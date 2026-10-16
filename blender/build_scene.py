@@ -6,6 +6,7 @@ Exemple:
 """
 import argparse
 import math
+import os
 import sys
 
 import bpy
@@ -20,6 +21,9 @@ ap.add_argument("--samples", type=int, default=64)
 ap.add_argument("--res", type=int, nargs=2, default=[1080, 1080])
 ap.add_argument("--close", action="store_true", help="cadrage portrait (visage)")
 args = ap.parse_args(argv)
+args.obj, args.blend = os.path.abspath(args.obj), os.path.abspath(args.blend)
+if args.render:
+    args.render = os.path.abspath(args.render)
 
 # ---------- scene vide ----------
 bpy.ops.wm.read_factory_settings(use_empty=True)
