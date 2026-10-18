@@ -49,6 +49,11 @@ class NarrationTest(unittest.TestCase):
         self.assertIsNone(segs[0]["audio"])
         self.assertEqual([w["text"] for w in segs[0]["words"]], ["Regarde", "sa", "ginga."])
 
+    def test_engine_none_means_no_voice(self):
+        segs = [{"id": "outro", "fr": "Abonne-toi."}]
+        self.assertIsNone(nar.voice_segments(segs, voice_id="abc", engine="none"))
+        self.assertIsNone(segs[0]["audio"])
+
     def test_srt_format(self):
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / "x.srt"

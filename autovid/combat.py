@@ -35,15 +35,20 @@ RESOLUTIONS = {"1080": (1080, 1920), "1440": (1440, 2560), "4k": (2160, 3840), "
 
 # --------------------------------------------------------------------------- 1. normalisation
 
-def normalize(src, out):
+def normalize(src, out, framing="auto"):
+    """framing : "blur" (vidéo paysage entière sur fond flouté), "cover" (recadrage plein écran au centre,
+    sujets plus grands : mieux pour les plans larges, rodas filmées de haut), "auto" = blur."""
     i = info(src)
     grade = "eq=contrast=1.1:saturation=1.22:brightness=0.01,unsharp=5:5:0.8"
-    if i["width"] >= i["height"]:
+    if i["height"] < 900:                         # source basse définition : agrandissement soigné avant l'étalonnage
+        grade = "hqdn3d=1.5:1.5:4:4," + grade
+    if i["width"] >= i["height"] and framing != "cover":
         vf = (f"[0:v]fps={FPS},split[a][b];[a]scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},"
               f"gblur=sigma=40,eq=brightness=-0.15[bg];[b]scale={W}:{H}:force_original_aspect_ratio=decrease[fg];"
               f"[bg][fg]overlay=(W-w)/2:(H-h)/2,{grade},setsar=1[v]")
     else:
-        vf = f"[0:v]fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase,crop={W}:{H},{grade},setsar=1[v]"
+        vf = (f"[0:v]fps={FPS},scale={W}:{H}:force_original_aspect_ratio=increase:flags=lanczos,crop={W}:{H},"
+              f"{grade},setsar=1[v]")
     run(["ffmpeg", "-y", "-v", "error", "-i", src, "-filter_complex", vf, "-map", "[v]", "-an",
          "-c:v", "libx264", "-preset", "veryfast", "-crf", "16", "-g", "15", "-pix_fmt", "yuv420p", out])
 
@@ -597,7 +602,7 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None):
 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
-           extras=True, motion_design=True):
+           extras=True, motion_design=True, framing="auto", tts="auto"):
     from . import narration as nar
     from .anatomy import add_safety, capoeira_variant
     work = Path(workdir)
@@ -607,7 +612,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     out_abs.parent.mkdir(parents=True, exist_ok=True)
     out_base = str(out_abs.with_suffix(""))
     print("1/6 normalisation 9:16 + étalonnage")
-    normalize(str(src), base)
+    normalize(str(src), base, framing)
     print("2/6 squelette (MediaPipe)")
     tracks = track(base)
     n = tracks.shape[1]
@@ -630,8 +635,10 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     # voix off : script, synthèse (ta voix clonée) et durées → l'arrêt sur image s'adapte à la voix
     segs = nar.build_script(impacts, discipline)
     voice_id = voice_id or nar.default_voice()
-    has_voice = nar.voice_segments(segs, voice_id)
-    print(f"   voix off : {'ElevenLabs, voix ' + voice_id if has_voice else 'script seul (pas de clé / voix ElevenLabs)'}")
+    engine = nar.voice_segments(segs, voice_id, tts)
+    has_voice = engine is not None
+    print("   voix off : " + {"elevenlabs": f"ElevenLabs, voix {voice_id}", "kokoro": "voix test locale Kokoro (ff_siwis)",
+                               None: "script seul (pas de clé ElevenLabs ni Kokoro)"}[engine])
     Path(f"{out_base}.voix.txt").write_text("\n\n".join(f"[{sg['id']}] {sg['fr']}" for sg in segs), encoding="utf-8")
     by_id = {sg["id"]: sg for sg in segs}
     for k, m in enumerate(impacts):

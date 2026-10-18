@@ -149,16 +149,71 @@ def estimate_words(text, rate=14.0):
     return out, t
 
 
-def voice_segments(segs, voice_id=None):
-    """Ajoute à chaque segment : audio (ou None), mots horodatés relatifs, durée."""
-    use_voice = bool(voice_id and _key())
+def kokoro_available():
+    from .motion import MOTION
+    import shutil
+    if not shutil.which("npx") or not (MOTION / "node_modules" / ".bin" / "hyperframes").exists():
+        return False
+    import importlib.util
+    return importlib.util.find_spec("kokoro_onnx") is not None
+
+
+def synth_kokoro(text, voice="ff_siwis", speed=1.05):
+    """Voix locale Kokoro (via HyperFrames) : français, termes [pt] prononcés en portugais du Brésil.
+    Kokoro ne donne pas l'heure des mots : on les répartit selon la longueur de chaque morceau."""
+    import tempfile
+    from .motion import MOTION, _env
+    pieces = [(p.strip(), "pt-br" if i % 2 else "fr-fr")
+              for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
+    audio, words, t = [], [], 0.0
+    gap = np.zeros((int(0.05 * sfx.SR), 2))
+    with tempfile.TemporaryDirectory() as d:
+        for k, (piece, lang) in enumerate(pieces):
+            wav = Path(d) / f"p{k}.wav"
+            r = subprocess.run(["npx", "hyperframes", "tts", piece, "--voice", voice, "--lang", lang, "--speed", str(speed),
+                                "--output", str(wav), "--json"], cwd=MOTION, capture_output=True, text=True, env=_env())
+            if r.returncode != 0 or not wav.exists():
+                raise RuntimeError(f"Kokoro : {(r.stdout + r.stderr)[-400:]}")
+            a = sfx.read_wav(wav)
+            # retire les silences de début/fin que Kokoro ajoute, pour enchaîner les morceaux naturellement
+            loud = np.where(np.abs(a).max(axis=1) > 0.01)[0]
+            if len(loud):
+                a = a[max(loud[0] - 400, 0): loud[-1] + 2400]
+            dur = len(a) / sfx.SR
+            ws = piece.split()
+            total = sum(len(w) + 1 for w in ws) or 1
+            cur = t
+            for w in ws:
+                d_w = dur * (len(w) + 1) / total
+                words.append({"text": w, "start": cur, "end": cur + d_w * 0.95, "lang": lang[:2]})
+                cur += d_w
+            audio += [a, gap]
+            t += dur + len(gap) / sfx.SR
+    return (np.concatenate(audio) if audio else np.zeros((0, 2))), words, t
+
+
+def voice_segments(segs, voice_id=None, engine="auto"):
+    """Ajoute à chaque segment : audio (ou None), mots horodatés relatifs, durée.
+
+    engine : "elevenlabs" (ta voix clonée), "kokoro" (voix locale gratuite, pour tester), "auto" (ElevenLabs si
+    clé + voix, sinon Kokoro s'il est installé, sinon pas de voix). Renvoie le moteur utilisé ou None."""
+    if engine == "none":
+        engine = None
+    elif engine == "auto":
+        engine = "elevenlabs" if voice_id and _key() else ("kokoro" if kokoro_available() else None)
+    elif engine == "elevenlabs" and not (voice_id and _key()):
+        engine = None
+    elif engine == "kokoro" and not kokoro_available():
+        engine = None
     for s in segs:
-        if use_voice:
+        if engine == "elevenlabs":
             s["audio"], s["words"], s["dur"] = synth(s["fr"], voice_id)
+        elif engine == "kokoro":
+            s["audio"], s["words"], s["dur"] = synth_kokoro(s["fr"])
         else:
             s["audio"] = None
             s["words"], s["dur"] = estimate_words(s["fr"])
-    return use_voice
+    return engine
 
 
 # --------------------------------------------------------------------------- sous-titres

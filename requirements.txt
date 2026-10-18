@@ -6,3 +6,5 @@ pillow
 opencv-python-headless
 mediapipe
 anthropic
+kokoro-onnx
+soundfile

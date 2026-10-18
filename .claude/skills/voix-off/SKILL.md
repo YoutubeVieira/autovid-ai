@@ -14,6 +14,12 @@ description: Crée la voix off explicative d'une vidéo de combat ou de capoeira
    ```
    L'identifiant est gardé dans `~/.config/autovid/voix.json` (ou `ELEVENLABS_VOICE_ID`).
 
+## Voix de test sans compte (Kokoro, locale et gratuite)
+`--tts kokoro` (ou automatique quand il n'y a pas de clé ElevenLabs) : voix française `ff_siwis` de Kokoro via
+`npx hyperframes tts`, les termes [pt] prononcés avec le phonémiseur pt-br. Ce n'est pas ta voix : c'est pour
+valider le rythme et le script avant de brancher ElevenLabs. Nécessite `pip install kokoro-onnx soundfile` et
+`motion/` installé.
+
 ## À chaque vidéo
 ```bash
 python -m autovid combat video.mp4 -o sorties/x.mp4 --discipline capoeira --ai claude --subs fr,pt,en --burn fr
