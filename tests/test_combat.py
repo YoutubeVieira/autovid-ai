@@ -61,6 +61,25 @@ class CombatTest(unittest.TestCase):
         self.assertEqual(len(imps), 1)
         self.assertEqual(classify(tr[0], imps[0]["frame"], imps[0]["eff"])["kind"], "poing")
 
+    def test_capoeira_variants(self):
+        from autovid.anatomy import add_safety, capoeira_variant
+        tr = standing()
+        base = classify(tr[0], 10, R_ANK)
+        # aú : pieds au-dessus de la tête, mains au sol
+        au = tr[0, 10].copy()
+        au[[L_ANK, R_ANK], 1] = 0.1
+        au[[15, 16], 1] = 0.9
+        self.assertEqual(capoeira_variant(au[None], 0, dict(base))["nom"], "AÚ")
+        # esquiva : bassin sous les genoux
+        low = tr[0, 10].copy()
+        low[[L_HIP, R_HIP], 1] = 0.75
+        info = capoeira_variant(low[None], 0, {**base, "kind": "poing", "nom": "DIRECT"})
+        self.assertEqual(info["nom"], "ESQUIVA")
+        for nom, attendu in (("HIGH KICK", "MEIA-LUA DE COMPASSO"), ("LOW KICK", "RASTEIRA")):
+            got = add_safety(capoeira_variant(tr[0, 10][None], 0, {**base, "kind": "pied", "nom": nom}))
+            self.assertEqual(got["nom"], attendu)
+            self.assertTrue(got["risque"][0])
+
     def test_timeline_structure(self):
         tr = standing(300)
         imp = {"frame": 150, "track": 0, "eff": R_ANK, "score": 0.5}

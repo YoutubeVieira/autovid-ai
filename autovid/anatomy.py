@@ -169,7 +169,7 @@ def capoeira_variant(track, i, info):
     if ank_y < head_y and wr_y > hip_y:                 # pieds au-dessus de la tête, mains au sol : aú
         info.update(nom=CAPOEIRA["au"], kind="au", membre="CORPS ENTIER")
     elif hip_y > knee_y - 0.02 and info["kind"] != "pied":  # bassin plus bas que les genoux : esquiva
-        info.update(nom=CAPOEIRA["esquiva"], kind="esquive")
+        info.update(nom=CAPOEIRA["esquive"], kind="esquive")
     elif info["kind"] == "pied":
         info["nom"] = {"HIGH KICK": CAPOEIRA["pied_haut"], "MIDDLE KICK": CAPOEIRA["pied_moyen"],
                        "LOW KICK": CAPOEIRA["pied_bas"]}.get(info["nom"], info["nom"])

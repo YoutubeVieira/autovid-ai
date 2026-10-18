@@ -611,10 +611,20 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     out_abs = Path(out).resolve()
     out_abs.parent.mkdir(parents=True, exist_ok=True)
     out_base = str(out_abs.with_suffix(""))
-    print("1/6 normalisation 9:16 + étalonnage")
-    normalize(str(src), base, framing)
-    print("2/6 squelette (MediaPipe)")
-    tracks = track(base)
+    # cache : relancer un montage sur la même vidéo (même cadrage) ne refait ni la normalisation ni le squelette
+    key = f"{Path(src).resolve()}|{Path(src).stat().st_size}|{Path(src).stat().st_mtime_ns}|{framing}"
+    cache_ok = (work / "cache.key").exists() and (work / "cache.key").read_text() == key \
+        and base.exists() and (work / "squelette.npy").exists()
+    if cache_ok:
+        print("1/6 normalisation + 2/6 squelette : repris du cache")
+        tracks = np.load(work / "squelette.npy")
+    else:
+        print("1/6 normalisation 9:16 + étalonnage")
+        normalize(str(src), base, framing)
+        print("2/6 squelette (MediaPipe)")
+        tracks = track(base)
+        np.save(work / "squelette.npy", tracks)
+        (work / "cache.key").write_text(key)
     n = tracks.shape[1]
     cuts = [int(round(c * FPS)) for c in scene_cuts(str(base))]
     print("3/6 détection des coups")
