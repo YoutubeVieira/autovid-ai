@@ -3,7 +3,10 @@
   python -m autovid analyze  ref.mp4 -o analyse/            ADN de montage d'une vidéo de référence
   python -m autovid auto     rushs/ -o out.mp4 [--music m.mp3] [--reference ref.mp4] [--style bincombat]
   python -m autovid render   brief.yaml -o out.mp4         montage piloté par un brief (titres, étapes, cercles…)
-  python -m autovid talk     face_cam.mp4 -o out.mp4       coupe des silences + sous-titres ElevenLabs
+  python -m autovid talk     face_cam.mp4 -o out.mp4       coupe des silences + « euh » + sous-titres ElevenLabs
+  python -m autovid combat   combat.mp4 -o out.mp4         short éducatif analysé (squelette, anatomie, sons)
+  python -m autovid serve                                   plateforme web (téléphone ↔ PC)
+  python -m autovid watch    dossier_sync/ sorties/         traite chaque vidéo déposée
 """
 import argparse
 import json
@@ -62,6 +65,29 @@ def main(argv=None):
     t.add_argument("--min-silence", type=float, default=0.4)
     t.add_argument("--workdir")
 
+    c = sub.add_parser("combat", help="short combat éducatif 100 % automatique")
+    c.add_argument("video")
+    c.add_argument("-o", "--out", required=True)
+    c.add_argument("--music", help="musique de fond (sinon beat généré, libre de droits)")
+    c.add_argument("--handle", help="ton @ affiché en filigrane")
+    c.add_argument("--max-impacts", type=int, default=6)
+    c.add_argument("--resolution", choices=["1080", "1440", "4k", "8k"], default="1080")
+    c.add_argument("--ai", choices=["claude"], help="explications rédigées par Claude à partir des images")
+    c.add_argument("--no-hook", action="store_true")
+    c.add_argument("--original-audio", type=float, default=0.7, help="volume du son d'origine (0 = coupé)")
+    c.add_argument("--workdir")
+
+    s = sub.add_parser("serve", help="plateforme web locale")
+    s.add_argument("--port", type=int, default=8765)
+    s.add_argument("--host", default="0.0.0.0")
+    s.add_argument("--data", default="donnees")
+
+    w = sub.add_parser("watch", help="dossier surveillé (Drive, iCloud, Syncthing…)")
+    w.add_argument("in_dir")
+    w.add_argument("out_dir")
+    w.add_argument("--mode", choices=["combat", "talk"], default="combat")
+    w.add_argument("--handle")
+
     args = ap.parse_args(argv)
     if args.cmd == "analyze":
         for v in args.videos:
@@ -80,6 +106,16 @@ def main(argv=None):
         resolved = resolve(_load_brief(args.brief), Path(args.brief).parent)
         print(f"  {len(resolved['segments'])} plans, {resolved['total_duration']:.2f} s @ {resolved['bpm']} BPM")
         print("→", render(resolved, args.out, _workdir(args, args.out)))
+    elif args.cmd == "combat":
+        from .combat import combat
+        print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
+                          args.resolution, args.ai, not args.no_hook, args.original_audio))
+    elif args.cmd == "serve":
+        from .server import serve
+        serve(args.port, args.host, args.data)
+    elif args.cmd == "watch":
+        from .server import watch
+        watch(args.in_dir, args.out_dir, args.mode, {"handle": args.handle})
     elif args.cmd == "talk":
         print("→", talk(args.video, args.out, _workdir(args, args.out), os.environ.get("ELEVENLABS_API_KEY"),
                         args.language, args.noise_db, args.min_silence))

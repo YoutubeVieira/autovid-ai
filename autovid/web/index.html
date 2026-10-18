@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AutoVid Studio</title>
+<style>
+  :root { --bg:#0b0c10; --card:#15171e; --line:#262a35; --txt:#f2f3f5; --mute:#9aa0ad; --acc:#39ff14; --acc2:#ffe600; --err:#ff4d5e; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--txt); font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+  main { max-width:880px; margin:0 auto; padding:20px 16px 60px; }
+  h1 { font-size:28px; margin:4px 0 2px; letter-spacing:.5px; } h1 b { color:var(--acc); }
+  .sub { color:var(--mute); margin:0 0 20px; }
+  .grid { display:grid; gap:16px; grid-template-columns:1fr; }
+  @media (min-width:760px){ .grid { grid-template-columns:1.4fr 1fr; } }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:18px; }
+  label { display:block; font-size:13px; color:var(--mute); margin:12px 0 6px; text-transform:uppercase; letter-spacing:.6px; }
+  input[type=text], select { width:100%; padding:12px; border-radius:10px; border:1px solid var(--line); background:#0f1117; color:var(--txt); font-size:16px; }
+  .drop { border:2px dashed var(--line); border-radius:14px; padding:22px; text-align:center; cursor:pointer; }
+  .drop.has { border-color:var(--acc); }
+  .drop input { display:none; }
+  .row { display:flex; gap:10px; } .row > * { flex:1; }
+  .check { display:flex; align-items:center; gap:10px; margin-top:12px; color:var(--txt); text-transform:none; font-size:15px; letter-spacing:0; }
+  button { width:100%; margin-top:18px; padding:15px; border:0; border-radius:12px; background:var(--acc); color:#05130a; font-weight:800; font-size:17px; cursor:pointer; }
+  button:disabled { opacity:.5; }
+  .job { border-top:1px solid var(--line); padding:14px 0; } .job:first-child { border-top:0; padding-top:0; }
+  .bar { height:8px; background:#0f1117; border-radius:9px; overflow:hidden; margin:8px 0; }
+  .bar i { display:block; height:100%; background:linear-gradient(90deg,var(--acc),var(--acc2)); width:0; transition:width .4s; }
+  .meta { color:var(--mute); font-size:13px; }
+  video { width:100%; max-height:70vh; border-radius:12px; background:#000; margin-top:8px; }
+  .actions { display:flex; gap:8px; margin-top:8px; } .actions a, .actions button { flex:1; margin:0; padding:11px; font-size:15px; text-align:center; border-radius:10px; text-decoration:none; }
+  .actions a { background:#22262f; color:var(--txt); }
+  #qr { background:#fff; padding:10px; border-radius:12px; width:max-content; margin:10px auto; }
+  .err { color:var(--err); }
+  code { color:var(--acc2); word-break:break-all; font-size:13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>AUTO<b>VID</b> STUDIO</h1>
+  <p class="sub">Envoie une vidéo de combat → reçois un short 9:16 analysé, monté, sonorisé, prêt à poster.</p>
+  <div class="grid">
+    <section class="card">
+      <div class="drop" id="drop"><input type="file" id="file" accept="video/*"><div id="dropTxt">📹 Touche pour choisir ou filmer une vidéo</div></div>
+      <label>Mode</label>
+      <select id="mode"><option value="combat">Combat éducatif (analyse + anatomie)</option><option value="talk">Face caméra (coupe des blancs + sous-titres)</option></select>
+      <div class="row">
+        <div><label>Ton @</label><input type="text" id="handle" placeholder="@toncompte"></div>
+        <div><label>Résolution</label><select id="res"><option value="1080">1080p (réseaux)</option><option value="1440">1440p</option><option value="4k">4K (YouTube)</option><option value="8k">8K (archive, lent)</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Analyses max</label><select id="maxi"><option>3</option><option>4</option><option selected>6</option><option>8</option></select></div>
+        <div><label>Musique (option)</label><input type="file" id="music" accept="audio/*" style="color:var(--mute);font-size:13px;padding-top:10px"></div>
+      </div>
+      <label class="check"><input type="checkbox" id="ai"> Explications rédigées par Claude (clé API sur le PC)</label>
+      <button id="go">Créer mon montage</button>
+      <p class="meta" id="upl"></p>
+    </section>
+    <section class="card">
+      <b>Mes montages</b>
+      <div id="jobs" style="margin-top:12px" class="meta">Aucun montage pour l'instant.</div>
+    </section>
+  </div>
+  <section class="card" style="margin-top:16px" id="phone">
+    <b>📱 Ouvrir sur ton téléphone</b>
+    <p class="meta">Même Wi-Fi que le PC, scanne ce code :</p>
+    <div id="qr"></div>
+    <p style="text-align:center"><code id="url"></code></p>
+  </section>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const K = new URLSearchParams(location.search).get('k') || '';
+const $ = id => document.getElementById(id);
+const api = (p) => p + (p.includes('?') ? '&' : '?') + 'k=' + encodeURIComponent(K);
+
+$('drop').onclick = () => $('file').click();
+$('file').onchange = () => { const f = $('file').files[0]; if (f) { $('dropTxt').textContent = '✅ ' + f.name; $('drop').classList.add('has'); } };
+
+function upload(file, label) {
+  return new Promise((ok, ko) => {
+    const x = new XMLHttpRequest();
+    x.open('POST', api('/api/upload?name=' + encodeURIComponent(file.name)));
+    x.upload.onprogress = e => { if (e.lengthComputable) $('upl').textContent = label + ' : ' + Math.round(e.loaded / e.total * 100) + ' %'; };
+    x.onload = () => x.status === 200 ? ok(JSON.parse(x.responseText).path) : ko(new Error(x.responseText));
+    x.onerror = () => ko(new Error('réseau'));
+    x.send(file);
+  });
+}
+
+$('go').onclick = async () => {
+  const f = $('file').files[0];
+  if (!f) { $('upl').textContent = 'Choisis une vidéo.'; return; }
+  $('go').disabled = true;
+  try {
+    const video = await upload(f, 'Envoi vidéo');
+    const m = $('music').files[0];
+    const music = m ? await upload(m, 'Envoi musique') : null;
+    const r = await fetch(api('/api/jobs'), { method: 'POST', body: JSON.stringify({
+      video, music, mode: $('mode').value, handle: $('handle').value, resolution: $('res').value,
+      max_impacts: +$('maxi').value, ai: $('ai').checked }) });
+    if (!r.ok) throw new Error(await r.text());
+    $('upl').textContent = 'Montage lancé ✔';
+    refresh();
+  } catch (e) { $('upl').innerHTML = '<span class="err">Erreur : ' + e.message + '</span>'; }
+  $('go').disabled = false;
+};
+
+const shown = new Set();
+async function refresh() {
+  const jobs = await (await fetch(api('/api/jobs'))).json();
+  if (!jobs.length) return;
+  const box = $('jobs');
+  if (box.dataset.init !== '1') { box.textContent = ''; box.dataset.init = '1'; }
+  for (const j of jobs) {
+    let el = document.getElementById('j' + j.id);
+    if (!el) {
+      el = document.createElement('div'); el.className = 'job'; el.id = 'j' + j.id;
+      el.innerHTML = '<div><b class="t"></b></div><div class="bar"><i></i></div><div class="meta s"></div><div class="v"></div>';
+      box.prepend(el);
+    }
+    el.querySelector('.t').textContent = (j.mode === 'combat' ? '🥊 ' : '🎙️ ') + j.file;
+    el.querySelector('i').style.width = Math.round(j.progress * 100) + '%';
+    el.querySelector('.s').textContent = j.state === 'en cours' ? j.step : j.state === 'fini' ? 'Terminé ✔' : 'Erreur : ' + (j.log.slice(-1)[0] || '');
+    if (j.state === 'fini' && !shown.has(j.id)) {
+      shown.add(j.id);
+      const src = api('/fichier/' + encodeURIComponent(j.file));
+      el.querySelector('.v').innerHTML = '<video controls playsinline src="' + src + '"></video>' +
+        '<div class="actions"><a href="' + src + '" download="' + j.file + '">⬇ Télécharger</a><button class="sh">↗ Partager</button></div>';
+      el.querySelector('.sh').onclick = async () => {
+        try {
+          const blob = await (await fetch(src)).blob();
+          const file = new File([blob], j.file, { type: 'video/mp4' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: 'Mon short' });
+          else location.href = src;
+        } catch (e) {}
+      };
+    }
+  }
+}
+setInterval(refresh, 2000); refresh();
+
+fetch(api('/api/info')).then(r => r.json()).then(i => {
+  $('url').textContent = i.url;
+  if (window.QRCode) new QRCode($('qr'), { text: i.url, width: 180, height: 180 });
+  if (/Android|iPhone|iPad/i.test(navigator.userAgent)) $('phone').style.display = 'none';
+});
+</script>
+</body>
+</html>

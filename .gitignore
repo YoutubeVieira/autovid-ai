@@ -5,3 +5,9 @@ __pycache__/
 /rushs/
 *.mp4
 *.mov
+/donnees/
+/sorties/
+/travail/
+.venv/
+.agent/
+autovid/models/

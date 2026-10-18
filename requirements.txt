@@ -1,0 +1,8 @@
+numpy
+scipy
+pyyaml
+requests
+pillow
+opencv-python-headless
+mediapipe
+anthropic
