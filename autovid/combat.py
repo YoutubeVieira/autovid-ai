@@ -101,10 +101,12 @@ def detect_impacts(tracks, cuts_frames, max_n=6, min_gap=1.3, threshold=0.11):
 # --------------------------------------------------------------------------- 4. timeline
 
 def freeze_len(m):
-    return 1.15 + 0.38 * len(m["info"]["muscles"])
+    """Durée de l'arrêt sur image : le temps de lire les étiquettes, ou d'écouter la voix off."""
+    base = 1.75 + 0.38 * len(m["info"]["muscles"])
+    return max(base, m.get("voice_dur", 0) + 0.45)
 
 
-def build_timeline(n_frames, impacts, hook=True, max_dead=3.0):
+def build_timeline(n_frames, impacts, hook=True, max_dead=3.0, hook_freeze=HOOK_FREEZE, outro_len=1.8):
     """Liste d'images de sortie : dict(src, phase, imp, lt)."""
     out = []
 
@@ -135,7 +137,7 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=3.0):
         nslow = int((m["frame"] - s0) / 0.5)
         for j in range(nslow):
             add(s0 + j * 0.5, "hook_slow", h, j / FPS)
-        for j in range(int(HOOK_FREEZE * FPS)):
+        for j in range(int(hook_freeze * FPS)):
             add(m["frame"], "hook_freeze", h, j / FPS)
 
     cursor = 0
@@ -153,7 +155,7 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=3.0):
     tail = min(n_frames, cursor + int(1.2 * FPS)) if impacts else n_frames
     normal(cursor, tail)
     last = out[-1]["src"] if out else 0
-    for j in range(int(1.8 * FPS)):
+    for j in range(int(outro_len * FPS)):
         add(last, "outro", -1, j / FPS)
     if hook and impacts:                         # la coupe accroche → contenu se fait sur un flash
         first_main = next(i for i, f in enumerate(out) if not f["phase"].startswith("hook"))
@@ -352,6 +354,11 @@ class Renderer:
                         gfx.paste(img, gfx.text_sprite(f"{name} {deg:.0f}°", 40, gfx.YELLOW, stroke=4, shadow=6),
                                   float(np.clip(pb[0], 160, W - 160)), float(np.clip(pb[1] - 95, 420, H - 300)),
                                   gfx.pop(lt - 0.75))
+                risk_t = 0.55 + 0.32 * len(info_["muscles"]) + 0.2
+                if info_.get("risque") and risk_t < lt <= freeze_len(m) - 0.75:
+                    zone, conseil = info_["risque"]
+                    gfx.paste(img, gfx.text_sprite(f"RISQUE : {zone}", 50, gfx.RED, stroke=5, shadow=8, max_w=980),
+                              W / 2, 1490, gfx.pop(lt - risk_t))
                 if lt > freeze_len(m) - 0.75:
                     gfx.paste(img, gfx.text_sprite("ASTUCE : " + info_["tip"], 50, gfx.WHITE, stroke=5, shadow=8, max_w=980),
                               W / 2, 1500, gfx.pop(lt - (freeze_len(m) - 0.75)))
@@ -457,7 +464,7 @@ class Renderer:
 
 # --------------------------------------------------------------------------- 6. son
 
-def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7):
+def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7, voice=()):
     sr = sfx.SR
     spf = sr // FPS
     n = len(timeline) * spf
@@ -508,19 +515,85 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
                 put("impact", t, 0.8)
                 put("riser", max(t - 0.6, 0), 0.4, d=0.6)
         prev = f
+    vox = np.zeros((n, 2))
+    for t, a in voice:                           # voix off : la musique et le son d'origine passent dessous
+        i = int(t * sr)
+        if a is None or i >= n:
+            continue
+        seg = a[: n - i]
+        vox[i: i + len(seg)] += seg
+        duck[i: i + len(seg)] = np.minimum(duck[i: i + len(seg)], 0.22)
     duck = np.convolve(duck, np.ones(2400) / 2400, mode="same")
-    mix = mus * 0.5 * duck[:, None] + orig * orig_gain + fx * 0.8
+    if np.abs(vox).max() > 0:
+        vox *= 0.8 / np.abs(vox).max()
+        orig *= np.where(duck < 0.5, 0.3, 1.0)[:, None]
+    mix = mus * 0.5 * duck[:, None] + orig * orig_gain + fx * 0.8 + vox * 1.6
     peak = np.abs(mix).max() or 1
     sfx.write_wav(out_wav, mix / peak * 0.9)
 
 
 # --------------------------------------------------------------------------- 7. orchestration
 
+def phase_starts(timeline):
+    """Instant (s) du début de chaque phase : {('freeze', k): t, ('outro', -1): t, …}."""
+    out = {}
+    for i, f in enumerate(timeline):
+        out.setdefault((f["phase"], f["imp"]), i / FPS)
+    return out
+
+
+def subtitles(segs, starts, impacts, out_base, work, burn, langs):
+    """SRT par langue + fichier ASS pour l'incrustation. Renvoie (chemin ASS ou None, {langue: srt})."""
+    from . import narration as nar
+    from .talk import captions_ass
+    t_of = {"hook": 0.0, "outro": starts.get(("outro", -1), 0.0)}
+    for k in range(len(impacts)):
+        t_of[k] = starts.get(("freeze", k), 0.0) + 0.15
+    fr_words, cues = [], {"fr": []}
+    for sg in segs:
+        t0 = t_of[sg["id"]]
+        ws = [{**w, "start": w["start"] + t0, "end": w["end"] + t0} for w in sg["words"]]
+        fr_words += ws
+        cues["fr"] += nar.cues_from_words(ws)
+    other = [x for x in langs if x != "fr"]
+    if other:
+        from .ai import translate
+        tr = translate([nar.plain(sg["fr"]) for sg in segs])
+        if tr is None:
+            print("   (pas d'identifiants Anthropic : sous-titres pt/en non traduits)")
+        else:
+            for lang in other:
+                cues[lang] = []
+                for sg, txt in zip(segs, tr[lang]):
+                    t0 = t_of[sg["id"]]
+                    cues[lang] += nar.cues_from_text(txt, t0, t0 + sg["dur"])
+    srts = {}
+    for lang, c in cues.items():
+        if c:
+            srts[lang] = f"{out_base}.{lang}.srt"
+            nar.write_srt(c, srts[lang])
+    ass = None
+    if burn == "fr" and fr_words:
+        ass = work / "sous_titres.ass"
+        captions_ass(fr_words, ass, y=1640, max_words=3)
+    elif burn in cues and cues[burn]:
+        ass = work / "sous_titres.ass"
+        captions_ass([{"text": txt, "start": a, "end": b} for a, b, txt in cues[burn]], ass, y=1640, max_words=1,
+                     highlight=False)
+    return ass, srts
+
+
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
-           orig_gain=0.7, accent=None):
+           orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
+           extras=True):
+    from . import narration as nar
+    from .anatomy import add_safety, capoeira_variant
     work = Path(workdir)
     work.mkdir(parents=True, exist_ok=True)
     base = work / "base.mp4"
+    out_abs = Path(out).resolve()
+    out_abs.parent.mkdir(parents=True, exist_ok=True)
+    out_base = str(out_abs.with_suffix(""))
     print("1/6 normalisation 9:16 + étalonnage")
     normalize(str(src), base)
     print("2/6 squelette (MediaPipe)")
@@ -531,34 +604,89 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     impacts = detect_impacts(tracks, cuts, max_impacts)
     for m in impacts:
         m["info"] = classify(tracks[m["track"]], m["frame"], m["eff"])
+        if discipline == "capoeira":
+            capoeira_variant(tracks[m["track"]], m["frame"], m["info"])
+        add_safety(m["info"])
     if ai:
         from .ai import enrich
-        enrich(impacts, base, provider=ai)
+        enrich(impacts, base, provider=ai, discipline=discipline)
     for m in impacts:
         print(f"   t={m['frame'] / FPS:5.2f}s  {m['info']['nom']:<22} {m['info']['membre']:<14} vitesse {m['score']:.2f}")
     if not impacts:
         print("   aucun coup net détecté : montage dynamique sans analyse")
+
+    # voix off : script, synthèse (ta voix clonée) et durées → l'arrêt sur image s'adapte à la voix
+    segs = nar.build_script(impacts, discipline)
+    voice_id = voice_id or nar.default_voice()
+    has_voice = nar.voice_segments(segs, voice_id)
+    print(f"   voix off : {'ElevenLabs, voix ' + voice_id if has_voice else 'script seul (pas de clé / voix ElevenLabs)'}")
+    Path(f"{out_base}.voix.txt").write_text("\n\n".join(f"[{sg['id']}] {sg['fr']}" for sg in segs), encoding="utf-8")
+    by_id = {sg["id"]: sg for sg in segs}
+    for k, m in enumerate(impacts):
+        if has_voice:
+            m["voice_dur"] = by_id[k]["dur"]
+    hook_freeze = max(HOOK_FREEZE, by_id["hook"]["dur"] - 1.1) if has_voice and "hook" in by_id else HOOK_FREEZE
+    outro_len = max(1.8, by_id["outro"]["dur"] + 0.4) if has_voice else 1.8
+
     (work / "analyse.json").write_text(json.dumps(
         [{"t": m["frame"] / FPS, "score": m["score"], **{k: v for k, v in m["info"].items() if k in
-          ("nom", "membre", "hook", "tip", "kind")}, "muscles": [x[:2] for x in m["info"]["muscles"]]}
-         for m in impacts], ensure_ascii=False, indent=1), encoding="utf-8")
-    timeline = build_timeline(n, impacts, hook=hook)
+          ("nom", "membre", "hook", "tip", "kind", "placement", "risque")},
+          "muscles": [x[:2] for x in m["info"]["muscles"]]} for m in impacts], ensure_ascii=False, indent=1),
+        encoding="utf-8")
+    timeline = build_timeline(n, impacts, hook=hook, hook_freeze=hook_freeze, outro_len=outro_len)
+    starts = phase_starts(timeline)
     print(f"4/6 timeline : {len(timeline) / FPS:.1f} s ({len(impacts)} analyses)")
     print("5/6 rendu image par image")
-    Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN).render(base, work / "video.mp4")
-    print("6/6 son + export")
+    renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
+    renderer.render(base, work / "video.mp4")
+    print("6/6 son, sous-titres + export")
     src_audio = sfx.read_wav(src) if info(str(src))["has_audio"] else np.zeros((0, 2))
-    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain)
+    voice = []
+    if has_voice:
+        if hook and "hook" in by_id:
+            voice.append((0.0, by_id["hook"]["audio"]))
+        for k in range(len(impacts)):
+            voice.append((starts.get(("freeze", k), 0) + 0.15, by_id[k]["audio"]))
+        voice.append((starts.get(("outro", -1), 0) + 0.1, by_id["outro"]["audio"]))
+    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice)
+    if not hook:
+        segs = [sg for sg in segs if sg["id"] != "hook"]
+    ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs))
+
     rw, rh = RESOLUTIONS[resolution]
-    vf = ["-c:v", "copy"]
+    filters = []
+    if ass:
+        shutil.copytree(Path(__file__).parent / "fonts", work / "fonts", dirs_exist_ok=True)
+        filters.append("ass=sous_titres.ass:fontsdir=fonts")
     if (rw, rh) != (W, H):
-        vf = ["-vf", f"scale={rw}:{rh}:flags=lanczos,unsharp=5:5:0.4", "-c:v", "libx264", "-preset", "medium",
-              "-crf", "18", "-pix_fmt", "yuv420p"]
-    run(["ffmpeg", "-y", "-v", "error", "-i", work / "video.mp4", "-i", work / "audio.wav", *vf,
+        filters.append(f"scale={rw}:{rh}:flags=lanczos,unsharp=5:5:0.4")
+    vf = ["-vf", ",".join(filters), "-c:v", "libx264", "-preset", "medium", "-crf", "17" if rw > W else "18",
+          "-pix_fmt", "yuv420p"] if filters else ["-c:v", "copy"]
+    run(["ffmpeg", "-y", "-v", "error", "-i", "video.mp4", "-i", "audio.wav", *vf,
          "-af", "loudnorm=I=-14:TP=-1:LRA=9", "-c:a", "aac", "-b:a", "192k", "-ar", 48000, "-shortest",
-         "-movflags", "+faststart", work / "brut.mp4"])
-    out_abs = Path(out).resolve()
-    out_abs.parent.mkdir(parents=True, exist_ok=True)
-    match_loudness(work / "brut.mp4", out_abs, -14)
-    shutil.copy(work / "analyse.json", out_abs.with_suffix(".analyse.json"))
+         "-movflags", "+faststart", "brut.mp4"], cwd=work)
+    match_loudness(work / "brut.mp4", work / "final.mp4", -14)
+    # pistes de sous-titres activables (YouTube / lecteurs) en plus de l'incrustation
+    if srts:
+        ins, maps, meta = [], [], []
+        for j, (lang, path) in enumerate(srts.items()):
+            ins += ["-i", path]
+            maps += ["-map", str(j + 1)]
+            meta += [f"-metadata:s:s:{j}", f"language={nar.LANG_ISO3.get(lang, lang)}"]
+        run(["ffmpeg", "-y", "-v", "error", "-i", work / "final.mp4", *ins, "-map", "0", *maps, "-c", "copy",
+             "-c:s", "mov_text", *meta, "-movflags", "+faststart", out_abs])
+    else:
+        shutil.copy(work / "final.mp4", out_abs)
+    shutil.copy(work / "analyse.json", f"{out_base}.analyse.json")
+
+    if extras:
+        from . import seo, thumbs
+        analyses = [{"t_out": starts.get(("freeze", k), 0), "nom": m["info"]["nom"], "kind": m["info"]["kind"],
+                     "muscles": m["info"]["muscles"]} for k, m in enumerate(impacts)]
+        seo.write(seo.build(analyses, discipline, handle or ""), out_base)
+        if impacts:
+            top = max(range(len(impacts)), key=lambda j: impacts[j]["score"])
+            frame = next(iter_frames(base, W, H, start=impacts[top]["frame"] / FPS))
+            person = renderer.freeze_cache.get(top, {}).get("person")
+            thumbs.make_thumbnails(frame, out_base, impacts[top]["info"]["nom"], mask=person, accent=accent or gfx.GREEN)
     return out_abs

@@ -11,6 +11,9 @@ python -m autovid combat "<video>" -o "sorties/<nom>_combat.mp4" --handle "<@com
     [--music musique.mp3] [--max-impacts 6] [--resolution 1080|4k] [--ai claude] --workdir "travail/<nom>"
 ```
 - Pas de `--music` → beat généré (libre de droits, pas de Content ID).
+- `--discipline capoeira` : noms brésiliens (meia-lua de compasso, armada, rasteira, aú, esquiva…).
+- Voix off avec la voix clonée + sous-titres FR/PT-BR/EN : voir le skill `voix-off`.
+- Le rendu écrit aussi les miniatures et le SEO : voir le skill `miniature-seo`.
 - `--ai claude` si `ANTHROPIC_API_KEY` (ou `ant auth login`) est configuré : Claude regarde les images de chaque coup et rédige le titre, l'accroche, les muscles et l'astuce.
 - Résolution : 1080 pour TikTok / Reels (ils recompressent en 1080p), 4k seulement pour un master YouTube. Ne propose pas la 8K pour publier : c'est un upscale, sans détail en plus.
 

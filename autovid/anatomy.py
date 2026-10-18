@@ -116,3 +116,71 @@ def anchor_for(muscle, side):
         if key in m:
             return fn(side, o)
     return (J[side][3],)
+
+
+# --------------------------------------------------------------------------- placement et risques de blessure
+
+PLACEMENT = {
+    "HIGH KICK": "Pied d'appui pivoté à 90°, hanche ouverte, bras opposé en garde.",
+    "MIDDLE KICK": "Tibia à hauteur des côtes, hanche qui passe par-dessus.",
+    "LOW KICK": "Frappe avec le tibia au-dessus du genou adverse, appui fléchi.",
+    "DIRECT": "Épaule devant le menton, poing aligné avec l'avant-bras, talon arrière levé.",
+    "CROCHET": "Coude à hauteur du poing, rotation sur l'avant-pied.",
+    "UPPERCUT": "Genoux fléchis, poussée des jambes, poing qui monte près du corps.",
+    "COUP DE GENOU": "Mains qui contrôlent la nuque, bassin projeté vers l'avant.",
+}
+
+RISQUES = {
+    "pied": ("ISCHIOS ET HANCHE", "échauffe-toi, monte l'amplitude progressivement"),
+    "poing": ("POIGNET", "aligne les métacarpes, bande tes mains"),
+    "genou": ("GENOU D'APPUI", "ne verrouille pas l'appui, reste fléchi"),
+    "au": ("POIGNETS ET NUQUE", "mains à plat, doigts écartés, regard au sol"),
+    "esquive": ("GENOUX", "genou dans l'axe du pied, pas vers l'intérieur"),
+    "rasteira": ("CHEVILLE DU PARTENAIRE", "balaye doucement à l'entraînement"),
+}
+
+# Vocabulaire capoeira (prononcé en portugais du Brésil dans la voix off)
+CAPOEIRA = {
+    "pied_haut": "MEIA-LUA DE COMPASSO", "pied_moyen": "ARMADA", "pied_bas": "RASTEIRA",
+    "genou": "JOELHADA", "poing": "GALOPANTE", "au": "AÚ", "esquive": "ESQUIVA", "ginga": "GINGA",
+}
+PT_TERMS = ["meia-lua de compasso", "meia-lua de frente", "meia-lua", "queixada", "armada", "martelo", "bênção",
+            "rasteira", "esquiva", "negativa", "cocorinha", "rolê", "macaco", "joelhada", "galopante", "ginga",
+            "capoeira", "berimbau", "mestre", "malícia", "chamada", "roda", "axé", "aú"]
+
+
+def tag_pt(text):
+    """Entoure les termes capoeira de [pt]…[/pt] pour que la voix off les prononce en portugais du Brésil."""
+    import re
+    if "[pt]" in text:
+        return text
+    pattern = "|".join(re.escape(t) for t in sorted(PT_TERMS, key=len, reverse=True))
+    return re.sub(rf"(?<![\w-])({pattern})(?![\w-])", r"[pt]\1[/pt]", text, flags=re.IGNORECASE)
+
+
+def capoeira_variant(track, i, info):
+    """Adapte le nom au vocabulaire capoeira + repère les positions propres à la capoeira (aú, esquiva)."""
+    p = track[i]
+    head_y = p[0, 1]
+    ank_y = min(p[L_ANK, 1], p[R_ANK, 1])
+    wr_y = max(p[L_WR, 1], p[R_WR, 1])
+    hip_y = (p[L_HIP, 1] + p[R_HIP, 1]) / 2
+    knee_y = (p[L_KNEE, 1] + p[R_KNEE, 1]) / 2
+    if ank_y < head_y and wr_y > hip_y:                 # pieds au-dessus de la tête, mains au sol : aú
+        info.update(nom=CAPOEIRA["au"], kind="au", membre="CORPS ENTIER")
+    elif hip_y > knee_y - 0.02 and info["kind"] != "pied":  # bassin plus bas que les genoux : esquiva
+        info.update(nom=CAPOEIRA["esquiva"], kind="esquive")
+    elif info["kind"] == "pied":
+        info["nom"] = {"HIGH KICK": CAPOEIRA["pied_haut"], "MIDDLE KICK": CAPOEIRA["pied_moyen"],
+                       "LOW KICK": CAPOEIRA["pied_bas"]}.get(info["nom"], info["nom"])
+        if info["nom"] == CAPOEIRA["pied_bas"]:
+            info["kind"] = "rasteira"
+    elif info["kind"] == "genou":
+        info["nom"] = CAPOEIRA["genou"]
+    return info
+
+
+def add_safety(info):
+    info["risque"] = RISQUES.get(info["kind"], RISQUES["pied"])
+    info["placement"] = PLACEMENT.get(info["nom"], info.get("placement", "Garde haute, appuis stables."))
+    return info

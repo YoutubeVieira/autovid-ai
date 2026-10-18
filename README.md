@@ -26,7 +26,31 @@ Sans rien d'autre que la vidéo :
 6. beat généré libre de droits (ou ta musique) + whoosh, impacts, ticks, son d'origine, −14 LUFS ;
 7. export 1080p (réseaux), 1440p, 4K (YouTube) ou 8K.
 
-`--ai claude` : Claude regarde les images de chaque coup et réécrit nom, accroche, muscles et astuce.
+`--ai claude` : Claude regarde les images de chaque coup et réécrit nom, accroche, muscles, placement, risque et voix off.
+
+Chaque rendu écrit aussi :
+| fichier | contenu |
+|---|---|
+| `short.mp4` | sous-titres FR incrustés + pistes FR / PT-BR / EN activables |
+| `short.fr.srt`, `.pt.srt`, `.en.srt` | sous-titres à envoyer sur YouTube (PT/EN : traduits par Claude) |
+| `short.voix.txt` | le script de la voix off (termes capoeira balisés `[pt]`) |
+| `short_youtube.jpg`, `short_cover.jpg` | miniature 1280×720 et couverture 9:16 |
+| `short.seo.txt` / `.seo.json` | 3 titres, description horodatée, tags, hashtags × 3 langues |
+| `short.analyse.json` | coups détectés, muscles, placement, risques |
+
+### 🎙️ Voix off avec ta voix (ElevenLabs)
+```bash
+export ELEVENLABS_API_KEY=...
+python -m autovid voice-clone ma_voix_1.m4a ma_voix_2.m4a --name "Ma voix" --i-own-this-voice   # une fois
+python -m autovid combat roda.mp4 -o sorties/roda.mp4 --discipline capoeira --ai claude --subs fr,pt,en
+```
+Le texte est en français, les mots brésiliens (ginga, rasteira, aú, meia-lua…) sont synthétisés en portugais.
+Les arrêts sur image durent le temps de la phrase ; la musique baisse sous la voix.
+
+### 🖼️ ADN de miniatures
+```bash
+python -m autovid thumbs captures_miniatures/ -o analyse/miniatures.json
+```
 
 ## 📱 Plateforme téléphone ↔ PC
 ```bash
@@ -44,6 +68,10 @@ Détails, connecteurs (Canva, CapCut, Gemini, Flow, Antigravity, ElevenLabs, Hyp
 | `copier-style` | « fais le même montage que cette vidéo » |
 | `feedback-montage` | tes retours → réglages et `APPRENTISSAGES.md`, chaque montage s'améliore |
 | `publier` | formats, légendes, hashtags, couverture (Canva), règles de monétisation |
+| `voix-off` | clonage de ta voix, voix off FR + termes PT-BR, sous-titres FR / PT-BR / EN |
+| `miniature-seo` | ADN des miniatures et titres d'une chaîne modèle → nos miniatures, titres, tags |
+
+Ce qui reste à construire : [docs/feuille-de-route.md](docs/feuille-de-route.md).
 
 ## Les autres commandes
 

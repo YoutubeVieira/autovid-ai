@@ -95,7 +95,7 @@ def remap(words, intervals):
     return res
 
 
-def captions_ass(words, path, y=1320, max_words=3, max_gap=0.6):
+def captions_ass(words, path, y=1320, max_words=3, max_gap=0.6, highlight=True):
     """Sous-titres « mot actif » : 1 à 3 mots, le mot prononcé passe en jaune avec un pop."""
     chunks, cur = [], []
     for w in words:
@@ -113,7 +113,7 @@ def captions_ass(words, path, y=1320, max_words=3, max_gap=0.6):
             for j, o in enumerate(chunk):
                 t = _esc(o["text"].upper())
                 parts.append("{\\c&H0000E6FF&\\fscx115\\fscy115\\t(0,90,\\fscx100\\fscy100)}%s{\\r}" % t
-                             if j == i else t)
+                             if j == i and highlight else t)
             events.append(f"Dialogue: 0,{_ass_time(w['start'])},{_ass_time(end)},cap,,0,0,0,,"
                           f"{{\\an5\\pos({W // 2},{y})}}" + " ".join(parts))
     Path(path).write_text(
