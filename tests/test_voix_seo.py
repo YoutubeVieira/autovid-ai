@@ -98,3 +98,28 @@ class SeoThumbTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SkillPackTest(unittest.TestCase):
+    def test_install_validates_and_rejects_traversal(self):
+        import zipfile
+
+        from autovid import skillpack
+        with tempfile.TemporaryDirectory() as d:
+            d = Path(d)
+            good = d / "good.zip"
+            with zipfile.ZipFile(good, "w") as z:
+                z.writestr("pack/montage-x/SKILL.md", "---\nname: montage-x\ndescription: Monte des vidéos\n---\n# X\n")
+                z.writestr("pack/montage-x/scripts/run.sh", "echo hi\n")
+            dest = d / "skills"
+            res = skillpack.install(good, dest=dest, also_antigravity=False)
+            self.assertEqual(res[0]["name"], "montage-x")
+            self.assertEqual(res[0]["scripts"], ["scripts/run.sh"])
+            self.assertTrue((dest / "montage-x" / "SKILL.md").exists())
+            with self.assertRaises(FileExistsError):
+                skillpack.install(good, dest=dest, also_antigravity=False)
+            evil = d / "evil.zip"
+            with zipfile.ZipFile(evil, "w") as z:
+                z.writestr("../../evil/SKILL.md", "---\nname: evil\ndescription: x\n---\n")
+            with self.assertRaises(ValueError):
+                skillpack.install(evil, dest=dest, also_antigravity=False)

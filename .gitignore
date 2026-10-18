@@ -11,3 +11,7 @@ __pycache__/
 .venv/
 .agent/
 autovid/models/
+motion/node_modules/
+motion/.agents/
+motion/.claude/
+**/.hyperframes/

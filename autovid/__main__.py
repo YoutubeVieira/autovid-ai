@@ -81,6 +81,8 @@ def main(argv=None):
     c.add_argument("--subs", default="fr,pt,en", help="langues des sous-titres (fr, pt = portugais du Brésil, en)")
     c.add_argument("--burn", default="fr", help="langue incrustée dans l'image (fr, pt, en ou none)")
     c.add_argument("--no-extras", action="store_true", help="sans miniatures ni fichier SEO")
+    c.add_argument("--no-motion", action="store_true",
+                   help="sans intro HyperFrames ni carte de fin Remotion (sinon utilisées si motion/ est installé)")
     c.add_argument("--workdir")
 
     vc = sub.add_parser("voice-clone", help="clone ta voix (ElevenLabs) à partir de tes enregistrements")
@@ -92,6 +94,14 @@ def main(argv=None):
     th = sub.add_parser("thumbs", help="ADN d'un dossier de miniatures de référence")
     th.add_argument("folder")
     th.add_argument("-o", "--out", default="analyse/miniatures.json")
+
+    sk = sub.add_parser("skills", help="installer un skill .zip (vérifié) ou exporter nos skills en .zip")
+    sk_sub = sk.add_subparsers(dest="skills_cmd", required=True)
+    ski = sk_sub.add_parser("install")
+    ski.add_argument("zip")
+    ski.add_argument("--overwrite", action="store_true")
+    skp = sk_sub.add_parser("pack")
+    skp.add_argument("-o", "--out", default="dist/skill-montage-video.zip")
 
     s = sub.add_parser("serve", help="plateforme web locale")
     s.add_argument("--port", type=int, default=8765)
@@ -127,7 +137,7 @@ def main(argv=None):
         langs = [x.strip() for x in args.subs.split(",") if x.strip()]
         print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
                           args.resolution, args.ai, not args.no_hook, args.original_audio, None, args.discipline,
-                          args.voice_id, langs, args.burn, not args.no_extras))
+                          args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion))
     elif args.cmd == "voice-clone":
         from .narration import CONFIG, clone_voice
         print("voix créée :", clone_voice(args.samples, args.name), f"(enregistrée dans {CONFIG})")
@@ -136,6 +146,16 @@ def main(argv=None):
         dna = analyze_folder(args.folder, args.out)
         print(json.dumps({"style": dna["style"], "moyenne": dna["moyenne"]}, indent=2, ensure_ascii=False))
         print("→", args.out)
+    elif args.cmd == "skills":
+        from . import skillpack
+        if args.skills_cmd == "pack":
+            out, n = skillpack.pack(args.out)
+            print(f"{n} skills → {out}")
+        else:
+            for sk in skillpack.install(args.zip, overwrite=args.overwrite):
+                print(f"✔ {sk['name']} : {sk['description']}")
+                if sk["scripts"]:
+                    print(f"   ⚠ scripts à relire avant usage : {', '.join(sk['scripts'])}")
     elif args.cmd == "serve":
         from .server import serve
         serve(args.port, args.host, args.data)

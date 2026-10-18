@@ -464,10 +464,15 @@ class Renderer:
 
 # --------------------------------------------------------------------------- 6. son
 
-def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7, voice=()):
+def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7, voice=(), insert=(0.0, 0.0),
+                post=0.0, extra_fx=()):
+    """Bande-son complète. `insert` = (instant, durée) d'un carton (intro) inséré dans le montage, `post` = durée
+    de la carte de fin ajoutée à la fin ; les temps de `voice` et `extra_fx` sont ceux de la vidéo finale."""
     sr = sfx.SR
     spf = sr // FPS
-    n = len(timeline) * spf
+    ins_at, ins_len = insert
+    tmap = lambda t: t + ins_len if t >= ins_at - 1e-6 else t  # noqa: E731
+    n = len(timeline) * spf + int(round((ins_len + post) * sr))
     dur = n / sr
     if music_path:
         mus = sfx.read_wav(music_path)
@@ -486,16 +491,19 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
             seg = s[: n - i]
             fx[i: i + len(seg)] += seg
 
+    for t, name, gain, kw in extra_fx:
+        put(name, t, gain, **kw)
     prev = None
     for k, f in enumerate(timeline):
-        t = k / FPS
+        t = tmap(k / FPS)
+        i0 = int(round(t * sr))
         ph = f["phase"]
         if ph in ("freeze", "hook_freeze", "outro"):
-            duck[k * spf:(k + 1) * spf] = 0.35
+            duck[i0:i0 + spf] = 0.35
         if ph in ("normal", "jump", "post") and len(src_audio):
             a = int(f["src"] * spf)
             chunk = src_audio[a: a + spf]
-            orig[k * spf: k * spf + len(chunk)] = chunk
+            orig[i0: i0 + len(chunk)] = chunk
         if ph != (prev or {}).get("phase"):
             if ph in ("slow", "hook_slow"):
                 put("whoosh", t, 0.8, d=0.5)
@@ -589,7 +597,7 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None):
 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
-           extras=True):
+           extras=True, motion_design=True):
     from . import narration as nar
     from .anatomy import add_safety, capoeira_variant
     work = Path(workdir)
@@ -631,6 +639,12 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
             m["voice_dur"] = by_id[k]["dur"]
     hook_freeze = max(HOOK_FREEZE, by_id["hook"]["dur"] - 1.1) if has_voice and "hook" in by_id else HOOK_FREEZE
     outro_len = max(1.8, by_id["outro"]["dur"] + 0.4) if has_voice else 1.8
+    from . import motion
+    use_motion = motion_design and motion.available() and bool(impacts)
+    if motion_design and not use_motion:
+        print("   motion design HyperFrames / Remotion indisponible (cd motion && npm install) : version sans")
+    if use_motion:
+        outro_len = 0.0                          # la carte de fin Remotion remplace l'outro intégré
 
     (work / "analyse.json").write_text(json.dumps(
         [{"t": m["frame"] / FPS, "score": m["score"], **{k: v for k, v in m["info"].items() if k in
@@ -643,7 +657,28 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     print("5/6 rendu image par image")
     renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
     renderer.render(base, work / "video.mp4")
-    print("6/6 son, sous-titres + export")
+    print("6/6 motion design, son, sous-titres + export")
+    first_main = next((i for i, f in enumerate(timeline) if not f["phase"].startswith("hook")), 0) / FPS
+    ins_at, ins_len, post = first_main, 0.0, 0.0
+    accent_hex = "#%02x%02x%02x" % tuple(accent or gfx.GREEN)
+    if use_motion:
+        top = max(range(len(impacts)), key=lambda j: impacts[j]["score"])
+        tag = "CAPOEIRA • ANATOMIE • PLACEMENT" if discipline == "capoeira" else "COMBAT • ANATOMIE • PLACEMENT"
+        try:
+            motion.render_intro(work / "intro.mp4", impacts[top]["info"]["nom"], tag=tag, handle=handle or "",
+                                accent=accent_hex)
+            teaser = "PRÓXIMO : A ESQUIVA" if discipline == "capoeira" else "PARTIE 2 : LA DÉFENSE"
+            motion.render_outro(work / "outro.mp4", handle=handle or "", teaser=teaser, accent=accent_hex)
+            ins_len, post = motion.INTRO_DUR, motion.OUTRO_DUR
+            print(f"   intro HyperFrames {ins_len} s après l'accroche, carte de fin Remotion {post} s")
+        except (RuntimeError, OSError) as e:
+            print(f"   motion design ignoré : {e}")
+            use_motion = False
+    tmap = lambda t: t + ins_len if t >= ins_at - 1e-6 else t  # noqa: E731
+    main_end = len(timeline) / FPS + ins_len
+    starts = {key: tmap(t) for key, t in starts.items()}
+    if use_motion:
+        starts[("outro", -1)] = main_end
     src_audio = sfx.read_wav(src) if info(str(src))["has_audio"] else np.zeros((0, 2))
     voice = []
     if has_voice:
@@ -652,11 +687,25 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         for k in range(len(impacts)):
             voice.append((starts.get(("freeze", k), 0) + 0.15, by_id[k]["audio"]))
         voice.append((starts.get(("outro", -1), 0) + 0.1, by_id["outro"]["audio"]))
-    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice)
+    extra = []
+    if use_motion:                               # sons calés sur les animations de l'intro et de la carte de fin
+        extra += [(ins_at, "riser", 0.5, {"d": 0.6}), (ins_at + 0.62, "impact", 1.0, {}),
+                  (ins_at + 0.62, "shutter", 0.5, {}), (ins_at + 2.2, "whoosh", 0.7, {"d": 0.35}),
+                  (main_end, "impact", 0.7, {}), (main_end + 1.0, "tick", 0.9, {"f": 2200}),
+                  (main_end + 1.1, "tick", 0.7, {"f": 1500}), (main_end + 1.33, "tick", 0.6, {})]
+    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice, (ins_at, ins_len), post, extra)
+    if use_motion:                               # assemblage : accroche → intro → analyses → carte de fin
+        norm = f"fps={FPS},scale={W}:{H},setsar=1,format=yuv420p"
+        fc = (f"[0:v]trim=end={ins_at:.4f},setpts=PTS-STARTPTS,{norm}[a];[1:v]{norm}[b];"
+              f"[0:v]trim=start={ins_at:.4f},setpts=PTS-STARTPTS,{norm}[c];[2:v]{norm}[d];"
+              f"[a][b][c][d]concat=n=4:v=1:a=0[v]")
+        run(["ffmpeg", "-y", "-v", "error", "-i", "video.mp4", "-i", "intro.mp4", "-i", "outro.mp4",
+             "-filter_complex", fc, "-map", "[v]", "-c:v", "libx264", "-preset", "fast", "-crf", "16",
+             "video_motion.mp4"], cwd=work)
+    video_in = "video_motion.mp4" if use_motion else "video.mp4"
     if not hook:
         segs = [sg for sg in segs if sg["id"] != "hook"]
-    first_main = next((i for i, f in enumerate(timeline) if not f["phase"].startswith("hook")), 0) / FPS
-    windows = {"hook": max(first_main - 0.1, 1.0), "outro": outro_len - 0.1}
+    windows = {"hook": max(first_main - 0.1, 1.0), "outro": (post if use_motion else outro_len) - 0.1}
     for k, m in enumerate(impacts):
         windows[k] = freeze_len(m) - 0.25
     if not has_voice and burn != "none":
@@ -673,7 +722,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         filters.append(f"scale={rw}:{rh}:flags=lanczos,unsharp=5:5:0.4")
     vf = ["-vf", ",".join(filters), "-c:v", "libx264", "-preset", "medium", "-crf", "17" if rw > W else "18",
           "-pix_fmt", "yuv420p"] if filters else ["-c:v", "copy"]
-    run(["ffmpeg", "-y", "-v", "error", "-i", "video.mp4", "-i", "audio.wav", *vf,
+    run(["ffmpeg", "-y", "-v", "error", "-i", video_in, "-i", "audio.wav", *vf,
          "-af", "loudnorm=I=-14:TP=-1:LRA=9", "-c:a", "aac", "-b:a", "192k", "-ar", 48000, "-shortest",
          "-movflags", "+faststart", "brut.mp4"], cwd=work)
     match_loudness(work / "brut.mp4", work / "final.mp4", -14)
