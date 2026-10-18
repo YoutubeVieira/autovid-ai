@@ -1,78 +1,90 @@
-import React, { useState } from 'react';
+# AutoVid AI — monteur vidéo automatique
 
-export default function AutoVidCreator() {
-  const [script, setScript] = useState('');
-  const [voice, setVoice] = useState('female');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [videoUrl, setVideoUrl] = useState(null);
+Tu lui donnes des rushs et une musique, il sort un short 9:16 prêt à poster : coupes calées sur le tempo,
+meilleur moment de chaque plan trouvé tout seul, recadrage vertical, titres animés, annotations, filigrane,
+CTA et son normalisé à −14 LUFS. Les deux styles fournis sont reconstitués à partir de deux vidéos
+virales de sports de combat (voir [docs/analyse-videos.md](docs/analyse-videos.md)).
 
-  const handleGenerate = () => {
-    if (!script.trim()) {
-      alert('Veuillez entrer un script.');
-      return;
-    }
-    setIsGenerating(true);
+Tout tourne en local avec **ffmpeg + Python** (numpy, PyYAML, requests). Pas d'After Effects, pas de Premiere.
 
-    // Simulation de génération (à remplacer par appel API réel)
-    setTimeout(() => {
-      // Ici, on simule une URL vidéo créée
-      setVideoUrl('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4');
-      setIsGenerating(false);
-    }, 3000);
-  };
+## Installation
+```bash
+sudo apt install ffmpeg          # ou brew install ffmpeg (il faut libass, inclus d'habitude)
+pip install numpy pyyaml requests
+```
 
-  return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1>AutoVid AI - Création de vidéo</h1>
+## Les 4 commandes
 
-      <label>
-        Script (texte) :
-        <textarea
-          rows={6}
-          style={{ width: '100%', fontSize: 16, marginTop: 8 }}
-          value={script}
-          onChange={(e) => setScript(e.target.value)}
-          placeholder="Entrez votre script ici..."
-        />
-      </label>
+### 1. `analyze` — extraire l'« ADN » d'une vidéo qui marche
+```bash
+python -m autovid analyze reference.mp4 -o analyse/
+```
+Sortie : format, codecs, chaque coupe, durée des plans, BPM, part des coupes sur le temps, loudness,
+mise en page seconde par seconde (`adn.json`, `resume.md`) + une planche contact (`planche.jpg`).
 
-      <label style={{ display: 'block', marginTop: 16 }}>
-        Choix de la voix :
-        <select value={voice} onChange={(e) => setVoice(e.target.value)} style={{ marginLeft: 10, fontSize: 16 }}>
-          <option value="female">Femme</option>
-          <option value="male">Homme</option>
-        </select>
-      </label>
+### 2. `auto` — montage autonome d'un dossier de rushs
+```bash
+python -m autovid auto rushs/ -o out/short.mp4 --music musique.mp3 \
+    --style bincombat --reference reference.mp4 --watermark "MonCompte" --cta "SAVE AND TRY" \
+    --save-brief out/brief.json
+```
+- Les titres viennent des noms de fichiers : `01_mma__smart-back-kick.mp4` → surtitre **MMA**, titre **SMART BACK KICK**.
+- `--reference` : copie le rythme (temps par plan) et la mise en page d'une vidéo existante.
+- `--save-brief` : écrit le brief généré pour le retoucher et le relancer avec `render`.
 
-      <button
-        onClick={handleGenerate}
-        disabled={isGenerating}
-        style={{
-          marginTop: 20,
-          padding: '10px 20px',
-          fontSize: 18,
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: 4,
-          cursor: 'pointer',
-          opacity: isGenerating ? 0.6 : 1,
-        }}
-      >
-        {isGenerating ? 'Génération en cours...' : 'Générer la vidéo'}
-      </button>
+### 3. `render` — montage piloté par un brief (contrôle total)
+```bash
+python -m autovid render examples/pull_counter.yaml -o out/pull_counter.mp4
+```
+Voir [examples/pull_counter.yaml](examples/pull_counter.yaml). Options par plan :
 
-      {videoUrl && (
-        <div style={{ marginTop: 30 }}>
-          <h2>Prévisualisation vidéo</h2>
-          <video
-            src={videoUrl}
-            controls
-            width="100%"
-            style={{ borderRadius: 8, boxShadow: '0 0 10px rgba(0,0,0,0.3)' }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+| clé | valeurs |
+|---|---|
+| `clip` | chemin du rush (relatif au brief) |
+| `start` | `auto` (pic de mouvement) ou secondes |
+| `beats` / `duration` | longueur en temps musicaux ou en secondes |
+| `layout` | `auto`, `cover`, `fit_blur`, `letterbox` |
+| `kicker`, `title`, `subtitle`, `step` | textes |
+| `transition` | `cut`, `flash`, `fade` |
+| `zoom` | `punch` (sur l'impact), `push` |
+| `speed` | `0.5` = ralenti ×2 |
+| `markers` | `[{shape: ring/ellipse, x, y, r, color, at, dur}]` cercles qui pulsent |
+
+Au niveau du brief : `style`, `music`, `bpm`, `music_offset`, `watermark`, `cta`, `keep_clip_audio`,
+`clip_audio_volume`, `target_lufs`, `style_overrides`.
+
+### 4. `talk` — vidéo face caméra (façon Video-Use)
+```bash
+export ELEVENLABS_API_KEY=...      # facultatif : sans clé, pas de sous-titres
+python -m autovid talk face_cam.mp4 -o out/talk.mp4 --language fra
+```
+Coupe des silences → recadrage 9:16 → transcription mot à mot ElevenLabs Speech-to-Text →
+sous-titres dynamiques (mot prononcé en jaune avec un pop) → −14 LUFS.
+
+## Styles
+- **bincombat** — titre pinceau 2 lignes (jaune/blanc), coupe tous les 2 temps, changement de titre sec.
+- **stepbystep** — titres condensés gras, étapes numérotées, pop, flash, forte accentuation.
+
+Polices incluses : Anton (OFL) et Permanent Marker (Apache 2.0), dans `autovid/fonts/`.
+
+## Pipeline
+```
+rushs ─► analyse (mouvement, format) ─┐
+musique ─► BPM + premier temps ───────┼─► plan (timeline sur la grille du tempo)
+référence ─► ADN (rythme, layout) ────┘        │
+                                               ▼
+        par plan : découpe ─ recadrage 9:16 ─ zoom ─ étalonnage ─ flash   (ffmpeg)
+                                               ▼
+        concat ─► habillage ASS (titres, étapes, cercles, filigrane, CTA) ─► mix musique ─► −14 LUFS ─► MP4
+```
+
+## Tests
+```bash
+python3 -m unittest discover tests
+```
+
+## Limites actuelles
+- Pas encore de masque coloré qui suit un membre (il faut un modèle de segmentation type SAM 2 / MediaPipe).
+- Pas encore de flèches animées ni de hook « réaction » en 2 vidéos superposées.
+- Le BPM est estimé : sur une musique sans batterie nette, indique `bpm:` dans le brief.
+- `main.jsx` / `src` : ancien prototype d'interface React, il n'est pas encore relié au moteur.

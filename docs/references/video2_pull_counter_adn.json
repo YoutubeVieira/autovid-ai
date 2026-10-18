@@ -1,0 +1,71 @@
+{
+  "fichier": "v2.mp4",
+  "format": {
+    "duration": 10.866667,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30.0,
+    "video_codec": "av1",
+    "audio_codec": "aac",
+    "has_audio": true,
+    "sample_rate": 44100,
+    "bitrate_kbps": 3345,
+    "ratio": "1080:1920",
+    "vertical": true
+  },
+  "montage": {
+    "nb_coupes": 9,
+    "coupes_s": [
+      3.333,
+      3.667,
+      4.5,
+      5.667,
+      6.333,
+      6.967,
+      8.267,
+      9.4,
+      10.133
+    ],
+    "plans_s": [
+      3.333,
+      0.334,
+      0.833,
+      1.167,
+      0.666,
+      0.634,
+      1.3,
+      1.133,
+      0.733,
+      0.734
+    ],
+    "duree_plan_moyenne_s": 1.087,
+    "duree_plan_mediane_s": 0.783,
+    "coupes_par_minute": 49.7,
+    "temps_par_plan": 1.88
+  },
+  "audio": {
+    "integrated_lufs": -14.1,
+    "lra_lu": 3.2,
+    "bpm": 143.6,
+    "nb_attaques": 24,
+    "coupes_sur_attaque_pct": 67,
+    "coupes_sur_temps_pct": 44
+  },
+  "mise_en_page": {
+    "fond_flou": 8,
+    "plein_cadre": 3
+  },
+  "mise_en_page_par_seconde": [
+    "fond_flou",
+    "fond_flou",
+    "fond_flou",
+    "fond_flou",
+    "plein_cadre",
+    "fond_flou",
+    "fond_flou",
+    "plein_cadre",
+    "fond_flou",
+    "plein_cadre",
+    "fond_flou"
+  ]
+}

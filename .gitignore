@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+/analyse/
+/out/
+/rushs/
+*.mp4
+*.mov

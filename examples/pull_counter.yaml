@@ -1,0 +1,29 @@
+# Brief façon vidéo 2 (« PULL COUNTER — STEP-BY-STEP »). Les chemins sont relatifs à ce fichier.
+style: stepbystep
+music: ../rushs/musique.mp3
+watermark: "@moncompte"
+cta: { text: "SAVE AND TRY", seconds: 1.4 }
+segments:
+  - clip: ../rushs/hook_reaction.mp4      # hook : 3,3 s, la promesse avant la démonstration
+    beats: 8
+    layout: fit_blur
+  - clip: ../rushs/demo_complete.mp4
+    title: PULL COUNTER
+    subtitle: STEP-BY-STEP
+    transition: flash                     # flash blanc à l'entrée, comme dans la référence
+    zoom: punch
+  - clip: ../rushs/stance.mp4
+    step: "1. WIDE STANCE"
+  - clip: ../rushs/pied_arriere.mp4
+    step: "2. REAR FOOT"
+    speed: 0.6                            # ralenti
+    markers:                              # cercle « au sol » qui pulse autour du pied
+      - { shape: ellipse, x: 540, y: 1250, r: 170, color: "#FFE600", at: 0.1 }
+  - clip: ../rushs/lean_back.mp4
+    step: "3. LEAN BACK"
+  - clip: ../rushs/cross.mp4
+    step: "4. CROSS"
+    zoom: push
+  - clip: ../rushs/sac.mp4
+    markers:
+      - { shape: ring, x: 760, y: 820, r: 80, color: "#39FF14", at: 0.2 }
