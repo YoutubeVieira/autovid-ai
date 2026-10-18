@@ -177,7 +177,17 @@ def cues_from_words(words, max_chars=32):
         cur.append(w)
     if cur:
         cues.append(cur)
-    return [(c[0]["start"], c[-1]["end"] + 0.12, " ".join(x["text"] for x in c)) for c in cues]
+    out = [(c[0]["start"], c[-1]["end"] + 0.12, " ".join(x["text"] for x in c)) for c in cues]
+    return [(a, min(b, out[i + 1][0]) if i + 1 < len(out) else b, t) for i, (a, b, t) in enumerate(out)]
+
+
+def fit_words(words, window):
+    """Comprime les temps des mots pour tenir dans `window` secondes (texte sans voix, plus long que l'arrêt)."""
+    end = max((w["end"] for w in words), default=0)
+    if end <= window or end <= 0:
+        return words
+    k = window / end
+    return [{**w, "start": w["start"] * k, "end": w["end"] * k} for w in words]
 
 
 def cues_from_text(text, t0, t1, max_chars=32):

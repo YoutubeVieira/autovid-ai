@@ -542,7 +542,7 @@ def phase_starts(timeline):
     return out
 
 
-def subtitles(segs, starts, impacts, out_base, work, burn, langs):
+def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None):
     """SRT par langue + fichier ASS pour l'incrustation. Renvoie (chemin ASS ou None, {langue: srt})."""
     from . import narration as nar
     from .talk import captions_ass
@@ -550,8 +550,12 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs):
     for k in range(len(impacts)):
         t_of[k] = starts.get(("freeze", k), 0.0) + 0.15
     fr_words, cues = [], {"fr": []}
+    windows = windows or {}
     for sg in segs:
         t0 = t_of[sg["id"]]
+        if sg["id"] in windows:                 # chaque réplique reste dans la fenêtre de son analyse
+            sg["words"] = nar.fit_words(sg["words"], windows[sg["id"]])
+            sg["dur"] = min(sg["dur"], windows[sg["id"]])
         ws = [{**w, "start": w["start"] + t0, "end": w["end"] + t0} for w in sg["words"]]
         fr_words += ws
         cues["fr"] += nar.cues_from_words(ws)
@@ -651,7 +655,14 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice)
     if not hook:
         segs = [sg for sg in segs if sg["id"] != "hook"]
-    ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs))
+    first_main = next((i for i, f in enumerate(timeline) if not f["phase"].startswith("hook")), 0) / FPS
+    windows = {"hook": max(first_main - 0.1, 1.0), "outro": outro_len - 0.1}
+    for k, m in enumerate(impacts):
+        windows[k] = freeze_len(m) - 0.25
+    if not has_voice and burn != "none":
+        print("   sans voix off : sous-titres écrits en .srt, pas incrustés (les étiquettes portent déjà l'info)")
+        burn = "none"
+    ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs), windows)
 
     rw, rh = RESOLUTIONS[resolution]
     filters = []

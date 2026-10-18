@@ -61,10 +61,11 @@ def build(analyses, discipline="combat", handle="", shorts=True):
     """analyses : [{'t_out': secondes dans la vidéo finale, 'nom', 'kind', 'muscles': [...]}]."""
     if not analyses:
         analyses = [{"t_out": 0, "nom": discipline.upper(), "kind": "pied", "muscles": []}]
-    main = analyses[0]
+    from collections import Counter
+    noms = [n for n, _ in Counter(a["nom"] for a in analyses).most_common()]
+    main = next(a for a in analyses if a["nom"] == noms[0])
     emoji = EMOJI.get(main["kind"], "🥋")
-    noms = list(dict.fromkeys(a["nom"] for a in analyses))
-    sujet = main["nom"] if len(noms) == 1 else f"{noms[0]} + {len(noms) - 1}"
+    sujet = noms[0] if len(noms) == 1 else f"{noms[0]} & {noms[1]}"
     dtags = DISCIPLINE_TAGS.get(discipline, DISCIPLINE_TAGS["combat"])
     out = {}
     for lang, t in T.items():
