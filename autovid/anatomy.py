@@ -166,6 +166,25 @@ def tag_pt(text):
     return re.sub(rf"(?<![\w-])({pattern})(?![\w-])", r"[pt]\1[/pt]", text, flags=re.IGNORECASE)
 
 
+CAPOEIRA_HOOKS = {
+    "au": ("LE SECRET D'UN AÚ PROPRE", "REGARDE SES MAINS"),
+    "ginga": ("LA GINGA QUI TE PROTÈGE", "REGARDE SON BRAS"),
+    "esquive": ("L'ESQUIVA QUI SAUVE", "REGARDE SON BASSIN"),
+    "pied": ("LE SECRET DE CE CHUTE", "REGARDE SA HANCHE"),
+    "rasteira": ("LA RASTEIRA PARFAITE", "REGARDE LE TIMING"),
+    "genou": ("CETTE JOELHADA SURPREND", "REGARDE SON BASSIN"),
+}
+CAPOEIRA_TIPS = {
+    "AÚ": "POSE LA MAIN LOIN, REGARDE TON PARTENAIRE",
+    "GINGA": "UN BRAS TOUJOURS DEVANT LE VISAGE",
+    "ESQUIVA": "DESCENDS SANS QUITTER LE PARTENAIRE DES YEUX",
+    "MEIA-LUA DE COMPASSO": "MAINS AU SOL, LA HANCHE FAIT TOURNER",
+    "ARMADA": "LE REGARD TOURNE AVANT LA JAMBE",
+    "RASTEIRA": "ATTENDS LE TRANSFERT DE POIDS",
+    "JOELHADA": "CONTRÔLE LA DISTANCE AVANT DE MONTER",
+}
+
+
 def capoeira_variant(track, i, info):
     """Adapte le nom au vocabulaire capoeira + repère les positions propres à la capoeira (aú, esquiva)."""
     p = track[i]
@@ -193,6 +212,9 @@ def capoeira_variant(track, i, info):
             info["kind"] = "rasteira"
     elif info["kind"] == "genou":
         info["nom"] = CAPOEIRA["genou"]
+    h1, h2 = CAPOEIRA_HOOKS.get(info["kind"], CAPOEIRA_HOOKS["pied"])
+    info["hook"] = [h1, h2]
+    info["tip"] = CAPOEIRA_TIPS.get(info["nom"], info["tip"])
     return info
 
 

@@ -657,6 +657,12 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         if discipline == "capoeira":
             capoeira_variant(tracks[m["track"]], m["frame"], m["info"])
         add_safety(m["info"])
+    if discipline == "capoeira":                 # variété : pas plus de 2 fois le même mouvement
+        seen = {}
+        for m in sorted(impacts, key=lambda m: -m["score"]):
+            seen[m["info"]["nom"]] = seen.get(m["info"]["nom"], 0) + 1
+            m["keep"] = seen[m["info"]["nom"]] <= 2
+        impacts = [m for m in impacts if m.pop("keep")]
     if ai:
         from .ai import enrich
         enrich(impacts, base, provider=ai, discipline=discipline)
