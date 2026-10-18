@@ -58,6 +58,14 @@ class NarrationTest(unittest.TestCase):
         self.assertIn("00:00:03,000", txt)
 
 
+class NoCredentialsTest(unittest.TestCase):
+    def test_translate_without_credentials_returns_none(self):
+        from autovid.ai import translate
+        env = {"HOME": "/nonexistent", "PATH": "/usr/bin"}
+        with mock.patch.dict("os.environ", env, clear=True):
+            self.assertIsNone(translate(["Bonjour"]))
+
+
 class SeoThumbTest(unittest.TestCase):
     def test_seo_three_languages(self):
         out = seo.build([{"t_out": 0.0, "nom": "HIGH KICK", "kind": "pied", "muscles": []},

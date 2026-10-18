@@ -91,7 +91,7 @@ def enrich(impacts, video, provider="claude", discipline="combat"):
                 output_config={"effort": "medium", "format": {"type": "json_schema", "schema": SCHEMA}},
                 messages=[{"role": "user", "content": content}],
             )
-        except anthropic.AuthenticationError:
+        except (anthropic.AuthenticationError, TypeError):  # TypeError : aucun identifiant configuré
             print("   IA : pas d'identifiants Anthropic valides, on garde l'analyse automatique")
             return
         except anthropic.APIError as e:
@@ -140,8 +140,8 @@ def translate(texts):
             model=MODEL, max_tokens=8000, betas=["server-side-fallback-2026-07-01"], fallbacks="default",
             output_config={"effort": "low", "format": {"type": "json_schema", "schema": TRANSLATE_SCHEMA}},
             messages=[{"role": "user", "content": prompt}])
-    except anthropic.APIError as e:
-        print(f"   traduction : erreur {e.__class__.__name__}, sous-titres en français seulement")
+    except (anthropic.APIError, TypeError) as e:     # TypeError : aucun identifiant configuré
+        print(f"   traduction : indisponible ({e.__class__.__name__}), sous-titres en français seulement")
         return None
     text = next((b.text for b in resp.content if b.type == "text"), None)
     if resp.stop_reason == "refusal" or not text:
