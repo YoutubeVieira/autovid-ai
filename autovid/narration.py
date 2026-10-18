@@ -24,18 +24,18 @@ LANG_ISO3 = {"fr": "fra", "pt": "por", "en": "eng"}
 # --------------------------------------------------------------------------- script
 
 def script_for(info, n, discipline="combat"):
-    """Texte de voix off d'une analyse (≈ 6–9 s à l'oral)."""
+    """Texte de voix off d'une analyse, court (≈ 5–7 s) : nom, placement, moteurs, risque."""
     m = [x[0].lower() for x in info["muscles"]]
     muscles = ", ".join(m[:-1]) + f" et {m[-1]}" if len(m) > 1 else (m[0] if m else "")
     zone, conseil = info.get("risque", ("", ""))
+    parle = info.get("risque_parle") or (f"à : {zone.lower()}" if zone else "")
     nom = info["nom"].lower()
-    parts = [f"Analyse {n}. {nom.capitalize()}.", info.get("placement", "")]
+    parts = [f"{nom.capitalize()}.", info.get("placement", "")]
     if muscles:
-        parts.append(f"Les muscles moteurs : {muscles}.")
-    if zone:
-        parts.append(f"Attention à {zone.lower()} : {conseil}.")
-    text = " ".join(p for p in parts if p)
-    return info.get("narration") or text
+        parts.append(f"Moteurs : {muscles}.")
+    if parle:
+        parts.append(f"Attention {parle} : {conseil}.")
+    return info.get("narration") or " ".join(p for p in parts if p)
 
 
 def build_script(impacts, discipline="combat"):

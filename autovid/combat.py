@@ -55,7 +55,26 @@ def normalize(src, out, framing="auto"):
 
 # --------------------------------------------------------------------------- 3. détection des coups
 
-def detect_impacts(tracks, cuts_frames, max_n=6, min_gap=1.3, threshold=0.11):
+def mover_mask(tr, center_zone=None, window=FPS, min_travel=0.08):
+    """Images où la personne se DÉPLACE (joueurs) — le public assis autour reste sur place.
+    center_zone : rayon max (en fraction du cadre) autour du centre, pour les rodas filmées de haut."""
+    s = np.array([1.0, 16 / 9])
+    hip = (tr[:, L_HIP, :2] + tr[:, R_HIP, :2]) / 2 * s
+    n = len(hip)
+    ok = np.zeros(n, bool)
+    for i in range(n):
+        a, b = max(i - window, 0), min(i + window, n - 1)
+        seg = hip[a:b + 1]
+        seg = seg[np.isfinite(seg).all(axis=1)]
+        if len(seg) > 4 and np.linalg.norm(seg.max(axis=0) - seg.min(axis=0)) > min_travel:
+            ok[i] = True
+    if center_zone:
+        c = np.array([0.5, 0.5]) * s
+        ok &= np.nan_to_num(np.linalg.norm(hip - c, axis=1), nan=9) < center_zone * s[1]
+    return ok
+
+
+def detect_impacts(tracks, cuts_frames, max_n=6, min_gap=1.3, threshold=0.11, movers_only=False, center_zone=None):
     s = np.array([1.0, 16 / 9])
     found = []
     n = tracks.shape[1]
@@ -71,6 +90,8 @@ def detect_impacts(tracks, cuts_frames, max_n=6, min_gap=1.3, threshold=0.11):
         hipc = (tr[:, L_HIP, :2] + tr[:, R_HIP, :2]) / 2 * s
         jump = np.concatenate([[0], np.linalg.norm(np.diff(hipc, axis=0), axis=1)])
         bad = near_cut.copy()
+        if movers_only:
+            bad |= ~mover_mask(tr, center_zone)
         for j in np.where(~(jump < 0.06))[0]:          # saut d'identité / de plan : on ignore ±3 images
             bad[max(j - 3, 0): j + 4] = True
         for e in EFFECTORS:
@@ -612,7 +633,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     out_abs.parent.mkdir(parents=True, exist_ok=True)
     out_base = str(out_abs.with_suffix(""))
     # cache : relancer un montage sur la même vidéo (même cadrage) ne refait ni la normalisation ni le squelette
-    key = f"{Path(src).resolve()}|{Path(src).stat().st_size}|{Path(src).stat().st_mtime_ns}|{framing}"
+    people = 4 if discipline == "capoeira" else 2   # roda : on suit plusieurs personnes puis on garde les joueurs
+    key = f"{Path(src).resolve()}|{Path(src).stat().st_size}|{Path(src).stat().st_mtime_ns}|{framing}|{people}"
     cache_ok = (work / "cache.key").exists() and (work / "cache.key").read_text() == key \
         and base.exists() and (work / "squelette.npy").exists()
     if cache_ok:
@@ -622,13 +644,14 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         print("1/6 normalisation 9:16 + étalonnage")
         normalize(str(src), base, framing)
         print("2/6 squelette (MediaPipe)")
-        tracks = track(base)
+        tracks = track(base, people=people)
         np.save(work / "squelette.npy", tracks)
         (work / "cache.key").write_text(key)
     n = tracks.shape[1]
     cuts = [int(round(c * FPS)) for c in scene_cuts(str(base))]
     print("3/6 détection des coups")
-    impacts = detect_impacts(tracks, cuts, max_impacts)
+    impacts = detect_impacts(tracks, cuts, max_impacts, movers_only=discipline == "capoeira",
+                             center_zone=0.42 if discipline == "capoeira" and framing == "cover" else None)
     for m in impacts:
         m["info"] = classify(tracks[m["track"]], m["frame"], m["eff"])
         if discipline == "capoeira":

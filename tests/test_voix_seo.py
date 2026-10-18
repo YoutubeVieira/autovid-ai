@@ -24,7 +24,8 @@ class NarrationTest(unittest.TestCase):
                            "hook": ["A", "B"]})
         txt = nar.script_for(info, 1)
         self.assertIn("psoas et quadriceps", txt)
-        self.assertIn(RISQUES["pied"][0].lower(), txt)
+        self.assertIn("Attention " + RISQUES["pied"][1], txt)
+        self.assertEqual(info["risque"][0], RISQUES["pied"][0])
 
     def test_synth_splits_languages_and_times_words(self):
         calls = []

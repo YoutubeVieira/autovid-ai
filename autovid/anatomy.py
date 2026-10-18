@@ -121,6 +121,12 @@ def anchor_for(muscle, side):
 # --------------------------------------------------------------------------- placement et risques de blessure
 
 PLACEMENT = {
+    "AÚ": "Mains posées l'une après l'autre, bassin au-dessus des épaules, jambes ouvertes.",
+    "ESQUIVA": "Bassin bas, poids sur la jambe arrière, un bras protège le visage.",
+    "GINGA": "Pieds en triangle, poids mobile, un bras toujours devant le visage.",
+    "MEIA-LUA DE COMPASSO": "Mains au sol, regard sur le partenaire, jambe tendue qui balaie.",
+    "ARMADA": "Rotation complète, regard par-dessus l'épaule, jambe tendue.",
+    "RASTEIRA": "Appui très bas, crochète la cheville quand le partenaire transfère son poids.",
     "HIGH KICK": "Pied d'appui pivoté à 90°, hanche ouverte, bras opposé en garde.",
     "MIDDLE KICK": "Tibia à hauteur des côtes, hanche qui passe par-dessus.",
     "LOW KICK": "Frappe avec le tibia au-dessus du genou adverse, appui fléchi.",
@@ -130,19 +136,21 @@ PLACEMENT = {
     "COUP DE GENOU": "Mains qui contrôlent la nuque, bassin projeté vers l'avant.",
 }
 
+# zone à risque : (texte à l'écran, forme parlée avec l'article, conseil)
 RISQUES = {
-    "pied": ("ISCHIOS ET HANCHE", "échauffe-toi, monte l'amplitude progressivement"),
-    "poing": ("POIGNET", "aligne les métacarpes, bande tes mains"),
-    "genou": ("GENOU D'APPUI", "ne verrouille pas l'appui, reste fléchi"),
-    "au": ("POIGNETS ET NUQUE", "mains à plat, doigts écartés, regard au sol"),
-    "esquive": ("GENOUX", "genou dans l'axe du pied, pas vers l'intérieur"),
-    "rasteira": ("CHEVILLE DU PARTENAIRE", "balaye doucement à l'entraînement"),
+    "pied": ("ISCHIOS ET HANCHE", "aux ischios et à la hanche", "échauffe-toi, monte l'amplitude progressivement"),
+    "poing": ("POIGNET", "au poignet", "aligne les métacarpes, bande tes mains"),
+    "genou": ("GENOU D'APPUI", "au genou d'appui", "ne verrouille pas l'appui, reste fléchi"),
+    "au": ("POIGNETS ET NUQUE", "aux poignets et à la nuque", "mains à plat, doigts écartés, regard au sol"),
+    "esquive": ("GENOUX", "aux genoux", "genou dans l'axe du pied, pas vers l'intérieur"),
+    "rasteira": ("CHEVILLE DU PARTENAIRE", "à la cheville du partenaire", "balaye doucement à l'entraînement"),
+    "ginga": ("CHEVILLES", "aux chevilles", "reste sur l'avant-pied, genoux souples"),
 }
 
 # Vocabulaire capoeira (prononcé en portugais du Brésil dans la voix off)
 CAPOEIRA = {
     "pied_haut": "MEIA-LUA DE COMPASSO", "pied_moyen": "ARMADA", "pied_bas": "RASTEIRA",
-    "genou": "JOELHADA", "poing": "GALOPANTE", "au": "AÚ", "esquive": "ESQUIVA", "ginga": "GINGA",
+    "genou": "JOELHADA", "au": "AÚ", "esquive": "ESQUIVA", "ginga": "GINGA",
 }
 PT_TERMS = ["meia-lua de compasso", "meia-lua de frente", "meia-lua", "queixada", "armada", "martelo", "bênção",
             "rasteira", "esquiva", "negativa", "cocorinha", "rolê", "macaco", "joelhada", "galopante", "ginga",
@@ -167,9 +175,17 @@ def capoeira_variant(track, i, info):
     hip_y = (p[L_HIP, 1] + p[R_HIP, 1]) / 2
     knee_y = (p[L_KNEE, 1] + p[R_KNEE, 1]) / 2
     if ank_y < head_y and wr_y > hip_y:                 # pieds au-dessus de la tête, mains au sol : aú
-        info.update(nom=CAPOEIRA["au"], kind="au", membre="CORPS ENTIER")
+        info.update(nom=CAPOEIRA["au"], kind="au", membre="CORPS ENTIER",
+                    muscles=[("DELTOÏDES", "portent le corps", (L_SH,)), ("TRICEPS", "verrouillent les bras", (L_SH, L_EL)),
+                             ("ABDOMINAUX", "gainage du tronc", (L_HIP, R_SH))])
     elif hip_y > knee_y - 0.02 and info["kind"] != "pied":  # bassin plus bas que les genoux : esquiva
-        info.update(nom=CAPOEIRA["esquive"], kind="esquive")
+        info.update(nom=CAPOEIRA["esquive"], kind="esquive", membre="BASSIN BAS",
+                    muscles=[("QUADRICEPS", "descente contrôlée", (L_HIP, L_KNEE)),
+                             ("FESSIERS", "stabilisent le bassin", (R_HIP,)), ("ABDOMINAUX", "gainage", (L_HIP, R_SH))])
+    elif info["kind"] == "poing":                       # en roda, un bras qui part vite = la protection de la ginga
+        info.update(nom=CAPOEIRA["ginga"], kind="ginga", membre="BRAS DE PROTECTION",
+                    muscles=[("DELTOÏDE", "lève la garde", (L_SH,)), ("OBLIQUES", "rotation du buste", (L_HIP, R_SH)),
+                             ("MOLLETS", "appuis mobiles", (L_KNEE, L_ANK))])
     elif info["kind"] == "pied":
         info["nom"] = {"HIGH KICK": CAPOEIRA["pied_haut"], "MIDDLE KICK": CAPOEIRA["pied_moyen"],
                        "LOW KICK": CAPOEIRA["pied_bas"]}.get(info["nom"], info["nom"])
@@ -181,6 +197,8 @@ def capoeira_variant(track, i, info):
 
 
 def add_safety(info):
-    info["risque"] = RISQUES.get(info["kind"], RISQUES["pied"])
+    zone, parle, conseil = RISQUES.get(info["kind"], RISQUES["pied"])
+    info["risque"] = (zone, conseil)
+    info["risque_parle"] = parle
     info["placement"] = PLACEMENT.get(info["nom"], info.get("placement", "Garde haute, appuis stables."))
     return info

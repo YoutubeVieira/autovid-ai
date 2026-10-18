@@ -28,11 +28,11 @@ def model_path(variant="full"):
     return str(path)
 
 
-def _landmarker(segmentation=False, variant="full"):
+def _landmarker(segmentation=False, variant="full", num_poses=2):
     from mediapipe.tasks.python import BaseOptions, vision
     opts = vision.PoseLandmarkerOptions(
         base_options=BaseOptions(model_asset_path=model_path(variant)),
-        running_mode=vision.RunningMode.VIDEO, num_poses=2,
+        running_mode=vision.RunningMode.VIDEO, num_poses=num_poses,
         min_pose_detection_confidence=0.4, min_tracking_confidence=0.4,
         output_segmentation_masks=segmentation)
     return vision.PoseLandmarker.create_from_options(opts)
@@ -58,10 +58,11 @@ def iter_frames(path, w, h, fps=None, start=None):
         p.wait()
 
 
-def track(path, fps=30, w=540, h=960):
-    """Renvoie un tableau (2, N, 33, 3) [x, y, visibilité] normalisé 0–1, NaN si absent, piste 0 = personne principale."""
+def track(path, fps=30, w=540, h=960, people=2):
+    """Renvoie un tableau (people, N, 33, 3) [x, y, visibilité] normalisé 0–1, NaN si absent ;
+    pistes triées de la plus présente à la moins présente."""
     import mediapipe as mp
-    lm = _landmarker()
+    lm = _landmarker(num_poses=people)
     raw = []
     for i, frame in enumerate(iter_frames(path, w, h)):
         res = lm.detect_for_video(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.ascontiguousarray(frame)),
@@ -69,12 +70,12 @@ def track(path, fps=30, w=540, h=960):
         raw.append([np.array([[p.x, p.y, p.visibility] for p in pose]) for pose in res.pose_landmarks])
     lm.close()
     n = len(raw)
-    tracks = np.full((2, n, 33, 3), np.nan)
-    last = [None, None]
+    tracks = np.full((people, n, 33, 3), np.nan)
+    last = [None] * people
     for i, poses in enumerate(raw):
         centers = [np.nanmean(p[[L_HIP, R_HIP], :2], axis=0) for p in poses]
         used = set()
-        for k in (0, 1):    # association au plus proche de la position précédente
+        for k in range(people):    # association au plus proche de la position précédente
             if last[k] is None or not centers:
                 continue
             d = [np.linalg.norm(c - last[k]) if j not in used else 9 for j, c in enumerate(centers)]
@@ -84,15 +85,15 @@ def track(path, fps=30, w=540, h=960):
                 last[k] = centers[j]
                 used.add(j)
         for j, p in enumerate(poses):   # nouvelles personnes → première piste libre
-            free = [k for k in (0, 1) if np.isnan(tracks[k, i, 0, 0])]
+            free = [k for k in range(people) if np.isnan(tracks[k, i, 0, 0])]
             if j in used or not free:
                 continue
             k = min(free, key=lambda k: last[k] is not None)
             tracks[k, i] = p
             last[k] = centers[j]
             used.add(j)
-    if np.isfinite(tracks[1, :, 0, 0]).sum() > np.isfinite(tracks[0, :, 0, 0]).sum():
-        tracks = tracks[::-1].copy()
+    order = np.argsort([-np.isfinite(tracks[k, :, 0, 0]).sum() for k in range(people)])
+    tracks = tracks[order].copy()
     return smooth(tracks)
 
 
