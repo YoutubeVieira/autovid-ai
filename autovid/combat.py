@@ -410,8 +410,8 @@ class Renderer:
         """Décode base.mp4 par tronçons monotones, compose, et envoie les images à ffmpeg."""
         enc = subprocess.Popen(["ffmpeg", "-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
                                 "-r", str(FPS), "-i", "-", "-vf", "noise=alls=5:allf=t,vignette=angle=PI/5",
-                                "-c:v", "libx264", "-preset", "fast", "-crf", "17", "-pix_fmt", "yuv420p",
-                                str(out_path)], stdin=subprocess.PIPE)
+                                "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-maxrate", "20M", "-bufsize", "40M",
+                                "-pix_fmt", "yuv420p", str(out_path)], stdin=subprocess.PIPE)
         runs, cur = [], [0]
         for i in range(1, len(self.tl)):
             if self.tl[i]["src"] < self.tl[i - 1]["src"]:
@@ -700,8 +700,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
               f"[0:v]trim=start={ins_at:.4f},setpts=PTS-STARTPTS,{norm}[c];[2:v]{norm}[d];"
               f"[a][b][c][d]concat=n=4:v=1:a=0[v]")
         run(["ffmpeg", "-y", "-v", "error", "-i", "video.mp4", "-i", "intro.mp4", "-i", "outro.mp4",
-             "-filter_complex", fc, "-map", "[v]", "-c:v", "libx264", "-preset", "fast", "-crf", "16",
-             "video_motion.mp4"], cwd=work)
+             "-filter_complex", fc, "-map", "[v]", "-c:v", "libx264", "-preset", "medium", "-crf", "18",
+             "-maxrate", "16M", "-bufsize", "32M", "video_motion.mp4"], cwd=work)
     video_in = "video_motion.mp4" if use_motion else "video.mp4"
     if not hook:
         segs = [sg for sg in segs if sg["id"] != "hook"]
@@ -720,8 +720,10 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         filters.append("ass=sous_titres.ass:fontsdir=fonts")
     if (rw, rh) != (W, H):
         filters.append(f"scale={rw}:{rh}:flags=lanczos,unsharp=5:5:0.4")
+    # débit plafonné : le grain gonfle le fichier sans gain visible après recompression par les réseaux
+    rate = {1080: "16M", 1440: "24M", 2160: "45M", 4320: "120M"}[rw]
     vf = ["-vf", ",".join(filters), "-c:v", "libx264", "-preset", "medium", "-crf", "17" if rw > W else "18",
-          "-pix_fmt", "yuv420p"] if filters else ["-c:v", "copy"]
+          "-maxrate", rate, "-bufsize", str(int(rate[:-1]) * 2) + "M", "-pix_fmt", "yuv420p"] if filters else ["-c:v", "copy"]
     run(["ffmpeg", "-y", "-v", "error", "-i", video_in, "-i", "audio.wav", *vf,
          "-af", "loudnorm=I=-14:TP=-1:LRA=9", "-c:a", "aac", "-b:a", "192k", "-ar", 48000, "-shortest",
          "-movflags", "+faststart", "brut.mp4"], cwd=work)

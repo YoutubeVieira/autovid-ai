@@ -15,6 +15,7 @@ Classé par impact sur les vues et les revenus. ✅ = fait, 🟡 = partiel, ❌ 
 | ❌ | Suivi des 2 combattants avec ré-identification (qui frappe qui) | |
 | ❌ | Flèches animées de trajectoire, comparaison côte à côte (bon / mauvais geste), écran partagé « pro vs élève » | |
 | ❌ | Accroche « réaction » (toi en incrustation qui réagis) | |
+| ✅ | Intro 3D HyperFrames + carte de fin Remotion, générées et insérées automatiquement | fait |
 | ❌ | Bibliothèque de bruitages / musiques réels (ElevenLabs Sound Effects & Music) en option des sons générés | |
 
 ## 2. Formats et déclinaisons (ce qui multiplie la portée)

@@ -47,6 +47,17 @@ python -m autovid combat roda.mp4 -o sorties/roda.mp4 --discipline capoeira --ai
 Le texte est en français, les mots brésiliens (ginga, rasteira, aú, meia-lua…) sont synthétisés en portugais.
 Les arrêts sur image durent le temps de la phrase ; la musique baisse sous la voix.
 
+### 🎞️ Motion design par le code (HyperFrames + Remotion)
+`cd motion && npm install` une fois : chaque montage reçoit alors une **intro 3D HyperFrames** (HTML/CSS/GSAP,
+placée juste après l'accroche) et une **carte de fin Remotion** (React : clic sur « S'abonner », cloche, teaser).
+`--no-motion` pour s'en passer. Détails : skill `motion-design`.
+
+### 📦 Skills en .zip
+```bash
+python -m autovid skills install skill-montage-video.zip   # vérifié : chemins, liens, SKILL.md ; scripts listés
+python -m autovid skills pack -o dist/skill-montage-video.zip
+```
+
 ### 🖼️ ADN de miniatures
 ```bash
 python -m autovid thumbs captures_miniatures/ -o analyse/miniatures.json
@@ -70,6 +81,10 @@ Détails, connecteurs (Canva, CapCut, Gemini, Flow, Antigravity, ElevenLabs, Hyp
 | `publier` | formats, légendes, hashtags, couverture (Canva), règles de monétisation |
 | `voix-off` | clonage de ta voix, voix off FR + termes PT-BR, sous-titres FR / PT-BR / EN |
 | `miniature-seo` | ADN des miniatures et titres d'une chaîne modèle → nos miniatures, titres, tags |
+| `motion-design` | intro HyperFrames et carte de fin Remotion paramétrées, insérées dans le montage |
+
+Skills officiels installés par `scripts/install.sh` : HyperFrames (`hyperframes`, `motion-graphics`, `hyperframes-core`…)
+et Remotion (`remotion-best-practices`, `remotion-create`, `remotion-render`…).
 
 Ce qui reste à construire : [docs/feuille-de-route.md](docs/feuille-de-route.md).
 
