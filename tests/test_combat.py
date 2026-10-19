@@ -175,3 +175,18 @@ class FluideTest(unittest.TestCase):
         p = np.abs(z) ** 2
         sub = p[(f >= 20) & (f < 120)].sum() / p.sum()
         self.assertTrue(0.6 < sub < 0.85, sub)
+
+
+class FocusTest(unittest.TestCase):
+    def test_focus_part_is_one_limb(self):
+        from autovid.fluide import focus_part
+        tr = standing()
+        kick = classify(tr[0], 10, R_ANK)
+        kick["kind"] = "pied"
+        bones, target = focus_part(kick)
+        self.assertEqual(target, R_ANK)
+        self.assertEqual(len(bones), 3)
+        au = dict(kick, kind="au", side="G")
+        bones, target = focus_part(au)
+        self.assertEqual(target, 15)                     # poignet gauche
+        self.assertEqual(len(bones), 2)

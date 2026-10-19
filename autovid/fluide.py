@@ -116,6 +116,41 @@ def _glow_strokes(img, segs, thick):
         gfx.glow_fill(img[y0:y1, x0:x1], m.astype(np.float32) / 255, col, alpha=0.78, glow=0.7)
 
 
+def focus_part(info):
+    """(os à tracer, point suivi par la flèche) : la partie précise du corps qui fait le mouvement."""
+    from .anatomy import J
+    sh, el, wr, hip, knee, ank, foot = J[info.get("side", "D")]
+    kind = info["kind"]
+    if kind in ("pied", "rasteira"):
+        return [(hip, knee), (knee, ank), (ank, foot)], ank
+    if kind == "genou":
+        return [(hip, knee)], knee
+    if kind == "esquive":
+        return [(hip, knee), (knee, ank)], hip
+    return [(sh, el), (el, wr)], wr            # poing, ginga, aú : le bras
+
+
+def _curve_arrow(img, pts, color, thick, min_len=0.0):
+    """Flèche courbe lisse (Bézier passant par le milieu du trajet), contour noir pour la lisibilité."""
+    a0, a2 = pts[0], pts[-1]
+    if np.linalg.norm(a2 - a0) <= min_len:
+        return
+    a1 = pts[len(pts) // 2] * 2 - (a0 + a2) / 2
+    u = np.linspace(0, 1, 24)[:, None]
+    curve = ((1 - u) ** 2 * a0 + 2 * (1 - u) * u * a1 + u ** 2 * a2).astype(np.int32)
+    w = thick // 2 + 3
+    cv2.polylines(img, [curve], False, (0, 0, 0), w + 5, cv2.LINE_AA)
+    cv2.polylines(img, [curve], False, color, w, cv2.LINE_AA)
+    d = (curve[-1] - curve[-3]).astype(float)
+    if np.linalg.norm(d) > 1:
+        d /= np.linalg.norm(d)
+        nrm = np.array([-d[1], d[0]])
+        tri = np.array([curve[-1] + d * thick * 1.7, curve[-1] + nrm * thick * 1.1,
+                        curve[-1] - nrm * thick * 1.1]).astype(np.int32)
+        cv2.fillPoly(img, [tri], (0, 0, 0), cv2.LINE_AA)
+        cv2.fillPoly(img, [(tri * 0.92 + tri.mean(axis=0) * 0.08).astype(np.int32)], color, cv2.LINE_AA)
+
+
 class FluidMixin:
     """À combiner avec combat.Renderer : remplace zoom, tremblement et habillage."""
 
@@ -183,94 +218,53 @@ class FluidMixin:
             return
         ok = lambda j: np.isfinite(xy[j]).all() and vis[j] > 0.2  # noqa: E731
 
-        # 1. traits de couleur : appui en orange, chaîne qui travaille dans la couleur d'accent
-        segs = [(xy[a], xy[b], gfx.ORANGE) for a, b in info_["support"] if ok(a) and ok(b)]
-        segs += [(xy[a], xy[b], self.accent) for a, b in info_["chain"] if ok(a) and ok(b)]
+        # Une seule partie du corps : la jambe qui frappe, ou le bras qui protège / qui porte (aú).
+        bones, target = focus_part(info_)
+        segs = [(xy[a], xy[b], self.accent) for a, b in bones if ok(a) and ok(b)]
         if fade < 1:
             over = img.copy()
             _glow_strokes(over, segs, thick)
             cv2.addWeighted(over, fade, img, 1 - fade, 0, dst=img)
         else:
             _glow_strokes(img, segs, thick)
-        for j in info_["joints"]:
+        for j in {j for bone in bones for j in bone}:
             if ok(j):
-                gfx.ring(img, xy[j], thick * 1.3, (255, 255, 255), 3)
+                gfx.ring(img, xy[j], thick * 1.2, (255, 255, 255), 3)
 
-        # 2. ellipse(s) sous les appuis : pied d'appui (pivot), ou les deux mains au sol pour l'aú
-        if info_["kind"] == "au":
-            supports = [j for j in (L_WR, R_WR) if ok(j)]
-        else:
-            supports = [j for bone in info_["support"] for j in bone if j in (L_ANK, R_ANK) and ok(j)][:1]
-        pulse = 1 + 0.08 * np.sin(lt * 10)
-        for j in supports:
-            ax = (int(torso * 0.45 * pulse), int(torso * 0.14 * pulse))
-            c = tuple((xy[j] + [0, torso * 0.06]).astype(int))
+        # ellipse sous la main d'appui, seulement pour l'aú
+        if info_["kind"] == "au" and ok(target):
+            pulse = 1 + 0.08 * np.sin(lt * 10)
+            ax = (int(torso * 0.42 * pulse), int(torso * 0.13 * pulse))
+            c = tuple((xy[target] + [0, torso * 0.06]).astype(int))
             cv2.ellipse(img, c, ax, 0, 0, 360, (0, 0, 0), 9, cv2.LINE_AA)
             cv2.ellipse(img, c, ax, 0, 0, 360, gfx.YELLOW, 5, cv2.LINE_AA)
 
-        e = info_["effector"]
-        if info_["kind"] in BURST_KINDS:
-            # 3. trajectoire de l'extrémité en arc, avec pointe de flèche
-            if base in ("slow", "hit"):
-                pts = []
-                for d in np.arange(0, 16, 1.5):
-                    p, _ = self.live(m, max(src - d, 0), span=1)
-                    if np.isfinite(p[e]).all() and (not np.isfinite(xy[e]).all() or
-                                                    np.linalg.norm(p[e] - xy[e]) < torso * 3):
-                        pts.append(p[e])
-                if len(pts) >= 3:
-                    pts = np.array(pts[::-1])
-                    over = np.zeros_like(img)
-                    for n in range(len(pts) - 1):
-                        w = 3 + int(thick * 0.9 * (n + 1) / len(pts))
-                        cv2.line(over, tuple(pts[n].astype(int)), tuple(pts[n + 1].astype(int)), self.accent, w, cv2.LINE_AA)
-                    d = pts[-1] - pts[-2]
-                    if np.linalg.norm(d) > 1:
-                        d = d / np.linalg.norm(d)
-                        nrm = np.array([-d[1], d[0]])
-                        tip = pts[-1] + d * thick * 1.6
-                        tri = np.array([tip, pts[-1] + nrm * thick, pts[-1] - nrm * thick]).astype(np.int32)
-                        cv2.fillPoly(over, [tri], self.accent, cv2.LINE_AA)
-                    glow = cv2.GaussianBlur(over, (0, 0), 9)
-                    mask = (over.max(axis=2, keepdims=True) > 0).astype(np.float32)
-                    img[:] = np.clip(img * (1 - mask * 0.85) + over * 0.85 + glow * 0.8, 0, 255)
-            # 4. étoile d'impact au contact
-            if base == "hit" or (base == "after" and lt < 0.25):
-                t = lt if base == "hit" else HIT + lt
-                if ok(e):
-                    r = torso * (0.35 + 0.65 * gfx.ease(t / 0.15))
-                    a = 1 - gfx.ease((t - 0.25) / 0.25)
-                    over = img.copy()
-                    cv2.fillPoly(over, [_star(xy[e], r, r * 0.42, 12, t * 2)], self.accent, cv2.LINE_AA)
-                    cv2.fillPoly(over, [_star(xy[e], r * 0.55, r * 0.25, 12, t * 2 + 0.2)], (255, 255, 255), cv2.LINE_AA)
-                    cv2.addWeighted(over, 0.9 * a, img, 1 - 0.9 * a, 0, dst=img)
-        else:
-            # 5. mouvement du corps (aú, esquiva, ginga) : flèche jaune courbe et lisse sur le trajet du bassin
-            cur = (xy[L_HIP] + xy[R_HIP]) / 2
+        # une flèche courbe et lisse qui suit l'extrémité de cette partie
+        if base in ("slow", "hit") or (base == "after" and lt < 0.3):
             pts = []
-            for d in np.arange(0, 26, 2):
-                p, _ = self.live(m, max(src - d, 0), span=4)
-                hip = (p[L_HIP] + p[R_HIP]) / 2
-                if np.isfinite(hip).all() and np.linalg.norm(hip - cur) < torso * 2.2:   # écarte les sauts de suivi
-                    pts.append(hip)
+            if ok(target):                           # trajet récent et CONTINU : on s'arrête au premier saut de suivi
+                prev = xy[target]
+                for d in np.arange(0, 16, 2):
+                    p, _ = self.live(m, max(src - d, 0), span=3)
+                    q = p[target]
+                    if not np.isfinite(q).all() or np.linalg.norm(q - prev) > torso * 0.6:
+                        break
+                    pts.append(q)
+                    prev = q
             if len(pts) >= 4:
-                pts = np.array(pts[::-1])
-                a0, a2 = pts[0], pts[-1]
-                a1 = pts[len(pts) // 2] * 2 - (a0 + a2) / 2           # point de contrôle : la courbe passe par le milieu
-                if np.linalg.norm(a2 - a0) > torso * 0.35:
-                    u = np.linspace(0, 1, 24)[:, None]
-                    curve = ((1 - u) ** 2 * a0 + 2 * (1 - u) * u * a1 + u ** 2 * a2).astype(np.int32)
-                    w = thick // 2 + 3
-                    cv2.polylines(img, [curve], False, (0, 0, 0), w + 5, cv2.LINE_AA)
-                    cv2.polylines(img, [curve], False, gfx.YELLOW, w, cv2.LINE_AA)
-                    d = (curve[-1] - curve[-3]).astype(float)
-                    if np.linalg.norm(d) > 1:
-                        d /= np.linalg.norm(d)
-                        nrm = np.array([-d[1], d[0]])
-                        tri = np.array([curve[-1] + d * thick * 1.7, curve[-1] + nrm * thick * 1.1,
-                                        curve[-1] - nrm * thick * 1.1]).astype(np.int32)
-                        cv2.fillPoly(img, [tri], (0, 0, 0), cv2.LINE_AA)
-                        cv2.fillPoly(img, [(tri * 0.92 + tri.mean(axis=0) * 0.08).astype(np.int32)], gfx.YELLOW, cv2.LINE_AA)
+                _curve_arrow(img, np.array(pts[::-1]), gfx.YELLOW, thick, min_len=torso * 0.3)
+
+        # étoile d'impact au contact (coups seulement)
+        if info_["kind"] in BURST_KINDS and (base == "hit" or (base == "after" and lt < 0.25)):
+            t = lt if base == "hit" else HIT + lt
+            e = info_["effector"]
+            if ok(e):
+                r = torso * (0.35 + 0.65 * gfx.ease(t / 0.15))
+                a = 1 - gfx.ease((t - 0.25) / 0.25)
+                over = img.copy()
+                cv2.fillPoly(over, [_star(xy[e], r, r * 0.42, 12, t * 2)], self.accent, cv2.LINE_AA)
+                cv2.fillPoly(over, [_star(xy[e], r * 0.55, r * 0.25, 12, t * 2 + 0.2)], (255, 255, 255), cv2.LINE_AA)
+                cv2.addWeighted(over, 0.9 * a, img, 1 - 0.9 * a, 0, dst=img)
 
     def screen_overlays(self, img, f, k, M):
         ph, lt, imp = f["phase"], f["lt"], f["imp"]

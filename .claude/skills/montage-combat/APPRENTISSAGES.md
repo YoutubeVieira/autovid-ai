@@ -11,3 +11,8 @@
 - **Zoom précis sur un membre** : cadrer extrémité + articulation intermédiaire (pied+genou, main+coude).
 - Modèle « Gemini » (martelo / meia-lua) : titres courts 2 lignes, écran partagé « application réelle » à ajouter.
 - Toujours vérifier la planche contact ET quelques images en grand avant d'envoyer.
+
+## 2026-10-19 — 2e retour
+- **Traits et flèches sur une seule partie précise** : uniquement le membre qui travaille (jambe qui frappe,
+  ou bras qui protège / qui porte l'aú) + ses articulations + UNE flèche qui suit son extrémité.
+  Plus de trait sur la jambe d'appui ni de flèche sur le bassin. Ellipse seulement sous la main de l'aú.
