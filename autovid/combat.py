@@ -564,7 +564,8 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
                 if contact:                      # bruit selon ce qui est touché : corps, sac / pao, ou dans le vide
                     for name, dt, g in sfx.contact_fx(contact, impacts[f["imp"]]["info"]["kind"]):
                         put(name, max(t + dt, 0), g)
-                    put("sub_boom" if kit == "reaction" else "impact", t, 0.55 if contact["cible"] != "air" else 0.35)
+                    if contact["cible"] != "aucun":
+                        put("sub_boom" if kit == "reaction" else "impact", t, 0.55 if contact["cible"] != "air" else 0.35)
                 else:
                     put("sub_boom" if kit == "reaction" else "impact", t, 1.0)
                 put("shutter", t, 0.35)
@@ -649,13 +650,24 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None, 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
            extras=True, motion_design=True, framing="auto", tts="auto", style="fluide", kit="reaction",
-           music_from=None, force=False):
+           music_from=None, force=False, projet=None):
     """style : "fluide" (analyse sur la vidéo en mouvement, sans pause) ou "analyse" (arrêts sur image commentés).
+    projet : projet.json (ou dict) modifié dans la plateforme : textes, voix, effets, sons, analyses retirées.
     force : analyser même si le contrôle « vraie personne » échoue.
     kit : "reaction" (phonk 808, impacts sub) ou "classique". music_from : vidéo dont on reprend la bande-son
     comme musique (uniquement si tu en as les droits)."""
     from . import narration as nar
+    from . import projet as pj_mod
     from .anatomy import add_safety, capoeira_variant
+    pj = pj_mod.load(projet)
+    if pj:                                       # réglages choisis dans la plateforme
+        r = pj.get("reglages", {})
+        style, kit = r.get("style", style), r.get("kit", kit)
+        handle, discipline = r.get("handle", handle) or None, r.get("discipline", discipline)
+        accent = pj_mod.hex_rgb(r.get("accent")) or accent
+        motion_design = r.get("intro_outro", motion_design)
+        burn, orig_gain = r.get("sous_titres", burn), float(r.get("son_origine", orig_gain))
+        framing = r.get("cadrage", framing)
     work = Path(workdir)
     work.mkdir(parents=True, exist_ok=True)
     base = work / "base.mp4"
@@ -710,6 +722,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     if ai:
         from .ai import enrich
         enrich(impacts, base, provider=ai, discipline=discipline)
+    impacts, voices, all_impacts = pj_mod.combat_apply(pj, impacts)
     for m in impacts:
         print(f"   t={m['frame'] / FPS:5.2f}s  {m['info']['nom']:<22} {m['info']['membre']:<14} vitesse {m['score']:.2f}"
               f"  son : {m['contact']['cible']}{' + rotation' if m['contact']['rotation'] else ''}")
@@ -719,7 +732,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     # voix off : script, synthèse (ta voix clonée) et durées → l'arrêt sur image s'adapte à la voix
     fluid = style == "fluide"
     anchor = "slow" if fluid else "freeze"
-    segs = nar.build_script(impacts, discipline, short=fluid)
+    segs = pj_mod.apply_voices(nar.build_script(impacts, discipline, short=fluid), voices)
     voice_id = voice_id or nar.default_voice()
     engine = nar.voice_segments(segs, voice_id, tts)
     has_voice = engine is not None
@@ -851,6 +864,13 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     else:
         shutil.copy(work / "final.mp4", out_abs)
     shutil.copy(work / "analyse.json", f"{out_base}.analyse.json")
+    from .fluide import CLE
+    settings = {"style": style, "kit": kit, "accent": pj_mod.rgb_hex(accent or gfx.GREEN), "handle": handle or "",
+                "discipline": discipline, "intro_outro": bool(motion_design), "sous_titres": burn,
+                "son_origine": orig_gain, "cadrage": framing}
+    data = pj_mod.combat_export(src, impacts, segs, settings, lambda i: CLE.get(i["kind"], i["membre"]), all_impacts)
+    data["duree_source"] = round(n / FPS, 2)
+    pj_mod.save(data, f"{out_base}.projet.json")
 
     if extras:
         from . import seo, thumbs

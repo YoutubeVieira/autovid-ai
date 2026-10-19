@@ -47,9 +47,20 @@ def build_timeline(n, peak, max_before=4.0, max_after=6.0):
     return tl
 
 
-def fun(src, out, workdir, texts=None, handle=None, ai=None, label_ia=None, music=None, accent=gfx.ORANGE):
+def fun(src, out, workdir, texts=None, handle=None, ai=None, label_ia=None, music=None, accent=gfx.ORANGE,
+        projet=None):
     """texts : 3 paires (ligne 1, ligne 2) pour le début, le ralenti et la fin. label_ia : True / False / None
-    (None = demandé à Claude avec --ai, sinon pas de mention)."""
+    (None = demandé à Claude avec --ai, sinon pas de mention). projet : projet.json modifié dans la plateforme."""
+    from . import projet as pj_mod
+    pj = pj_mod.load(projet)
+    peak_at = None
+    if pj:
+        texts = [tuple(t)[:2] for t in pj.get("textes", [])] or texts
+        label_ia = pj.get("mention_ia", label_ia)
+        peak_at = pj.get("moment_fort")
+        r = pj.get("reglages", {})
+        handle = r.get("handle", handle) or None
+        accent = pj_mod.hex_rgb(r.get("accent")) or accent
     work = Path(workdir)
     work.mkdir(parents=True, exist_ok=True)
     out = Path(out).resolve()
@@ -58,7 +69,8 @@ def fun(src, out, workdir, texts=None, handle=None, ai=None, label_ia=None, musi
     print("1/4 normalisation 9:16")
     normalize(str(src), base)
     n = int(round(info(str(base))["duration"] * FPS))
-    peak = peak_frame(str(base), n)
+    peak = int(float(peak_at) * FPS) if peak_at is not None else peak_frame(str(base), n)
+    peak = min(max(peak, 1), n - 1)
     tl = build_timeline(n, peak)
     print(f"2/4 moment fort à {peak / FPS:.2f} s → montage de {len(tl) / FPS:.1f} s")
     if not texts and ai:
@@ -165,4 +177,8 @@ def fun(src, out, workdir, texts=None, handle=None, ai=None, label_ia=None, musi
                     "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-shortest",
                     str(work / "mux.mp4")], check=True)
     match_loudness(str(work / "mux.mp4"), str(out), -14)
+    pj_mod.save({"mode": "fun", "source": str(Path(src).resolve()), "moment_fort": round(peak / FPS, 2),
+                 "duree_source": round(n / FPS, 2), "textes": [list(t) for t in texts[:3]],
+                 "mention_ia": bool(label_ia), "reglages": {"handle": handle or "", "accent": pj_mod.rgb_hex(accent)},
+                 "notes": ""}, out.with_suffix(".projet.json"))
     return str(out)

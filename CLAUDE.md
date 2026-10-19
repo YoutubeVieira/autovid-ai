@@ -11,6 +11,7 @@ Monteur vidéo automatique en Python + ffmpeg (paquet `autovid/`). Commandes : `
 - Skills tiers (Melvynx/video-agent-skills, installés par `scripts/install.sh`) : `outliers` / `studio-script viral`
   (ce qui marche dans la niche), `studio-script` (scripts + accroches notées, `humanize`), `short-editing`
   (prise face caméra → short), `clips` (vidéo longue → shorts), `editing` (aiguillage).
+- Après chaque montage : le mettre dans la plateforme Studio Jacobina (skill `plateforme`) pour que l'utilisateur corrige.
 - Toujours **regarder** le rendu (planche contact via ffmpeg + Read) avant de dire qu'il est bon.
 - Tests : `python3 -m unittest discover tests` (rapides, rushs synthétiques).
 - Ne jamais committer de vidéos (`*.mp4` est ignoré) ni de clés API.

@@ -197,6 +197,8 @@ class FluidMixin:
                 return 1 + 0.12 * (1 - gfx.ease(lt / 0.2)), None
             return 1.0, None
         m = self.impacts[imp]
+        if not m["info"].get("fx", {}).get("zoom", True):
+            return 1.0, None
         zt, c = self.limb_focus(m, f["src"] if not ph.endswith("hit") else m["frame"])
         base = ph.replace("hook_", "")
         if base == "slow":
@@ -293,13 +295,16 @@ class FluidMixin:
 
         # Une seule partie du corps, coloriée (pas de trait) : la jambe qui frappe, ou le bras qui protège / porte.
         bones, target = focus_part(info_)
-        mask, box = self.limb_mask(m, src, frame_rgb, xy, [(a, b) for a, b in bones if ok(a) and ok(b)], torso)
+        fx = info_.get("fx", {})
+        on = lambda name: fx.get(name, True)  # noqa: E731  (effets cochés / décochés dans la plateforme)
+        mask, box = (self.limb_mask(m, src, frame_rgb, xy, [(a, b) for a, b in bones if ok(a) and ok(b)], torso)
+                     if on("couleur") else (None, None))
         if mask is not None:
             gfx.glow_fill(img, mask, self.accent, alpha=0.55 * fade, glow=0.35 * fade, box=box)
 
         # un seul rond, sur l'articulation qui compte, seulement pendant la pause du contact
         pause = base == "hit" or (base == "after" and lt < 0.35)
-        if pause and ok(target):
+        if pause and ok(target) and on("rond"):
             a = 1.0 if base == "hit" else 1 - lt / 0.35
             r = torso * 0.28 * (1 + 0.15 * gfx.ease(min(lt / 0.12, 1)) if base == "hit" else 1.15)
             if info_["kind"] == "au":           # aú : l'ellipse d'appui sous la main remplace le rond
@@ -314,7 +319,7 @@ class FluidMixin:
             cv2.addWeighted(over, a, img, 1 - a, 0, dst=img)
 
         # une flèche courbe et lisse qui suit l'extrémité de cette partie
-        if base in ("slow", "hit") or (base == "after" and lt < 0.3):
+        if on("fleche") and (base in ("slow", "hit") or (base == "after" and lt < 0.3)):
             pts = []
             if ok(target):                           # trajet récent et CONTINU : on s'arrête au premier saut de suivi
                 prev = xy[target]
@@ -329,7 +334,7 @@ class FluidMixin:
                 _curve_arrow(img, np.array(pts[::-1]), gfx.YELLOW, max(int(thick * 0.6), 5), min_len=torso * 0.3)
 
         # étoile d'impact au contact (coups seulement)
-        if info_["kind"] in BURST_KINDS and (base == "hit" or (base == "after" and lt < 0.25)):
+        if on("etoile") and info_["kind"] in BURST_KINDS and (base == "hit" or (base == "after" and lt < 0.25)):
             t = lt if base == "hit" else HIT + lt
             e = info_["effector"]
             if ok(e):
@@ -365,10 +370,10 @@ class FluidMixin:
                 if out > 0.02:
                     gfx.paste(img, gfx.text_sprite(info_["nom"], 124, gfx.WHITE, stroke=9), W / 2, 330,
                               gfx.pop(t_all), out)
-                    gfx.paste(img, gfx.text_sprite(CLE.get(info_["kind"], info_["membre"]), 70, gfx.YELLOW, stroke=7),
+                    gfx.paste(img, gfx.text_sprite(info_.get("cle") or CLE.get(info_["kind"], info_["membre"]), 70, gfx.YELLOW, stroke=7),
                               W / 2, 448, gfx.pop(t_all - 0.12), out)
                 gfx.paste(img, gfx.text_sprite("RALENTI", 34, gfx.WHITE, stroke=4, shadow=4), W / 2, 150, 1, 0.75)
-                if base == "after" and info_.get("risque"):
+                if base == "after" and info_.get("risque") and info_.get("fx", {}).get("risque", True):
                     gfx.paste(img, gfx.text_sprite("ATTENTION : " + info_["risque"][0], 46, gfx.RED, stroke=5, shadow=6,
                                                    max_w=980), W / 2, 1480, gfx.pop(lt - 0.05))
                     musc = " • ".join(x[0] for x in info_["muscles"])

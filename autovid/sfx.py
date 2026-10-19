@@ -267,6 +267,8 @@ LIB.update({"slap": slap, "bag_thump": bag_thump, "body_thud": body_thud, "swish
 def contact_fx(contact, kind):
     """Bruits (nom, décalage, gain) au moment du contact selon ce qui est touché et le type de coup."""
     cible = contact.get("cible", "air")
+    if cible == "aucun":
+        return []
     if cible == "air":
         return [("swish", -0.12, 0.9)]
     if cible == "corps":

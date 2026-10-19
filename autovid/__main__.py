@@ -95,6 +95,7 @@ def main(argv=None):
     c.add_argument("--music-from", help="reprendre la bande-son d'une vidéo (seulement si tu en as les droits)")
     c.add_argument("--workdir")
 
+    c.add_argument("--projet", help="projet.json modifié dans la plateforme (textes, effets, sons, analyses)")
     c.add_argument("--force", action="store_true",
                    help="analyser même si aucune vraie personne n'est reconnue (créature d'IA, animal, dessin…)")
 
@@ -107,7 +108,14 @@ def main(argv=None):
     fu.add_argument("--ia", action="store_true", help="ajoute la mention « VIDÉO GÉNÉRÉE PAR IA »")
     fu.add_argument("--handle")
     fu.add_argument("--music")
+    fu.add_argument("--projet", help="projet.json modifié dans la plateforme")
     fu.add_argument("--workdir")
+
+    pr = sub.add_parser("projet", help="refaire un montage à partir de son projet.json (modifié dans la plateforme)")
+    pr.add_argument("fichier")
+    pr.add_argument("-o", "--out", required=True)
+    pr.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    pr.add_argument("--workdir")
 
     vc = sub.add_parser("voice-clone", help="clone ta voix (ElevenLabs) à partir de tes enregistrements")
     vc.add_argument("samples", nargs="+", help="1 à 3 min de ta voix, sans musique (mp3/wav/m4a)")
@@ -139,7 +147,7 @@ def main(argv=None):
     w.add_argument("--handle")
 
     args = ap.parse_args(argv)
-    if args.cmd == "combat":
+    if args.cmd in ("combat", "projet"):
         from .combat import PasHumain
         try:
             return _run(args)
@@ -172,12 +180,21 @@ def _run(args):
         print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
                           args.resolution, args.ai, not args.no_hook, args.original_audio, None, args.discipline,
                           args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion, args.framing,
-                          args.tts, args.style, args.kit, args.music_from, args.force))
+                          args.tts, args.style, args.kit, args.music_from, args.force, args.projet))
+    elif args.cmd == "projet":
+        from .projet import load
+        pj = load(args.fichier)
+        if pj["mode"] == "fun":
+            from .fun import fun
+            print("→", fun(pj["source"], args.out, _workdir(args, args.out), projet=pj))
+        else:
+            from .combat import combat
+            print("→", combat(pj["source"], args.out, _workdir(args, args.out), tts=args.tts, projet=pj))
     elif args.cmd == "fun":
         from .fun import fun
         texts = [tuple((t.split("/", 1) + [""])[:2]) for t in (args.texte or [])[:3]]
         print("→", fun(args.video, args.out, _workdir(args, args.out), texts or None, args.handle, args.ai,
-                       True if args.ia else None, args.music))
+                       True if args.ia else None, args.music, projet=args.projet))
     elif args.cmd == "voice-clone":
         from .narration import CONFIG, clone_voice
         print("voix créée :", clone_voice(args.samples, args.name), f"(enregistrée dans {CONFIG})")
