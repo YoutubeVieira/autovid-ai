@@ -21,3 +21,8 @@
 - Avant de rendre, passer accroches, voix off, titres et description au filtre `studio-script humanize`
   (pas de « secret », pas de question-révélation, une seule demande en fin de vidéo, 5 hashtags max).
   `tests/test_humanize.py` le vérifie sur nos modèles de texte.
+- Pas de lignes ni de squelette : seulement la COULEUR sur le membre qui travaille (silhouette coloriée, sinon
+  bande douce). Pas de ronds un peu partout : UN seul rond, sur l'articulation clé, pendant la pause du contact.
+  Petite flèche de trajectoire de temps en temps, c'est tout (comme la vidéo modèle n° 2).
+- Bruits selon le coup (comme la vidéo n° 1) : contact sur le corps = coup sourd + claque, sac / pao = « boum »
+  lourd + cuir + chaîne, dans le vide = swish ; rotation (meia-lua, armada, aú) = souffle qui tourne.

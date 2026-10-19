@@ -190,3 +190,31 @@ class FocusTest(unittest.TestCase):
         bones, target = focus_part(au)
         self.assertEqual(target, 15)                     # poignet gauche
         self.assertEqual(len(bones), 2)
+
+
+class ContactTest(unittest.TestCase):
+    def _kick(self, stop_after):
+        tr = standing(90)
+        for j, i in enumerate(range(40, 47)):
+            tr[0, i, R_ANK, :2] = (0.45 - 0.05 * j, 0.85 - 0.09 * j)
+        last = tr[0, 46, R_ANK, :2].copy()
+        for j, i in enumerate(range(47, 90)):          # arrêt net (contact) ou le pied continue sa course
+            tr[0, i, R_ANK, :2] = last if stop_after else last + (-0.05 * (j + 1), -0.09 * (j + 1))
+        m = {"frame": 46, "track": 0, "eff": R_ANK, "score": 0.5}
+        m["info"] = classify(tr[0], 46, R_ANK)
+        return tr, m
+
+    def test_target_and_rotation(self):
+        from autovid.fluide import contact_profile
+        tr, m = self._kick(stop_after=False)
+        self.assertEqual(contact_profile(tr, m)["cible"], "air")
+        tr, m = self._kick(stop_after=True)
+        self.assertEqual(contact_profile(tr, m)["cible"], "sac")
+        tr[1] = tr[0]                                  # un partenaire à l'endroit où arrive le pied
+        tr[1, :, :, 0] += tr[0, 46, R_ANK, 0] - tr[0, 46, 0, 0]
+        tr[1, :, :, 1] += tr[0, 46, R_ANK, 1] - tr[0, 46, 0, 1]
+        self.assertEqual(contact_profile(tr, m)["cible"], "corps")
+        self.assertFalse(contact_profile(tr, m)["rotation"])
+        self.assertTrue(contact_profile(tr, dict(m, info=dict(m["info"], nom="MEIA-LUA DE COMPASSO")))["rotation"])
+        for c in ("air", "sac", "corps"):
+            self.assertTrue(all(n in sfx.LIB for n, _, _ in sfx.contact_fx({"cible": c}, "pied")))

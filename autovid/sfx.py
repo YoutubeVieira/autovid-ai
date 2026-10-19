@@ -210,3 +210,65 @@ def music_phonk(duration, bpm=143, seed=11):
         reese = np.tanh(3 * (np.sin(2 * np.pi * np.cumsum(glide * 2) / SR) + np.sin(2 * np.pi * np.cumsum(glide * 2.01) / SR)))
         put(_stereo(_bp(reese, 120, 480) * np.minimum(1, tb * 8) * np.minimum(1, (4 * beat - tb) * 8)), t0, REESE_GAIN)
     return out[: int(duration * SR)]
+
+
+# --------------------------------------------------------------------------- bruits de contact (selon le coup)
+
+def slap(d=0.35):
+    """Claque cuir / peau : attaque sèche dans les médiums-aigus (coup de pied qui touche, pao, gant)."""
+    t = _t(d)
+    n = rng.standard_normal(len(t))
+    snap = _bp(n, 1200, 6000) * np.exp(-t * 90)
+    body = _bp(n, 180, 900) * np.exp(-t * 30)
+    return _stereo(np.tanh(2.5 * (snap + 0.8 * body)) * 0.9)
+
+
+def bag_thump(d=0.8):
+    """Sac de frappe : « boum » lourd et mat, puis la chaîne qui tinte."""
+    t = _t(d)
+    f = 60 + 50 * np.exp(-t * 25)
+    thud = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 8)
+    leather = _bp(rng.standard_normal(len(t)), 300, 2500) * np.exp(-t * 45)
+    chain = sum(np.sin(2 * np.pi * fr * t) for fr in (3150, 4420, 5870)) * np.exp(-(t - 0.08).clip(0) * 9) \
+        * (t > 0.08) * 0.05
+    return _stereo(np.tanh(2.0 * (thud + 0.6 * leather)) * 0.9 + chain)
+
+
+def body_thud(d=0.5):
+    """Coup qui rentre dans le corps : sourd, étouffé."""
+    t = _t(d)
+    f = 90 + 60 * np.exp(-t * 30)
+    x = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 14) + _lp(rng.standard_normal(len(t)), 700) * np.exp(-t * 35)
+    return _stereo(np.tanh(2.2 * x) * 0.9)
+
+
+def swish(d=0.28):
+    """Coup dans le vide : souffle court et aigu."""
+    t = _t(d)
+    n = _bp(rng.standard_normal(len(t)), 1500, 7000)
+    return _stereo(np.tanh(1.5 * n * np.sin(np.pi * t / d) ** 3) * 0.8)
+
+
+def spin_whoosh(d=0.9):
+    """Rotation (meia-lua, armada, aú) : souffle qui tourne gauche ↔ droite en montant."""
+    t = _t(d)
+    n = rng.standard_normal(len(t))
+    lo = _bp(n, 150, 1200)
+    hi = _bp(n, 1200, 5000) * (t / d)
+    env = np.sin(np.pi * (t / d) ** 0.8) ** 2
+    x = (lo + 0.7 * hi) * env * 1.3
+    pan = np.sin(2 * np.pi * 1.6 * t)
+    return np.stack([x * (1 - 0.8 * pan.clip(0)), x * (1 + 0.8 * pan.clip(-1, 0))], axis=1)
+
+
+LIB.update({"slap": slap, "bag_thump": bag_thump, "body_thud": body_thud, "swish": swish, "spin_whoosh": spin_whoosh})
+
+
+def contact_fx(contact, kind):
+    """Bruits (nom, décalage, gain) au moment du contact selon ce qui est touché et le type de coup."""
+    cible = contact.get("cible", "air")
+    if cible == "air":
+        return [("swish", -0.12, 0.9)]
+    if cible == "corps":
+        return [("body_thud", 0.0, 1.0)] + ([("slap", 0.0, 0.7)] if kind in ("pied", "poing") else [])
+    return [("bag_thump", 0.0, 1.0), ("slap", 0.0, 0.5 if kind == "genou" else 0.8)]   # sac / pao

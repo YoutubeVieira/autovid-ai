@@ -552,8 +552,17 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
             if ph in ("slow", "hook_slow") and kit == "reaction":   # mode fluide : montée inversée vers le contact
                 from .fluide import PRE_SRC, SLOW_IN
                 put("reverse_hit", t + PRE_SRC / SLOW_IN - 0.45, 0.7)
+            if ph in ("slow", "hook_slow") and impacts[f["imp"]].get("contact", {}).get("rotation"):
+                from .fluide import PRE_SRC, SLOW_IN
+                put("spin_whoosh", t + 0.2, 0.9, d=PRE_SRC / SLOW_IN - 0.1)
             if ph in ("hit", "hook_hit"):
-                put("sub_boom" if kit == "reaction" else "impact", t, 1.0)
+                contact = impacts[f["imp"]].get("contact")
+                if contact:                      # bruit selon ce qui est touché : corps, sac / pao, ou dans le vide
+                    for name, dt, g in sfx.contact_fx(contact, impacts[f["imp"]]["info"]["kind"]):
+                        put(name, max(t + dt, 0), g)
+                    put("sub_boom" if kit == "reaction" else "impact", t, 0.55 if contact["cible"] != "air" else 0.35)
+                else:
+                    put("sub_boom" if kit == "reaction" else "impact", t, 1.0)
                 put("shutter", t, 0.35)
             if ph == "jump":
                 put("low_whoosh" if kit == "reaction" else "whoosh", max(t - 0.15, 0), 0.8, d=0.35)
@@ -673,6 +682,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         if discipline == "capoeira":
             capoeira_variant(tracks[m["track"]], m["frame"], m["info"])
         add_safety(m["info"])
+        from .fluide import contact_profile
+        m["contact"] = contact_profile(tracks, m)
     if discipline == "capoeira":                 # variété : pas plus de 2 fois le même mouvement
         seen = {}
         for m in sorted(impacts, key=lambda m: -m["score"]):
@@ -683,7 +694,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         from .ai import enrich
         enrich(impacts, base, provider=ai, discipline=discipline)
     for m in impacts:
-        print(f"   t={m['frame'] / FPS:5.2f}s  {m['info']['nom']:<22} {m['info']['membre']:<14} vitesse {m['score']:.2f}")
+        print(f"   t={m['frame'] / FPS:5.2f}s  {m['info']['nom']:<22} {m['info']['membre']:<14} vitesse {m['score']:.2f}"
+              f"  son : {m['contact']['cible']}{' + rotation' if m['contact']['rotation'] else ''}")
     if not impacts:
         print("   aucun coup net détecté : montage dynamique sans analyse")
 

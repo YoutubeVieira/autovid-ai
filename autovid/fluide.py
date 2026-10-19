@@ -1,8 +1,8 @@
 """Mode « fluide » : l'analyse se fait sur la vidéo EN MOUVEMENT, sans arrêt sur image long.
 
 Repris du modèle de référence (Gemini) : ralenti autour du coup, zoom précis sur le membre qui travaille,
-traits de couleur sur les membres, trajectoire en arc, étoile d'impact, ellipse sous l'appui, flèches de
-déplacement, titres courts en deux lignes.
+membre colorié (pas de traits ni de ronds partout), petite flèche de trajectoire, étoile d'impact, titres courts
+en deux lignes. Un seul rond, sur l'articulation qui compte, pendant la pause du contact.
 """
 import cv2
 import numpy as np
@@ -23,6 +23,40 @@ CLE = {  # le mot-clé de la 2e ligne du titre
     "poing": "ROTATION DU BUSTE", "rasteira": "LE BON TIMING", "genou": "BASSIN EN AVANT",
 }
 BURST_KINDS = {"pied", "poing", "genou", "rasteira"}
+SPIN_NAMES = ("MEIA-LUA", "ARMADA", "QUEIXADA", "MARTELO RODADO", "AÚ", "SPIN")
+
+
+def contact_profile(tracks, m):
+    """Ce que touche le coup et s'il y a rotation, pour choisir les bruits.
+    cible : "corps" (l'extrémité arrive sur une autre personne), "sac" (arrêt net sans personne : sac, pao),
+    "air" (le membre continue sa course)."""
+    tr, f, e = tracks[m["track"]], m["frame"], m["eff"]
+    s = np.array([1.0, 16 / 9])
+    p = tr[:, e, :2] * s
+    torso = torso_len(tr[f]) if np.isfinite(tr[f, 0, 0]) else 0.1
+    torso = torso if np.isfinite(torso) and torso > 0 else 0.1
+    v = np.r_[0, np.linalg.norm(np.diff(p, axis=0), axis=1)] / torso
+    before = np.nanmax(v[max(f - 4, 0): f + 1]) if f > 0 else 0
+    after = np.nanmean(v[f + 1: min(f + 4, len(v))]) if f + 1 < len(v) else before
+    stop = bool(np.isfinite(before) and before > 0 and np.isfinite(after) and after < 0.35 * before)
+    near = False
+    for k in range(tracks.shape[0]):
+        if k == m["track"] or not np.isfinite(tracks[k, f, 0, 0]):
+            continue
+        body = tracks[k, f, [0, 11, 12, L_HIP, R_HIP], :2] * s
+        body = body[np.isfinite(body).all(axis=1)]
+        if len(body) and np.isfinite(p[f]).all() and np.min(np.linalg.norm(body - p[f], axis=1)) < 0.6 * torso:
+            near = True
+    cible = "corps" if near else ("sac" if stop and m["info"]["kind"] in ("pied", "poing", "genou") else "air")
+    # rotation : la ligne des hanches tourne de plus de ~75° entre le début du ralenti et le contact
+    a, b = max(f - int(PRE_SRC * FPS), 0), f
+    def hip_angle(i):
+        d = (tr[i, R_HIP, :2] - tr[i, L_HIP, :2]) * s
+        return np.arctan2(d[1], d[0]) if np.isfinite(d).all() else np.nan
+    turn = abs((hip_angle(b) - hip_angle(a) + np.pi) % (2 * np.pi) - np.pi)
+    rotation = bool(np.isfinite(turn) and turn > 1.3) or any(x in m["info"]["nom"] for x in SPIN_NAMES) \
+        or m["info"]["kind"] == "au"
+    return {"cible": cible, "rotation": rotation}
 
 
 def analysis_len(voice_dur=0.0):
@@ -95,25 +129,6 @@ def _star(c, r_out, r_in, n=12, rot=0.0):
     a = np.linspace(0, 2 * np.pi, 2 * n, endpoint=False) + rot
     r = np.where(np.arange(2 * n) % 2 == 0, r_out, r_in)
     return np.stack([c[0] + r * np.cos(a), c[1] + r * np.sin(a)], axis=1).astype(np.int32)
-
-
-def _glow_strokes(img, segs, thick):
-    """Traits épais lumineux : segs = [(p1, p2, couleur)] dans l'espace image."""
-    pts = np.array([p for a, b, _ in segs for p in (a, b)])
-    if not len(pts):
-        return
-    pad = thick * 3 + 30
-    x0, y0 = np.maximum(pts.min(axis=0) - pad, 0).astype(int)
-    x1, y1 = np.minimum(pts.max(axis=0) + pad, [W, H]).astype(int)
-    if x1 - x0 < 8 or y1 - y0 < 8:
-        return
-    off = np.array([x0, y0])
-    for col in {c for _, _, c in segs}:
-        m = np.zeros((y1 - y0, x1 - x0), np.uint8)
-        for a, b, c in segs:
-            if c == col:
-                cv2.line(m, tuple((a - off).astype(int)), tuple((b - off).astype(int)), 255, int(thick), cv2.LINE_AA)
-        gfx.glow_fill(img[y0:y1, x0:x1], m.astype(np.float32) / 255, col, alpha=0.78, glow=0.7)
 
 
 def focus_part(info):
@@ -200,6 +215,64 @@ class FluidMixin:
             return tuple(self.rng.uniform(-amp, amp, 2))
         return (0, 0)
 
+    def limb_mask(self, m, src, frame_rgb, xy, bones, torso):
+        """Masque 0–1 du membre : silhouette MediaPipe ∩ capsule autour des os. Sans silhouette exploitable
+        (personne trop petite, flou), bande douce autour des os. Renvoie (masque, boîte) ou (None, None)."""
+        if not bones:
+            return None, None
+        pts = np.array([p for a, b in bones for p in (xy[a], xy[b])])
+        pad = torso * 0.45 + 20
+        x0, y0 = np.maximum(pts.min(axis=0) - pad, 0).astype(int)
+        x1, y1 = np.minimum(pts.max(axis=0) + pad, [W, H]).astype(int)
+        if x1 - x0 < 8 or y1 - y0 < 8:
+            return None, None
+        off = np.array([x0, y0])
+        cap = np.zeros((y1 - y0, x1 - x0), np.uint8)
+        for a, b in bones:
+            cv2.line(cap, tuple((xy[a] - off).astype(int)), tuple((xy[b] - off).astype(int)), 255,
+                     max(int(torso * 0.42), 9), cv2.LINE_AA)
+        cap = cap.astype(np.float32) / 255
+        person = self.person_mask(m, src, frame_rgb)
+        if person is not None:
+            limb = cap * person[y0:y1, x0:x1]
+            if limb.sum() > 0.15 * cap.sum():      # assez de silhouette dans la capsule : on suit le vrai membre
+                cap = cv2.GaussianBlur(limb, (0, 0), 1.5)
+                return self._full(cap, x0, y0), (x0, y0, x1, y1)
+        thin = np.zeros_like(cap)
+        for a, b in bones:
+            cv2.line(thin, tuple((xy[a] - off).astype(int)), tuple((xy[b] - off).astype(int)), 1.0,
+                     max(int(torso * 0.2), 7), cv2.LINE_AA)
+        return self._full(cv2.GaussianBlur(thin, (0, 0), max(torso * 0.05, 2)), x0, y0), (x0, y0, x1, y1)
+
+    @staticmethod
+    def _full(part, x0, y0):
+        full = np.zeros((H, W), np.float32)
+        full[y0:y0 + part.shape[0], x0:x0 + part.shape[1]] = part
+        return full
+
+    def person_mask(self, m, src, frame_rgb):
+        """Silhouette (pleine résolution) de la personne suivie, mise en cache par image source."""
+        from .pose import segment
+        cache = self.__dict__.setdefault("_masks", {})
+        key = (m["track"], int(round(src)))
+        if key not in cache:
+            cache[key] = None
+            try:
+                poses, masks = segment(cv2.resize(frame_rgb, (W // 2, H // 2)))
+            except Exception:                    # MediaPipe absent ou image illisible : repli sur la bande douce
+                poses, masks = [], []
+            ref = self.tracks[m["track"], min(key[1], self.tracks.shape[1] - 1), [L_HIP, R_HIP, L_SH, R_SH], :2]
+            best = None
+            for p, mk in zip(poses, masks):
+                d = np.nanmean(np.linalg.norm(p[[L_HIP, R_HIP, L_SH, R_SH], :2] - ref, axis=1))
+                if np.isfinite(d) and d < 0.08 and (best is None or d < best[0]):
+                    best = (d, mk)
+            if best is not None:
+                cache[key] = cv2.resize(best[1], (W, H))
+            if len(cache) > 64:
+                cache.pop(next(iter(cache)))
+        return cache[key]
+
     def scene_overlays(self, img, f, frame_rgb):
         ph, lt, imp = f["phase"], f["lt"], f["imp"]
         base = ph.replace("hook_", "")
@@ -218,26 +291,27 @@ class FluidMixin:
             return
         ok = lambda j: np.isfinite(xy[j]).all() and vis[j] > 0.2  # noqa: E731
 
-        # Une seule partie du corps : la jambe qui frappe, ou le bras qui protège / qui porte (aú).
+        # Une seule partie du corps, coloriée (pas de trait) : la jambe qui frappe, ou le bras qui protège / porte.
         bones, target = focus_part(info_)
-        segs = [(xy[a], xy[b], self.accent) for a, b in bones if ok(a) and ok(b)]
-        if fade < 1:
-            over = img.copy()
-            _glow_strokes(over, segs, thick)
-            cv2.addWeighted(over, fade, img, 1 - fade, 0, dst=img)
-        else:
-            _glow_strokes(img, segs, thick)
-        for j in {j for bone in bones for j in bone}:
-            if ok(j):
-                gfx.ring(img, xy[j], thick * 1.2, (255, 255, 255), 3)
+        mask, box = self.limb_mask(m, src, frame_rgb, xy, [(a, b) for a, b in bones if ok(a) and ok(b)], torso)
+        if mask is not None:
+            gfx.glow_fill(img, mask, self.accent, alpha=0.55 * fade, glow=0.35 * fade, box=box)
 
-        # ellipse sous la main d'appui, seulement pour l'aú
-        if info_["kind"] == "au" and ok(target):
-            pulse = 1 + 0.08 * np.sin(lt * 10)
-            ax = (int(torso * 0.42 * pulse), int(torso * 0.13 * pulse))
-            c = tuple((xy[target] + [0, torso * 0.06]).astype(int))
-            cv2.ellipse(img, c, ax, 0, 0, 360, (0, 0, 0), 9, cv2.LINE_AA)
-            cv2.ellipse(img, c, ax, 0, 0, 360, gfx.YELLOW, 5, cv2.LINE_AA)
+        # un seul rond, sur l'articulation qui compte, seulement pendant la pause du contact
+        pause = base == "hit" or (base == "after" and lt < 0.35)
+        if pause and ok(target):
+            a = 1.0 if base == "hit" else 1 - lt / 0.35
+            r = torso * 0.28 * (1 + 0.15 * gfx.ease(min(lt / 0.12, 1)) if base == "hit" else 1.15)
+            if info_["kind"] == "au":           # aú : l'ellipse d'appui sous la main remplace le rond
+                ax = (int(torso * 0.42), int(torso * 0.13))
+                c = tuple((xy[target] + [0, torso * 0.06]).astype(int))
+                over = img.copy()
+                cv2.ellipse(over, c, ax, 0, 0, 360, (0, 0, 0), 9, cv2.LINE_AA)
+                cv2.ellipse(over, c, ax, 0, 0, 360, gfx.YELLOW, 5, cv2.LINE_AA)
+            else:
+                over = img.copy()
+                gfx.ring(over, xy[target], r, gfx.YELLOW, 5)
+            cv2.addWeighted(over, a, img, 1 - a, 0, dst=img)
 
         # une flèche courbe et lisse qui suit l'extrémité de cette partie
         if base in ("slow", "hit") or (base == "after" and lt < 0.3):
@@ -252,7 +326,7 @@ class FluidMixin:
                     pts.append(q)
                     prev = q
             if len(pts) >= 4:
-                _curve_arrow(img, np.array(pts[::-1]), gfx.YELLOW, thick, min_len=torso * 0.3)
+                _curve_arrow(img, np.array(pts[::-1]), gfx.YELLOW, max(int(thick * 0.6), 5), min_len=torso * 0.3)
 
         # étoile d'impact au contact (coups seulement)
         if info_["kind"] in BURST_KINDS and (base == "hit" or (base == "after" and lt < 0.25)):
