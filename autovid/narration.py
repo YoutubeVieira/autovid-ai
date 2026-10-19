@@ -38,7 +38,17 @@ def script_for(info, n, discipline="combat"):
     return info.get("narration") or " ".join(p for p in parts if p)
 
 
-def build_script(impacts, discipline="combat"):
+def script_short(info):
+    """Version courte pour le mode fluide (≈ 3–4 s, la vidéo ne s'arrête pas) : nom, geste clé, risque."""
+    geste = (info.get("placement") or "").split(",")[0].rstrip(".")
+    parle = info.get("risque_parle")
+    parts = [f"{info['nom'].lower().capitalize()} : {geste[:1].lower() + geste[1:]}." if geste else f"{info['nom'].capitalize()}."]
+    if parle:
+        parts.append(f"Attention {parle}.")
+    return info.get("narration_courte") or " ".join(parts)
+
+
+def build_script(impacts, discipline="combat", short=False):
     from .anatomy import tag_pt
     segs = []
     if impacts:
@@ -46,10 +56,11 @@ def build_script(impacts, discipline="combat"):
         h1, h2 = impacts[top]["info"]["hook"]
         segs.append({"id": "hook", "fr": tag_pt(f"{h1.capitalize()} ? {h2.capitalize()}.")})
     for k, m in enumerate(impacts):
-        segs.append({"id": k, "fr": tag_pt(script_for(m["info"], k + 1, discipline))})
+        txt = script_short(m["info"]) if short else script_for(m["info"], k + 1, discipline)
+        segs.append({"id": k, "fr": tag_pt(txt)})
     outro = "Abonne-toi pour la partie deux, et enregistre la vidéo pour l'essayer à l'entraînement."
     if discipline == "capoeira":
-        outro = "Abonne-toi pour la suite, et on se retrouve dans la [pt]roda[/pt]. [pt]Axé[/pt] !"
+        outro = "Abonne-toi, et on se retrouve dans la [pt]roda[/pt]. [pt]Axé[/pt] !"
     segs.append({"id": "outro", "fr": outro})
     return segs
 

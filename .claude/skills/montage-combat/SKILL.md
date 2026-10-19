@@ -10,7 +10,10 @@ description: Monte automatiquement une vidéo de sport de combat en short vertic
 python -m autovid combat "<video>" -o "sorties/<nom>_combat.mp4" --handle "<@compte>" \
     [--music musique.mp3] [--max-impacts 6] [--resolution 1080|4k] [--ai claude] --workdir "travail/<nom>"
 ```
-- Pas de `--music` → beat généré (libre de droits, pas de Content ID).
+- Pas de `--music` → beat généré (libre de droits, pas de Content ID) ; `--kit reaction` (défaut) = phonk 808.
+- `--style fluide` (défaut) : aucune pause longue, traits de couleur, trajectoires, zoom sur le membre ;
+  `--style analyse` : arrêts sur image avec étiquettes d'anatomie.
+- Plan large / roda filmée de haut : `--framing cover`.
 - `--discipline capoeira` : noms brésiliens (meia-lua de compasso, armada, rasteira, aú, esquiva…).
 - Voix off avec la voix clonée + sous-titres FR/PT-BR/EN : voir le skill `voix-off`.
 - Le rendu écrit aussi les miniatures et le SEO : voir le skill `miniature-seo`.

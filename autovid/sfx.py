@@ -133,3 +133,80 @@ def write_wav(path, x):
         w.setsampwidth(2)
         w.setframerate(SR)
         w.writeframes((x * 32767).astype("<i2").tobytes())
+
+
+# --------------------------------------------------------------------------- kit « réaction » (phonk / drill 808)
+# Profil mesuré sur la vidéo réaction de référence : ~71 % de l'énergie sous 120 Hz, très peu d'aigus.
+
+def sub_boom(d=1.2):
+    """Impact 808 : sub qui tombe 70 → 32 Hz, longue queue, attaque claquée."""
+    t = _t(d)
+    f = 32 + 38 * np.exp(-t * 9)
+    body = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 2.6)
+    click = _bp(rng.standard_normal(len(t)), 900, 4000) * np.exp(-t * 120) * 0.4
+    return _stereo(np.tanh(2.6 * (body + click)) * 0.95)
+
+
+def low_whoosh(d=0.5):
+    """Souffle grave (moins de sifflement que le whoosh classique)."""
+    t = _t(d)
+    n = _bp(rng.standard_normal(len(t)), 120, 1100)
+    env = np.sin(np.pi * (t / d) ** 0.8) ** 2
+    return _stereo(n * env * 1.4)
+
+
+def reverse_hit(d=0.45):
+    """Montée inversée avant un impact."""
+    t = _t(d)
+    n = _bp(rng.standard_normal(len(t)), 300, 5000) * (t / d) ** 3
+    tone = np.sin(2 * np.pi * np.cumsum(60 + 200 * (t / d)) / SR) * (t / d) ** 2 * 0.5
+    return _stereo((n + tone) * 0.8)
+
+
+LIB.update({"sub_boom": sub_boom, "low_whoosh": low_whoosh, "reverse_hit": reverse_hit})
+
+
+# réglés pour coller au profil mesuré de la vidéo réaction : ~72 % sub, 19 % basses, 8 % médiums
+BASS_GAIN, COW_GAIN, SNARE_GAIN, REESE_GAIN = 0.15, 1.2, 1.4, 1.3
+
+
+def music_phonk(duration, bpm=143, seed=11):
+    """Beat phonk/drill sombre : 808 qui glissent, kicks lourds, cowbell phonk, peu d'aigus."""
+    r = np.random.default_rng(seed)
+    beat = 60 / bpm
+    n = int(duration * SR) + SR
+    out = np.zeros((n, 2))
+
+    def put(sig, at, gain=1.0):
+        i = int(at * SR)
+        if i < n:
+            sig = sig[: n - i]
+            out[i: i + len(sig)] += sig * gain
+
+    tk = _t(0.45)
+    kick = _stereo(np.tanh(4 * np.sin(2 * np.pi * np.cumsum(42 + 140 * np.exp(-tk * 38)) / SR) * np.exp(-tk * 9)))
+    tc = _t(0.18)
+    cow = _stereo(_bp(np.sign(np.sin(2 * np.pi * 540 * tc)) + np.sign(np.sin(2 * np.pi * 800 * tc)), 450, 2200)
+                  * np.exp(-tc * 22) * 0.35)
+    snare = _stereo(_bp(r.standard_normal(len(_t(0.22))), 180, 3500) * np.exp(-_t(0.22) * 18))
+    hat = _stereo(_hp(r.standard_normal(len(_t(0.03))), 6000) * np.exp(-_t(0.03) * 120))
+    notes = [43.65, 43.65, 51.91, 38.89]                       # Fa, Fa, Lab, Mib (graves)
+    bars = int(duration / (4 * beat)) + 2
+    for b in range(bars):
+        t0 = b * 4 * beat
+        for k in (0, 0.75, 2.5):
+            put(kick, t0 + k * beat, 1.0)
+        put(snare, t0 + 2 * beat, SNARE_GAIN)
+        for k in np.arange(0, 4, 0.5):
+            put(hat, t0 + k * beat, 0.12)
+        for k, step in enumerate((0, 0.5, 1.5, 2, 3, 3.5)):     # cowbell phonk en motif syncopé
+            put(cow * (1.0 + 0.5 * (k % 3 == 0)), t0 + step * beat, COW_GAIN)
+        f0, f1 = notes[b % 4], notes[(b + 1) % 4]
+        tb = _t(4 * beat)
+        glide = f0 + (f1 - f0) * np.clip((tb - 3.4 * beat) / (0.5 * beat), 0, 1)   # glissé de 808 en fin de mesure
+        bass = np.tanh(2.2 * np.sin(2 * np.pi * np.cumsum(glide) / SR)) * np.minimum(1, tb * 60) * np.exp(-tb * 0.35)
+        put(_stereo(_lp(bass, 140)), t0, BASS_GAIN)
+        # couche « reese » une octave au-dessus : remplit 120–500 Hz comme dans la référence
+        reese = np.tanh(3 * (np.sin(2 * np.pi * np.cumsum(glide * 2) / SR) + np.sin(2 * np.pi * np.cumsum(glide * 2.01) / SR)))
+        put(_stereo(_bp(reese, 120, 480) * np.minimum(1, tb * 8) * np.minimum(1, (4 * beat - tb) * 8)), t0, REESE_GAIN)
+    return out[: int(duration * SR)]

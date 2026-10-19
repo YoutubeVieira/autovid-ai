@@ -147,3 +147,31 @@ class ServerSecurityTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FluideTest(unittest.TestCase):
+    def test_no_long_pause_and_voice_fits(self):
+        from autovid import fluide
+        tr = standing(400)
+        imps = []
+        for k, fr in enumerate((120, 260)):
+            m = {"frame": fr, "track": 0, "eff": R_ANK, "score": 0.5 - k * 0.1, "voice_dur": 4.0}
+            m["info"] = classify(tr[0], fr, R_ANK)
+            imps.append(m)
+        tl = fluide.build_timeline(400, imps, hook=True, outro_len=0)
+        longest, run = 1, 1                       # plus longue image tenue (même source)
+        for a, b in zip(tl, tl[1:]):
+            run = run + 1 if b["src"] == a["src"] else 1
+            longest = max(longest, run)
+        self.assertLessEqual(longest, int(fluide.HIT * 30) + 1)
+        starts = [i for i, f in enumerate(tl) if f["phase"] == "slow" and f["lt"] == 0]
+        self.assertEqual(len(starts), 2)
+        self.assertGreaterEqual((starts[1] - starts[0]) / 30, 4.0 + 0.3)   # la voix de l'analyse 1 a le temps de finir
+
+    def test_reaction_music_profile(self):
+        from scipy.signal import stft
+        a = sfx.music_phonk(8).mean(axis=1)
+        f, _, z = stft(a, sfx.SR, nperseg=4096)
+        p = np.abs(z) ** 2
+        sub = p[(f >= 20) & (f < 120)].sum() / p.sum()
+        self.assertTrue(0.6 < sub < 0.85, sub)

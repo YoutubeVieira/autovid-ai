@@ -87,6 +87,11 @@ def main(argv=None):
                    help="vidéo paysage : blur = entière sur fond flouté, cover = recadrée au centre (sujets plus grands)")
     c.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto",
                    help="voix off : ElevenLabs (ta voix), Kokoro (voix locale de test), none")
+    c.add_argument("--style", choices=["fluide", "analyse"], default="fluide",
+                   help="fluide : sans pause, traits et zoom sur le membre ; analyse : arrêts sur image commentés")
+    c.add_argument("--kit", choices=["reaction", "classique"], default="reaction",
+                   help="sons : reaction = phonk 808 (comme la vidéo réaction), classique = beat d'origine")
+    c.add_argument("--music-from", help="reprendre la bande-son d'une vidéo (seulement si tu en as les droits)")
     c.add_argument("--workdir")
 
     vc = sub.add_parser("voice-clone", help="clone ta voix (ElevenLabs) à partir de tes enregistrements")
@@ -142,7 +147,7 @@ def main(argv=None):
         print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
                           args.resolution, args.ai, not args.no_hook, args.original_audio, None, args.discipline,
                           args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion, args.framing,
-                          args.tts))
+                          args.tts, args.style, args.kit, args.music_from))
     elif args.cmd == "voice-clone":
         from .narration import CONFIG, clone_voice
         print("voix créée :", clone_voice(args.samples, args.name), f"(enregistrée dans {CONFIG})")

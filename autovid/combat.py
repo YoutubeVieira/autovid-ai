@@ -227,6 +227,12 @@ class Renderer:
             z = 1.0
         return z, c
 
+    def shake_for(self, f):
+        if f["phase"] in ("freeze", "hook_freeze") and f["lt"] < 0.2:
+            amp = 16 * (1 - f["lt"] / 0.2)
+            return tuple(self.rng.uniform(-amp, amp, 2))
+        return (0, 0)
+
     @staticmethod
     def matrix(z, c, shake=(0, 0)):
         if c is None:
@@ -471,10 +477,7 @@ class Renderer:
                 img = rgb.astype(np.float32)
                 self.scene_overlays(img, f, rgb)
                 z, c = self.zoom_for(f)
-                shake = (0, 0)
-                if f["phase"] in ("freeze", "hook_freeze") and f["lt"] < 0.2:
-                    amp = 16 * (1 - f["lt"] / 0.2)
-                    shake = tuple(self.rng.uniform(-amp, amp, 2))
+                shake = self.shake_for(f)
                 M = self.matrix(z, c, shake)
                 if abs(z - 1) > 1e-3 or shake != (0, 0):
                     img = cv2.warpAffine(img, M, (W, H), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REFLECT)
@@ -491,7 +494,7 @@ class Renderer:
 # --------------------------------------------------------------------------- 6. son
 
 def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7, voice=(), insert=(0.0, 0.0),
-                post=0.0, extra_fx=()):
+                post=0.0, extra_fx=(), kit="reaction"):
     """Bande-son complète. `insert` = (instant, durée) d'un carton (intro) inséré dans le montage, `post` = durée
     de la carte de fin ajoutée à la fin ; les temps de `voice` et `extra_fx` sont ceux de la vidéo finale."""
     sr = sfx.SR
@@ -504,6 +507,8 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
         mus = sfx.read_wav(music_path)
         reps = int(np.ceil(n / max(len(mus), 1)))
         mus = np.tile(mus, (reps, 1))[:n] if len(mus) else np.zeros((n, 2))
+    elif kit == "reaction":
+        mus = sfx.music_phonk(dur + 0.1)[:n]
     else:
         mus = sfx.music(dur + 0.1)[:n]
     duck = np.ones(n)
@@ -524,7 +529,7 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
         t = tmap(k / FPS)
         i0 = int(round(t * sr))
         ph = f["phase"]
-        if ph in ("freeze", "hook_freeze", "outro"):
+        if ph in ("freeze", "hook_freeze", "outro", "hit", "hook_hit"):
             duck[i0:i0 + spf] = 0.35
         if ph in ("normal", "jump", "post") and len(src_audio):
             a = int(f["src"] * spf)
@@ -532,8 +537,9 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
             orig[i0: i0 + len(chunk)] = chunk
         if ph != (prev or {}).get("phase"):
             if ph in ("slow", "hook_slow"):
-                put("whoosh", t, 0.8, d=0.5)
-                put("riser", t, 0.5, d=max(SLOW_SRC / SLOW - 0.05, 0.3))
+                put("low_whoosh" if kit == "reaction" else "whoosh", t, 0.8, d=0.5)
+                if kit != "reaction":
+                    put("riser", t, 0.5, d=max(SLOW_SRC / SLOW - 0.05, 0.3))
             if ph in ("freeze", "hook_freeze"):
                 put("impact", t, 1.0)
                 put("shutter", t, 0.6)
@@ -543,8 +549,14 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
                         put("tick", t + 0.55 + j * 0.32 + 0.1, 0.8)
                     put("tick", t + 0.85, 0.6, f=1400)
                     put("whoosh", t + freeze_len(m) - 0.3, 0.6, d=0.35)
+            if ph in ("slow", "hook_slow") and kit == "reaction":   # mode fluide : montée inversée vers le contact
+                from .fluide import PRE_SRC, SLOW_IN
+                put("reverse_hit", t + PRE_SRC / SLOW_IN - 0.45, 0.7)
+            if ph in ("hit", "hook_hit"):
+                put("sub_boom" if kit == "reaction" else "impact", t, 1.0)
+                put("shutter", t, 0.35)
             if ph == "jump":
-                put("whoosh", max(t - 0.15, 0), 0.7, d=0.35)
+                put("low_whoosh" if kit == "reaction" else "whoosh", max(t - 0.15, 0), 0.8, d=0.35)
             if ph == "outro":
                 put("impact", t, 0.8)
                 put("riser", max(t - 0.6, 0), 0.4, d=0.6)
@@ -576,13 +588,13 @@ def phase_starts(timeline):
     return out
 
 
-def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None):
+def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None, anchor="freeze"):
     """SRT par langue + fichier ASS pour l'incrustation. Renvoie (chemin ASS ou None, {langue: srt})."""
     from . import narration as nar
     from .talk import captions_ass
     t_of = {"hook": 0.0, "outro": starts.get(("outro", -1), 0.0)}
     for k in range(len(impacts)):
-        t_of[k] = starts.get(("freeze", k), 0.0) + 0.15
+        t_of[k] = starts.get((anchor, k), 0.0) + 0.15
     fr_words, cues = [], {"fr": []}
     windows = windows or {}
     for sg in segs:
@@ -623,7 +635,11 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None):
 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
-           extras=True, motion_design=True, framing="auto", tts="auto"):
+           extras=True, motion_design=True, framing="auto", tts="auto", style="fluide", kit="reaction",
+           music_from=None):
+    """style : "fluide" (analyse sur la vidéo en mouvement, sans pause) ou "analyse" (arrêts sur image commentés).
+    kit : "reaction" (phonk 808, impacts sub) ou "classique". music_from : vidéo dont on reprend la bande-son
+    comme musique (uniquement si tu en as les droits)."""
     from . import narration as nar
     from .anatomy import add_safety, capoeira_variant
     work = Path(workdir)
@@ -672,7 +688,9 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         print("   aucun coup net détecté : montage dynamique sans analyse")
 
     # voix off : script, synthèse (ta voix clonée) et durées → l'arrêt sur image s'adapte à la voix
-    segs = nar.build_script(impacts, discipline)
+    fluid = style == "fluide"
+    anchor = "slow" if fluid else "freeze"
+    segs = nar.build_script(impacts, discipline, short=fluid)
     voice_id = voice_id or nar.default_voice()
     engine = nar.voice_segments(segs, voice_id, tts)
     has_voice = engine is not None
@@ -697,11 +715,19 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
           ("nom", "membre", "hook", "tip", "kind", "placement", "risque")},
           "muscles": [x[:2] for x in m["info"]["muscles"]]} for m in impacts], ensure_ascii=False, indent=1),
         encoding="utf-8")
-    timeline = build_timeline(n, impacts, hook=hook, hook_freeze=hook_freeze, outro_len=outro_len)
+    if fluid:
+        from . import fluide
+        timeline = fluide.build_timeline(n, impacts, hook=hook, outro_len=outro_len)
+    else:
+        timeline = build_timeline(n, impacts, hook=hook, hook_freeze=hook_freeze, outro_len=outro_len)
     starts = phase_starts(timeline)
     print(f"4/6 timeline : {len(timeline) / FPS:.1f} s ({len(impacts)} analyses)")
     print("5/6 rendu image par image")
-    renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
+    if fluid:
+        renderer = type("FluidRenderer", (fluide.FluidMixin, Renderer), {})(tracks, impacts, timeline, handle,
+                                                                              accent or gfx.GREEN)
+    else:
+        renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
     renderer.render(base, work / "video.mp4")
     print("6/6 motion design, son, sous-titres + export")
     first_main = next((i for i, f in enumerate(timeline) if not f["phase"].startswith("hook")), 0) / FPS
@@ -731,7 +757,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         if hook and "hook" in by_id:
             voice.append((0.0, by_id["hook"]["audio"]))
         for k in range(len(impacts)):
-            voice.append((starts.get(("freeze", k), 0) + 0.15, by_id[k]["audio"]))
+            voice.append((starts.get((anchor, k), 0) + 0.15, by_id[k]["audio"]))
         voice.append((starts.get(("outro", -1), 0) + 0.1, by_id["outro"]["audio"]))
     extra = []
     if use_motion:                               # sons calés sur les animations de l'intro et de la carte de fin
@@ -739,7 +765,12 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
                   (ins_at + 0.62, "shutter", 0.5, {}), (ins_at + 2.2, "whoosh", 0.7, {"d": 0.35}),
                   (main_end, "impact", 0.7, {}), (main_end + 1.0, "tick", 0.9, {"f": 2200}),
                   (main_end + 1.1, "tick", 0.7, {"f": 1500}), (main_end + 1.33, "tick", 0.6, {})]
-    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice, (ins_at, ins_len), post, extra)
+    if music_from:                               # bande-son reprise d'une autre vidéo (droits requis pour publier)
+        run(["ffmpeg", "-y", "-v", "error", "-i", str(Path(music_from).resolve()), "-vn", "-ac", "2", "-ar", 48000,
+             "musique_reprise.wav"], cwd=work)
+        music = str(work / "musique_reprise.wav")
+    build_audio(timeline, impacts, src_audio, music, work / "audio.wav", orig_gain, voice, (ins_at, ins_len), post, extra,
+                kit)
     if use_motion:                               # assemblage : accroche → intro → analyses → carte de fin
         norm = f"fps={FPS},scale={W}:{H},setsar=1,format=yuv420p"
         fc = (f"[0:v]trim=end={ins_at:.4f},setpts=PTS-STARTPTS,{norm}[a];[1:v]{norm}[b];"
@@ -753,11 +784,14 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         segs = [sg for sg in segs if sg["id"] != "hook"]
     windows = {"hook": max(first_main - 0.1, 1.0), "outro": (post if use_motion else outro_len) - 0.1}
     for k, m in enumerate(impacts):
-        windows[k] = freeze_len(m) - 0.25
+        if fluid:
+            windows[k] = fluide.analysis_len(m.get("voice_dur", 0)) + 1.0
+        else:
+            windows[k] = freeze_len(m) - 0.25
     if not has_voice and burn != "none":
         print("   sans voix off : sous-titres écrits en .srt, pas incrustés (les étiquettes portent déjà l'info)")
         burn = "none"
-    ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs), windows)
+    ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs), windows, anchor)
 
     rw, rh = RESOLUTIONS[resolution]
     filters = []
@@ -789,7 +823,7 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
 
     if extras:
         from . import seo, thumbs
-        analyses = [{"t_out": starts.get(("freeze", k), 0), "nom": m["info"]["nom"], "kind": m["info"]["kind"],
+        analyses = [{"t_out": starts.get((anchor, k), 0), "nom": m["info"]["nom"], "kind": m["info"]["kind"],
                      "muscles": m["info"]["muscles"]} for k, m in enumerate(impacts)]
         seo.write(seo.build(analyses, discipline, handle or ""), out_base)
         if impacts:
