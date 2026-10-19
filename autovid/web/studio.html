@@ -50,6 +50,7 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; b
 
 .monitor { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 @media (min-width: 821px) { .monitor { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 70px); } }
+.screen.wide { aspect-ratio: 16 / 9; max-height: none; }
 .screen { position: relative; aspect-ratio: 9 / 16; max-width: 100%; max-height: 64vh; margin-inline: auto; width: 100%;
   background: #000; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
 .screen video { width: 100%; height: 100%; object-fit: contain; display: block; background: #000; }
@@ -197,9 +198,10 @@ main { max-width: 1180px; margin: 0 auto; }
     const box = $("#versions"); box.replaceChildren();
     if (!ver && vs.length) ver = vs[vs.length - 1].n;
     for (const v of vs) box.append(h("button", { type: "button", "aria-pressed": String(v.n === ver),
-      on: { click: () => { ver = v.n; renderMonitor(); } } }, "V" + v.n));
+      on: { click: () => { ver = v.n; renderMonitor(); } } }, v.label || "V" + v.n));
     const v = vs.find(x => x.n === ver);
     const scr = $("#screen"); const old = scr.querySelector("video");
+    scr.classList.toggle("wide", !!(v && v.format === "16:9"));
     if (v && v.url) {
       $("#screenEmpty").hidden = true;
       if (!old || old.getAttribute("src") !== v.url) {
@@ -308,6 +310,17 @@ main { max-width: 1180px; margin: 0 auto; }
             [["fr", "Français"], ["pt", "Portugais (Brésil)"], ["en", "Anglais"], ["none", "Aucun"]].map(([v, l]) =>
               h("option", { value: v, selected: (r.sous_titres || "fr") === v }, l))))),
         h("div", { class: "toggles" }, toggle(r, "intro_outro", "Intro 3D + carte de fin"))),
+        h("div", { class: "card" }, h("h2", {}, "Effets façon CapCut"),
+          h("div", { class: "f" }, h("span", { class: "hint" }, "Courbe de vitesse du ralenti"),
+            seg([["heros", "Héros"], ["bullet", "Bullet time"], ["montage", "Montage"], ["flash_in", "Flash in"],
+                 ["flash_out", "Flash out"], ["constant", "Fixe"]], r.courbe || "heros", v => { r.courbe = v; })),
+          h("div", { class: "f" }, h("span", { class: "hint" }, "Transition entre les moments"),
+            seg([["zoom", "Zoom"], ["whip", "Whip pan"], ["glitch", "Glitch"], ["flash", "Flash"], ["mix", "Mélange"]],
+                r.transition || "zoom", v => { r.transition = v; })),
+          field("Filtre couleur", h("select", { on: { change: e => { r.filtre = e.target.value; markDirty(); } } },
+            [["aucun", "Aucun"], ["cine", "Cinéma (teal & orange)"], ["vif", "Vif"], ["chaud", "Chaud"], ["froid", "Froid"],
+             ["nb", "Noir et blanc"]].map(([v, l]) => h("option", { value: v, selected: (r.filtre || "aucun") === v }, l)))),
+          h("div", { class: "toggles" }, toggle(r, "debruitage", "Réduire le bruit du son d'origine"))),
         h("div", { class: "card" }, h("h2", {}, "Sons"),
           h("div", { class: "f" }, h("span", { class: "hint" }, "Ambiance"),
             seg([["reaction", "Réaction (phonk 808)"], ["classique", "Classique"]], r.kit || "reaction", v => { r.kit = v; })),

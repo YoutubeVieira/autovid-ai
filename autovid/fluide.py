@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from . import gfx
+from .effets import transition
 from .media import FPS, H, W
 from .pose import L_ANK, L_EL, L_HIP, L_KNEE, L_SH, L_WR, R_ANK, R_EL, R_HIP, R_KNEE, R_SH, R_WR, torso_len
 
@@ -59,17 +60,27 @@ def contact_profile(tracks, m):
     return {"cible": cible, "rotation": rotation}
 
 
-def analysis_len(voice_dur=0.0):
+def slow_parts(t, curve=None):
+    """Positions source du ralenti avant et après le contact `t` (image) : vitesse fixe, ou courbe CapCut."""
+    if curve:
+        from .effets import ramp
+        return ramp(t - PRE_SRC * FPS, t, t + POST_SRC * FPS, curve)
+    before = [t - PRE_SRC * FPS + j * SLOW_IN for j in range(int(PRE_SRC * FPS / SLOW_IN))]
+    after = [t + j * SLOW_OUT for j in range(int(POST_SRC * FPS / SLOW_OUT))]
+    return before, after
+
+
+def analysis_len(voice_dur=0.0, curve=None):
     """Durée minimale d'une analyse (ralenti + contact + ralenti) : la voix doit pouvoir finir avant la suivante."""
-    base = PRE_SRC / SLOW_IN + HIT + POST_SRC / SLOW_OUT
-    return max(base, voice_dur + 0.3)
+    before, after = slow_parts(1000, curve)
+    return max((len(before) + len(after)) / FPS + HIT, voice_dur + 0.3)
 
 
-def build_timeline(n_frames, impacts, hook=True, max_dead=2.5, outro_len=1.8):
+def build_timeline(n_frames, impacts, hook=True, max_dead=2.5, outro_len=1.8, curve=None):
     out = []
 
-    def add(src, phase, imp=-1, lt=0.0):
-        out.append({"src": float(min(max(src, 0), n_frames - 1)), "phase": phase, "imp": imp, "lt": lt})
+    def add(src, phase, imp=-1, lt=0.0, pd=0.0):
+        out.append({"src": float(min(max(src, 0), n_frames - 1)), "phase": phase, "imp": imp, "lt": lt, "pd": pd})
 
     def normal(a, b, first=False, need=0.0):
         """Plans à vitesse normale entre deux analyses ; les temps morts sont coupés, mais on garde `need`
@@ -86,20 +97,20 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=2.5, outro_len=1.8):
             for s in range(a, a + head):
                 add(s, "normal")
             for j, s in enumerate(range(b - tail, b)):
-                add(s, "jump" if j < 5 else "normal", lt=j / FPS)
+                add(s, "jump" if j < 7 else "normal", lt=j / FPS)
         else:
             for s in range(a, b):
                 add(s, "normal")
 
     def analysis(k, m, prefix=""):
         t = m["frame"]
-        s0 = t - PRE_SRC * FPS
-        for j in range(int(PRE_SRC * FPS / SLOW_IN)):
-            add(s0 + j * SLOW_IN, prefix + "slow", k, j / FPS)
+        before, after = slow_parts(t, curve)
+        for j, s in enumerate(before):
+            add(s, prefix + "slow", k, j / FPS, len(before) / FPS)
         for j in range(int(HIT * FPS)):
-            add(t, prefix + "hit", k, j / FPS)
-        for j in range(int(POST_SRC * FPS / SLOW_OUT)):
-            add(t + j * SLOW_OUT, prefix + "after", k, j / FPS)
+            add(t, prefix + "hit", k, j / FPS, HIT)
+        for j, s in enumerate(after):
+            add(s, prefix + "after", k, j / FPS, len(after) / FPS)
         return t + POST_SRC * FPS
 
     if hook and impacts:
@@ -110,7 +121,7 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=2.5, outro_len=1.8):
         s0 = max(cursor, m["frame"] - PRE_SRC * FPS)
         normal(cursor, s0, first=(k == 0), need=need)
         cursor = analysis(k, m)
-        spent = PRE_SRC / SLOW_IN + HIT + POST_SRC / SLOW_OUT
+        spent = analysis_len(0, curve)
         need = max(0.0, m.get("voice_dur", 0) + 0.3 - spent)
     tail = min(n_frames, int(cursor + max(1.0, need + 0.4) * FPS)) if impacts else n_frames
     normal(int(cursor), tail)
@@ -119,7 +130,7 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=2.5, outro_len=1.8):
         add(last, "outro", -1, j / FPS)
     if hook and impacts:
         first_main = next(i for i, f in enumerate(out) if not f["phase"].startswith("hook"))
-        for j in range(first_main, min(first_main + 5, len(out))):
+        for j in range(first_main, min(first_main + 7, len(out))):
             if out[j]["phase"] == "normal":
                 out[j]["phase"], out[j]["lt"] = "jump", (j - first_main) / FPS
     return out
@@ -201,12 +212,13 @@ class FluidMixin:
             return 1.0, None
         zt, c = self.limb_focus(m, f["src"] if not ph.endswith("hit") else m["frame"])
         base = ph.replace("hook_", "")
+        pd = f.get("pd") or {"slow": PRE_SRC / SLOW_IN, "hit": HIT, "after": POST_SRC / SLOW_OUT}.get(base, 1.0)
         if base == "slow":
-            z = 1 + (zt - 1) * gfx.ease(lt / (PRE_SRC / SLOW_IN * 0.8))
+            z = 1 + (zt - 1) * gfx.ease(lt / (pd * 0.8))
         elif base == "hit":
             z = zt * (1 + 0.06 * gfx.ease(lt / HIT))
         elif base == "after":
-            z = zt * 1.06 - (zt * 1.06 - 1) * gfx.ease(lt / (POST_SRC / SLOW_OUT))
+            z = zt * 1.06 - (zt * 1.06 - 1) * gfx.ease(lt / pd)
         else:
             z = 1.0
         return z, c
@@ -349,11 +361,13 @@ class FluidMixin:
         ph, lt, imp = f["phase"], f["lt"], f["imp"]
         base = ph.replace("hook_", "")
         acc = self.accent
-        if (base == "hit" and lt < 0.1) or (ph == "jump" and lt < 0.1):
-            a = (1 - lt / 0.1) * 0.6
-            img[:] = img * (1 - a) + 255 * a
-            img[:, 8:, 0] = img[:, :-8, 0].copy()
-            img[:, :-8, 2] = img[:, 8:, 2].copy()
+        if base == "hit" and lt < 0.1:
+            transition(img, "flash", lt, self.rng, 0.1)
+        if ph == "jump":                         # transition de coupe choisie (CapCut : flash, zoom, whip, glitch)
+            kind = getattr(self, "transition", "flash")
+            if kind == "mix":
+                kind = ("zoom", "whip", "glitch", "flash")[int(f["src"]) % 4]
+            transition(img, kind, lt, self.rng, 0.1 if kind == "flash" else 0.2)
         if imp >= 0:
             m = self.impacts[imp]
             info_ = m["info"]
@@ -365,7 +379,8 @@ class FluidMixin:
                     gfx.paste(img, gfx.text_sprite(l2, 78, gfx.YELLOW, stroke=7), W / 2, 445,
                               gfx.pop(lt if base == "hit" else 1))
             elif base in ("slow", "hit", "after"):
-                t_all = lt + {"slow": 0, "hit": PRE_SRC / SLOW_IN, "after": PRE_SRC / SLOW_IN + HIT}[base]
+                pre = self.slow_len.get(imp, PRE_SRC / SLOW_IN) if hasattr(self, "slow_len") else PRE_SRC / SLOW_IN
+                t_all = lt + {"slow": 0, "hit": pre, "after": pre + HIT}[base]
                 out = 1 - gfx.ease((t_all - 2.4) / 0.25)
                 if out > 0.02:
                     gfx.paste(img, gfx.text_sprite(info_["nom"], 124, gfx.WHITE, stroke=9), W / 2, 330,

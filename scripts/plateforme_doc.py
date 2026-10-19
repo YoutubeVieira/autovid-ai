@@ -16,6 +16,8 @@ ap.add_argument("--url", required=True)
 ap.add_argument("--duree", type=float, default=0)
 ap.add_argument("--note", default="")
 ap.add_argument("--ancien")
+ap.add_argument("--label", default="", help="nom du bouton de version (ex. « Vidéo longue »)")
+ap.add_argument("--format", default="9:16", choices=["9:16", "16:9"])
 ap.add_argument("-o", "--out", required=True)
 a = ap.parse_args()
 projet = json.loads(Path(a.projet).read_text(encoding="utf-8"))
@@ -24,7 +26,7 @@ old = old.get("data", old)
 versions = old.get("versions", [])
 now = datetime.now()
 versions.append({"n": len(versions) + 1, "url": a.url, "date": now.strftime("%d/%m %H:%M"), "duree": a.duree,
-                 "note": a.note})
+                 "note": a.note, "label": a.label, "format": a.format})
 doc = {"nom": a.nom, "statut": "pret", "cree": old.get("cree", now.isoformat()), "modifie": now.isoformat(),
        "versions": versions, "projet": projet}
 Path(a.out).write_text(json.dumps(doc, ensure_ascii=False, indent=1), encoding="utf-8")

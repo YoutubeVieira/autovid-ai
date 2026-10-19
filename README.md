@@ -12,6 +12,14 @@ Tout tourne en local avec **ffmpeg + Python** (numpy, PyYAML, requests). Pas d'A
 ./scripts/install.sh             # ffmpeg, dépendances Python, modèle de pose, skills (Claude Code + Antigravity)
 ```
 
+## ⭐⭐ Une vidéo → vidéo longue YouTube + shorts (automate)
+```bash
+python -m autovid viral roda.mp4 -o projet_roda/ --discipline capoeira --handle @toncompte \
+  [--courbe heros|bullet|montage|flash_in|flash_out] [--transition zoom|whip|glitch|flash|mix] [--filtre cine|vif|chaud|froid|nb]
+```
+Short principal, vidéo longue 16:9 à chapitres (intro + plan, en vrai, analyse + fiche, meilleur moment aux 2/3),
+un short par mouvement, plan de publication `a_publier.md`. Correspondance avec CapCut : `docs/capcut-pro.md`.
+
 ## Clip d'humour, d'animaux ou généré par IA
 ```bash
 python -m autovid fun clip.mp4 -o sorties/fun.mp4 --handle @toncompte --ia \

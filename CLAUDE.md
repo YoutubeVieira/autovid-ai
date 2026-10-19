@@ -3,6 +3,9 @@
 Monteur vidéo automatique en Python + ffmpeg (paquet `autovid/`). Commandes : `python -m autovid -h`.
 
 - Vidéos de combat → skill `montage-combat` (`python -m autovid combat`).
+- « Projet complet / long + shorts / comme CapCut » → `python -m autovid viral video -o dossier/` (short principal,
+  vidéo longue 16:9 à chapitres, un short par mouvement, `a_publier.md`). Effets CapCut : `--courbe`, `--transition`,
+  `--filtre` (voir `docs/capcut-pro.md`).
 - Clip d'humour / animaux / généré par IA → `python -m autovid fun` (pas d'anatomie). Le mode combat refuse
   l'analyse si aucune vraie personne n'est reconnue (`--force` pour passer outre).
 - Vidéo parlée → skill `couper-les-blancs` (`python -m autovid talk`).

@@ -4,6 +4,7 @@
   python -m autovid auto     rushs/ -o out.mp4 [--music m.mp3] [--reference ref.mp4] [--style bincombat]
   python -m autovid render   brief.yaml -o out.mp4         montage piloté par un brief (titres, étapes, cercles…)
   python -m autovid fun      clip.mp4 -o out.mp4          clip d'humour / animaux / IA : accroche, ralenti, bruitages
+  python -m autovid viral    video.mp4 -o projet/          automate : vidéo longue YouTube + shorts + SEO + plan
   python -m autovid talk     face_cam.mp4 -o out.mp4       coupe des silences + « euh » + sous-titres ElevenLabs
   python -m autovid combat   combat.mp4 -o out.mp4         short éducatif analysé (squelette, anatomie, sons)
   python -m autovid serve                                   plateforme web (téléphone ↔ PC)
@@ -95,6 +96,11 @@ def main(argv=None):
     c.add_argument("--music-from", help="reprendre la bande-son d'une vidéo (seulement si tu en as les droits)")
     c.add_argument("--workdir")
 
+    c.add_argument("--courbe", default="heros", choices=["heros", "bullet", "montage", "flash_in", "flash_out", "constant"],
+                   help="courbe de vitesse du ralenti (préréglages CapCut)")
+    c.add_argument("--transition", default="zoom", choices=["flash", "zoom", "whip", "glitch", "mix"])
+    c.add_argument("--filtre", default="aucun", choices=["aucun", "cine", "vif", "chaud", "froid", "nb"])
+    c.add_argument("--sans-debruitage", action="store_true", help="garder le son d'origine tel quel")
     c.add_argument("--projet", help="projet.json modifié dans la plateforme (textes, effets, sons, analyses)")
     c.add_argument("--force", action="store_true",
                    help="analyser même si aucune vraie personne n'est reconnue (créature d'IA, animal, dessin…)")
@@ -110,6 +116,27 @@ def main(argv=None):
     fu.add_argument("--music")
     fu.add_argument("--projet", help="projet.json modifié dans la plateforme")
     fu.add_argument("--workdir")
+
+    vi = sub.add_parser("viral", help="automate : une vidéo → vidéo longue YouTube + shorts + SEO + plan de publication")
+    vi.add_argument("video")
+    vi.add_argument("-o", "--out", required=True, help="dossier du projet")
+    vi.add_argument("--discipline", choices=["combat", "capoeira"], default="combat")
+    vi.add_argument("--handle")
+    vi.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    vi.add_argument("--framing", choices=["auto", "blur", "cover"], default="auto")
+    vi.add_argument("--max-shorts", type=int, default=4)
+    vi.add_argument("--ai", choices=["claude"])
+    vi.add_argument("--courbe", default="heros", choices=["heros", "bullet", "montage", "flash_in", "flash_out", "constant"])
+    vi.add_argument("--transition", default="zoom", choices=["flash", "zoom", "whip", "glitch", "mix"])
+    vi.add_argument("--filtre", default="aucun", choices=["aucun", "cine", "vif", "chaud", "froid", "nb"])
+    vi.add_argument("--workdir")
+
+    lg = sub.add_parser("longue", help="vidéo longue 16:9 à chapitres à partir d'un short analysé (combat)")
+    lg.add_argument("video", help="vidéo d'origine")
+    lg.add_argument("short", help="le short produit par « combat » (son .segments.json est à côté)")
+    lg.add_argument("-o", "--out", required=True)
+    lg.add_argument("--handle", default="")
+    lg.add_argument("--workdir")
 
     pr = sub.add_parser("projet", help="refaire un montage à partir de son projet.json (modifié dans la plateforme)")
     pr.add_argument("fichier")
@@ -147,7 +174,7 @@ def main(argv=None):
     w.add_argument("--handle")
 
     args = ap.parse_args(argv)
-    if args.cmd in ("combat", "projet"):
+    if args.cmd in ("combat", "projet", "viral"):
         from .combat import PasHumain
         try:
             return _run(args)
@@ -180,7 +207,16 @@ def _run(args):
         print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
                           args.resolution, args.ai, not args.no_hook, args.original_audio, None, args.discipline,
                           args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion, args.framing,
-                          args.tts, args.style, args.kit, args.music_from, args.force, args.projet))
+                          args.tts, args.style, args.kit, args.music_from, args.force, args.projet, args.courbe,
+                          args.transition, args.filtre, not args.sans_debruitage))
+    elif args.cmd == "viral":
+        from .viral import viral
+        viral(args.video, args.out, _workdir(args, args.out), args.discipline, args.handle, args.tts, args.framing,
+              args.max_shorts, args.ai, courbe=args.courbe, transition=args.transition, filtre=args.filtre)
+    elif args.cmd == "longue":
+        from .long import long_video
+        print("→", long_video(args.video, args.short, str(Path(args.short).with_suffix(".segments.json")), args.out,
+                              _workdir(args, args.out), args.handle)[0])
     elif args.cmd == "projet":
         from .projet import load
         pj = load(args.fichier)

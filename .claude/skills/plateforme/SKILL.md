@@ -30,3 +30,9 @@ Statuts : `pret` (à vérifier par l'utilisateur), `a_rendre` (il a cliqué « L
 ## Nouvelle vidéo déposée dans la page (`a_monter`)
 `Artifact` read avec `path` = `source.id` pour récupérer la vidéo, puis `python -m autovid combat` ou `fun` selon
 `projet.mode` et les notes, puis « Après un montage ». Les vidéos de plus de 20 Mo passent par la conversation.
+
+## Projet complet (automate `viral`)
+Un seul document par projet, une version par sortie avec `--label` et `--format 16:9` pour la vidéo longue
+(« Short principal », « Vidéo longue 16:9 », « Short Aú »…). Quand l'utilisateur modifie ce projet, relancer
+`viral(..., projet=<projet modifié>)` (ou `python -m autovid projet` pour le seul short, puis `python -m autovid longue`)
+et republier toutes les versions.

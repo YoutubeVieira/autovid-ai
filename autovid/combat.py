@@ -511,8 +511,11 @@ def build_audio(timeline, impacts, src_audio, music_path, out_wav, orig_gain=0.7
         mus = sfx.read_wav(music_path)
         reps = int(np.ceil(n / max(len(mus), 1)))
         mus = np.tile(mus, (reps, 1))[:n] if len(mus) else np.zeros((n, 2))
-    elif kit == "reaction":
-        mus = sfx.music_phonk(dur + 0.1)[:n]
+    elif kit == "reaction":                      # synchro beat : un temps fort tombe pile sur le premier impact
+        from .effets import beat_offset
+        k_hit = next((k for k, f in enumerate(timeline) if f["phase"] in ("hit", "hook_hit")), None)
+        off = int(beat_offset(tmap(k_hit / FPS)) * sr) if k_hit is not None else 0
+        mus = sfx.music_phonk(dur + 0.1 + off / sr)[off:off + n]
     else:
         mus = sfx.music(dur + 0.1)[:n]
     duck = np.ones(n)
@@ -650,8 +653,12 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None, 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
            extras=True, motion_design=True, framing="auto", tts="auto", style="fluide", kit="reaction",
-           music_from=None, force=False, projet=None):
+           music_from=None, force=False, projet=None, courbe="heros", transition="zoom", filtre="aucun",
+           debruitage=True):
     """style : "fluide" (analyse sur la vidéo en mouvement, sans pause) ou "analyse" (arrêts sur image commentés).
+    courbe : courbe de vitesse du ralenti (heros, bullet, montage, flash_in, flash_out, constant).
+    transition : transition des coupes (flash, zoom, whip, glitch, mix). filtre : aucun, cine, vif, chaud, froid, nb.
+    debruitage : réduit le souffle et le bruit de fond du son d'origine.
     projet : projet.json (ou dict) modifié dans la plateforme : textes, voix, effets, sons, analyses retirées.
     force : analyser même si le contrôle « vraie personne » échoue.
     kit : "reaction" (phonk 808, impacts sub) ou "classique". music_from : vidéo dont on reprend la bande-son
@@ -668,6 +675,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         motion_design = r.get("intro_outro", motion_design)
         burn, orig_gain = r.get("sous_titres", burn), float(r.get("son_origine", orig_gain))
         framing = r.get("cadrage", framing)
+        courbe, transition = r.get("courbe", courbe), r.get("transition", transition)
+        filtre, debruitage = r.get("filtre", filtre), r.get("debruitage", debruitage)
     work = Path(workdir)
     work.mkdir(parents=True, exist_ok=True)
     base = work / "base.mp4"
@@ -759,7 +768,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
         encoding="utf-8")
     if fluid:
         from . import fluide
-        timeline = fluide.build_timeline(n, impacts, hook=hook, outro_len=outro_len)
+        curve = courbe if courbe in __import__("autovid.effets", fromlist=["COURBES"]).COURBES else None
+        timeline = fluide.build_timeline(n, impacts, hook=hook, outro_len=outro_len, curve=curve)
     else:
         timeline = build_timeline(n, impacts, hook=hook, hook_freeze=hook_freeze, outro_len=outro_len)
     starts = phase_starts(timeline)
@@ -770,6 +780,9 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
                                                                               accent or gfx.GREEN)
         src_h = min(info(str(src))["height"], info(str(src))["width"] * 16 / 9)
         renderer.max_zoom = float(np.clip(src_h / 280, 1.5, 2.4))   # source basse définition : zoom plus doux
+        renderer.transition = transition
+        renderer.slow_len = {k: sum(1 for f in timeline if f["imp"] == k and f["phase"] == "slow") / FPS
+                             for k in range(len(impacts))}
     else:
         renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
     renderer.render(base, work / "video.mp4")
@@ -795,7 +808,14 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     starts = {key: tmap(t) for key, t in starts.items()}
     if use_motion:
         starts[("outro", -1)] = main_end
-    src_audio = sfx.read_wav(src) if info(str(src))["has_audio"] else np.zeros((0, 2))
+    src_audio = np.zeros((0, 2))
+    if info(str(src))["has_audio"]:
+        if debruitage:                           # réduction de bruit (souffle, vent, foule lointaine), comme CapCut
+            run(["ffmpeg", "-y", "-v", "error", "-i", str(Path(src).resolve()), "-vn", "-af",
+                 "highpass=f=70,afftdn=nf=-28:tn=1", "-ac", "2", "-ar", 48000, "son_propre.wav"], cwd=work)
+            src_audio = sfx.read_wav(str(work / "son_propre.wav"))
+        else:
+            src_audio = sfx.read_wav(src)
     voice = []
     if has_voice:
         if hook and "hook" in by_id:
@@ -829,16 +849,29 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     windows = {"hook": max(first_main - 0.1, 1.0), "outro": (post if use_motion else outro_len) - 0.1}
     for k, m in enumerate(impacts):
         if fluid:
-            windows[k] = fluide.analysis_len(m.get("voice_dur", 0)) + 1.0
+            windows[k] = fluide.analysis_len(m.get("voice_dur", 0), curve) + 1.0
         else:
             windows[k] = freeze_len(m) - 0.25
     if not has_voice and burn != "none":
         print("   sans voix off : sous-titres écrits en .srt, pas incrustés (les étiquettes portent déjà l'info)")
         burn = "none"
     ass, srts = subtitles(segs, starts, impacts, out_base, work, burn, list(langs), windows, anchor)
+    # où se trouve chaque analyse dans le short : sert à la vidéo longue (chapitres) et aux shorts par moment
+    Path(f"{out_base}.segments.json").write_text(json.dumps({
+        "accroche_fin": ins_at, "intro_fin": ins_at + ins_len, "fin_analyses": main_end, "discipline": discipline,
+        "analyses": [{"k": k, "debut": round(starts.get((anchor, k), 0), 3),
+                      "fin": round(starts.get((anchor, k), 0) + (windows[k] - 1.0 if fluid else windows[k] + 0.25), 3),
+                      "src_t": round(m["frame"] / FPS, 3), "score": m["score"],
+                      **{x: m["info"].get(x) for x in ("nom", "kind", "membre", "tip", "placement", "risque", "hook")},
+                      "cle": m["info"].get("cle") or fluide.CLE.get(m["info"]["kind"], m["info"]["membre"]) if fluid else "",
+                      "muscles": [list(mu[:2]) for mu in m["info"]["muscles"]]}
+                     for k, m in enumerate(impacts)]}, ensure_ascii=False, indent=1), encoding="utf-8")
 
     rw, rh = RESOLUTIONS[resolution]
     filters = []
+    from .effets import FILTRES
+    if FILTRES.get(filtre):                      # filtre couleur (sous les sous-titres)
+        filters.append(FILTRES[filtre])
     if ass:
         shutil.copytree(Path(__file__).parent / "fonts", work / "fonts", dirs_exist_ok=True)
         filters.append("ass=sous_titres.ass:fontsdir=fonts")
@@ -867,7 +900,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     from .fluide import CLE
     settings = {"style": style, "kit": kit, "accent": pj_mod.rgb_hex(accent or gfx.GREEN), "handle": handle or "",
                 "discipline": discipline, "intro_outro": bool(motion_design), "sous_titres": burn,
-                "son_origine": orig_gain, "cadrage": framing}
+                "son_origine": orig_gain, "cadrage": framing, "courbe": courbe, "transition": transition,
+                "filtre": filtre, "debruitage": bool(debruitage)}
     data = pj_mod.combat_export(src, impacts, segs, settings, lambda i: CLE.get(i["kind"], i["membre"]), all_impacts)
     data["duree_source"] = round(n / FPS, 2)
     pj_mod.save(data, f"{out_base}.projet.json")
