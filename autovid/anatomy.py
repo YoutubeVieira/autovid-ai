@@ -11,10 +11,11 @@ J = {  # articulations par côté : (épaule, coude, poignet, hanche, genou, che
 COTE = {"G": "GAUCHE", "D": "DROIT"}
 COTE_F = {"G": "GAUCHE", "D": "DROITE"}
 
+# Accroches passées au filtre « humanize » (skill studio-script) : pas de « secret », pas de question-révélation.
 HOOKS = {
-    "pied": ("LE SECRET DE CE {nom}", "REGARDE SA HANCHE"),
-    "poing": ("POURQUOI CE {nom} FAIT MAL", "TOUT PART DES PIEDS"),
-    "genou": ("CE {nom} EST UNE ARME", "REGARDE SON BASSIN"),
+    "pied": ("CE {nom} PART DE LA HANCHE", "REGARDE SON PIED D'APPUI"),
+    "poing": ("CE {nom} PART DES PIEDS", "REGARDE SON TALON"),
+    "genou": ("CE {nom} SE PRÉPARE AVEC LES MAINS", "REGARDE SON BASSIN"),
 }
 
 TIPS = {
@@ -167,12 +168,12 @@ def tag_pt(text):
 
 
 CAPOEIRA_HOOKS = {
-    "au": ("LE SECRET D'UN AÚ PROPRE", "REGARDE SES MAINS"),
-    "ginga": ("LA GINGA QUI TE PROTÈGE", "REGARDE SON BRAS"),
-    "esquive": ("L'ESQUIVA QUI SAUVE", "REGARDE SON BASSIN"),
-    "pied": ("LE SECRET DE CE CHUTE", "REGARDE SA HANCHE"),
-    "rasteira": ("LA RASTEIRA PARFAITE", "REGARDE LE TIMING"),
-    "genou": ("CETTE JOELHADA SURPREND", "REGARDE SON BASSIN"),
+    "au": ("TON AÚ PART DE TRAVERS ?", "REGARDE SES MAINS"),
+    "ginga": ("SANS CE BRAS, TU PRENDS LE COUP", "REGARDE SA GARDE"),
+    "esquive": ("ELLE ESQUIVE SANS RECULER", "REGARDE SON BASSIN"),
+    "pied": ("CE CHUTE PART DE LA HANCHE", "REGARDE SON APPUI"),
+    "rasteira": ("IL ATTEND QUE LE POIDS PASSE", "REGARDE SA MAIN AU SOL"),
+    "genou": ("LA JOELHADA PART DU BASSIN", "REGARDE SES MAINS"),
 }
 CAPOEIRA_TIPS = {
     "AÚ": "POSE LA MAIN LOIN, REGARDE TON PARTENAIRE",

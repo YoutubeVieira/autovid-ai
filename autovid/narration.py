@@ -54,11 +54,12 @@ def build_script(impacts, discipline="combat", short=False):
     if impacts:
         top = max(range(len(impacts)), key=lambda j: impacts[j]["score"])
         h1, h2 = impacts[top]["info"]["hook"]
-        segs.append({"id": "hook", "fr": tag_pt(f"{h1.capitalize()} ? {h2.capitalize()}.")})
+        sep = " " if h1.endswith("?") else ". "
+        segs.append({"id": "hook", "fr": tag_pt(f"{h1.capitalize()}{sep}{h2.capitalize()}.")})
     for k, m in enumerate(impacts):
         txt = script_short(m["info"]) if short else script_for(m["info"], k + 1, discipline)
         segs.append({"id": k, "fr": tag_pt(txt)})
-    outro = "Abonne-toi pour la partie deux, et enregistre la vidéo pour l'essayer à l'entraînement."
+    outro = "Abonne-toi, la partie deux arrive."
     if discipline == "capoeira":
         outro = "Abonne-toi, et on se retrouve dans la [pt]roda[/pt]. [pt]Axé[/pt] !"
     segs.append({"id": "outro", "fr": outro})

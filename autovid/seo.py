@@ -2,7 +2,7 @@
 
 Structure de titre reprise de la chaîne de référence (FISH13) : SUJET EN MAJUSCULES + émoji + promesse,
 puis des mots-clés entre crochets, ex. « LUXURY CAMPING IN THE RAIN ⛈️ XXL INFLATABLE CAPSULE TENT »
-→ « HIGH KICK 🦵 LE SECRET DE LA HANCHE [ Anatomie, Placement, Erreurs ] ».
+→ « HIGH KICK 🦵 ANALYSE AU RALENTI [ Anatomie, Placement, Erreurs ] ».
 """
 import json
 from pathlib import Path
@@ -11,7 +11,7 @@ EMOJI = {"pied": "🦵", "poing": "🥊", "genou": "🦵", "au": "🤸", "esquiv
 
 T = {
     "fr": {
-        "promesse": ["LE SECRET DE LA TECHNIQUE", "ANALYSE AU RALENTI", "CE QUE PERSONNE NE T'EXPLIQUE"],
+        "promesse": ["ANALYSE AU RALENTI", "PLACEMENT ET MUSCLES", "LES ERREURS QUI BLESSENT"],
         "crochets": "[ Anatomie, Placement, Erreurs ]",
         "desc": ("{nom} expliqué au ralenti : placement, muscles moteurs et risques de blessure.\n\n"
                  "Dans cette vidéo :\n{liste}\n\n"
@@ -22,7 +22,7 @@ T = {
         "hashtags": ["#combat", "#anatomie", "#entrainement", "#selfdefense"],
     },
     "pt": {
-        "promesse": ["O SEGREDO DA TÉCNICA", "ANÁLISE EM CÂMERA LENTA", "O QUE NINGUÉM TE EXPLICA"],
+        "promesse": ["ANÁLISE EM CÂMERA LENTA", "POSICIONAMENTO E MÚSCULOS", "OS ERROS QUE MACHUCAM"],
         "crochets": "[ Anatomia, Posicionamento, Erros ]",
         "desc": ("{nom} explicado em câmera lenta: posicionamento, músculos e riscos de lesão.\n\n"
                  "Neste vídeo:\n{liste}\n\n"
@@ -33,7 +33,7 @@ T = {
         "hashtags": ["#luta", "#anatomia", "#treino", "#defesapessoal"],
     },
     "en": {
-        "promesse": ["THE SECRET BEHIND IT", "SLOW MOTION BREAKDOWN", "WHAT NOBODY TELLS YOU"],
+        "promesse": ["SLOW MOTION BREAKDOWN", "PLACEMENT AND MUSCLES", "THE MISTAKES THAT HURT"],
         "crochets": "[ Anatomy, Placement, Mistakes ]",
         "desc": ("{nom} broken down in slow motion: placement, prime movers and injury risks.\n\n"
                  "In this video:\n{liste}\n\n"
@@ -72,7 +72,8 @@ def build(analyses, discipline="combat", handle="", shorts=True):
         titres = [f"{sujet} {emoji} {p} {t['crochets']}" for p in t["promesse"]]
         titres = [x if len(x) <= 100 else x[:97] + "…" for x in titres]
         liste = "\n".join(f"{_mmss(a['t_out'])} {a['nom']}" for a in analyses)
-        hashtags = dtags["hash"] + t["hashtags"] + (["#shorts"] if shorts else [])
+        # 5 hashtags maximum (règle humanize) : 2 de la discipline, 2 du sujet, #shorts
+        hashtags = dtags["hash"][:2] + t["hashtags"][:2] + (["#shorts"] if shorts else t["hashtags"][2:3])
         tags = [n.lower() for n in noms] + dtags[lang] + t["tags"]
         out[lang] = {
             "titres": titres,

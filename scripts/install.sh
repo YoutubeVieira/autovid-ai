@@ -26,6 +26,13 @@ else
   echo "⚠ Node.js absent : installe Node 22+ (https://nodejs.org) pour l'intro HyperFrames et la carte de fin Remotion"
 fi
 
+# Skills vidéo de Melvynx (MIT) : niche virale (outliers), scripts + accroches notées (studio-script),
+# humanize (studio-script humanize), montage (short-editing), vidéo longue → shorts (clips).
+if command -v npx >/dev/null; then
+  npx --yes skills add Melvynx/video-agent-skills -a claude-code \
+    || echo "⚠ skills Melvynx non installés : git clone https://github.com/Melvynx/video-agent-skills puis cp -r video-agent-skills/skills/* .claude/skills/"
+fi
+
 # Skills : Claude Code les lit dans .claude/skills ; on les copie aussi pour Google Antigravity.
 mkdir -p .agent/skills && cp -r .claude/skills/* .agent/skills/
 

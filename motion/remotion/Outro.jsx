@@ -52,8 +52,10 @@ export const Outro = ({ handle, teaser, cta, save, accent }) => {
       <div style={{ position: "absolute", left: cursorX, top: cursorY, fontSize: 90, opacity: frame < 50 ? pop(12) : 0,
         transform: `scale(${press})`, filter: "drop-shadow(0 6px 10px rgba(0,0,0,.7))" }}>👆</div>
 
-      <div style={{ position: "absolute", top: 1240, width: "100%", textAlign: "center", fontFamily: "Marker", fontSize: 58, color: accent,
-        opacity: pop(40), transform: `scale(${interpolate(pop(40), [0, 1], [0.6, 1])})` }}>🔖 {save}</div>
+      {save ? (  // une seule demande par vidéo (règle humanize) : le rappel « enregistre » est optionnel
+        <div style={{ position: "absolute", top: 1240, width: "100%", textAlign: "center", fontFamily: "Marker", fontSize: 58, color: accent,
+          opacity: pop(40), transform: `scale(${interpolate(pop(40), [0, 1], [0.6, 1])})` }}>🔖 {save}</div>
+      ) : null}
       <div style={{ position: "absolute", bottom: 170, width: "100%", textAlign: "center", fontSize: 50, letterSpacing: 3,
         color: "rgba(255,255,255,.75)", opacity: pop(48) }}>{handle}</div>
       <AbsoluteFill style={{ background: "#fff", opacity: flash }} />

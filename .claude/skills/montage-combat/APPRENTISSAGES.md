@@ -16,3 +16,8 @@
 - **Traits et flèches sur une seule partie précise** : uniquement le membre qui travaille (jambe qui frappe,
   ou bras qui protège / qui porte l'aú) + ses articulations + UNE flèche qui suit son extrémité.
   Plus de trait sur la jambe d'appui ni de flèche sur le bassin. Ellipse seulement sous la main de l'aú.
+
+## 2026-10-19 — skills Melvynx installés
+- Avant de rendre, passer accroches, voix off, titres et description au filtre `studio-script humanize`
+  (pas de « secret », pas de question-révélation, une seule demande en fin de vidéo, 5 hashtags max).
+  `tests/test_humanize.py` le vérifie sur nos modèles de texte.

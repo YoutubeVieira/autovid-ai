@@ -48,7 +48,7 @@ def render_intro(out, title, kicker="ANALYSE AU RALENTI", tag="COMBAT • ANATOM
     return out
 
 
-def render_outro(out, handle="", teaser="PARTIE 2 : LA DÉFENSE", cta="ABONNE-TOI", save="ENREGISTRE ET ESSAIE",
+def render_outro(out, handle="", teaser="PARTIE 2 : LA DÉFENSE", cta="ABONNE-TOI", save="",
                  accent="#39ff14"):
     out = Path(out).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)

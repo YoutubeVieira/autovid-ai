@@ -15,3 +15,11 @@ motion/node_modules/
 motion/.agents/
 motion/.claude/
 **/.hyperframes/
+
+# Skills tiers (Melvynx/video-agent-skills, MIT) : installés par scripts/install.sh, pas versionnés ici
+.claude/skills/editing/
+.claude/skills/studio-setup/
+.claude/skills/studio-script/
+.claude/skills/outliers/
+.claude/skills/short-editing/
+.claude/skills/clips/
