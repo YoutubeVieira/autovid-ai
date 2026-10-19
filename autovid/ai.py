@@ -150,3 +150,48 @@ def translate(texts):
     if any(len(data[k]) != len(texts) for k in ("pt", "en")):
         return None
     return data
+
+
+FUN_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "lignes": {"type": "array", "description": "3 textes à l'écran : début, ralenti, fin",
+                   "items": {"type": "object", "properties": {"l1": {"type": "string"}, "l2": {"type": "string"}},
+                             "required": ["l1", "l2"], "additionalProperties": False}},
+        "genere_par_ia": {"type": "boolean", "description": "la vidéo semble générée par IA"},
+    },
+    "required": ["lignes", "genere_par_ia"],
+    "additionalProperties": False,
+}
+
+FUN_PROMPT = """Voici 3 images d'un clip court (début, moment fort, fin) qu'on monte en short TikTok/Reels drôle.
+Écris 3 textes à l'écran en français, chacun sur 2 lignes en MAJUSCULES (ligne 1 : 4 mots max, ligne 2 : 3 mots
+max) : un pour le début, un pendant le ralenti du moment fort, un pour la fin. Ton parlé, comme un pote qui
+commente. Décris seulement ce qu'on voit. Pas de « secret », pas de question suivie de sa réponse, pas de tiret
+long, pas d'emoji. Dis aussi si la vidéo semble générée par IA."""
+
+
+def fun_texts(video, idxs):
+    """Textes d'écran du mode fun écrits par Claude à partir de 3 images. None sans identifiants Anthropic."""
+    import anthropic
+    try:
+        client = anthropic.Anthropic()
+    except anthropic.AnthropicError:
+        return None
+    content = [{"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": _jpeg(f)}}
+               for f in _frames_at(video, idxs)]
+    content.append({"type": "text", "text": FUN_PROMPT})
+    try:
+        resp = client.beta.messages.create(
+            model=MODEL, max_tokens=2000, betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+            output_config={"effort": "low", "format": {"type": "json_schema", "schema": FUN_SCHEMA}},
+            messages=[{"role": "user", "content": content}])
+    except (anthropic.APIError, TypeError) as e:     # TypeError : aucun identifiant configuré
+        print(f"   IA : textes indisponibles ({e.__class__.__name__}), textes par défaut")
+        return None
+    text = next((b.text for b in resp.content if b.type == "text"), None)
+    if resp.stop_reason == "refusal" or not text:
+        return None
+    data = json.loads(text)
+    lines = [(x["l1"].upper()[:28], x["l2"].upper()[:24]) for x in data["lignes"][:3]]
+    return (lines + [("", "")] * 3)[:3], bool(data["genere_par_ia"])

@@ -46,6 +46,11 @@ def command(mode, video, out, opts):
         cmd += ["--resolution", opts.get("resolution", "1080"), "--max-impacts", str(opts.get("max_impacts", 6))]
         if opts.get("ai"):
             cmd += ["--ai", "claude"]
+    elif mode == "fun":
+        if opts.get("handle"):
+            cmd += ["--handle", opts["handle"]]
+        if opts.get("ai"):
+            cmd += ["--ai", "claude"]
     elif mode == "talk":
         cmd += ["--language", opts.get("language", "fra")]
     return cmd
@@ -61,10 +66,10 @@ def run_job(job_id):
         if not line or "W0000" in line or "I0000" in line:
             continue
         with LOCK:
-            m = re.match(r"(\d)/6 (.*)", line)
+            m = re.match(r"(\d)/(\d) (.*)", line)
             if m:
                 job["step"] = line
-                job["progress"] = max(job["progress"], (int(m.group(1)) - 1) / 6)
+                job["progress"] = max(job["progress"], (int(m.group(1)) - 1) / int(m.group(2)))
             r = re.search(r"rendu (\d+)/(\d+)", line)
             if r:
                 job["progress"] = 4 / 6 + int(r.group(1)) / int(r.group(2)) / 6
@@ -205,7 +210,7 @@ class Handler(BaseHTTPRequestHandler):
                     "max_impacts": int(body.get("max_impacts", 6)), "music": music, "ai": bool(body.get("ai"))}
             if opts["resolution"] not in ("1080", "1440", "4k", "8k"):
                 opts["resolution"] = "1080"
-            mode = body.get("mode", "combat") if body.get("mode") in ("combat", "talk") else "combat"
+            mode = body.get("mode", "combat") if body.get("mode") in ("combat", "fun", "talk") else "combat"
             self._json({"id": start_job(video, mode, opts, self.data_dir)})
         else:
             self.send_error(404)

@@ -3,6 +3,8 @@
 Monteur vidéo automatique en Python + ffmpeg (paquet `autovid/`). Commandes : `python -m autovid -h`.
 
 - Vidéos de combat → skill `montage-combat` (`python -m autovid combat`).
+- Clip d'humour / animaux / généré par IA → `python -m autovid fun` (pas d'anatomie). Le mode combat refuse
+  l'analyse si aucune vraie personne n'est reconnue (`--force` pour passer outre).
 - Vidéo parlée → skill `couper-les-blancs` (`python -m autovid talk`).
 - « Fais comme cette vidéo » → skill `copier-style`.
 - Retours sur un rendu → skill `feedback-montage` ; publication → skill `publier`.

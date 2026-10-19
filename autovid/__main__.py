@@ -3,6 +3,7 @@
   python -m autovid analyze  ref.mp4 -o analyse/            ADN de montage d'une vidéo de référence
   python -m autovid auto     rushs/ -o out.mp4 [--music m.mp3] [--reference ref.mp4] [--style bincombat]
   python -m autovid render   brief.yaml -o out.mp4         montage piloté par un brief (titres, étapes, cercles…)
+  python -m autovid fun      clip.mp4 -o out.mp4          clip d'humour / animaux / IA : accroche, ralenti, bruitages
   python -m autovid talk     face_cam.mp4 -o out.mp4       coupe des silences + « euh » + sous-titres ElevenLabs
   python -m autovid combat   combat.mp4 -o out.mp4         short éducatif analysé (squelette, anatomie, sons)
   python -m autovid serve                                   plateforme web (téléphone ↔ PC)
@@ -94,6 +95,20 @@ def main(argv=None):
     c.add_argument("--music-from", help="reprendre la bande-son d'une vidéo (seulement si tu en as les droits)")
     c.add_argument("--workdir")
 
+    c.add_argument("--force", action="store_true",
+                   help="analyser même si aucune vraie personne n'est reconnue (créature d'IA, animal, dessin…)")
+
+    fu = sub.add_parser("fun", help="clip court d'humour, d'animaux ou d'IA (sans analyse anatomique)")
+    fu.add_argument("video")
+    fu.add_argument("-o", "--out", required=True)
+    fu.add_argument("--texte", action="append", metavar="LIGNE1/LIGNE2",
+                    help="texte à l'écran (3 fois max : début, ralenti, fin), ex. --texte \"LA DINDE A PRIS/SA REVANCHE\"")
+    fu.add_argument("--ai", choices=["claude"], help="textes écrits par Claude à partir des images")
+    fu.add_argument("--ia", action="store_true", help="ajoute la mention « VIDÉO GÉNÉRÉE PAR IA »")
+    fu.add_argument("--handle")
+    fu.add_argument("--music")
+    fu.add_argument("--workdir")
+
     vc = sub.add_parser("voice-clone", help="clone ta voix (ElevenLabs) à partir de tes enregistrements")
     vc.add_argument("samples", nargs="+", help="1 à 3 min de ta voix, sans musique (mp3/wav/m4a)")
     vc.add_argument("--name", default="Ma voix AutoVid")
@@ -120,10 +135,20 @@ def main(argv=None):
     w = sub.add_parser("watch", help="dossier surveillé (Drive, iCloud, Syncthing…)")
     w.add_argument("in_dir")
     w.add_argument("out_dir")
-    w.add_argument("--mode", choices=["combat", "talk"], default="combat")
+    w.add_argument("--mode", choices=["combat", "fun", "talk"], default="combat")
     w.add_argument("--handle")
 
     args = ap.parse_args(argv)
+    if args.cmd == "combat":
+        from .combat import PasHumain
+        try:
+            return _run(args)
+        except PasHumain as e:
+            raise SystemExit(f"✘ {e}")
+    return _run(args)
+
+
+def _run(args):
     if args.cmd == "analyze":
         for v in args.videos:
             out = Path(args.out) / Path(v).stem[:40]
@@ -147,7 +172,12 @@ def main(argv=None):
         print("→", combat(args.video, args.out, _workdir(args, args.out), args.music, args.handle, args.max_impacts,
                           args.resolution, args.ai, not args.no_hook, args.original_audio, None, args.discipline,
                           args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion, args.framing,
-                          args.tts, args.style, args.kit, args.music_from))
+                          args.tts, args.style, args.kit, args.music_from, args.force))
+    elif args.cmd == "fun":
+        from .fun import fun
+        texts = [tuple((t.split("/", 1) + [""])[:2]) for t in (args.texte or [])[:3]]
+        print("→", fun(args.video, args.out, _workdir(args, args.out), texts or None, args.handle, args.ai,
+                       True if args.ia else None, args.music))
     elif args.cmd == "voice-clone":
         from .narration import CONFIG, clone_voice
         print("voix créée :", clone_voice(args.samples, args.name), f"(enregistrée dans {CONFIG})")

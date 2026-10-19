@@ -151,3 +151,63 @@ def segment(frame):
     poses = [np.array([[p.x, p.y, p.visibility] for p in pose]) for pose in res.pose_landmarks]
     masks = [np.squeeze(m.numpy_view()).astype(np.float32) for m in (res.segmentation_masks or [])]
     return poses, masks
+
+
+DETECTOR_URL = ("https://storage.googleapis.com/mediapipe-models/object_detector/"
+                "efficientdet_lite2/float32/1/efficientdet_lite2.tflite")
+
+
+def human_ratio(path, tracks, frames, w=540, h=960, min_score=0.3, min_iou=0.2):
+    """Part des images (parmi `frames`) où un squelette suivi correspond à une vraie « personne » pour un
+    détecteur d'objets (COCO). Le squelette seul se pose aussi sur des animaux, dessins ou créatures d'IA.
+    Renvoie None si le détecteur est indisponible (pas de réseau au premier lancement)."""
+    import mediapipe as mp
+    from mediapipe.tasks.python import BaseOptions, vision
+    cache = Path(os.environ.get("AUTOVID_CACHE", Path.home() / ".cache" / "autovid"))
+    model = cache / "efficientdet_lite2.tflite"
+    try:
+        if not model.exists():
+            cache.mkdir(parents=True, exist_ok=True)
+            urllib.request.urlretrieve(DETECTOR_URL, model)
+        det = vision.ObjectDetector.create_from_options(vision.ObjectDetectorOptions(
+            base_options=BaseOptions(model_asset_path=str(model)), score_threshold=0.15, max_results=12))
+    except (OSError, RuntimeError, ValueError):
+        return None
+    try:
+        return _human_ratio(det, path, tracks, frames, w, h, min_score, min_iou)
+    finally:
+        det.close()                              # sinon MediaPipe affiche une erreur à la sortie de Python
+
+
+def _human_ratio(det, path, tracks, frames, w, h, min_score, min_iou):
+    import mediapipe as mp
+    want, seen, ok = set(int(f) for f in frames), 0, 0
+    for i, fr in enumerate(iter_frames(path, w, h)):
+        if i > max(want):
+            break
+        if i not in want:
+            continue
+        boxes = []
+        for k in range(tracks.shape[0]):
+            p = tracks[k, min(i, tracks.shape[1] - 1), :, :2]
+            p = p[np.isfinite(p).all(axis=1)] * [w, h]
+            if len(p) > 8:
+                boxes.append((*p.min(axis=0), *p.max(axis=0)))
+        if not boxes:
+            continue
+        seen += 1
+        res = det.detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.ascontiguousarray(fr)))
+        people = [d.bounding_box for d in res.detections
+                  if d.categories[0].category_name == "person" and d.categories[0].score >= min_score]
+        for x0, y0, x1, y1 in boxes:
+            for b in people:
+                bx0, by0, bx1, by1 = b.origin_x, b.origin_y, b.origin_x + b.width, b.origin_y + b.height
+                inter = max(0, min(x1, bx1) - max(x0, bx0)) * max(0, min(y1, by1) - max(y0, by0))
+                union = (x1 - x0) * (y1 - y0) + b.width * b.height - inter
+                if union > 0 and inter / union >= min_iou:
+                    ok += 1
+                    break
+            else:
+                continue
+            break
+    return ok / seen if seen else 0.0

@@ -26,3 +26,8 @@
   Petite flèche de trajectoire de temps en temps, c'est tout (comme la vidéo modèle n° 2).
 - Bruits selon le coup (comme la vidéo n° 1) : contact sur le corps = coup sourd + claque, sac / pao = « boum »
   lourd + cuir + chaîne, dans le vide = swish ; rotation (meia-lua, armada, aú) = souffle qui tourne.
+
+## 2026-10-19 — sujet qui n'est pas humain
+- Une créature d'IA (dinde-dinosaure) a reçu un faux « UPPERCUT / attention au poignet » : le squelette se pose
+  sur tout ce qui a deux pattes. Le mode combat vérifie maintenant avec un détecteur d'objets (COCO « person »)
+  et refuse sous 50 %. Ces clips passent par `python -m autovid fun` (accroche, ralenti, bruitages, mention IA).

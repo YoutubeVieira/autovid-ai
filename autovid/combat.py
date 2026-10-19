@@ -194,6 +194,10 @@ def build_timeline(n_frames, impacts, hook=True, max_dead=3.0, hook_freeze=HOOK_
 
 # --------------------------------------------------------------------------- 5. rendu image
 
+class PasHumain(RuntimeError):
+    """Le sujet n'est pas une vraie personne : l'analyse anatomique n'aurait pas de sens."""
+
+
 class Renderer:
     def __init__(self, tracks, impacts, timeline, handle=None, accent=gfx.GREEN):
         self.tracks, self.impacts, self.tl = tracks, impacts, timeline
@@ -645,8 +649,9 @@ def subtitles(segs, starts, impacts, out_base, work, burn, langs, windows=None, 
 def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution="1080", ai=None, hook=True,
            orig_gain=0.7, accent=None, discipline="combat", voice_id=None, langs=("fr", "pt", "en"), burn="fr",
            extras=True, motion_design=True, framing="auto", tts="auto", style="fluide", kit="reaction",
-           music_from=None):
+           music_from=None, force=False):
     """style : "fluide" (analyse sur la vidéo en mouvement, sans pause) ou "analyse" (arrêts sur image commentés).
+    force : analyser même si le contrôle « vraie personne » échoue.
     kit : "reaction" (phonk 808, impacts sub) ou "classique". music_from : vidéo dont on reprend la bande-son
     comme musique (uniquement si tu en as les droits)."""
     from . import narration as nar
@@ -677,6 +682,18 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     print("3/6 détection des coups")
     impacts = detect_impacts(tracks, cuts, max_impacts, movers_only=discipline == "capoeira",
                              center_zone=0.42 if discipline == "capoeira" and framing == "cover" else None)
+    if impacts and not force:                    # le squelette se pose aussi sur des créatures d'IA, des animaux…
+        from .pose import human_ratio
+        check = sorted({m["frame"] for m in impacts} | {int(n * q) for q in (0.2, 0.4, 0.6, 0.8)})
+        ratio = human_ratio(str(base), tracks, check)
+        if ratio is None:
+            print("   contrôle « vraie personne » indisponible (détecteur non téléchargé) : analyse quand même")
+        elif ratio < 0.5:
+            raise PasHumain(f"pas de vraie personne reconnue ({ratio:.0%} des images contrôlées) : analyse "
+                            "anatomique refusée pour ne pas inventer de coups. Pour un clip d'humour / IA / animaux : "
+                            "python -m autovid fun. Pour forcer : --force")
+        else:
+            print(f"   contrôle « vraie personne » : OK ({ratio:.0%} des images)")
     for m in impacts:
         m["info"] = classify(tracks[m["track"]], m["frame"], m["eff"])
         if discipline == "capoeira":

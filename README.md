@@ -12,6 +12,15 @@ Tout tourne en local avec **ffmpeg + Python** (numpy, PyYAML, requests). Pas d'A
 ./scripts/install.sh             # ffmpeg, dépendances Python, modèle de pose, skills (Claude Code + Antigravity)
 ```
 
+## Clip d'humour, d'animaux ou généré par IA
+```bash
+python -m autovid fun clip.mp4 -o sorties/fun.mp4 --handle @toncompte --ia \
+  --texte "LA DINDE A PRIS/SA REVANCHE" --texte "ELLE A SORTI/LE COUTEAU" --texte "ET ELLE A RAMENÉ/SES AMIS"
+```
+Moment fort trouvé tout seul (pic de mouvement) : ralenti + zoom, flash, micro-pause, beat phonk et bruitages,
+textes en deux lignes (ou écrits par Claude avec `--ai claude`), mention « VIDÉO GÉNÉRÉE PAR IA » avec `--ia`.
+Le mode combat, lui, refuse d'analyser un sujet qui n'est pas une vraie personne (`--force` pour passer outre).
+
 ## ⭐ Une vidéo → un short prêt à poster
 ```bash
 python -m autovid combat ma_video.mp4 -o sorties/short.mp4 --handle @toncompte [--music m.mp3] [--ai claude]
