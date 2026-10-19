@@ -137,7 +137,7 @@ class FluidMixin:
             return 1.0, None
         c = eff * 0.45 + mid * 0.35 + (root if np.isfinite(root).all() else mid) * 0.2
         span = np.linalg.norm(eff - root) if np.isfinite(root).all() else np.linalg.norm(eff - mid) * 2
-        z = float(np.clip(0.42 * H / max(span, 40), 1.35, 2.4))
+        z = float(np.clip(0.42 * H / max(span, 40), 1.35, getattr(self, "max_zoom", 2.4)))
         return z, c
 
     def zoom_for(self, f):
@@ -196,14 +196,17 @@ class FluidMixin:
             if ok(j):
                 gfx.ring(img, xy[j], thick * 1.3, (255, 255, 255), 3)
 
-        # 2. ellipse sous le pied d'appui (pivot)
-        sup = [j for bone in info_["support"] for j in bone if j in (L_ANK, R_ANK)]
-        foot = xy[sup[0]] if sup and ok(sup[0]) else None
-        if foot is not None:
-            pulse = 1 + 0.08 * np.sin(lt * 10)
-            ax = (int(torso * 0.55 * pulse), int(torso * 0.17 * pulse))
-            cv2.ellipse(img, tuple((foot + [0, torso * 0.08]).astype(int)), ax, 0, 0, 360, (0, 0, 0), 9, cv2.LINE_AA)
-            cv2.ellipse(img, tuple((foot + [0, torso * 0.08]).astype(int)), ax, 0, 0, 360, gfx.YELLOW, 5, cv2.LINE_AA)
+        # 2. ellipse(s) sous les appuis : pied d'appui (pivot), ou les deux mains au sol pour l'aú
+        if info_["kind"] == "au":
+            supports = [j for j in (L_WR, R_WR) if ok(j)]
+        else:
+            supports = [j for bone in info_["support"] for j in bone if j in (L_ANK, R_ANK) and ok(j)][:1]
+        pulse = 1 + 0.08 * np.sin(lt * 10)
+        for j in supports:
+            ax = (int(torso * 0.45 * pulse), int(torso * 0.14 * pulse))
+            c = tuple((xy[j] + [0, torso * 0.06]).astype(int))
+            cv2.ellipse(img, c, ax, 0, 0, 360, (0, 0, 0), 9, cv2.LINE_AA)
+            cv2.ellipse(img, c, ax, 0, 0, 360, gfx.YELLOW, 5, cv2.LINE_AA)
 
         e = info_["effector"]
         if info_["kind"] in BURST_KINDS:

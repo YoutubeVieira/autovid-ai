@@ -726,6 +726,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     if fluid:
         renderer = type("FluidRenderer", (fluide.FluidMixin, Renderer), {})(tracks, impacts, timeline, handle,
                                                                               accent or gfx.GREEN)
+        src_h = min(info(str(src))["height"], info(str(src))["width"] * 16 / 9)
+        renderer.max_zoom = float(np.clip(src_h / 280, 1.5, 2.4))   # source basse définition : zoom plus doux
     else:
         renderer = Renderer(tracks, impacts, timeline, handle, accent or gfx.GREEN)
     renderer.render(base, work / "video.mp4")
