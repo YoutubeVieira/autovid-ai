@@ -28,8 +28,13 @@ Statuts : `pret` (à vérifier par l'utilisateur), `a_rendre` (il a cliqué « L
 5. Regarder le rendu, puis étapes 2 à 6 ci-dessus avec `--ancien` pour ajouter la version N.
 
 ## Nouvelle vidéo déposée dans la page (`a_monter`)
-`Artifact` read avec `path` = `source.id` pour récupérer la vidéo, puis `python -m autovid combat` ou `fun` selon
-`projet.mode` et les notes, puis « Après un montage ». Les vidéos de plus de 20 Mo passent par la conversation.
+La page envoie toute vidéo en morceaux de 19 Mo (limite de 20 Mo par fichier), tous déclarés `video/mp4`.
+1. `ArtifactData` get du projet avec `out_dir` (le fichier JSON du document).
+2. `Artifact` read avec `paths` = tous les `source.morceaux[].id` (dans l'ordre) et un `out_dir` commun.
+3. `python3 scripts/recoller_video.py <doc.json> <out_dir> -o source.<ext d'origine>` (vérifie la taille totale).
+4. `python -m autovid combat` / `fun` / `viral` selon `projet.mode` et les notes, puis « Après un montage ».
+5. Une fois le montage publié, supprimer les morceaux (`Artifact` delete avec `url` + `path` = id) pour libérer la
+   place, et retirer `source.morceaux` du document. Anciennes versions d'aperçu : même ménage si la place manque.
 
 ## Projet complet (automate `viral`)
 Un seul document par projet, une version par sortie avec `--label` et `--format 16:9` pour la vidéo longue

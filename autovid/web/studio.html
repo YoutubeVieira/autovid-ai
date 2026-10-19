@@ -112,6 +112,8 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 main { max-width: 1180px; margin: 0 auto; }
 .new { display: grid; gap: 12px; }
+.bar { height: 10px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; }
+.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 .ro { padding: 12px 14px; border: 1px dashed var(--gold); border-radius: 10px; color: var(--gold); }
 @media (prefers-reduced-motion: no-preference) { .clip, .btn, .tabs button { transition: background .15s, border-color .15s, color .15s; } }
 </style>
@@ -131,12 +133,13 @@ main { max-width: 1180px; margin: 0 auto; }
   <section class="card new" id="newCard" hidden>
     <h2>Nouveau montage</h2>
     <div class="grid2">
-      <label class="f"><span>Vidéo (20 Mo max ici)</span><input type="file" id="newFile" accept="video/*"></label>
+      <label class="f"><span>Vidéo (toute taille, mp4 ou mov)</span><input type="file" id="newFile" accept="video/*,.mov,.mp4,.m4v,.webm"></label>
       <label class="f"><span>Type de montage</span>
         <select id="newMode"><option value="combat">Combat / capoeira éducatif</option><option value="fun">Fun / animaux / IA</option></select></label>
     </div>
     <label class="f"><span>Ce que tu veux (facultatif)</span><textarea id="newNotes" placeholder="Ex. : capoeira, accent sur la meia-lua, voix en français"></textarea></label>
-    <p class="hint">Vidéo plus lourde : envoie-la dans la conversation avec Claude, elle apparaîtra ici une fois montée.</p>
+    <p class="hint" id="newInfo">Les grosses vidéos partent en morceaux de 19 Mo : garde cette page ouverte pendant l'envoi.</p>
+    <div class="bar" id="newBar" hidden><span id="newBarFill"></span></div>
     <div><button class="btn go" id="newGo" type="button">Envoyer à Claude</button></div>
   </section>
 
@@ -388,23 +391,73 @@ main { max-width: 1180px; margin: 0 auto; }
   $("#projSel").addEventListener("change", e => select(e.target.value));
   $("#newBtn").addEventListener("click", () => { $("#newCard").hidden = !$("#newCard").hidden; });
 
+  // Envoi en morceaux : la plateforme accepte 20 Mo par fichier ; Claude recolle les morceaux dans l'ordre.
+  const CHUNK = 19 * 1024 * 1024;
+  const mo = b => (b / 1048576).toFixed(b < 10485760 ? 1 : 0) + " Mo";
+  async function cuts(file) {
+    // un morceau ne doit pas commencer par « < » (pris pour du HTML) : on décale la coupe d'un octet si besoin
+    const out = []; let a = 0;
+    while (a < file.size) {
+      let b = Math.min(a + CHUNK, file.size);
+      while (b < file.size) {
+        const head = new Uint8Array(await file.slice(b, Math.min(b + 64, file.size)).arrayBuffer());
+        const first = head.find(x => x !== 0x20 && x !== 0x09 && x !== 0x0a && x !== 0x0d);
+        if (first !== 0x3c) break;
+        b += 1;
+      }
+      out.push([a, b]); a = b;
+    }
+    return out;
+  }
+  async function sendPart(assets, blob) {
+    for (let attempt = 0; ; attempt++) {
+      try { return await assets.upload(blob, { type: "video/mp4" }); }
+      catch (e) {
+        const again = (e.code === "store_unavailable" && attempt < 1) || (e.code === "rate_limited" && attempt < 4);
+        if (!again) throw e;
+        await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+      }
+    }
+  }
+  $("#newFile").addEventListener("change", () => {
+    const f = $("#newFile").files[0];
+    if (f) $("#newInfo").textContent = `${f.name} · ${mo(f.size)} · ${Math.ceil(f.size / CHUNK)} morceau(x). Garde cette page ouverte pendant l'envoi.`;
+  });
   $("#newGo").addEventListener("click", async () => {
     const f = $("#newFile").files[0];
     if (!db) return setMsg("Connecte-toi pour envoyer une vidéo.");
     if (!f) return setMsg("Choisis d'abord une vidéo.");
-    if (f.size > 20 * 1024 * 1024) return setMsg("Vidéo de plus de 20 Mo : envoie-la directement dans la conversation avec Claude.");
     const assets = await claude.use("assets");
-    if (!assets) return setMsg("Envoi de fichiers indisponible ici : envoie la vidéo dans la conversation.");
-    $("#newGo").disabled = true; setMsg("Envoi de la vidéo…");
+    if (!assets) return setMsg("Envoi de fichiers indisponible ici : envoie la vidéo dans la conversation avec Claude.");
     try {
-      const up = await assets.upload(f);
+      const { usage } = await assets.list();
+      if (usage && usage.maxBytes && usage.bytes + f.size > usage.maxBytes)
+        return setMsg(`Plus assez de place (${mo(usage.maxBytes - usage.bytes)} libres, vidéo de ${mo(f.size)}). Demande à Claude de faire le ménage des anciennes vidéos, ou exporte-la plus légère (1080p).`);
+    } catch (e) { /* la place libre n'est pas connue : on tente l'envoi */ }
+    $("#newGo").disabled = true; $("#newBar").hidden = false;
+    const parts = [];
+    try {
+      const plan = await cuts(f);
+      for (let i = 0; i < plan.length; i++) {
+        const [a, b] = plan[i];
+        setMsg(`Envoi du morceau ${i + 1}/${plan.length} (${mo(b)} sur ${mo(f.size)})…`);
+        const up = await sendPart(assets, f.slice(a, b));
+        parts.push({ id: up.id, url: up.url, octets: b - a });
+        $("#newBarFill").style.width = (100 * b / f.size).toFixed(1) + "%";
+      }
       const nom = f.name.replace(/\.[^.]+$/, "").slice(0, 40);
       const ref = await db.collection("projets").add({ nom, statut: "a_monter", cree: new Date().toISOString(),
-        source: { id: up.id, url: up.url, nom: f.name }, versions: [],
+        source: { nom: f.name, octets: f.size, type: f.type || "", morceaux: parts }, versions: [],
         projet: { mode: $("#newMode").value, notes: $("#newNotes").value, reglages: {} } });
-      $("#newCard").hidden = true; setMsg("Vidéo envoyée. Dis à Claude « nouveau montage » dans la conversation.");
+      $("#newCard").hidden = true; $("#newBar").hidden = true;
+      setMsg(`Vidéo envoyée (${mo(f.size)}, ${parts.length} morceau(x)). Dis à Claude « nouveau montage » dans la conversation.`);
       pending = ref.id;
-    } catch (e) { setMsg("Envoi impossible : " + (e.message || e.code || "erreur")); }
+    } catch (e) {
+      for (const p of parts) { try { await assets.delete(p.id); } catch (_) { /* déjà supprimé */ } }
+      const why = { too_large: "un morceau est trop gros", quota_or_state: "plus de place sur la plateforme",
+        unsupported_type: "format refusé", rate_limited: "trop d'envois d'un coup, réessaie dans une minute" }[e.code];
+      setMsg("Envoi interrompu : " + (why || e.message || e.code || "erreur") + ". Rien n'a été gardé, tu peux relancer.");
+    }
     $("#newGo").disabled = false;
   });
   let pending = null;
