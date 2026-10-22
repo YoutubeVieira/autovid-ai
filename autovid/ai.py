@@ -195,3 +195,85 @@ def fun_texts(video, idxs):
     data = json.loads(text)
     lines = [(x["l1"].upper()[:28], x["l2"].upper()[:24]) for x in data["lignes"][:3]]
     return (lines + [("", "")] * 3)[:3], bool(data["genere_par_ia"])
+
+
+# --------------------------------------------------------------------------- documentaire
+
+DOC_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "titre": {"type": "string", "description": "titre YouTube factuel, 70 caractères max"},
+        "accroche": {"type": "string", "description": "voix off des 15 premières secondes : le fait le plus fort, "
+                                                       "une vraie question, pas de « secret »"},
+        "chapitres": {"type": "array", "items": {"type": "object", "properties": {
+            "titre": {"type": "string"},
+            "plans": {"type": "array", "items": {"type": "object", "properties": {
+                "texte": {"type": "string", "description": "voix off de ce plan, 1 à 3 phrases parlées"},
+                "visuel": {"type": "string", "enum": ["archive", "film", "date", "lieu", "citation", "ambiance"]},
+                "requete": {"type": "string", "description": "recherche d'archive EN ANGLAIS (lieu, bâtiment, "
+                                                             "objet, époque, personne publique) ; jamais de victime ni de corps"},
+                "legende": {"type": "string", "description": "texte court affiché (date, lieu, citation exacte)"},
+            }, "required": ["texte", "visuel", "requete", "legende"], "additionalProperties": False}},
+        }, "required": ["titre", "plans"], "additionalProperties": False}},
+        "sources": {"type": "array", "items": {"type": "object", "properties": {
+            "titre": {"type": "string"}, "url": {"type": "string"}},
+            "required": ["titre", "url"], "additionalProperties": False}},
+    },
+    "required": ["titre", "accroche", "chapitres", "sources"],
+    "additionalProperties": False,
+}
+
+DOC_RULES = """Règles (non négociables) :
+- Seulement des faits établis et sourcés : condamnations définitives, archives judiciaires, presse de référence.
+  Pas de spéculation présentée comme un fait, pas de nom de suspect jamais condamné.
+- Angle enquête et victimes : comment l'affaire a été résolue, les erreurs, les leçons. Jamais glorifier l'auteur,
+  pas de détails sanglants ni de description des corps. Les victimes sont nommées avec respect ou pas du tout.
+- Ton documentaire calme et précis (National Geographic), phrases courtes, à l'oral, en français. Pas de « secret »,
+  pas de question suivie de sa réponse, pas de tiret long.
+- Visuels : « archive » (photo d'archive libre à chercher), « film » (film d'archive), « date », « lieu »,
+  « citation » (phrase exacte tirée d'une source), « ambiance » (plan neutre : route, forêt, ville la nuit)."""
+
+
+def doc_plan(sujet, minutes=8, langue="fr"):
+    """Recherche web (Claude + web_search) puis plan structuré du documentaire. None sans identifiants."""
+    import anthropic
+    try:
+        client = anthropic.Anthropic()
+    except anthropic.AnthropicError:
+        return None
+    ask = (f"Prépare un documentaire YouTube d'environ {minutes} minutes sur : {sujet}.\n{DOC_RULES}\n"
+           "Cherche d'abord les faits sur le web (sources fiables), puis écris des notes détaillées : chronologie, "
+           "lieux, citations exactes avec leur source, et la liste des URL utilisées.")
+    messages = [{"role": "user", "content": ask}]
+    try:
+        for _ in range(6):                        # la recherche web peut demander plusieurs tours (pause_turn)
+            with client.beta.messages.stream(
+                    model=MODEL, max_tokens=64000, betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+                    output_config={"effort": "high"}, messages=messages,
+                    tools=[{"type": "web_search_20260209", "name": "web_search", "max_uses": 15}]) as stream:
+                resp = stream.get_final_message()
+            messages.append({"role": "assistant", "content": resp.content})
+            if resp.stop_reason != "pause_turn":
+                break
+        if resp.stop_reason == "refusal":
+            print("   IA : demande refusée pour ce sujet")
+            return None
+        notes = "\n".join(b.text for b in resp.content if b.type == "text")
+        with client.beta.messages.stream(
+                model=MODEL, max_tokens=64000, betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+                output_config={"effort": "high", "format": {"type": "json_schema", "schema": DOC_SCHEMA}},
+                messages=[{"role": "user", "content":
+                           f"{DOC_RULES}\n\nÀ partir de ces notes de recherche, écris le plan complet du documentaire "
+                           f"(environ {minutes} minutes de voix off, soit {minutes * 140} mots ; 4 à 7 chapitres ; "
+                           f"un plan toutes les 6 à 12 secondes). Langue : {langue}.\n\nNOTES :\n{notes}"}]) as stream:
+            plan = stream.get_final_message()
+    except (anthropic.AuthenticationError, TypeError):
+        print("   IA : pas d'identifiants Anthropic valides")
+        return None
+    except anthropic.APIError as e:
+        print(f"   IA : erreur {e.__class__.__name__}")
+        return None
+    text = next((b.text for b in plan.content if b.type == "text"), None)
+    if plan.stop_reason == "refusal" or not text:
+        return None
+    return json.loads(text)

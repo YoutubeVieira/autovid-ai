@@ -20,6 +20,14 @@ python -m autovid viral roda.mp4 -o projet_roda/ --discipline capoeira --handle 
 Short principal, vidéo longue 16:9 à chapitres (intro + plan, en vrai, analyse + fiche, meilleur moment aux 2/3),
 un short par mouvement, plan de publication `a_publier.md`. Correspondance avec CapCut : `docs/capcut-pro.md`.
 
+## Documentaire YouTube (archives libres)
+```bash
+python -m autovid documentaire "L'affaire Landru" -o doc_landru/ [--plan plan.json] [--minutes 8]
+```
+Recherche et script par Claude (ou `plan.json`), archives libres de droits trouvées automatiquement (Wikimedia Commons,
+Library of Congress, Openverse, Internet Archive) avec licence vérifiée et crédits, voix off, zoom lent, cartes de
+dates / lieux / citations, nappe sombre, chapitres, sous-titres, shorts, `a_publier.md`. Règles : skill `documentaire`.
+
 ## Clip d'humour, d'animaux ou généré par IA
 ```bash
 python -m autovid fun clip.mp4 -o sorties/fun.mp4 --handle @toncompte --ia \

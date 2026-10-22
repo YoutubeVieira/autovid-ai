@@ -5,6 +5,7 @@
   python -m autovid render   brief.yaml -o out.mp4         montage piloté par un brief (titres, étapes, cercles…)
   python -m autovid fun      clip.mp4 -o out.mp4          clip d'humour / animaux / IA : accroche, ralenti, bruitages
   python -m autovid viral    video.mp4 -o projet/          automate : vidéo longue YouTube + shorts + SEO + plan
+  python -m autovid documentaire "sujet" -o dossier/     documentaire YouTube (archives libres, voix, shorts)
   python -m autovid talk     face_cam.mp4 -o out.mp4       coupe des silences + « euh » + sous-titres ElevenLabs
   python -m autovid combat   combat.mp4 -o out.mp4         short éducatif analysé (squelette, anatomie, sons)
   python -m autovid serve                                   plateforme web (téléphone ↔ PC)
@@ -138,6 +139,18 @@ def main(argv=None):
     lg.add_argument("--handle", default="")
     lg.add_argument("--workdir")
 
+    do = sub.add_parser("documentaire", help="documentaire YouTube automatique (recherche, archives libres, voix, shorts)")
+    do.add_argument("sujet", help="ex. « L'affaire Landru »")
+    do.add_argument("-o", "--out", required=True, help="dossier de sortie")
+    do.add_argument("--plan", help="plan.json déjà écrit (sinon recherche + script par Claude, clé Anthropic requise)")
+    do.add_argument("--images", help="dossier d'images / vidéos à utiliser au lieu de la recherche d'archives")
+    do.add_argument("--minutes", type=int, default=8)
+    do.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    do.add_argument("--handle", default="")
+    do.add_argument("--max-shorts", type=int, default=3)
+    do.add_argument("--sans-films", action="store_true", help="photos seulement (pas de films Internet Archive)")
+    do.add_argument("--workdir")
+
     pr = sub.add_parser("projet", help="refaire un montage à partir de son projet.json (modifié dans la plateforme)")
     pr.add_argument("fichier")
     pr.add_argument("-o", "--out", required=True)
@@ -209,6 +222,10 @@ def _run(args):
                           args.voice_id, langs, args.burn, not args.no_extras, not args.no_motion, args.framing,
                           args.tts, args.style, args.kit, args.music_from, args.force, args.projet, args.courbe,
                           args.transition, args.filtre, not args.sans_debruitage))
+    elif args.cmd == "documentaire":
+        from .documentaire import documentaire
+        documentaire(args.sujet, args.out, _workdir(args, args.out), args.plan, args.images, args.tts, None, args.handle,
+                     args.minutes, args.max_shorts, not args.sans_films)
     elif args.cmd == "viral":
         from .viral import viral
         viral(args.video, args.out, _workdir(args, args.out), args.discipline, args.handle, args.tts, args.framing,

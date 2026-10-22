@@ -274,3 +274,37 @@ def contact_fx(contact, kind):
     if cible == "corps":
         return [("body_thud", 0.0, 1.0)] + ([("slap", 0.0, 0.7)] if kind in ("pied", "poing") else [])
     return [("bag_thump", 0.0, 1.0), ("slap", 0.0, 0.5 if kind == "genou" else 0.8)]   # sac / pao
+
+
+# --------------------------------------------------------------------------- ambiance documentaire
+
+def ambiance_sombre(duration, seed=5):
+    """Nappe sombre de documentaire : drone grave qui respire, souffle filtré, battement sourd lent."""
+    r = np.random.default_rng(seed)
+    t = np.arange(int(duration * SR)) / SR
+    lfo = 0.6 + 0.4 * np.sin(2 * np.pi * t / 11)
+    drone = sum(np.sin(2 * np.pi * f * t + p) * g for f, p, g in ((55, 0, 0.5), (55.4, 1, 0.4), (82.4, 2, 0.25), (110.2, 0.5, 0.12)))
+    air = _bp(r.standard_normal(len(t)), 300, 1400) * 0.06 * (0.5 + 0.5 * np.sin(2 * np.pi * t / 7 + 1))
+    x = drone * 0.35 * lfo + air
+    beat = np.zeros_like(t)                    # battement de cœur lointain toutes les 2,4 s
+    th = _t(0.35)
+    thump = np.sin(2 * np.pi * np.cumsum(48 + 30 * np.exp(-th * 30)) / SR) * np.exp(-th * 14)
+    for start in np.arange(1.0, duration, 2.4):
+        for off, g in ((0, 0.5), (0.28, 0.32)):
+            i = int((start + off) * SR)
+            seg = thump[: max(len(t) - i, 0)]
+            beat[i: i + len(seg)] += seg * g
+    x = x + beat * 0.6
+    fade = np.minimum(1, np.minimum(t / 2.0, (duration - t) / 2.0).clip(0))
+    return _stereo(np.tanh(x * 1.2) * 0.8 * fade)
+
+
+def tension_hit(d=2.0):
+    """Coup sourd de changement de chapitre, avec traîne grave."""
+    t = _t(d)
+    body = np.sin(2 * np.pi * np.cumsum(40 + 25 * np.exp(-t * 6)) / SR) * np.exp(-t * 1.8)
+    air = _bp(rng.standard_normal(len(t)), 200, 3000) * np.exp(-t * 3) * 0.3
+    return _stereo(np.tanh(1.8 * (body + air)) * 0.9)
+
+
+LIB.update({"tension_hit": tension_hit})
