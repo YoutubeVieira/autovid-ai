@@ -26,7 +26,8 @@ from .render import match_loudness
 
 GRADE = ("eq=saturation=0.6:contrast=1.12:brightness=-0.03,colorbalance=rs=-0.03:bs=0.06:bm=0.03,"
          "vignette=angle=PI/4.5,noise=alls=7:allf=t")
-VENC = ["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p", "-r", str(FPS), "-an"]
+VENC = ["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-maxrate", "12M", "-bufsize", "24M", "-pix_fmt", "yuv420p",
+        "-r", str(FPS), "-an"]   # débit plafonné : le grain ferait exploser la taille du fichier
 ROUGE = (200, 40, 40)
 GRIS = (175, 178, 172)
 
