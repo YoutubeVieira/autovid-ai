@@ -87,20 +87,38 @@ def _clean(html):
 
 # --------------------------------------------------------------------------- moteurs de recherche
 
+WM_BUCKETS = (1920, 1280, 960)   # tailles de vignettes standard : Wikimedia limite les originaux et les tailles libres
+
+
+def _bucket(width):
+    return next((b for b in WM_BUCKETS if width > b), 0)
+
+
+def _commons_thumb(ii):
+    """URL d'une vignette standard (1920/1280/960 px) au lieu de l'original, qui est fortement limité en débit."""
+    url, width = (ii.get("url") or "").split("?")[0], ii.get("width", 0)
+    b = _bucket(width)
+    m = re.match(r"(https://upload\.wikimedia\.org/wikipedia/commons/)(\w/\w\w/)(.+)$", url)
+    if not (b and m):
+        return None                     # trop petite pour un plan 1080p, ou URL inattendue
+    name = m.group(3)
+    thumb = f"{m.group(1)}thumb/{m.group(2)}{name}/{b}px-{name}"
+    return thumb + (".png" if name.lower().endswith((".tif", ".tiff")) else "")
+
+
 def commons(query, n=8):
     data = _get("https://commons.wikimedia.org/w/api.php", {
         "action": "query", "format": "json", "generator": "search", "gsrsearch": f"{query} filetype:bitmap",
-        "gsrnamespace": 6, "gsrlimit": n, "prop": "imageinfo", "iiprop": "url|extmetadata|mime|size",
-        "iiurlwidth": 1920}).json()   # taille de vignette standard : moins limitée par Wikimedia
+        "gsrnamespace": 6, "gsrlimit": n, "prop": "imageinfo", "iiprop": "url|extmetadata|mime|size"}).json()
     out = []
     for page in (data.get("query", {}).get("pages") or {}).values():
         ii = (page.get("imageinfo") or [{}])[0]
         meta = ii.get("extmetadata") or {}
         lic = _clean(meta.get("LicenseShortName", {}).get("value"))
         out.append({"source": "Wikimedia Commons", "titre": page.get("title", "").replace("File:", ""),
-                    "url": ii.get("thumburl") or ii.get("url"), "page": ii.get("descriptionurl"),
+                    "url": _commons_thumb(ii), "page": ii.get("descriptionurl"),
                     "auteur": _clean(meta.get("Artist", {}).get("value"))[:120] or "inconnu", "licence": lic,
-                    "largeur": ii.get("thumbwidth") or ii.get("width", 0), "type": "image",
+                    "largeur": _bucket(ii.get("width", 0)), "type": "image",
                     "description": _clean(meta.get("ImageDescription", {}).get("value"))[:300],
                     "date": _clean(meta.get("DateTimeOriginal", {}).get("value"))[:40]})
     return out
@@ -126,7 +144,9 @@ def loc(query, n=8):
 def openverse(query, n=8):
     data = _get("https://api.openverse.org/v1/images/", {"q": query, "page_size": n,
                                                          "license_type": "commercial,modification"}).json()
-    return [{"source": f"Openverse ({r.get('provider', '?')})", "titre": r.get("title") or "", "url": r.get("url"),
+    return [{"source": f"Openverse ({r.get('provider', '?')})", "titre": r.get("title") or "",
+             "url": _commons_thumb({"url": r.get("url"), "width": r.get("width") or 0})
+             if "upload.wikimedia.org" in (r.get("url") or "") else r.get("url"),
              "page": r.get("foreign_landing_url"), "auteur": r.get("creator") or "inconnu",
              "licence": f"{r.get('license', '')} {r.get('license_version', '')}".strip().upper().replace("BY", "CC BY")
              if r.get("license") not in ("cc0", "pdm") else "Public domain",
@@ -184,7 +204,7 @@ MOTEURS = {"commons": commons, "loc": loc, "openverse": openverse, "pexels": pex
 class Archives:
     """Cherche, filtre (licence, contenu interdit, déjà utilisé), télécharge et tient les crédits."""
 
-    def __init__(self, dossier, local=None, video=True, verifier=None):
+    def __init__(self, dossier, local=None, video=True, verifier=None, budget=60):
         self.dir = Path(dossier)
         self.dir.mkdir(parents=True, exist_ok=True)
         self.credits, self.used, self.errors = [], set(), set()
@@ -192,6 +212,7 @@ class Archives:
             if local else []
         self.video = video
         self.verifier = verifier                   # (requête, image) → bool ; ex. ai.image_pertinente si clé Anthropic
+        self.budget = budget
 
     def _candidates(self, query):
         for name, fn in MOTEURS.items():
@@ -224,7 +245,12 @@ class Archives:
             except Exception as e:
                 self.errors.add("archive")
                 print(f"   archives : Internet Archive indisponible ({e.__class__.__name__})")
+        import time
+        deadline = time.time() + self.budget       # pas plus d'une minute par plan : sinon plan neutre
         for c in cands:
+            if time.time() > deadline:
+                print(f"   archives : temps écoulé pour « {query} », plan neutre")
+                break
             text = f"{c['titre']} {c['description']}"
             if not c.get("url") or c["url"] in self.used or c.get("page") in self.used or INTERDIT.search(text) \
                     or not licence_ok(c["licence"]) \
@@ -257,11 +283,19 @@ class Archives:
                 import time
 
                 import requests
-                t0, size = time.time(), 0
                 time.sleep(1.0)                    # politesse : une image par seconde au plus
-                with requests.get(c["url"], stream=True, timeout=(10, 20), headers={"User-Agent": UA}) as r:
-                    if r.status_code == 429:       # serveur saturé : on le signale, l'image suivante sera tentée
-                        print(f"   archives : {c['source']} demande d'attendre ({r.headers.get('Retry-After', '?')} s)")
+                for attempt in range(2):           # serveur saturé : on attend ce qu'il demande (≤ 12 s), 2 essais
+                    r = requests.get(c["url"], stream=True, timeout=(10, 20), headers={"User-Agent": UA})
+                    if r.status_code != 429:
+                        break
+                    wait = float(r.headers.get("Retry-After") or 10)
+                    r.close()
+                    if wait > 12 or attempt == 1:
+                        break
+                    print(f"   archives : {c['source']} demande d'attendre {wait:.0f} s")
+                    time.sleep(wait)
+                t0, size = time.time(), 0
+                with r:
                     r.raise_for_status()
                     with open(path, "wb") as f:
                         for chunk in r.iter_content(65536):
