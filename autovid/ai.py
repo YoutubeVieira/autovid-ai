@@ -210,8 +210,10 @@ DOC_SCHEMA = {
             "plans": {"type": "array", "items": {"type": "object", "properties": {
                 "texte": {"type": "string", "description": "voix off de ce plan, 1 à 3 phrases parlées"},
                 "visuel": {"type": "string", "enum": ["archive", "film", "date", "lieu", "citation", "ambiance"]},
-                "requete": {"type": "string", "description": "recherche d'archive EN ANGLAIS (lieu, bâtiment, "
-                                                             "objet, époque, personne publique) ; jamais de victime ni de corps"},
+                "requete": {"type": "string", "description": "recherche d'archive EN ANGLAIS, précise : lieu AVEC "
+                                                             "son pays, époque, sujet (ex. « Paris France 1916 street », "
+                                                             "« Sao Paulo Brazil 1998 »), ou nom d'une personne publique ; "
+                                                             "jamais de victime ni de corps"},
                 "legende": {"type": "string", "description": "texte court affiché (date, lieu, citation exacte)"},
             }, "required": ["texte", "visuel", "requete", "legende"], "additionalProperties": False}},
         }, "required": ["titre", "plans"], "additionalProperties": False}},
@@ -282,3 +284,43 @@ def doc_plan(sujet, minutes=8, langue="fr"):
     if plan.stop_reason == "refusal" or not text:
         return None
     return json.loads(text)
+
+
+def has_credentials():
+    """Vrai si un identifiant Anthropic est configuré (clé ou jeton), sans faire d'appel."""
+    import anthropic
+    try:
+        c = anthropic.Anthropic()
+    except anthropic.AnthropicError:
+        return False
+    return bool(getattr(c, "api_key", None) or getattr(c, "auth_token", None))
+
+
+def image_pertinente(requete, path):
+    """Claude regarde l'image d'archive : montre-t-elle vraiment « requete » (lieu, époque, sujet) ?
+    Refuse aussi les images choquantes. En cas d'erreur, on garde l'image (le filtre par mots-clés a déjà agi)."""
+    import anthropic
+    from PIL import Image
+    try:
+        im = Image.open(path).convert("RGB")
+        im.thumbnail((768, 768))
+        import io
+        buf = io.BytesIO()
+        im.save(buf, "JPEG", quality=80)
+        data = base64.standard_b64encode(buf.getvalue()).decode()
+        resp = anthropic.Anthropic().messages.create(
+            model=MODEL, max_tokens=300, output_config={"effort": "low", "format": {"type": "json_schema", "schema": {
+                "type": "object", "properties": {"pertinente": {"type": "boolean"}, "choquante": {"type": "boolean"}},
+                "required": ["pertinente", "choquante"], "additionalProperties": False}}},
+            messages=[{"role": "user", "content": [
+                {"type": "image", "source": {"type": "base64", "media_type": "image/jpeg", "data": data}},
+                {"type": "text", "text": f"Image d'archive pour illustrer : « {requete} ». Est-ce qu'elle montre bien ce "
+                                         "sujet (lieu, époque, personne, objet) ? Est-elle choquante (corps, sang, "
+                                         "violence) ?"}]}])
+        text = next((b.text for b in resp.content if b.type == "text"), None)
+        if resp.stop_reason == "refusal" or not text:
+            return False
+        r = json.loads(text)
+        return r["pertinente"] and not r["choquante"]
+    except Exception:
+        return True

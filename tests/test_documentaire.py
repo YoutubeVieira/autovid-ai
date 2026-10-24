@@ -19,6 +19,15 @@ class ArchivesTest(unittest.TestCase):
         self.assertTrue(INTERDIT.search("photo d'autopsie"))
         self.assertFalse(INTERDIT.search("Versailles courthouse, 1921"))
 
+    def test_relevance_rejects_wrong_pictures(self):
+        from autovid.archives import pertinence as P
+        self.assertTrue(P("Paris street 1916", {"titre": "Paris in 1916.jpg"}))
+        self.assertFalse(P("Paris street 1916", {"titre": "Driving boy taking pigs to market", "date": "1915"}))
+        self.assertFalse(P("French newspaper 1917", {"titre": "Newspaper fatima 353.jpg"}))
+        self.assertFalse(P("Versailles 1920s", {"titre": "[Reel 22] Written records"}))
+        self.assertTrue(P("Versailles 1920s", {"titre": "Château de Versailles, 1924"}))
+        self.assertFalse(P("Versailles 1920s", {"titre": "Versailles 1960"}))
+
     def test_local_images_and_offline(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "a.jpg").write_bytes(b"x")
