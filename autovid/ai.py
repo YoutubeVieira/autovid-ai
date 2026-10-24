@@ -230,6 +230,7 @@ DOC_RULES = """Règles (non négociables) :
   pas de détails sanglants ni de description des corps. Les victimes sont nommées avec respect ou pas du tout.
 - Ton documentaire calme et précis (National Geographic), phrases courtes, à l'oral, en français. Pas de « secret »,
   pas de question suivie de sa réponse, pas de tiret long.
+- Mineurs (victimes, témoins, auteurs) jamais identifiés, comme l'exige l'ECA au Brésil ; pas de nom ni de visage.
 - Visuels : « archive » (photo d'archive libre à chercher), « film » (film d'archive), « date », « lieu »,
   « citation » (phrase exacte tirée d'une source), « ambiance » (plan neutre : route, forêt, ville la nuit)."""
 
@@ -241,7 +242,10 @@ def doc_plan(sujet, minutes=8, langue="fr"):
         client = anthropic.Anthropic()
     except anthropic.AnthropicError:
         return None
-    ask = (f"Prépare un documentaire YouTube d'environ {minutes} minutes sur : {sujet}.\n{DOC_RULES}\n"
+    public = {"pt": "Public : brésilien. Écris le script final en portugais du Brésil, naturel et parlé (pas de portugais "
+                    "du Portugal), avec les repères brésiliens (villes, institutions, presse brésilienne quand c'est une "
+                    "affaire brésilienne).", "fr": "Public : francophone. Script en français."}.get(langue, "")
+    ask = (f"Prépare un documentaire YouTube d'environ {minutes} minutes sur : {sujet}.\n{public}\n{DOC_RULES}\n"
            "Cherche d'abord les faits sur le web (sources fiables), puis écris des notes détaillées : chronologie, "
            "lieux, citations exactes avec leur source, et la liste des URL utilisées.")
     messages = [{"role": "user", "content": ask}]
@@ -265,7 +269,8 @@ def doc_plan(sujet, minutes=8, langue="fr"):
                 messages=[{"role": "user", "content":
                            f"{DOC_RULES}\n\nÀ partir de ces notes de recherche, écris le plan complet du documentaire "
                            f"(environ {minutes} minutes de voix off, soit {minutes * 140} mots ; 4 à 7 chapitres ; "
-                           f"un plan toutes les 6 à 12 secondes). Langue : {langue}.\n\nNOTES :\n{notes}"}]) as stream:
+                           f"un plan toutes les 6 à 12 secondes). {public} Les champs « requete » restent en anglais (recherche "
+                           f"d'archives).\n\nNOTES :\n{notes}"}]) as stream:
             plan = stream.get_final_message()
     except (anthropic.AuthenticationError, TypeError):
         print("   IA : pas d'identifiants Anthropic valides")

@@ -148,6 +148,7 @@ def main(argv=None):
     do.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
     do.add_argument("--handle", default="")
     do.add_argument("--max-shorts", type=int, default=3)
+    do.add_argument("--langue", choices=["fr", "pt"], default="fr", help="pt = public brésilien (portugais du Brésil)")
     do.add_argument("--sans-films", action="store_true", help="photos seulement (pas de films Internet Archive)")
     do.add_argument("--workdir")
 
@@ -225,7 +226,7 @@ def _run(args):
     elif args.cmd == "documentaire":
         from .documentaire import documentaire
         documentaire(args.sujet, args.out, _workdir(args, args.out), args.plan, args.images, args.tts, None, args.handle,
-                     args.minutes, args.max_shorts, not args.sans_films)
+                     args.minutes, args.max_shorts, not args.sans_films, args.langue)
     elif args.cmd == "viral":
         from .viral import viral
         viral(args.video, args.out, _workdir(args, args.out), args.discipline, args.handle, args.tts, args.framing,

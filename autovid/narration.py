@@ -128,9 +128,12 @@ def tts_piece(text, voice_id, lang):
     return _decode(base64.b64decode(data["audio_base64"])), chars
 
 
-def synth(text, voice_id):
-    """Texte balisé → audio + mots horodatés ; les morceaux [pt] sont dits en portugais."""
+def synth(text, voice_id, lang=None):
+    """Texte balisé → audio + mots horodatés ; les morceaux [pt] sont dits en portugais.
+    lang (« pt », « fr »…) : tout le texte dans cette langue (documentaire pour un public brésilien, par exemple)."""
     pieces = [(p, "pt" if i % 2 else "fr") for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
+    if lang:
+        pieces = [(plain(text), lang)]
     audio, words, t = [], [], 0.0
     gap = np.zeros((int(0.04 * sfx.SR), 2))
     for piece, lang in pieces:
@@ -170,13 +173,15 @@ def kokoro_available():
     return importlib.util.find_spec("kokoro_onnx") is not None
 
 
-def synth_kokoro(text, voice="ff_siwis", speed=1.05):
+def synth_kokoro(text, voice="ff_siwis", speed=1.05, lang=None):
     """Voix locale Kokoro (via HyperFrames) : français, termes [pt] prononcés en portugais du Brésil.
     Kokoro ne donne pas l'heure des mots : on les répartit selon la longueur de chaque morceau."""
     import tempfile
     from .motion import MOTION, _env
     pieces = [(p.strip(), "pt-br" if i % 2 else "fr-fr")
               for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
+    if lang:                                   # tout le texte dans une seule langue (ex. pt-br, voix pm_alex)
+        pieces = [(plain(text).strip(), lang)]
     audio, words, t = [], [], 0.0
     gap = np.zeros((int(0.05 * sfx.SR), 2))
     with tempfile.TemporaryDirectory() as d:
@@ -204,11 +209,12 @@ def synth_kokoro(text, voice="ff_siwis", speed=1.05):
     return (np.concatenate(audio) if audio else np.zeros((0, 2))), words, t
 
 
-def voice_segments(segs, voice_id=None, engine="auto"):
+def voice_segments(segs, voice_id=None, engine="auto", lang=None):
     """Ajoute à chaque segment : audio (ou None), mots horodatés relatifs, durée.
 
     engine : "elevenlabs" (ta voix clonée), "kokoro" (voix locale gratuite, pour tester), "auto" (ElevenLabs si
-    clé + voix, sinon Kokoro s'il est installé, sinon pas de voix). Renvoie le moteur utilisé ou None."""
+    clé + voix, sinon Kokoro s'il est installé, sinon pas de voix). lang : « pt » = tout en portugais du Brésil
+    (voix Kokoro masculine pm_alex), « fr » / None = français avec les termes [pt] en portugais. Renvoie le moteur."""
     if engine == "none":
         engine = None
     elif engine == "auto":
@@ -219,9 +225,12 @@ def voice_segments(segs, voice_id=None, engine="auto"):
         engine = None
     for s in segs:
         if engine == "elevenlabs":
-            s["audio"], s["words"], s["dur"] = synth(s["fr"], voice_id)
+            s["audio"], s["words"], s["dur"] = synth(s["fr"], voice_id, lang if lang and lang != "fr" else None)
         elif engine == "kokoro":
-            s["audio"], s["words"], s["dur"] = synth_kokoro(s["fr"])
+            if lang == "pt":
+                s["audio"], s["words"], s["dur"] = synth_kokoro(s["fr"], voice="pm_alex", speed=1.0, lang="pt-br")
+            else:
+                s["audio"], s["words"], s["dur"] = synth_kokoro(s["fr"])
         else:
             s["audio"] = None
             s["words"], s["dur"] = estimate_words(s["fr"])

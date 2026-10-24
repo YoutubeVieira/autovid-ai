@@ -5,7 +5,11 @@ description: Documentaire YouTube automatique façon National Geographic (true c
 
 # Documentaire automatique
 
-Commande : `python -m autovid documentaire "L'affaire X" -o dossier/ [--plan plan.json] [--images dossier/] [--minutes 8]`
+Commande : `python -m autovid documentaire "L'affaire X" -o dossier/ [--plan plan.json] [--images dossier/] [--minutes 8] [--langue pt]`
+
+**Public de l'utilisateur pour les documentaires : brésilien → toujours `--langue pt`** (script, voix pm_alex ou ElevenLabs
+en portugais, textes à l'écran et description en pt-BR ; `plan.json` écrit en portugais du Brésil, champs `requete`
+en anglais). Les échanges avec l'utilisateur restent en français.
 
 ## Étapes
 1. **Plan** (schéma `ai.DOC_SCHEMA`) :
@@ -28,3 +32,4 @@ Commande : `python -m autovid documentaire "L'affaire X" -o dossier/ [--plan pla
   de crime (`archives.INTERDIT` les écarte ; vérifier aussi à l'œil sur la planche contact).
 - Pas d'image générée présentée comme une archive ; une reconstitution est écrite « reconstitution » à l'écran.
 - Relire les faits avec les sources avant publication ; conseiller une chaîne séparée de la chaîne capoeira.
+- Mineurs jamais identifiés (ECA au Brésil) ; données personnelles des familles protégées (LGPD).

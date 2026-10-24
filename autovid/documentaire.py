@@ -30,6 +30,19 @@ VENC = ["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-maxrate", "12M",
         "-r", str(FPS), "-an"]   # débit plafonné : le grain ferait exploser la taille du fichier
 ROUGE = (200, 40, 40)
 GRIS = (175, 178, 172)
+TXT = {   # textes à l'écran et description, selon la langue du public
+    "fr": {"doc": "UN DOCUMENTAIRE", "chap": "CHAPITRE", "lieu": "LIEU", "source": "Source", "sources_img": "SOURCES DES IMAGES",
+           "merci": "MERCI D'AVOIR REGARDÉ", "intro": "Intro", "chapitres": "Chapitres", "sources": "Sources",
+           "archives": "Images d'archives (licences libres)",
+           "mention": "Ce documentaire relate des faits jugés, à partir de sources publiques. Pensées aux victimes et à leurs proches.",
+           "tags": "#documentaire #truecrime #histoire"},
+    "pt": {"doc": "UM DOCUMENTÁRIO", "chap": "CAPÍTULO", "lieu": "LOCAL", "source": "Fonte", "sources_img": "FONTES DAS IMAGENS",
+           "merci": "OBRIGADO POR ASSISTIR", "intro": "Introdução", "chapitres": "Capítulos", "sources": "Fontes",
+           "archives": "Imagens de arquivo (licenças livres)",
+           "mention": "Este documentário relata fatos julgados, com base em fontes públicas. Nosso respeito às vítimas e às "
+                      "suas famílias.",
+           "tags": "#documentario #truecrime #casoreal #historia"},
+}
 
 
 # --------------------------------------------------------------------------- cartes (PNG)
@@ -95,7 +108,7 @@ def card_citation(path, citation, source=""):
     img.save(path)
 
 
-def overlay_png(path, legende="", credit="", lieu=False):
+def overlay_png(path, legende="", credit="", lieu=False, mot_lieu="LIEU"):
     """Calque transparent : légende en bas à gauche (lieu, date), source de l'archive en bas à droite."""
     img = Image.new("RGBA", (LW, LH), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -105,7 +118,7 @@ def overlay_png(path, legende="", credit="", lieu=False):
         d.rectangle((90, LH - 200, 90 + 10, LH - 120), fill=ROUGE + (255,))
         d.text((122, LH - 196), txt, font=f, fill=(245, 245, 240, 255), stroke_width=3, stroke_fill=(0, 0, 0, 200))
         if lieu:
-            d.text((122, LH - 236), "LIEU", font=_body(26), fill=GRIS + (255,))
+            d.text((122, LH - 236), mot_lieu, font=_body(26), fill=GRIS + (255,))
     if credit:
         f = _body(22)
         w = d.textlength(credit, font=f)
@@ -168,7 +181,9 @@ def _segments(plan):
 
 
 def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", voice_id=None, handle="", minutes=8,
-                 max_shorts=3, video=True):
+                 max_shorts=3, video=True, langue="fr"):
+    """langue : « fr » ou « pt » (portugais du Brésil : script, voix, textes à l'écran et description)."""
+    T = TXT[langue]
     from . import narration as nar
     from .archives import Archives
     out = Path(out_dir).resolve()
@@ -181,7 +196,7 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
         plan = json.loads(Path(plan).read_text(encoding="utf-8")) if not isinstance(plan, dict) else plan
     else:
         from .ai import doc_plan
-        plan = doc_plan(sujet, minutes)
+        plan = doc_plan(sujet, minutes, langue)
         if not plan:
             raise SystemExit("Pas de plan : il faut une clé Anthropic (recherche + script automatiques) ou --plan plan.json")
     (out / "plan.json").write_text(json.dumps(plan, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -193,7 +208,7 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
     voiced = [s for s in segs if s["kind"] == "plan"]
     for s in voiced:
         s["fr"] = s["texte"]
-    engine = nar.voice_segments(voiced, voice_id or nar.default_voice(), tts)
+    engine = nar.voice_segments(voiced, voice_id or nar.default_voice(), tts, langue)
     print(f"   moteur : {engine or 'aucun (durées estimées, vidéo sans voix)'}")
     for s in voiced:
         s["dur"] = max(s["dur"] + 0.7, 3.0)
@@ -217,12 +232,12 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
         png = str(work / f"s{k:03d}.png")
         ov = str(work / f"s{k:03d}_ov.png")
         if s["kind"] == "carte_titre":
-            card_titre(png, "", s["titre"], "UN DOCUMENTAIRE " + (handle or "").upper())
+            card_titre(png, "", s["titre"], T["doc"] + " " + (handle or "").upper())
             overlay_png(ov)
             ken_burns(png, s["dur"], seg_out, ov, k)
         elif s["kind"] == "carte_chapitre":
             marks.append((t, f"{s['num']}. {s['titre']}"))
-            card_titre(png, f"CHAPITRE {s['num']}", s["titre"])
+            card_titre(png, f"{T['chap']} {s['num']}", s["titre"])
             overlay_png(ov)
             ken_burns(png, s["dur"], seg_out, ov, k)
         else:
@@ -230,9 +245,9 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
             credit = ""
             if m and m["credit"]["source"] != "local":
                 c = m["credit"]
-                credit = f"Source : {c['source']} · {c['auteur'][:40]} · {c['licence']}"
+                credit = f"{T['source']} : {c['source']} · {c['auteur'][:40]} · {c['licence']}"
             overlay_png(ov, s.get("legende") if s["visuel"] in ("lieu", "archive", "film") else "", credit,
-                        lieu=s["visuel"] == "lieu")
+                        lieu=s["visuel"] == "lieu", mot_lieu=T["lieu"])
             if s["visuel"] == "date":
                 card_date(png, s.get("legende") or "")
                 ken_burns(png, s["dur"], seg_out, ov, k)
@@ -255,7 +270,7 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
     for j, page in enumerate(pages):
         img = _canvas()
         d = ImageDraw.Draw(img)
-        _center(d, "SOURCES DES IMAGES" if page else "MERCI D'AVOIR REGARDÉ", ImageFont.truetype(gfx.ANTON, 70), 120,
+        _center(d, T["sources_img"] if page else T["merci"], ImageFont.truetype(gfx.ANTON, 70), 120,
                 (240, 240, 236))
         for i, c in enumerate(page):
             line = f"{c['titre'][:60]} · {c['auteur'][:30]} · {c['licence']} · {c['source']}"
@@ -306,7 +321,7 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
     match_loudness(str(work / "brut.mp4"), str(long_out), -14)
 
     print("6/6 chapitres, sous-titres, shorts, plan de publication")
-    marks = [(0.0, "Intro")] + marks
+    marks = [(0.0, T["intro"])] + marks
     marks = [m for i, m in enumerate(marks) if i + 1 >= len(marks) or marks[i + 1][0] - m[0] >= 10]
     chap = chapters_text(marks)
     (out / "chapitres.txt").write_text(chap + "\n", encoding="utf-8")
@@ -316,7 +331,7 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
                   for w in s.get("words", [])]
     nar.write_srt(nar.cues_from_words(words), out / "documentaire.fr.srt")
     shorts = make_shorts(long_out, segs, starts, words, out / "shorts", work, max_shorts)
-    write_plan(out, plan, chap, arch.credits, shorts, handle)
+    write_plan(out, plan, chap, arch.credits, shorts, handle, T)
     print(f"→ {out}  ({total / 60:.1f} min, {len(arch.credits)} archives créditées)")
     return str(out)
 
@@ -350,12 +365,11 @@ def make_shorts(long_out, segs, starts, words, folder, work, n):
     return out
 
 
-def write_plan(out, plan, chap, credits, shorts, handle):
+def write_plan(out, plan, chap, credits, shorts, handle, T=TXT["fr"]):
     srcs = "\n".join(f"- {s['titre']} : {s['url']}" for s in plan.get("sources", []))
     creds = "\n".join(f"- {c['titre']} · {c['auteur']} · {c['licence']} · {c['page']}" for c in credits) or "- (aucune)"
-    desc = (f"{plan['accroche']}\n\nChapitres :\n{chap}\n\nSources :\n{srcs}\n\nImages d'archives (licences libres) :\n"
-            f"{creds}\n\nCe documentaire relate des faits jugés, à partir de sources publiques. Pensées aux victimes "
-            f"et à leurs proches.\n\n{handle}\n\n#documentaire #truecrime #histoire")
+    desc = (f"{plan['accroche']}\n\n{T['chapitres']}:\n{chap}\n\n{T['sources']}:\n{srcs}\n\n{T['archives']}:\n"
+            f"{creds}\n\n{T['mention']}\n\n{handle}\n\n{T['tags']}")
     lines = ["# À publier", "", f"**Titre :** {plan['titre']}", "", "**Description :**", "", "```", desc, "```", "",
              "## Shorts", ""] + [f"- `{s}`" for s in shorts] + [
              "", "## Vérifications avant publication", "",

@@ -22,7 +22,7 @@ un short par mouvement, plan de publication `a_publier.md`. Correspondance avec 
 
 ## Documentaire YouTube (archives libres)
 ```bash
-python -m autovid documentaire "L'affaire Landru" -o doc_landru/ [--plan plan.json] [--minutes 8]
+python -m autovid documentaire "L'affaire Landru" -o doc_landru/ --langue pt [--plan plan.json] [--minutes 8]
 ```
 Recherche et script par Claude (ou `plan.json`), archives libres de droits trouvées automatiquement (Wikimedia Commons,
 Library of Congress, Openverse, Internet Archive) avec licence vérifiée et crédits, voix off, zoom lent, cartes de
