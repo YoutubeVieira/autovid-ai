@@ -1,0 +1,295 @@
+{
+  "title": "Clone n'importe quelle app",
+  "theme": "dark",
+  "scenes": [
+    {
+      "from": 0,
+      "to": 3,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "tu choisis une app",
+        "lines": [
+          "agenda     59,90 €/mois",
+          "photos     89,00 €/mois",
+          "notes      49,00 €/mois"
+        ]
+      }
+    },
+    {
+      "from": 3,
+      "to": 7,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "title": "github.com/…/replica-skill",
+        "label": "the replica skill",
+        "lines": [
+          "Onze skills qui clonent",
+          "n'importe quelle app.",
+          "Gratuit · MIT · sans API key"
+        ]
+      }
+    },
+    {
+      "from": 7,
+      "to": 10,
+      "layout": "graphic",
+      "visual": {
+        "type": "bigNumber",
+        "value": 11,
+        "label": "une équipe complète"
+      }
+    },
+    {
+      "from": 10,
+      "to": 13,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "replica-recon",
+        "lines": [
+          "> /replica-recon",
+          "écrans ........ 14",
+          "flux ........... 6",
+          "modèle de données ✓"
+        ]
+      }
+    },
+    {
+      "from": 13,
+      "to": 16,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "replica-build",
+        "lines": [
+          "> /replica-build",
+          "stack + base de données",
+          "design system reconstruit",
+          "auth + paiements câblés"
+        ]
+      }
+    },
+    {
+      "from": 16,
+      "to": 19,
+      "layout": "split",
+      "visual": {
+        "type": "checklist",
+        "label": "replica-test",
+        "items": [
+          {
+            "text": "login / signup",
+            "ok": true
+          },
+          {
+            "text": "création de rendez-vous",
+            "ok": true
+          },
+          {
+            "text": "fuseau horaire",
+            "ok": false
+          }
+        ]
+      }
+    },
+    {
+      "from": 19,
+      "to": 22,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "replica-diff",
+        "lines": [
+          "> /replica-diff",
+          "!ce qui manque encore :",
+          "- rappel par SMS",
+          "- export PDF"
+        ]
+      }
+    },
+    {
+      "from": 22,
+      "to": 26,
+      "layout": "graphic",
+      "visual": {
+        "type": "iconGrid",
+        "label": "l'entrepreneur",
+        "items": [
+          "recon",
+          "build",
+          "test",
+          "diff",
+          "brand",
+          "landing",
+          "store",
+          "reviews"
+        ],
+        "highlight": 7
+      }
+    },
+    {
+      "from": 26,
+      "to": 30,
+      "layout": "graphic",
+      "visual": {
+        "type": "bigNumber",
+        "value": 140,
+        "label": "avis lus"
+      }
+    },
+    {
+      "from": 30,
+      "to": 33,
+      "layout": "split",
+      "visual": {
+        "type": "checklist",
+        "label": "problèmes résolus",
+        "items": [
+          {
+            "text": "fuseau horaire confus",
+            "ok": true
+          },
+          {
+            "text": "pas de rappel SMS",
+            "ok": true
+          },
+          {
+            "text": "prix qui change",
+            "ok": true
+          }
+        ]
+      }
+    },
+    {
+      "from": 33,
+      "to": 37,
+      "layout": "split",
+      "visual": {
+        "type": "ranking",
+        "label": "ton app",
+        "rows": [
+          {
+            "text": "Plan Pro · prix fixe",
+            "value": "19,90 €"
+          },
+          {
+            "text": "Vente approuvée",
+            "value": "PAYÉ"
+          }
+        ]
+      }
+    },
+    {
+      "from": 37,
+      "to": 40,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "colle dans claude code",
+        "lines": [
+          "* Welcome to Claude Code!",
+          "> install skill"
+        ]
+      }
+    },
+    {
+      "from": 40,
+      "to": 43,
+      "layout": "split",
+      "visual": {
+        "type": "headline",
+        "text": "C L O N E *_*",
+        "label": "commente"
+      }
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 1.5,
+      "text": "Maintenant il te suffit"
+    },
+    {
+      "from": 1.5,
+      "to": 3,
+      "text": "de *cloner* n'importe quelle app"
+    },
+    {
+      "from": 3,
+      "to": 4.5,
+      "text": "avec *Claude.*"
+    },
+    {
+      "from": 4.5,
+      "to": 6,
+      "text": "Cette skill s'appelle *Replica*"
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "text": "et elle est *gratuite.*"
+    },
+    {
+      "from": 7,
+      "to": 10,
+      "text": "Ce n'est pas une skill, c'est toute une équipe."
+    },
+    {
+      "from": 10,
+      "to": 11.5,
+      "text": "Une *démonte* l'app"
+    },
+    {
+      "from": 11.5,
+      "to": 13,
+      "text": "que tu veux cloner,"
+    },
+    {
+      "from": 13,
+      "to": 16,
+      "text": "une autre la *reconstruit,*"
+    },
+    {
+      "from": 16,
+      "to": 19,
+      "text": "puis une la *teste* à la recherche d'erreurs."
+    },
+    {
+      "from": 19,
+      "to": 22,
+      "text": "Tu obtiens un clone de n'importe quelle app."
+    },
+    {
+      "from": 22,
+      "to": 26,
+      "text": "Et l'entrepreneur va plus loin :"
+    },
+    {
+      "from": 26,
+      "to": 30,
+      "text": "il lit les avis de l'app que tu as clonée"
+    },
+    {
+      "from": 30,
+      "to": 33,
+      "text": "et *résout* tous ces problèmes"
+    },
+    {
+      "from": 33,
+      "to": 37,
+      "text": "dans *ton* app."
+    },
+    {
+      "from": 37,
+      "to": 40,
+      "text": "Pour la configurer, installe la skill dans *Claude Code.*"
+    },
+    {
+      "from": 40,
+      "to": 43,
+      "text": "Commente *CLONE* et je t'envoie le pas-à-pas."
+    }
+  ]
+}

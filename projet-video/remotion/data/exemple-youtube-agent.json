@@ -1,0 +1,378 @@
+{
+  "title": "Claude vient de tuer le YouTube",
+  "theme": "light",
+  "scenes": [
+    {
+      "from": 0,
+      "to": 3,
+      "layout": "split",
+      "visual": {
+        "type": "headline",
+        "text": "*YouTube*",
+        "label": "/yt-agent"
+      }
+    },
+    {
+      "from": 3,
+      "to": 6,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "tu écris · tu publies",
+        "lines": [
+          "> /yt-plan",
+          "script de la vidéo      écrit",
+          "titre + miniature       écrits",
+          "publier            !TOI"
+        ]
+      }
+    },
+    {
+      "from": 6,
+      "to": 8.5,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "title": "github.com/…/youtube-agent-skill",
+        "label": "le pack",
+        "lines": [
+          "Onze skills Claude Code pour",
+          "gérer une chaîne YouTube.",
+          "Gratuit · MIT · sans API key"
+        ]
+      }
+    },
+    {
+      "from": 8.5,
+      "to": 11,
+      "layout": "split",
+      "visual": {
+        "type": "bigNumber",
+        "value": 11,
+        "label": "pas une seule"
+      }
+    },
+    {
+      "from": 11,
+      "to": 13,
+      "layout": "split",
+      "visual": {
+        "type": "iconGrid",
+        "label": "skills",
+        "items": [
+          "yt-script",
+          "yt-package",
+          "yt-edit",
+          "yt-comment",
+          "yt-plan",
+          "yt-viral",
+          "yt-retention",
+          "yt-shorts",
+          "yt-seo",
+          "yt-chapters",
+          "yt-audit"
+        ]
+      }
+    },
+    {
+      "from": 13,
+      "to": 17,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "title": "skills / yt-script / hooks.json",
+        "label": "yt-script",
+        "lines": [
+          "{ \"name\": \"Le Reçu\" },",
+          "{ \"name\": \"L'Initié\" },",
+          "{ \"name\": \"L'Erreur\" },",
+          "{ \"name\": \"Le Retournement\" },",
+          "{ \"name\": \"J'ai testé\" },",
+          "!21 formules de hook"
+        ]
+      }
+    },
+    {
+      "from": 17,
+      "to": 21,
+      "layout": "split",
+      "visual": {
+        "type": "score",
+        "label": "yt-package",
+        "title": "Claude Code pour YouTube : le guide des 11 skills",
+        "score": 62,
+        "notes": [
+          "longueur : coupé sur desktop vers 60",
+          "la miniature répète le titre"
+        ]
+      }
+    },
+    {
+      "from": 21,
+      "to": 24,
+      "layout": "split",
+      "visual": {
+        "type": "iconGrid",
+        "label": "yt-edit",
+        "items": [
+          "intro",
+          "hook",
+          "coupe",
+          "coupe",
+          "CTA",
+          "outro"
+        ],
+        "highlight": 2
+      }
+    },
+    {
+      "from": 24,
+      "to": 27,
+      "layout": "split",
+      "visual": {
+        "type": "checklist",
+        "label": "yt-comment",
+        "items": [
+          {
+            "text": "question → réponse",
+            "ok": true
+          },
+          {
+            "text": "idée de vidéo → backlog",
+            "ok": true
+          },
+          {
+            "text": "spam → ignoré",
+            "ok": false
+          }
+        ]
+      }
+    },
+    {
+      "from": 27,
+      "to": 30,
+      "layout": "split",
+      "visual": {
+        "type": "bars",
+        "label": "yt-plan",
+        "labels": [
+          "LUN",
+          "MAR",
+          "MER",
+          "JEU",
+          "VEN",
+          "SAM",
+          "DIM"
+        ],
+        "values": [
+          0,
+          9,
+          0,
+          3,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "from": 30,
+      "to": 34,
+      "layout": "split",
+      "visual": {
+        "type": "headline",
+        "label": "elle t'aide à décider",
+        "text": "Quoi · *Quand* · Comment"
+      }
+    },
+    {
+      "from": 34,
+      "to": 38,
+      "layout": "split",
+      "visual": {
+        "type": "ranking",
+        "label": "yt-viral",
+        "rows": [
+          {
+            "text": "vidéo A du niche",
+            "value": "2,1 M"
+          },
+          {
+            "text": "vidéo B du niche",
+            "value": "1,4 M"
+          },
+          {
+            "text": "vidéo C du niche",
+            "value": "860 k"
+          },
+          {
+            "text": "vidéo D du niche",
+            "value": "410 k"
+          }
+        ]
+      }
+    },
+    {
+      "from": 38,
+      "to": 40,
+      "layout": "facecam"
+    },
+    {
+      "from": 40,
+      "to": 43,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "le script sort · tu tournes",
+        "lines": [
+          "> /yt-script",
+          "lu : ~/.claude/youtube/voice.md",
+          "[HOOK]  ...",
+          "[VIRAGE] ...",
+          "[CTA]  ..."
+        ]
+      }
+    },
+    {
+      "from": 43,
+      "to": 46,
+      "layout": "split",
+      "visual": {
+        "type": "terminal",
+        "label": "colle dans claude code",
+        "lines": [
+          "https://github.com/…/youtube-agent-skill",
+          "Installe cette skill et confirme",
+          "que /yt-script fonctionne."
+        ]
+      }
+    }
+  ],
+  "captions": [
+    {
+      "from": 0,
+      "to": 1.5,
+      "text": "Claude vient de"
+    },
+    {
+      "from": 1.5,
+      "to": 3,
+      "text": "*tuer* le YouTube."
+    },
+    {
+      "from": 3,
+      "to": 4.5,
+      "text": "Maintenant il fait"
+    },
+    {
+      "from": 4.5,
+      "to": 6,
+      "text": "le *travail entier* de ta chaîne"
+    },
+    {
+      "from": 6,
+      "to": 7,
+      "text": "à ta place."
+    },
+    {
+      "from": 7,
+      "to": 8.5,
+      "text": "Ça s'appelle *YouTube Agent*"
+    },
+    {
+      "from": 8.5,
+      "to": 9.5,
+      "text": "et c'est *gratuit.*"
+    },
+    {
+      "from": 9.5,
+      "to": 11,
+      "text": "Et ce n'est pas une skill, c'est *11.*"
+    },
+    {
+      "from": 11,
+      "to": 13,
+      "text": "Chacune fait un travail différent."
+    },
+    {
+      "from": 13,
+      "to": 15,
+      "text": "Une écrit tes vidéos"
+    },
+    {
+      "from": 15,
+      "to": 17,
+      "text": "avec *21* formules de hook qui marchent."
+    },
+    {
+      "from": 17,
+      "to": 19,
+      "text": "Une écrit tes titres"
+    },
+    {
+      "from": 19,
+      "to": 21,
+      "text": "et tes miniatures."
+    },
+    {
+      "from": 21,
+      "to": 24,
+      "text": "Une marque les *coupes* de ta vidéo."
+    },
+    {
+      "from": 24,
+      "to": 27,
+      "text": "Une gère tes commentaires"
+    },
+    {
+      "from": 27,
+      "to": 30,
+      "text": "et une planifie ta *semaine* sur YouTube."
+    },
+    {
+      "from": 30,
+      "to": 32,
+      "text": "Elle t'aide à décider quoi poster,"
+    },
+    {
+      "from": 32,
+      "to": 34,
+      "text": "*quand* poster et comment."
+    },
+    {
+      "from": 34,
+      "to": 36,
+      "text": "Elle trouve les vidéos les plus virales"
+    },
+    {
+      "from": 36,
+      "to": 38,
+      "text": "de ta niche,"
+    },
+    {
+      "from": 38,
+      "to": 40,
+      "text": "démonte le titre, le hook, la structure et les *recrée* pour toi."
+    },
+    {
+      "from": 40,
+      "to": 42,
+      "text": "Tu reçois une vidéo virale,"
+    },
+    {
+      "from": 42,
+      "to": 43,
+      "text": "écrite avec *ta voix.*"
+    },
+    {
+      "from": 43,
+      "to": 44.5,
+      "text": "Pour l'installer, ouvre *Claude Code*"
+    },
+    {
+      "from": 44.5,
+      "to": 46,
+      "text": "et colle ce lien."
+    }
+  ]
+}
