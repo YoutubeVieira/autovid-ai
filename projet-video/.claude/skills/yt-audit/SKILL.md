@@ -1,6 +1,6 @@
 ---
 name: yt-audit
-description: Audite une chaîne YouTube complète — packaging, régularité, rétention, formats, conversions — et rend un plan d'action classé. Utiliser pour « audit de ma chaîne », « pourquoi ma chaîne ne grandit pas », « analyse ma chaîne ».
+description: "Audite une chaîne YouTube complète — packaging, régularité, rétention, formats, conversions — et rend un plan d'action classé. Utiliser pour « audit de ma chaîne », « pourquoi ma chaîne ne grandit pas », « analyse ma chaîne »."
 ---
 
 # /yt-audit — l'état de la chaîne

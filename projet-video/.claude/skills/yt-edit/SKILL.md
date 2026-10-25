@@ -1,6 +1,6 @@
 ---
 name: yt-edit
-description: Prépare le montage — marque les coupes d'une prise brute et génère le fichier video.json (scènes, visuels, sous-titres) que le gabarit Remotion de ce projet rend en vidéo verticale. Utiliser pour « monte la vidéo », « coupes », « sous-titres », « edit ».
+description: "Prépare le montage — marque les coupes d'une prise brute et génère le fichier video.json (scènes, visuels, sous-titres) que le gabarit Remotion de ce projet rend en vidéo verticale. Utiliser pour « monte la vidéo », « coupes », « sous-titres », « edit »."
 ---
 
 # /yt-edit — des coupes au fichier de montage

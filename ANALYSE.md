@@ -32,5 +32,5 @@ Deux Reels/Shorts verticaux (1080×1920, 60 i/s, en portugais du Brésil), même
 ```
 
 ## Ce que ce dépôt en tire
-- [`projet-video/`](projet-video/) — le pack **AutoVid YouTube Agent** (11 skills `/yt-*` en français) + un gabarit **Remotion** qui rend des vidéos dans ce format exact à partir d'un JSON.
-- [`projet-app/`](projet-app/) — le pack **Replica** (11 skills `/replica-*` en français) pour concevoir, construire, tester, monétiser et lancer une application.
+- [`projet-video/`](projet-video/) — 5 agents (stratège, scénariste, monteur, découpeur de Shorts, motion designer), le pack **AutoVid YouTube Agent** (11 skills `/yt-*` en français) + un gabarit **Remotion** qui rend des vidéos dans ce format exact à partir d'un JSON.
+- [`projet-app/`](projet-app/) — 7 agents (chercheur produit, architecte, designer, dev web, dev mobile, QA, lanceur) et le pack **Replica** (11 skills `/replica-*` en français) pour concevoir, construire, tester, monétiser et lancer une application.

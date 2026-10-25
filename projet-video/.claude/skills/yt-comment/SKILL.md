@@ -1,6 +1,6 @@
 ---
 name: yt-comment
-description: Trie et répond aux commentaires d'une vidéo — réponses dans la voix du créateur, idées de vidéos envoyées au backlog, spam ignoré. Utiliser pour « réponds aux commentaires », « gère les commentaires », « comentários ».
+description: "Trie et répond aux commentaires d'une vidéo — réponses dans la voix du créateur, idées de vidéos envoyées au backlog, spam ignoré. Utiliser pour « réponds aux commentaires », « gère les commentaires », « comentários »."
 ---
 
 # /yt-comment — les commentaires

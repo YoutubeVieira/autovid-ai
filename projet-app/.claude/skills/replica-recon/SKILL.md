@@ -1,6 +1,6 @@
 ---
 name: replica-recon
-description: Démonte l'app à cloner — écrans, parcours, fonctionnalités, modèle de données, prix — à partir de son site, de captures ou d'une démo. Première étape de Replica. Utiliser pour « clone cette app », « analyse cette app », « reverse-engineer », « replica-recon ».
+description: "Démonte l'app à cloner — écrans, parcours, fonctionnalités, modèle de données, prix — à partir de son site, de captures ou d'une démo. Première étape de Replica. Utiliser pour « clone cette app », « analyse cette app », « reverse-engineer », « replica-recon »."
 ---
 
 # /replica-recon — démonter l'app

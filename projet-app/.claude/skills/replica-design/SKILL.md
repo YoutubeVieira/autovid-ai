@@ -1,6 +1,6 @@
 ---
 name: replica-design
-description: Reconstruit un design system propre au clone (couleurs, typo, espacements, composants) inspiré de l'ergonomie de l'original sans copier son identité. Utiliser pour « design system », « UI du clone », « replica-design ».
+description: "Reconstruit un design system propre au clone (couleurs, typo, espacements, composants) inspiré de l'ergonomie de l'original sans copier son identité. Utiliser pour « design system », « UI du clone », « replica-design »."
 ---
 
 # /replica-design — un design à toi

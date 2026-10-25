@@ -1,6 +1,6 @@
 ---
 name: yt-script
-description: Écrit le script complet d'une vidéo YouTube (longue ou Short) dans la voix du créateur, en partant d'une des 21 formules de hook. Utiliser pour « écris le script », « roteiro », « script de vidéo », « hook ».
+description: "Écrit le script complet d'une vidéo YouTube (longue ou Short) dans la voix du créateur, en partant d'une des 21 formules de hook. Utiliser pour « écris le script », « roteiro », « script de vidéo », « hook »."
 ---
 
 # /yt-script — le script, dans ta voix

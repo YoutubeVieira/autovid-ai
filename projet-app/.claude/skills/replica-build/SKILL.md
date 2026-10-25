@@ -1,6 +1,6 @@
 ---
 name: replica-build
-description: Construit le clone jalon par jalon à partir du plan — écrans, logique, base de données — et le garde toujours lançable. Utiliser pour « construis l'app », « code le clone », « replica-build ».
+description: "Construit le clone jalon par jalon à partir du plan — écrans, logique, base de données — et le garde toujours lançable. Utiliser pour « construis l'app », « code le clone », « replica-build »."
 ---
 
 # /replica-build — reconstruire

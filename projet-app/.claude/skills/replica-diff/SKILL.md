@@ -1,6 +1,6 @@
 ---
 name: replica-diff
-description: Compare le clone à l'original et note la couverture — ce qui est fait, ce qui manque encore, ce qui est mieux. Utiliser pour « qu'est-ce qui manque », « compare avec l'original », « replica-diff ».
+description: "Compare le clone à l'original et note la couverture — ce qui est fait, ce qui manque encore, ce qui est mieux. Utiliser pour « qu'est-ce qui manque », « compare avec l'original », « replica-diff »."
 ---
 
 # /replica-diff — ce qui manque encore

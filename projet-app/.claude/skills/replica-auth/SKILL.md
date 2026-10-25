@@ -1,6 +1,6 @@
 ---
 name: replica-auth
-description: Câble l'authentification du clone (email + mot de passe, lien magique, Google) avec Supabase Auth, profils et protection des routes. Utiliser pour « login », « inscription », « auth », « replica-auth ».
+description: "Câble l'authentification du clone (email + mot de passe, lien magique, Google) avec Supabase Auth, profils et protection des routes. Utiliser pour « login », « inscription », « auth », « replica-auth »."
 ---
 
 # /replica-auth

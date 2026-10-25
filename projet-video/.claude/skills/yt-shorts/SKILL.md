@@ -1,6 +1,6 @@
 ---
 name: yt-shorts
-description: Extrait 2 à 5 Shorts verticaux d'une vidéo longue (ou écrit un Short de zéro) avec hook réécrit, sous-titres et video.json prêt pour le rendu Remotion. Utiliser pour « Shorts », « Reels », « TikTok », « clip vertical », « découpe en Shorts ».
+description: "Extrait 2 à 5 Shorts verticaux d'une vidéo longue (ou écrit un Short de zéro) avec hook réécrit, sous-titres et video.json prêt pour le rendu Remotion. Utiliser pour « Shorts », « Reels », « TikTok », « clip vertical », « découpe en Shorts »."
 ---
 
 # /yt-shorts

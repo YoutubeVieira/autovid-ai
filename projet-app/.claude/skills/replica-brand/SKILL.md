@@ -1,6 +1,6 @@
 ---
 name: replica-brand
-description: Donne au clone sa propre marque — nom, promesse, logo simple, ton — et écrit la landing page qui vend l'angle trouvé dans les avis. Utiliser pour « nom de l'app », « marque », « landing page », « replica-brand ».
+description: "Donne au clone sa propre marque — nom, promesse, logo simple, ton — et écrit la landing page qui vend l'angle trouvé dans les avis. Utiliser pour « nom de l'app », « marque », « landing page », « replica-brand »."
 ---
 
 # /replica-brand — en faire ton produit

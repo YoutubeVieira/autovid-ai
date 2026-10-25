@@ -1,6 +1,6 @@
 ---
 name: yt-package
-description: Écrit et note le « package » d'une vidéo — titre + concept de miniature — sur 100 points, puis propose des versions améliorées. Utiliser pour « titre », « miniature », « thumbnail », « packaging », « CTR ».
+description: "Écrit et note le « package » d'une vidéo — titre + concept de miniature — sur 100 points, puis propose des versions améliorées. Utiliser pour « titre », « miniature », « thumbnail », « packaging », « CTR »."
 ---
 
 # /yt-package — titre + miniature, notés sur 100

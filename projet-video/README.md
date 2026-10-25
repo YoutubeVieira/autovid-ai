@@ -1,9 +1,24 @@
 # Projet vidéo — AutoVid YouTube Agent
 
-Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Deux parties :
+Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Trois parties :
 
-1. **11 skills Claude Code** (`.claude/skills/`) qui font le travail d'une chaîne YouTube.
-2. **Un gabarit Remotion** (`remotion/`) qui rend des Shorts/Reels au format des vidéos analysées : visuels en haut, facecam en bas, sous-titres mot à mot avec mot-clé rouge.
+1. **5 agents** (`.claude/agents/`) qui se répartissent la production — voir ci-dessous.
+2. **11 skills Claude Code** (`.claude/skills/`) qui font le travail d'une chaîne YouTube.
+3. **Un gabarit Remotion** (`remotion/`) qui rend des Shorts/Reels au format des vidéos analysées : visuels en haut, facecam en bas, sous-titres mot à mot avec mot-clé rouge.
+
+## Les 5 agents
+
+| Agent | Rôle |
+|-------|------|
+| `stratege-youtube` | planning, audit, vidéos virales, SEO, rétention, commentaires |
+| `scenariste` | script dans ta voix, hook, titre + miniature |
+| `monteur-video` | prise brute → coupes → sous-titres → `video.json` → MP4 |
+| `decoupeur-shorts` | vidéo longue → Shorts verticaux |
+| `motion-designer` | nouveaux visuels et animations du gabarit Remotion |
+
+Ils s'appellent automatiquement selon la demande (« monte cette vidéo », « écris le script de… »), ou explicitement : « utilise l'agent monteur-video sur brut.mp4 ». Le rôle de chacun est résumé dans [`CLAUDE.md`](CLAUDE.md).
+
+L'outil `outils/couper-silences.py brut.mp4 sortie.mp4` (ffmpeg) coupe les silences d'une prise brute ; c'est la première étape du `monteur-video`.
 
 ## Les 11 skills
 

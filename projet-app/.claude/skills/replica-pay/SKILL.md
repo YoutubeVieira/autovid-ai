@@ -1,6 +1,6 @@
 ---
 name: replica-pay
-description: Met en place les abonnements et paiements du clone (Stripe, PIX via PSP local), la page de prix et les webhooks qui activent le plan. Utiliser pour « paiement », « abonnement », « Stripe », « PIX », « replica-pay ».
+description: "Met en place les abonnements et paiements du clone (Stripe, PIX via PSP local), la page de prix et les webhooks qui activent le plan. Utiliser pour « paiement », « abonnement », « Stripe », « PIX », « replica-pay »."
 ---
 
 # /replica-pay — encaisser

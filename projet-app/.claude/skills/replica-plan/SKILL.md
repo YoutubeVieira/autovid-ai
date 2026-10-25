@@ -1,6 +1,6 @@
 ---
 name: replica-plan
-description: Choisit la stack, conçoit la base de données et découpe la construction du clone en étapes livrables. Utiliser après /replica-recon, pour « plan technique », « quelle stack », « schéma de base », « replica-plan ».
+description: "Choisit la stack, conçoit la base de données et découpe la construction du clone en étapes livrables. Utiliser après /replica-recon, pour « plan technique », « quelle stack », « schéma de base », « replica-plan »."
 ---
 
 # /replica-plan — stack, base, étapes

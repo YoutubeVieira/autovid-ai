@@ -1,6 +1,6 @@
 ---
 name: replica-reviews
-description: Lit les avis publics de l'app clonée (App Store, Google Play, G2, Trustpilot, Reddit) et en tire les problèmes que ton clone doit résoudre. C'est « l'entrepreneur » de Replica. Utiliser pour « lis les avis », « ce que les utilisateurs détestent », « pesquisa », « replica-reviews ».
+description: "Lit les avis publics de l'app clonée (App Store, Google Play, G2, Trustpilot, Reddit) et en tire les problèmes que ton clone doit résoudre. C'est « l'entrepreneur » de Replica. Utiliser pour « lis les avis », « ce que les utilisateurs détestent », « pesquisa », « replica-reviews »."
 ---
 
 # /replica-reviews — l'entrepreneur

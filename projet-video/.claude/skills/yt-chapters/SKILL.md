@@ -1,6 +1,6 @@
 ---
 name: yt-chapters
-description: Génère les chapitres YouTube (horodatages) d'une vidéo longue à partir de sa transcription. Utiliser pour « chapitres », « timestamps », « horodatages », « chapters ».
+description: "Génère les chapitres YouTube (horodatages) d'une vidéo longue à partir de sa transcription. Utiliser pour « chapitres », « timestamps », « horodatages », « chapters »."
 ---
 
 # /yt-chapters

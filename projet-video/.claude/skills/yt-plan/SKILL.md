@@ -1,6 +1,6 @@
 ---
 name: yt-plan
-description: Planifie la semaine YouTube d'une chaîne — quoi publier, quel jour, à quelle heure, et dans quel format (long ou Short). Utiliser quand l'utilisateur demande « quoi poster », « planning de la semaine », « calendrier éditorial » ou « quand publier ».
+description: "Planifie la semaine YouTube d'une chaîne — quoi publier, quel jour, à quelle heure, et dans quel format (long ou Short). Utiliser quand l'utilisateur demande « quoi poster », « planning de la semaine », « calendrier éditorial » ou « quand publier »."
 ---
 
 # /yt-plan — la semaine de la chaîne

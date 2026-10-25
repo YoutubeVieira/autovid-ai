@@ -1,6 +1,6 @@
 ---
 name: yt-viral
-description: Trouve les vidéos les plus virales de la niche, démonte leur titre, leur hook et leur structure, et les recrée pour la chaîne de l'utilisateur. Utiliser pour « vidéos virales », « qu'est-ce qui marche dans ma niche », « recrée cette vidéo », « outlier ».
+description: "Trouve les vidéos les plus virales de la niche, démonte leur titre, leur hook et leur structure, et les recrée pour la chaîne de l'utilisateur. Utiliser pour « vidéos virales », « qu'est-ce qui marche dans ma niche », « recrée cette vidéo », « outlier »."
 ---
 
 # /yt-viral — démonter ce qui marche et le recréer

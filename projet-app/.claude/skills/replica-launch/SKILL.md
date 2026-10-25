@@ -1,6 +1,6 @@
 ---
 name: replica-launch
-description: Met le clone en ligne et le prépare à vendre — déploiement, domaine, fiche App Store / Google Play, mentions légales, analytics, premier contenu de lancement. Utiliser pour « déployer », « mettre en ligne », « fiche store », « lancement », « replica-launch ».
+description: "Met le clone en ligne et le prépare à vendre — déploiement, domaine, fiche App Store / Google Play, mentions légales, analytics, premier contenu de lancement. Utiliser pour « déployer », « mettre en ligne », « fiche store », « lancement », « replica-launch »."
 ---
 
 # /replica-launch — mettre en vente

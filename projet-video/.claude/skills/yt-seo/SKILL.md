@@ -1,6 +1,6 @@
 ---
 name: yt-seo
-description: Optimise la recherche YouTube d'une vidéo — mot-clé principal, description, tags, hashtags. Utiliser pour « SEO YouTube », « description », « tags », « être trouvé dans la recherche ».
+description: "Optimise la recherche YouTube d'une vidéo — mot-clé principal, description, tags, hashtags. Utiliser pour « SEO YouTube », « description », « tags », « être trouvé dans la recherche »."
 ---
 
 # /yt-seo

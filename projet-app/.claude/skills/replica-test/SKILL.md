@@ -1,6 +1,6 @@
 ---
 name: replica-test
-description: Teste le clone à la recherche d'erreurs — tests end-to-end des parcours clés avec Playwright, cas limites, sécurité RLS — et corrige ce qui casse. Utiliser pour « teste l'app », « trouve les bugs », « QA », « replica-test ».
+description: "Teste le clone à la recherche d'erreurs — tests end-to-end des parcours clés avec Playwright, cas limites, sécurité RLS — et corrige ce qui casse. Utiliser pour « teste l'app », « trouve les bugs », « QA », « replica-test »."
 ---
 
 # /replica-test — chasser les erreurs

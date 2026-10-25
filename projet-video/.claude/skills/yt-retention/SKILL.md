@@ -1,6 +1,6 @@
 ---
 name: yt-retention
-description: Analyse la rétention d'une vidéo (courbe YouTube Studio ou transcription) et indique où les spectateurs décrochent et quoi réécrire. Utiliser pour « rétention », « les gens partent », « audience retention », « durée de visionnage ».
+description: "Analyse la rétention d'une vidéo (courbe YouTube Studio ou transcription) et indique où les spectateurs décrochent et quoi réécrire. Utiliser pour « rétention », « les gens partent », « audience retention », « durée de visionnage »."
 ---
 
 # /yt-retention — où les gens partent
