@@ -1,0 +1,214 @@
+[
+  {
+    "section": "warmup",
+    "name": "March in Place",
+    "instruction": "Gently lift your knees",
+    "cue": "Breathe at your own pace",
+    "say": "Let's start by marching in place. Gently lift your knees.",
+    "focus": [
+      "balance",
+      "mobility",
+      "strength"
+    ],
+    "chair_option": "Hold the back of your chair",
+    "arrow": {
+      "dir": "up",
+      "x": 0.36,
+      "y": 0.62,
+      "at": 2.0
+    }
+  },
+  {
+    "section": "warmup",
+    "name": "Shoulder Rolls",
+    "instruction": "Roll your shoulders back slowly",
+    "cue": "Keep your neck relaxed",
+    "say": "Now, roll your shoulders back, slowly and smoothly.",
+    "focus": [
+      "mobility",
+      "balance",
+      "strength"
+    ],
+    "chair_option": "Stay seated if you prefer"
+  },
+  {
+    "section": "warmup",
+    "name": "Arm Circles",
+    "instruction": "Make small circles with your arms",
+    "cue": "Small and easy",
+    "say": "Open your arms and make small, easy circles.",
+    "focus": [
+      "mobility",
+      "strength"
+    ],
+    "chair_option": "Stay seated if you prefer"
+  },
+  {
+    "section": "warmup",
+    "name": "Side Steps",
+    "instruction": "Step side to side, nice and easy",
+    "cue": "Look straight ahead",
+    "say": "Let's step side to side, nice and easy.",
+    "focus": [
+      "balance",
+      "mobility"
+    ],
+    "chair_option": "Hold your chair for support",
+    "arrow": {
+      "dir": "right",
+      "x": 0.4,
+      "y": 0.8,
+      "at": 2.0
+    }
+  },
+  {
+    "section": "main",
+    "name": "Heel Raises",
+    "instruction": "Rise onto your toes, then lower slowly",
+    "cue": "Hold a chair if needed",
+    "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly.",
+    "focus": [
+      "balance",
+      "strength"
+    ],
+    "chair_option": "Hold the back of your chair",
+    "arrow": {
+      "dir": "up",
+      "x": 0.37,
+      "y": 0.85,
+      "at": 2.0
+    }
+  },
+  {
+    "section": "main",
+    "name": "Sit to Stand",
+    "instruction": "Stand up slowly, then sit back down",
+    "cue": "Push through your heels",
+    "say": "Sit near the front of your chair. Stand up slowly, then sit back down with control.",
+    "focus": [
+      "strength",
+      "balance"
+    ],
+    "chair_option": "Use your hands to help"
+  },
+  {
+    "section": "main",
+    "name": "Single-Leg Balance",
+    "instruction": "Lift one foot just off the floor",
+    "cue": "Hold your chair the whole time",
+    "say": "Hold your chair, and lift one foot just off the floor. Switch sides halfway.",
+    "focus": [
+      "balance"
+    ],
+    "chair_option": "Keep both hands on the chair"
+  },
+  {
+    "section": "main",
+    "name": "Wall Push-Ups",
+    "instruction": "Bend your elbows, then push away",
+    "cue": "Keep your body straight",
+    "say": "Facing a wall, place your hands on it. Bend your elbows, then push away.",
+    "focus": [
+      "strength"
+    ],
+    "chair_option": "Stand closer to the wall"
+  },
+  {
+    "section": "main",
+    "name": "Side Leg Raises",
+    "instruction": "Lift your leg out to the side",
+    "cue": "Stand tall",
+    "say": "Hold your chair, and lift one leg out to the side. Slow and controlled.",
+    "focus": [
+      "balance",
+      "strength"
+    ],
+    "chair_option": "Keep a hand on the chair",
+    "arrow": {
+      "dir": "right",
+      "x": 0.42,
+      "y": 0.75,
+      "at": 2.0
+    }
+  },
+  {
+    "section": "main",
+    "name": "Heel-to-Toe Walk",
+    "instruction": "Place one heel in front of your toes",
+    "cue": "Eyes forward",
+    "say": "Walk heel to toe, like on a tightrope. Take your time.",
+    "focus": [
+      "balance"
+    ],
+    "chair_option": "Walk next to a counter"
+  },
+  {
+    "section": "main",
+    "name": "Seated Knee Lifts",
+    "instruction": "Lift one knee, then the other",
+    "cue": "Sit tall",
+    "say": "Sitting tall, lift one knee, then the other.",
+    "focus": [
+      "strength",
+      "mobility"
+    ],
+    "chair_option": "Seated exercise",
+    "arrow": {
+      "dir": "up",
+      "x": 0.38,
+      "y": 0.7,
+      "at": 2.0
+    }
+  },
+  {
+    "section": "main",
+    "name": "Toe Taps",
+    "instruction": "Tap your toes forward, one at a time",
+    "cue": "Keep a steady rhythm",
+    "say": "Tap your toes forward, one foot at a time.",
+    "focus": [
+      "mobility",
+      "balance"
+    ],
+    "chair_option": "Hold your chair"
+  },
+  {
+    "section": "cooldown",
+    "name": "Deep Breathing",
+    "instruction": "Breathe in through your nose",
+    "cue": "Slow and calm",
+    "say": "Let's slow down. Breathe in through your nose, and out through your mouth.",
+    "focus": [
+      "balance",
+      "mobility",
+      "strength"
+    ],
+    "chair_option": "Seated or standing"
+  },
+  {
+    "section": "cooldown",
+    "name": "Calf Stretch",
+    "instruction": "Step back and press your heel down",
+    "cue": "No bouncing",
+    "say": "Step one foot back and gently press your heel down. Hold the stretch.",
+    "focus": [
+      "balance",
+      "mobility",
+      "strength"
+    ],
+    "chair_option": "Hold your chair"
+  },
+  {
+    "section": "cooldown",
+    "name": "Neck Stretch",
+    "instruction": "Tilt your head gently to the side",
+    "cue": "Relax your shoulders",
+    "say": "Gently tilt your head to one side, then the other.",
+    "focus": [
+      "mobility",
+      "balance",
+      "strength"
+    ],
+    "chair_option": "Stay seated if you prefer"
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "brand": {
+    "name": "Gym Douce Senior",
+    "tagline": "Bouger aujourd’hui, rester autonome demain !",
+    "resolution": "1920x1080",
+    "fps": 30,
+    "colors": {
+      "sage": "#8FB996",
+      "beige": "#F6F4EC",
+      "olive": "#5B725E",
+      "soft_yellow": "#F6C667",
+      "warm_grey": "#A7B0A6",
+      "white": "#FFFFFF"
+    },
+    "fonts": {
+      "title": "Montserrat-SemiBold",
+      "instruction": "Inter-Medium",
+      "timer": "RobotoMono-Medium"
+    }
+  },
+  "layout": {
+    "coach_area": "full_frame",
+    "safe_margin_px": 70,
+    "title_position": "top_left",
+    "exercise_position": "right_upper_middle",
+    "timer_position": "right_middle",
+    "instruction_position": "right_lower_middle",
+    "motivational_message_position": "bottom_left_or_right",
+    "panels": "avoid_frames_use_text_overlay"
+  },
+  "animation": {
+    "intro_fade_seconds": 0.5,
+    "exercise_title_fade_seconds": 0.35,
+    "timer": "stable_no_bounce",
+    "progress_bar": "thin_muted_sage",
+    "movement_arrow_seconds": 1.0,
+    "rest_transition_seconds": 0.4
+  },
+  "intro_seconds": 7,
+  "default_effort_seconds": 35,
+  "default_rest_seconds": 18,
+  "segments": [
+    {
+      "name": "Marche sur place",
+      "type": "exercise",
+      "duration": 35,
+      "instruction": "Levez doucement les genoux",
+      "cue": "Respirez à votre rythme",
+      "needs_timer": true
+    },
+    {
+      "name": "Récupération",
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relâchez les épaules et respirez calmement",
+      "cue": "Récupérez à votre rythme",
+      "needs_timer": true
+    },
+    {
+      "name": "Élévations de talons",
+      "type": "exercise",
+      "duration": 35,
+      "instruction": "Montez les talons, puis redescendez lentement",
+      "cue": "Tenez une chaise si nécessaire",
+      "needs_timer": true
+    }
+  ],
+  "safety": {
+    "show_chair_option": true,
+    "avoid_fast_flashing": true,
+    "reminder": "Arrêtez en cas de douleur, vertige ou essoufflement inhabituel."
+  }
+}

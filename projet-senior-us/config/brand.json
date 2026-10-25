@@ -1,0 +1,68 @@
+{
+  "name": "Gentle Senior Fitness",
+  "tagline": "Move today, stay independent tomorrow!",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "fps": 30,
+  "colors": {
+    "sage": "#8FB996",
+    "beige": "#F6F4EC",
+    "olive": "#5B725E",
+    "soft_yellow": "#F6C667",
+    "warm_grey": "#A7B0A6",
+    "white": "#FFFFFF"
+  },
+  "fonts": {
+    "title": [
+      "fonts/Montserrat.ttf",
+      "SemiBold"
+    ],
+    "instruction": [
+      "fonts/Inter.ttf",
+      "Medium"
+    ],
+    "timer": [
+      "fonts/RobotoMono.ttf",
+      "Medium"
+    ]
+  },
+  "layout": {
+    "safe_margin": 70,
+    "text_side": "right",
+    "column_center_x": 1480,
+    "column_width": 560
+  },
+  "animation": {
+    "intro_fade": 0.5,
+    "title_fade": 0.35,
+    "rest_fade": 0.4,
+    "arrow_seconds": 1.0
+  },
+  "copy": {
+    "rest_title": "REST",
+    "next": "Next: {name}",
+    "intro_lines": [
+      "Hello and welcome.",
+      "Today, we're going to move together, gently."
+    ],
+    "intro_chair": "Grab a sturdy chair if you need one. Let's begin together.",
+    "outro_title": "Great job!",
+    "outro_line": "You took care of yourself today.",
+    "subscribe": "Subscribe for more gentle workouts",
+    "safety": "Stop if you feel pain, dizziness, or unusual shortness of breath.",
+    "disclaimer": "Always check with your doctor before starting a new exercise program. Stop if you feel pain, dizziness, or unusual shortness of breath."
+  },
+  "voice": {
+    "words_per_second": 2.3,
+    "offset": 0.4
+  },
+  "tts": {
+    "command": null
+  },
+  "music": {
+    "file": null,
+    "volume": 0.1
+  }
+}

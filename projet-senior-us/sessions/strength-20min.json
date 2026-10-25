@@ -1,0 +1,337 @@
+{
+  "slug": "strength-20min",
+  "title": "20-Minute Gentle Strength Workout for Seniors | Chair Support Option",
+  "promise": "20 minutes to work on your strength",
+  "description": "A gentle 20-minute strength routine for seniors. Follow along at your own pace — a sturdy chair is all you need.",
+  "target_minutes": 20,
+  "coach_default": null,
+  "hashtags": [
+    "#seniorfitness",
+    "#strengthexercises",
+    "#chairexercise",
+    "#over60"
+  ],
+  "segments": [
+    {
+      "type": "intro",
+      "duration": 7
+    },
+    {
+      "name": "March in Place",
+      "instruction": "Gently lift your knees",
+      "cue": "Breathe at your own pace",
+      "say": "Let's start by marching in place. Gently lift your knees.",
+      "type": "exercise",
+      "duration": 45,
+      "section": "warmup",
+      "arrow": {
+        "dir": "up",
+        "x": 0.36,
+        "y": 0.62,
+        "at": 2.0
+      }
+    },
+    {
+      "name": "Shoulder Rolls",
+      "instruction": "Roll your shoulders back slowly",
+      "cue": "Keep your neck relaxed",
+      "say": "Now, roll your shoulders back, slowly and smoothly.",
+      "type": "exercise",
+      "duration": 45,
+      "section": "warmup"
+    },
+    {
+      "name": "Arm Circles",
+      "instruction": "Make small circles with your arms",
+      "cue": "Small and easy",
+      "say": "Open your arms and make small, easy circles.",
+      "type": "exercise",
+      "duration": 45,
+      "section": "warmup"
+    },
+    {
+      "name": "Heel Raises",
+      "instruction": "Rise onto your toes, then lower slowly",
+      "cue": "Hold a chair if needed",
+      "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.37,
+        "y": 0.85,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe.",
+      "safety": true
+    },
+    {
+      "name": "Sit to Stand",
+      "instruction": "Stand up slowly, then sit back down",
+      "cue": "Push through your heels",
+      "say": "Sit near the front of your chair. Stand up slowly, then sit back down with control.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Wall Push-Ups",
+      "instruction": "Bend your elbows, then push away",
+      "cue": "Keep your body straight",
+      "say": "Facing a wall, place your hands on it. Bend your elbows, then push away.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Side Leg Raises",
+      "instruction": "Lift your leg out to the side",
+      "cue": "Stand tall",
+      "say": "Hold your chair, and lift one leg out to the side. Slow and controlled.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "right",
+        "x": 0.42,
+        "y": 0.75,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Seated Knee Lifts",
+      "instruction": "Lift one knee, then the other",
+      "cue": "Sit tall",
+      "say": "Sitting tall, lift one knee, then the other.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.38,
+        "y": 0.7,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Heel Raises (Round 2)",
+      "instruction": "Rise onto your toes, then lower slowly",
+      "cue": "Hold a chair if needed",
+      "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.37,
+        "y": 0.85,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Sit to Stand (Round 2)",
+      "instruction": "Stand up slowly, then sit back down",
+      "cue": "Push through your heels",
+      "say": "Sit near the front of your chair. Stand up slowly, then sit back down with control.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Wall Push-Ups (Round 2)",
+      "instruction": "Bend your elbows, then push away",
+      "cue": "Keep your body straight",
+      "say": "Facing a wall, place your hands on it. Bend your elbows, then push away.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Side Leg Raises (Round 2)",
+      "instruction": "Lift your leg out to the side",
+      "cue": "Stand tall",
+      "say": "Hold your chair, and lift one leg out to the side. Slow and controlled.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "right",
+        "x": 0.42,
+        "y": 0.75,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Seated Knee Lifts (Round 2)",
+      "instruction": "Lift one knee, then the other",
+      "cue": "Sit tall",
+      "say": "Sitting tall, lift one knee, then the other.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.38,
+        "y": 0.7,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Heel Raises (Round 3)",
+      "instruction": "Rise onto your toes, then lower slowly",
+      "cue": "Hold a chair if needed",
+      "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.37,
+        "y": 0.85,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Sit to Stand (Round 3)",
+      "instruction": "Stand up slowly, then sit back down",
+      "cue": "Push through your heels",
+      "say": "Sit near the front of your chair. Stand up slowly, then sit back down with control.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Wall Push-Ups (Round 3)",
+      "instruction": "Bend your elbows, then push away",
+      "cue": "Keep your body straight",
+      "say": "Facing a wall, place your hands on it. Bend your elbows, then push away.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 20,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Side Leg Raises (Round 3)",
+      "instruction": "Lift your leg out to the side",
+      "cue": "Stand tall",
+      "say": "Hold your chair, and lift one leg out to the side. Slow and controlled.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "main",
+      "arrow": {
+        "dir": "right",
+        "x": 0.42,
+        "y": 0.75,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 76,
+      "name": "Deep Breathing",
+      "instruction": "Breathe in through your nose",
+      "cue": "Slow and calm",
+      "say": "Let's slow down. Breathe in through your nose, and out through your mouth."
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 76,
+      "name": "Calf Stretch",
+      "instruction": "Step back and press your heel down",
+      "cue": "No bouncing",
+      "say": "Step one foot back and gently press your heel down. Hold the stretch."
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 78,
+      "name": "Neck Stretch",
+      "instruction": "Tilt your head gently to the side",
+      "cue": "Relax your shoulders",
+      "say": "Gently tilt your head to one side, then the other."
+    },
+    {
+      "type": "outro",
+      "duration": 8
+    }
+  ]
+}

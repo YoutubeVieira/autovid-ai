@@ -1,0 +1,187 @@
+{
+  "slug": "balance-10min",
+  "title": "10-Minute Gentle Balance Workout for Seniors | Chair Support Option",
+  "promise": "10 minutes to work on your balance",
+  "description": "A gentle 10-minute balance routine for seniors. Follow along at your own pace — a sturdy chair is all you need.",
+  "target_minutes": 10,
+  "coach_default": null,
+  "hashtags": [
+    "#seniorfitness",
+    "#balanceexercises",
+    "#chairexercise",
+    "#over60"
+  ],
+  "segments": [
+    {
+      "type": "intro",
+      "duration": 7
+    },
+    {
+      "name": "March in Place",
+      "instruction": "Gently lift your knees",
+      "cue": "Breathe at your own pace",
+      "say": "Let's start by marching in place. Gently lift your knees.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "warmup",
+      "arrow": {
+        "dir": "up",
+        "x": 0.36,
+        "y": 0.62,
+        "at": 2.0
+      }
+    },
+    {
+      "name": "Shoulder Rolls",
+      "instruction": "Roll your shoulders back slowly",
+      "cue": "Keep your neck relaxed",
+      "say": "Now, roll your shoulders back, slowly and smoothly.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "warmup"
+    },
+    {
+      "name": "Side Steps",
+      "instruction": "Step side to side, nice and easy",
+      "cue": "Look straight ahead",
+      "say": "Let's step side to side, nice and easy.",
+      "type": "exercise",
+      "duration": 40,
+      "section": "warmup",
+      "arrow": {
+        "dir": "right",
+        "x": 0.4,
+        "y": 0.8,
+        "at": 2.0
+      }
+    },
+    {
+      "name": "Heel Raises",
+      "instruction": "Rise onto your toes, then lower slowly",
+      "cue": "Hold a chair if needed",
+      "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main",
+      "arrow": {
+        "dir": "up",
+        "x": 0.37,
+        "y": 0.85,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe.",
+      "safety": true
+    },
+    {
+      "name": "Sit to Stand",
+      "instruction": "Stand up slowly, then sit back down",
+      "cue": "Push through your heels",
+      "say": "Sit near the front of your chair. Stand up slowly, then sit back down with control.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Single-Leg Balance",
+      "instruction": "Lift one foot just off the floor",
+      "cue": "Hold your chair the whole time",
+      "say": "Hold your chair, and lift one foot just off the floor. Switch sides halfway.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Side Leg Raises",
+      "instruction": "Lift your leg out to the side",
+      "cue": "Stand tall",
+      "say": "Hold your chair, and lift one leg out to the side. Slow and controlled.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main",
+      "arrow": {
+        "dir": "right",
+        "x": 0.42,
+        "y": 0.75,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Heel-to-Toe Walk",
+      "instruction": "Place one heel in front of your toes",
+      "cue": "Eyes forward",
+      "say": "Walk heel to toe, like on a tightrope. Take your time.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main"
+    },
+    {
+      "type": "rest",
+      "duration": 18,
+      "instruction": "Relax your shoulders and breathe",
+      "say": "Take a short rest. Relax your shoulders, and breathe."
+    },
+    {
+      "name": "Toe Taps",
+      "instruction": "Tap your toes forward, one at a time",
+      "cue": "Keep a steady rhythm",
+      "say": "Tap your toes forward, one foot at a time.",
+      "type": "exercise",
+      "duration": 35,
+      "section": "main"
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 55,
+      "name": "Deep Breathing",
+      "instruction": "Breathe in through your nose",
+      "cue": "Slow and calm",
+      "say": "Let's slow down. Breathe in through your nose, and out through your mouth."
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 55,
+      "name": "Calf Stretch",
+      "instruction": "Step back and press your heel down",
+      "cue": "No bouncing",
+      "say": "Step one foot back and gently press your heel down. Hold the stretch."
+    },
+    {
+      "type": "exercise",
+      "section": "cooldown",
+      "duration": 55,
+      "name": "Neck Stretch",
+      "instruction": "Tilt your head gently to the side",
+      "cue": "Relax your shoulders",
+      "say": "Gently tilt your head to one side, then the other."
+    },
+    {
+      "type": "outro",
+      "duration": 8
+    }
+  ]
+}
