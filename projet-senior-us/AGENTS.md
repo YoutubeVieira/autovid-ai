@@ -35,6 +35,11 @@ python3 autovideo.py render sessions/<slug>.json [--preview] [--until S] [--alph
 - Le ton du texte (olive ou blanc) est choisi automatiquement d'après le décor ; forcer avec `"text_tone": "light"|"dark"` sur un segment si une image de contrôle le montre mal lisible.
 - Placer le texte à gauche si le coach est à droite : `"text_side": "left"`.
 
+## Fichiers de l'utilisateur (voix off, vidéos du coach, musique)
+- Ils vont dans `entrees/<slug>/` : `coach/NN.*`, `voix/NN.*` (ou `voix/complete.*`), `musique.*` — `NN` = numéro du segment affiché par `check` (01 = intro). Mode d'emploi : `entrees/LISEZMOI.md`.
+- Copier, ne jamais déplacer ni supprimer les originaux ; ne jamais les committer (ignorés par git).
+- Une voix plus longue que son segment est signalée par `check` : ajuster la durée du segment, pas couper la voix.
+
 ## Avant de dire qu'une vidéo est prête
 1. `check` sans avertissement (ou chaque avertissement justifié).
 2. Images de contrôle (`still`) regardées : intro, un exercice avec flèche, un repos avec rappel de sécurité, la fin.

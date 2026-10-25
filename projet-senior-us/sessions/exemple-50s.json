@@ -1,0 +1,46 @@
+{
+  "slug": "exemple-50s",
+  "title": "Gentle Leg Warm-Up for Seniors (50 Seconds)",
+  "promise": "50 seconds to wake up your legs",
+  "description": "A short, gentle warm-up for seniors. A sturdy chair is all you need.",
+  "hashtags": [
+    "#seniorfitness",
+    "#chairexercise",
+    "#gentleworkout"
+  ],
+  "segments": [
+    {
+      "type": "intro",
+      "duration": 7
+    },
+    {
+      "type": "exercise",
+      "section": "warmup",
+      "name": "March in Place",
+      "duration": 20,
+      "instruction": "Gently lift your knees",
+      "cue": "Breathe at your own pace",
+      "say": "Let's start by marching in place. Gently lift your knees.",
+      "arrow": {
+        "dir": "up",
+        "x": 0.36,
+        "y": 0.62,
+        "at": 2.0
+      }
+    },
+    {
+      "type": "exercise",
+      "section": "main",
+      "name": "Heel Raises",
+      "duration": 20,
+      "reps": 8,
+      "instruction": "Rise onto your toes, then lower slowly",
+      "safety": true,
+      "say": "Hold your chair if you need it. Rise onto your toes, then lower slowly. Eight times."
+    },
+    {
+      "type": "outro",
+      "duration": 3
+    }
+  ]
+}

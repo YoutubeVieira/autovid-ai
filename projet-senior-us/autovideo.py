@@ -317,11 +317,11 @@ def overlay_elements(t, segs, brand, total):
 
     if seg.get("reps"):
         k = min(seg["reps"], int(loc / seg["duration"] * seg["reps"]) + 1)
-        counter = f'{k:02d} / {seg["reps"]:02d}'
+        counter, csize = f'{k:02d}/{seg["reps"]:02d}', 130  # plus large que mm:ss : police réduite
     else:
         remaining = max(0, math.ceil(s1 - t - 1e-6))
-        counter = f"{remaining // 60:02d}:{remaining % 60:02d}"
-    els.append((T(counter, "timer", 150, cx, 370, "tc"), a))
+        counter, csize = f"{remaining // 60:02d}:{remaining % 60:02d}", 150
+    els.append((T(counter, "timer", csize, cx, 370 + (150 - csize) // 2, "tc"), a))
     els.append((bar_element(brand, cx, 560, 400, loc / seg["duration"]), a))
     if seg.get("instruction"):
         els.append((T(seg["instruction"], "instruction", 42, cx, 600, "tc", colw), a))
@@ -331,9 +331,9 @@ def overlay_elements(t, segs, brand, total):
 
     # Encouragement / conseil en bas, sans bandeau.
     cue = seg.get("cue")
-    if rest and seg.get("safety"):
+    if seg.get("safety"):
         e = T(brand.copy["safety"], "instruction", 30, W - M, H - M - 36, "tr")
-        ca = fade(t, s0 + 1.0, s1, 0.5, 0.5)
+        ca = fade(t, s0 + (1.0 if rest else 2.0), s1, 0.5, 0.5)
         els.append((e, ca))
         els.append((Element(dot_icon(brand.c["soft_yellow"], 18), e.x, e.y + 41), ca))
     elif cue:
@@ -407,19 +407,17 @@ def is_image(p):
 
 def build_coach(segs, session, brand, work, until=None):
     """Concatène les plans du coach (vidéo ou image) en coach.mp4 sans son."""
-    default = session.get("coach_default")
     placeholder = None
     groups = []  # (source, durée) en regroupant les segments consécutifs de même source
     for s in segs:
         if until is not None and s["start"] >= until:
             break
         dur = s["duration"] if until is None else min(s["end"], until) - s["start"]
-        src = s.get("coach") or default
+        src = s["_coach"]
         if not src:
             placeholder = placeholder or str(placeholder_coach(brand, work / "coach_placeholder.png"))
             src = placeholder
-        else:
-            src = str((ROOT / src) if not Path(src).is_absolute() else Path(src))
+        src = str(src)
         if groups and groups[-1][0] == src:
             groups[-1][1] += dur
         else:
@@ -459,7 +457,7 @@ def tts_file(text, brand, work):
     return out
 
 
-def voice_plan(segs, brand, work, use_tts=True):
+def voice_plan(segs, brand, work, use_tts=True, full_voice=False):
     """[(début, fin, texte, fichier audio ou None)] — sert à la fois à l'audio et au SRT."""
     wps = brand.cfg["voice"]["words_per_second"]
     plan = []
@@ -467,17 +465,21 @@ def voice_plan(segs, brand, work, use_tts=True):
         lines = say_lines(s, brand)
         for i, (t0, text) in enumerate(lines):
             audio = None
-            if s.get("voice") and i == 0:
-                audio = ROOT / s["voice"]
+            if s["_voice"] or full_voice:
+                # Voix fournie (un fichier par segment, ou une piste complète) : elle couvre
+                # tout le segment ; le texte ne sert plus qu'aux sous-titres.
+                audio = s["_voice"] if i == 0 else None
             elif use_tts:
                 audio = tts_file(text, brand, work)
-            dur = probe_duration(audio) if audio else len(text.split()) / wps + 0.4
+            dur = len(text.split()) / wps + 0.4
+            if audio and len(lines) == 1:
+                dur = probe_duration(audio)
             limit = lines[i + 1][0] if i + 1 < len(lines) else s["end"]
             plan.append((t0, min(t0 + dur, limit), text, audio))
     return plan
 
 
-def build_audio(plan, total, brand, work):
+def build_audio(plan, total, brand, work, full_voice=None, music_file=None):
     args = ["-f", "lavfi", "-t", f"{total:.3f}", "-i", "anullsrc=r=48000:cl=stereo"]
     filt, labels, n = [], ["[0:a]"], 1
     for t0, _, _, audio in plan:
@@ -488,9 +490,14 @@ def build_audio(plan, total, brand, work):
         filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo,adelay={ms}|{ms}[a{n}]")
         labels.append(f"[a{n}]")
         n += 1
+    if full_voice:
+        args += ["-i", str(full_voice)]
+        filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo[a{n}]")
+        labels.append(f"[a{n}]")
+        n += 1
     music = brand.cfg["music"]
-    if music.get("file"):
-        args += ["-stream_loop", "-1", "-t", f"{total:.3f}", "-i", str(ROOT / music["file"])]
+    if music_file:
+        args += ["-stream_loop", "-1", "-t", f"{total:.3f}", "-i", str(music_file)]
         filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo,volume={music['volume']},"
                     f"afade=t=in:d=2,afade=t=out:st={max(0, total - 3):.3f}:d=3[m]")
         labels.append("[m]")
@@ -577,12 +584,47 @@ def run(cmd, **kw):
         sys.exit(f"Échec : {' '.join(map(str, cmd[:6]))}… (code {e.returncode})")
 
 
+MEDIA = {".mp4", ".mov", ".m4v", ".webm", ".mkv", ".png", ".jpg", ".jpeg", ".webp",
+         ".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac"}
+
+
+def find_media(folder, stem):
+    """Premier fichier média de `folder` nommé `stem` (03.mp4, 03.MP3…), sinon None."""
+    if folder.is_dir():
+        for f in sorted(folder.iterdir()):
+            if f.stem.lower() == stem and f.suffix.lower() in MEDIA:
+                return f
+    return None
+
+
+def resolve_media(session, segs, brand):
+    """Associe à chaque segment son clip du coach et sa voix off.
+
+    Ordre de priorité : chemin écrit dans la séance > dossier d'entrée
+    entrees/<slug>/coach|voix/<NN>.* (NN = numéro du segment, 01 = intro)
+    > entrees/<slug>/coach/defaut.* > "coach_default" de la séance > silhouette.
+    """
+    inbox = ROOT / "entrees" / session["slug"]
+    default = (ROOT / session["coach_default"]) if session.get("coach_default") else None
+    default = find_media(inbox / "coach", "defaut") or default
+    for i, seg in enumerate(segs, 1):
+        nn = f"{i:02d}"
+        seg["_nn"] = nn
+        seg["_coach"] = (ROOT / seg["coach"]) if seg.get("coach") else (find_media(inbox / "coach", nn) or default)
+        seg["_voice"] = (ROOT / seg["voice"]) if seg.get("voice") else find_media(inbox / "voix", nn)
+    session["_voice_full"] = find_media(inbox / "voix", "complete")
+    music = find_media(inbox, "musique") or (ROOT / brand.cfg["music"]["file"] if brand.cfg["music"].get("file") else None)
+    session["_music"] = music
+    session["_inbox"] = inbox
+
+
 def load_session(path, brand):
     session = load_json(path)
     segs, total = build_timeline(session, brand)
     for s in segs:
         if s["type"] == "intro":
             s.setdefault("promise", session.get("promise"))
+    resolve_media(session, segs, brand)
     return session, segs, total
 
 
@@ -604,7 +646,25 @@ def cmd_check(a):
     if segs[0]["type"] != "intro":
         warn.append("pas d'intro")
     if not any(s.get("safety") for s in segs):
-        warn.append("aucun rappel de sécurité à l'écran (ajouter \"safety\": true à un repos)")
+        warn.append("aucun rappel de sécurité à l'écran (ajouter \"safety\": true à un segment)")
+    # Médias trouvés pour chaque segment (dossier entrees/<slug>/ ou chemins de la séance).
+    rel = lambda f: str(f.relative_to(ROOT)) if f and f.is_relative_to(ROOT) else (str(f) if f else "—")
+    print(f'\nMédias (dossier d\'entrée : {rel(session["_inbox"])}/)')
+    print(f'{"NN":<3} {"segment":<22} {"coach":<40} voix')
+    for x in segs:
+        print(f'{x["_nn"]:<3} {(x.get("name") or x["type"])[:22]:<22} {rel(x["_coach"])[:40]:<40} {rel(x["_voice"])}')
+        if x["_voice"]:
+            d = probe_duration(x["_voice"])
+            if d > x["duration"] - 0.4:
+                warn.append(f'voix {x["_nn"]} ({d:.1f} s) plus longue que le segment ({x["duration"]} s)')
+    if session["_voice_full"]:
+        d = probe_duration(session["_voice_full"])
+        print(f'voix complète : {rel(session["_voice_full"])} ({d:.1f} s)')
+        if abs(d - total) > 1:
+            warn.append(f"voix complète de {d:.1f} s pour une séance de {total:.1f} s")
+    print(f'musique : {rel(session["_music"])}')
+    if not any(x["_coach"] for x in segs):
+        warn.append("aucune vidéo du coach : la silhouette d'emplacement sera utilisée")
     target = session.get("target_minutes")
     print(f"\nDurée totale : {fmt_ts(total)}" + (f" (cible {target} min)" if target else ""))
     if target and abs(total - target * 60) > 5:
@@ -620,14 +680,14 @@ def cmd_still(a):
     work = ROOT / "out" / session["slug"] / "work"
     work.mkdir(parents=True, exist_ok=True)
     seg = next(s for s in segs if s["start"] <= a.at < s["end"])
-    src = seg.get("coach") or session.get("coach_default")
+    src = seg["_coach"]
     if src and not is_image(src):
         frame = work / "still_bg.png"
-        run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{(a.at - seg['start']):.3f}", "-i", str(ROOT / src),
+        run(["ffmpeg", "-y", "-loglevel", "error", "-ss", f"{(a.at - seg['start']):.3f}", "-i", str(src),
              "-frames:v", "1", str(frame)])
         bg = Image.open(frame)
     else:
-        bg = Image.open(ROOT / src) if src else Image.open(placeholder_coach(brand, work / "coach_placeholder.png"))
+        bg = Image.open(src) if src else Image.open(placeholder_coach(brand, work / "coach_placeholder.png"))
     bg = bg.convert("RGB")
     k = max(brand.W / bg.width, brand.H / bg.height)
     bg = bg.resize((math.ceil(bg.width * k), math.ceil(bg.height * k)))
@@ -662,11 +722,11 @@ def cmd_render(a):
             if len(r.stdout) == LUMA_W * LUMA_H:
                 attach_luma(seg, np.frombuffer(r.stdout, np.uint8))
     print("2/4 voix off, sous-titres, musique…")
-    plan = voice_plan(segs, brand, work, use_tts=not a.no_tts)
+    plan = voice_plan(segs, brand, work, use_tts=not a.no_tts, full_voice=bool(session["_voice_full"]))
     plan = [p for p in plan if p[0] < end]
     write_srt(plan, ydir / "captions.en.srt")
     shutil.copy(ydir / "captions.en.srt", cdir / "captions.en.srt")
-    audio = build_audio(plan, end, brand, work)
+    audio = build_audio(plan, end, brand, work, full_voice=session["_voice_full"], music_file=session["_music"])
 
     print("3/4 habillage + encodage…")
     final = cdir / f"{slug}_final.mp4"

@@ -1,2 +1,5 @@
 out/
 __pycache__/
+entrees/**/*.*
+!entrees/LISEZMOI.md
+!entrees/**/.gitkeep

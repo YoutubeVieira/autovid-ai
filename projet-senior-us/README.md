@@ -26,6 +26,9 @@ pip install -r requirements.txt     # numpy, Pillow ; FFmpeg doit être install�
 ```
 Les polices (Montserrat, Inter, Roboto Mono, licence OFL) sont dans `fonts/`.
 
+## Exemple de 50 secondes
+`sessions/exemple-50s.json` : intro (7 s), « March in Place » avec chronomètre et flèche (20 s), « Heel Raises » avec compteur de répétitions et rappel de sécurité (20 s), fin (3 s). C'est la séance de départ à réutiliser : déposez vos fichiers dans `entrees/exemple-50s/` et relancez le rendu.
+
 ## Utilisation
 ```bash
 python3 autovideo.py plan --minutes 10 --focus balance        # → sessions/balance-10min.json
@@ -36,14 +39,22 @@ python3 autovideo.py render sessions/balance-10min.json --preview --until 60   #
 python3 autovideo.py render sessions/balance-10min.json --alpha              # + calque transparent pour CapCut
 ```
 
-### Brancher vos médias
-- **Coach** : `"coach_default": "assets/coach/coach.mp4"` dans la séance, ou `"coach"` par segment (vidéo ou image ; recadrage 16:9 automatique). Sans coach, une silhouette sert d'emplacement.
-- **Voix off** : `"voice": "assets/voice/03.mp3"` par segment, ou une commande de synthèse vocale dans `config/brand.json`, par exemple :
+### Brancher vos médias : dossier `entrees/`
+Déposez vos fichiers dans `entrees/<slug>/` — ils sont trouvés automatiquement (mode d'emploi : [`entrees/LISEZMOI.md`](entrees/LISEZMOI.md)) :
+```
+entrees/exemple-50s/coach/defaut.mp4   ← ou 02.mp4, 03.mp4… un clip par segment
+entrees/exemple-50s/voix/02.mp3        ← ou voix/complete.mp3 pour une piste unique
+entrees/exemple-50s/musique.mp3
+```
+`python3 autovideo.py check sessions/exemple-50s.json` affiche le numéro de chaque segment et les fichiers trouvés. L'agent `preparateur-medias` (ou le workflow Antigravity `/importer-medias`) range vos fichiers et ajuste les durées.
+
+- **Coach** : vidéo ou image, n'importe quel format (recadrage 16:9 automatique, boucle si trop court). Sans coach, une silhouette sert d'emplacement.
+- **Voix off** : vos enregistrements (ci-dessus), ou une commande de synthèse vocale dans `config/brand.json`, par exemple :
   ```json
   "tts": { "command": "edge-tts --voice en-US-AriaNeural --text {text} --write-media {out}" }
   ```
   (n'importe quel outil qui écrit un fichier audio fonctionne ; `{text}` et `{out}` sont remplacés.)
-- **Musique** : `"music": { "file": "assets/music.mp3", "volume": 0.10 }` dans `config/brand.json`.
+- **Musique** : `entrees/<slug>/musique.mp3`, ou par défaut `"music": { "file": "…", "volume": 0.10 }` dans `config/brand.json`.
 - **Texte à gauche** si le coach est à droite : `"text_side": "left"` sur le segment. Forcer le ton : `"text_tone": "light"` (blanc) ou `"dark"` (olive).
 
 ## Dépôt sur CapCut
@@ -67,6 +78,7 @@ Les deux assistants partagent les mêmes règles : **`AGENTS.md`** (langue, styl
 |---|---|---|
 | Règles | `CLAUDE.md` (importe `AGENTS.md`) | `AGENTS.md` + `.agent/rules/gym-douce-senior.md` |
 | Créer une séance | agent `redacteur-seance-us` | workflow `/nouvelle-seance` |
+| Ranger voix off / vidéos | agent `preparateur-medias` | workflow `/importer-medias` |
 | Monter la vidéo | agent `monteur-senior` | workflow `/monter-video` |
 | Préparer CapCut | agent `monteur-senior` | workflow `/exporter-capcut` |
 | Contrôle qualité | agent `controleur-senior` | (étapes de contrôle dans `/monter-video`) |

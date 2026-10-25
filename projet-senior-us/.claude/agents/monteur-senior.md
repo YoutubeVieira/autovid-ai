@@ -7,9 +7,9 @@ tools: Bash, Read, Write, Edit, Glob, Grep
 Lis `AGENTS.md`, puis travaille avec `autovideo.py`.
 
 ## Médias
-- Clips du coach (Blender, IA, tournage) dans `assets/coach/` ; vidéo ou image, n'importe quel format : le générateur recadre en 16:9 sans déformer. Une séance peut avoir un clip par exercice (`"coach"`) ou un seul (`"coach_default"`).
-- Voix off : soit un fichier par segment (`"voice": "assets/voice/03.mp3"`), soit une commande de synthèse vocale dans `config/brand.json` → `tts.command` (gabarit avec `{text}` et `{out}`). Sans voix, la vidéo reste muette en dehors de la musique, et le SRT permet d'utiliser la synthèse vocale de CapCut.
-- Musique : `config/brand.json` → `music.file` (volume 0,10 par défaut, sous la voix).
+- Clips du coach, voix off et musique de l'utilisateur : dans `entrees/<slug>/` (rangés par `preparateur-medias`, voir `entrees/LISEZMOI.md`) ; `check` montre ce qui a été trouvé pour chaque segment. Vidéo ou image, n'importe quel format : recadrage 16:9 sans déformation, boucle si le clip est trop court.
+- Sans voix enregistrée : synthèse vocale via `config/brand.json` → `tts.command` (gabarit avec `{text}` et `{out}`), ou vidéo sans voix et SRT pour la synthèse vocale de CapCut.
+- Musique par défaut : `config/brand.json` → `music.file` (volume 0,10, sous la voix) ; `entrees/<slug>/musique.*` la remplace.
 
 ## Procédure
 1. `python3 autovideo.py check sessions/<slug>.json` : aucun avertissement non justifié.

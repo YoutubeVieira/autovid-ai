@@ -1,78 +1,26 @@
-import React, { useState } from 'react';
+# AutoVid AI — 3 projets indépendants
 
-export default function AutoVidCreator() {
-  const [script, setScript] = useState('');
-  const [voice, setVoice] = useState('female');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [videoUrl, setVideoUrl] = useState(null);
+Chaque projet est autonome : son dossier contient ses agents, ses règles (`CLAUDE.md`), sa documentation et ses outils. Ouvrez Claude Code (ou Antigravity) **dans le dossier du projet** pour que ses agents soient chargés :
+```bash
+cd projet-senior-us && claude      # ou projet-video, projet-app
+```
 
-  const handleGenerate = () => {
-    if (!script.trim()) {
-      alert('Veuillez entrer un script.');
-      return;
-    }
-    setIsGenerating(true);
+| | Projet | Pour quoi | Agents |
+|---|---|---|---|
+| 1 | [`projet-senior-us/`](projet-senior-us/) | **Auto Video Senior (US)** — séances de gym douce YouTube 16:9 pour seniors américains, montage automatique Python + FFmpeg, export YouTube et CapCut. Claude Code **et** Antigravity. | `redacteur-seance-us`, `preparateur-medias`, `monteur-senior`, `controleur-senior` |
+| 2 | [`projet-video/`](projet-video/) | **Shorts/Reels verticaux** au style des deux vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*` | `stratege-youtube`, `scenariste`, `monteur-video`, `decoupeur-shorts`, `motion-designer` |
+| 3 | [`projet-app/`](projet-app/) | **Applications web et mobiles** (méthode Replica : analyser, reconstruire, tester, lancer), 11 skills `/replica-*` | `chercheur-produit`, `architecte-app`, `designer-ui`, `dev-web`, `dev-mobile`, `testeur-qa`, `lanceur` |
 
-    // Simulation de génération (à remplacer par appel API réel)
-    setTimeout(() => {
-      // Ici, on simule une URL vidéo créée
-      setVideoUrl('https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4');
-      setIsGenerating(false);
-    }, 3000);
-  };
+Analyse des deux vidéos d'origine : [`ANALYSE.md`](ANALYSE.md). Anciens fichiers de démarrage : [`archive/`](archive/).
 
-  return (
-    <div style={{ maxWidth: 700, margin: '2rem auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1>AutoVid AI - Création de vidéo</h1>
+## Où déposer vos voix off et vos vidéos
+Chaque projet vidéo a un dossier d'entrée, lu automatiquement :
 
-      <label>
-        Script (texte) :
-        <textarea
-          rows={6}
-          style={{ width: '100%', fontSize: 16, marginTop: 8 }}
-          value={script}
-          onChange={(e) => setScript(e.target.value)}
-          placeholder="Entrez votre script ici..."
-        />
-      </label>
+| Projet | Dossier | Mode d'emploi |
+|--------|---------|---------------|
+| Senior US | `projet-senior-us/entrees/<séance>/coach/NN.mp4`, `voix/NN.mp3` | [`entrees/LISEZMOI.md`](projet-senior-us/entrees/LISEZMOI.md) |
+| Shorts | `projet-video/entrees/<vidéo>/brut.mp4`, `voix.mp3` | [`entrees/LISEZMOI.md`](projet-video/entrees/LISEZMOI.md) |
 
-      <label style={{ display: 'block', marginTop: 16 }}>
-        Choix de la voix :
-        <select value={voice} onChange={(e) => setVoice(e.target.value)} style={{ marginLeft: 10, fontSize: 16 }}>
-          <option value="female">Femme</option>
-          <option value="male">Homme</option>
-        </select>
-      </label>
-
-      <button
-        onClick={handleGenerate}
-        disabled={isGenerating}
-        style={{
-          marginTop: 20,
-          padding: '10px 20px',
-          fontSize: 18,
-          backgroundColor: '#007bff',
-          color: 'white',
-          border: 'none',
-          borderRadius: 4,
-          cursor: 'pointer',
-          opacity: isGenerating ? 0.6 : 1,
-        }}
-      >
-        {isGenerating ? 'Génération en cours...' : 'Générer la vidéo'}
-      </button>
-
-      {videoUrl && (
-        <div style={{ marginTop: 30 }}>
-          <h2>Prévisualisation vidéo</h2>
-          <video
-            src={videoUrl}
-            controls
-            width="100%"
-            style={{ borderRadius: 8, boxShadow: '0 0 10px rgba(0,0,0,0.3)' }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
+Ces médias ne sont pas versionnés dans git (trop lourds). Deux façons de les transmettre :
+1. **Les joindre dans la conversation** (application Claude) : l'agent les range dans le bon dossier d'entrée.
+2. **Travailler directement dans un dossier de votre PC** : sur le PC, ouvrez un terminal dans votre copie du dépôt et lancez `claude remote-control` (ou utilisez l'application Claude Desktop) ; la session apparaît dans l'application Claude Code et lit vos fichiers sur place, sans téléversement. Une session dans le cloud comme celle-ci ne peut pas accéder à votre PC.

@@ -11,6 +11,9 @@ Production de vidéos YouTube et de Shorts au format décrit dans `../ANALYSE.md
 | Shorts à partir d'une vidéo longue | `decoupeur-shorts` |
 | nouveau visuel / animation / style du gabarit Remotion | `motion-designer` |
 
+## Fichiers de l'utilisateur
+Prises brutes et voix off : `entrees/<slug>/` (voir `entrees/LISEZMOI.md`). Ne jamais les committer.
+
 ## Chaîne de production
 `stratege-youtube` (sujet) → `scenariste` (`scripts/<slug>.md`) → tournage → `monteur-video` (`remotion/data/<slug>.json` → `remotion/out/<slug>.mp4`) → `decoupeur-shorts`.
 Les agents se passent le travail par fichiers : chacun lit ce que le précédent a écrit.
