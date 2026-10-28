@@ -204,5 +204,61 @@ test("séquence : les tours répètent les 5 exercices", function () {
   assert.strictEqual(L.sequence(items, 3).length, 15);
 });
 
+test("objectifs : la séance change avec l'objectif, sans jamais solliciter une zone signalée", function () {
+  var base = L.buildSession({}, 0, []).map(function (x) { return x.ex.id; }).join();
+  var muscle = L.buildSession({}, 0, ["muscle"]).map(function (x) { return x.ex.id; }).join();
+  assert.notStrictEqual(base, muscle);
+  ["weight", "muscle", "mobility", "endurance", "balance", "energy", "back", "sleep"].forEach(function (g) {
+    D.ZONES.forEach(function (z) {
+      var picked = {}; picked[z] = true;
+      for (var day = 0; day < 6; day++) L.buildSession(picked, day, [g, "muscle"]).forEach(function (x) { assert.ok(x.ex.z.indexOf(z) < 0, g + " " + z + " " + x.ex.id); });
+    });
+  });
+});
+
+test("objectifs : le muscle privilégie la force, la souplesse privilégie la mobilité", function () {
+  var m = L.buildSession({}, 0, ["muscle"]);
+  assert.ok(m[1].ex.t.indexOf("str") >= 0 && m[3].ex.t.indexOf("core") >= 0);
+  var f = L.buildSession({}, 0, ["mobility"]);
+  assert.ok(f[4].ex.t.indexOf("mob") >= 0);
+});
+
+test("objectifs : jours de lumière conseillés", function () {
+  assert.strictEqual(L.defaultTarget([]), 3);
+  assert.strictEqual(L.defaultTarget(["weight"]), 4);
+  assert.strictEqual(L.defaultTarget(["weight", "muscle"]), 4);
+  assert.strictEqual(L.defaultTarget(["muscle", "back"]), 3);
+});
+
+test("alimentation : repères du jour et de la semaine", function () {
+  var food = { "2026-10-26": { water: true, protein: true, veg: true }, "2026-10-27": { water: true }, "2026-10-28": { water: true, protein: true, veg: true, nosugar: true, regular: true } };
+  assert.strictEqual(L.foodCount(food, "2026-10-28"), 5);
+  assert.strictEqual(L.foodCount(food, "2026-10-29"), 0);
+  assert.strictEqual(L.foodWeek(food, new Date(2026, 9, 28)), 2);
+});
+
+test("poids : saisie validée et écart depuis le premier relevé", function () {
+  assert.strictEqual(L.parseWeight("72,5"), 72.5);
+  assert.strictEqual(L.parseWeight("72.46"), 72.5);
+  assert.strictEqual(L.parseWeight("5"), null);
+  assert.strictEqual(L.parseWeight("abc"), null);
+  assert.strictEqual(L.parseWeight("400"), null);
+  var s = L.weightSummary([{ d: "2026-10-20", kg: 80 }, { d: "2026-10-27", kg: 78.6 }, { d: "2026-10-10", kg: 81 }]);
+  assert.strictEqual(s.first, 81); assert.strictEqual(s.last, 78.6); assert.strictEqual(s.delta, -2.4);
+  assert.strictEqual(L.weightSummary([]), null);
+});
+
+test("coach : questions d'alimentation reconnues dans les trois langues", function () {
+  assert.strictEqual(L.replyFor("Que manger après la séance ?").key, "ai.r.food");
+  assert.strictEqual(L.replyFor("What should I eat after a session?").key, "ai.r.food");
+  assert.strictEqual(L.replyFor("O que comer depois da sessão?").key, "ai.r.food");
+});
+
+test("toutes les étiquettes d'exercice et tous les objectifs ont un texte dans les trois langues", function () {
+  D.GOALS.forEach(function (g) { assert.ok(I.S["q2." + g.id], g.id); });
+  D.EX.forEach(function (e) { assert.ok(e.t && e.t.length, e.id + " sans étiquette"); });
+  D.FOOD_CHECKS.forEach(function (c) { assert.ok(I.S["food.c." + c], c); });
+});
+
 console.log(failures ? "\n" + failures + " test(s) en échec" : "\nTous les tests passent");
 process.exit(failures ? 1 : 0);

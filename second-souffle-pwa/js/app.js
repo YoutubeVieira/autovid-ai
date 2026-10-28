@@ -8,7 +8,7 @@
   /* ---------- état ---------- */
   function fresh() {
     return {
-      lang: null, amb: "commun", tz: 1, onboarded: false, age: "a", goal: "energy",
+      lang: null, amb: "commun", tz: 1, onboarded: false, age: "a", goals: ["energy"], weekTarget: null, food: {}, weights: [], api: { key: "", model: "gemini-3.8-flash", search: true },
       zones: {}, log: {}, demo: "f", plan: "year", addon: false, dur: 45, rest: 10, rounds: 2, sound: true,
       pro: { msgs: [], relay: ["on", "", "", ""], replied: false, topic: "genoux", waiting: false }
     };
@@ -19,6 +19,8 @@
       var raw = localStorage.getItem(KEY);
       if (raw) { var o = JSON.parse(raw); for (var k in o) s[k] = o[k]; }
     } catch (e) { /* stockage indisponible : l'app fonctionne sans */ }
+    if (!Array.isArray(s.goals) || !s.goals.length) s.goals = s.goal ? [s.goal] : ["energy"];
+    s.api = Object.assign({ key: "", model: "gemini-3.8-flash", search: true }, s.api || {});
     return s;
   }
   var S = load();
@@ -27,7 +29,7 @@
   var ui = {
     screen: S.onboarded ? "home" : "welcome", coachTab: "ai", ai: [], libF: "all",
     layer: "muscles", azone: null, sess: null, angle: "face", timer: null, resetAsk: false,
-    fbMsg: "", toastTimer: null, custom: false
+    fbMsg: "", toastTimer: null, custom: false, busy: false, aiSetup: false
   };
 
   I.setLang(S.lang || I.guess(navigator.language));
@@ -101,6 +103,7 @@
     return n === 0 ? t("plan.adapted") : n === 1 ? t("plan.one") : t("plan.many", { n: n });
   }
 
+  function target() { return S.weekTarget || L.defaultTarget(S.goals); }
   function cfg() { return { dur: S.dur, rest: S.rest, rounds: S.rounds }; }
   function minutes() { return Math.max(1, Math.round(L.totalSeconds(5 * S.rounds, S.dur, S.rest) / 60)); }
   function levelBlock(forceOpen) {
@@ -120,7 +123,7 @@
   /* ---------- écrans ---------- */
   var SCREENS = {};
   var SKY = { plan: 1, home: 1, done: 1, paywall: 1 };
-  var TABS = { home: 1, body: 1, coach: 1, path: 1, lib: 1, anat: 1 };
+  var TABS = { home: 1, body: 1, food: 1, coach: 1, path: 1, goals: 1, lib: 1, anat: 1 };
 
   SCREENS.welcome = function () {
     return '<div class="intro"><div class="kicker">' + t("app.name") + "</div><h1>" + t("welcome.title") + "</h1><p>" + t("welcome.sub") + "</p></div>" +
@@ -142,9 +145,8 @@
   };
 
   SCREENS.q2 = function () {
-    var g = ["energy", "back", "weight", "muscle"];
     return '<div class="bar"><i class="on"></i><i class="on"></i><i></i></div><span class="step">' + t("q.n", { n: 2 }) + "</span><h2>" + t("q2.title") + '</h2><div class="chips">' +
-      g.map(function (k) { return chip(t("q2." + k), "goal", k, S.goal === k); }).join("") +
+      D.GOALS.map(function (g) { return chip(t("q2." + g.id), "goal", g.id, S.goals.indexOf(g.id) >= 0); }).join("") +
       '</div><p class="muted">' + t("q2.note") + '</p><button class="btn bottom" data-act="go" data-v="q3">' + t("common.continue") + "</button>";
   };
 
@@ -153,11 +155,12 @@
       bodyMap() + '<button class="btn bottom" data-act="finishOnboarding">' + t("q3.go") + "</button>";
   };
 
-  function sessionItems() { return L.buildSession(S.zones, L.dayOfYear(today())); }
+  function sessionItems() { return L.buildSession(S.zones, L.dayOfYear(today()), S.goals); }
 
   SCREENS.plan = function () {
     var items = sessionItems();
     return hero("bras-leves", t("guide.name")) + '<span class="step ink">' + t("plan.ready") + "</span><h2>" + t("plan.title") + "</h2>" +
+      '<div class="tags">' + S.goals.map(function (g) { return '<span class="tag solid">' + t("q2." + g) + "</span>"; }).join("") + "</div>" +
       '<div class="card solid"><div class="tags"><span class="tag">' + t("plan.min", { n: minutes() }) + '</span><span class="tag">' + t("plan.nogear") + '</span><span class="tag ok">' + swapLabel(items) + "</span></div><ol class=\"plist\">" +
       items.map(function (x) {
         return "<li><b>" + esc(exName(x.ex)) + "</b>" + (x.swapped ? '<br><span class="swap">' + t("plan.replaces", { x: esc(exName(x.was)) }) + "</span>" : "") + "</li>";
@@ -166,7 +169,7 @@
   };
 
   function arcSvg(n) {
-    var p = Math.min(1, n / 4), th = Math.PI * (1 - p);
+    var p = Math.min(1, n / target()), th = Math.PI * (1 - p);
     var x = (180 + 150 * Math.cos(th)).toFixed(1), y = (165 - 150 * Math.sin(th)).toFixed(1);
     return '<div class="arc" aria-hidden="true"><svg viewBox="0 0 360 195" preserveAspectRatio="xMidYMid meet">' +
       '<path d="M30 165 A150 150 0 0 1 330 165" fill="none" stroke="var(--card)" stroke-opacity=".6" stroke-width="3" stroke-dasharray="2 8" stroke-linecap="round"/>' +
@@ -267,7 +270,24 @@
   };
 
   function msgHtml(m) {
-    return '<div class="msg ' + m.cls + '"><span class="who">' + esc(m.who || "") + "</span><span>" + esc(m.text) + "</span>" + (m.fiche ? ficheHtml(m.fiche) : "") + "</div>";
+    var src = m.sources && m.sources.length ? '<div class="src"><b>' + t("ai.sources") + "</b>" + m.sources.map(function (x) {
+      return '<a href="' + esc(x.uri) + '" target="_blank" rel="noopener noreferrer">' + esc(x.title) + "</a>";
+    }).join("") + "</div>" : "";
+    return '<div class="msg ' + m.cls + (m.err ? " err" : "") + (m.pending ? " pending" : "") + '"><span class="who">' + esc(m.who || "") + "</span><span>" + esc(m.text) + "</span>" + (m.fiche ? ficheHtml(m.fiche) : "") + src + "</div>";
+  }
+  function aiSetupHtml() {
+    return '<div class="card solid"><h3>' + t("ai.connect") + '</h3><p class="muted small">' + t("ai.setup.sub") + "</p>" +
+      "<p><b>" + t("ai.step1") + '</b></p><a class="btn ghost" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">' + t("ai.open") + "</a>" +
+      "<p><b>" + t("ai.step2") + "</b></p><p><b>" + t("ai.step3") + '</b></p><form class="stack tight" data-form="aikey">' +
+      '<input id="aiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(t("ai.keyPh")) + '" aria-label="' + esc(t("ai.keyPh")) + '"><button class="btn" type="submit">' + t("ai.save") + "</button></form>" +
+      '<p class="muted small">' + t("ai.keyNote") + "</p></div>";
+  }
+  function aiSettingsHtml() {
+    if (!S.api.key) return aiSetupHtml();
+    return '<div class="card solid"><p><b>' + t("ai.status.on") + '</b></p><p class="muted small">' + t("ai.keySaved", { k: esc(S.api.key.slice(-4)) }) + "</p>" +
+      '<form class="stack tight" data-form="aimodel"><label class="small" for="aiModel"><b>' + t("ai.model") + '</b></label><input id="aiModel" value="' + esc(S.api.model) + '" autocomplete="off" spellcheck="false"><button class="btn ghost" type="submit">' + t("ai.save") + "</button></form>" +
+      '<p class="muted small">' + t("ai.modelNote") + "</p><b>" + t("ai.search") + '</b><div class="chips">' + chip(t("set.on"), "aiSearch", "1", S.api.search) + chip(t("set.off"), "aiSearch", "0", !S.api.search) + '</div><p class="muted small">' + t("ai.searchNote") + "</p>" +
+      '<div class="row"><button class="btn ghost" data-act="aiTest">' + t("ai.test") + '</button><button class="btn ghost" data-act="aiClear">' + t("ai.clear") + "</button></div></div>";
   }
   function ficheHtml(topic) {
     var list = D.FICHES[topic].map(function (r) { return "<span>• " + esc(exName(D.BY_ID[r[0]])) + " · " + r[1] + "</span>"; }).join("");
@@ -279,8 +299,12 @@
     var body;
     if (ui.coachTab === "ai") {
       var msgs = [{ cls: "ai", who: "", text: t("ai.hello") }].concat(ui.ai);
-      body = guideRow(t("guide.illu")) + '<div class="chat" id="chat" aria-live="polite">' + msgs.map(msgHtml).join("") + "</div>" +
-        '<div class="chips">' + [1, 2, 3, 4].map(function (i) { return '<button class="chip" data-act="ask" data-v="ai.s' + i + '">' + t("ai.s" + i) + "</button>"; }).join("") + "</div>" +
+      var on = !!S.api.key;
+      body = guideRow(t("guide.illu")) + '<div class="aistatus ' + (on ? "on" : "off") + '"><span class="adot"></span>' + t(on ? "ai.status.on" : "ai.status.off") +
+        (on ? ' <button class="chip" data-act="go" data-v="settings">' + t("home.settings") + "</button>" : ' <button class="chip" data-act="aiSetup">' + t("ai.connect") + "</button>") + "</div>" +
+        (!on && ui.aiSetup ? aiSetupHtml() : "") +
+        '<div class="chat" id="chat" aria-live="polite">' + msgs.map(msgHtml).join("") + "</div>" +
+        '<div class="chips">' + [1, 2, 3, 4, 5].map(function (i) { return '<button class="chip" data-act="ask" data-v="ai.s' + i + '">' + t("ai.s" + i) + "</button>"; }).join("") + "</div>" +
         '<form class="ask" data-form="ai"><input id="aiInput" placeholder="' + esc(t("ai.ph")) + '" aria-label="' + esc(t("ai.ph")) + '" autocomplete="off"><button class="btn" type="submit">' + t("ai.send") + "</button></form>" +
         '<p class="muted small">' + t("ai.disc") + "</p>";
     } else {
@@ -304,9 +328,39 @@
       return "<div><span>" + t("day." + d.dow) + '</span><span class="sun ' + cls + '" aria-label="' + label + '">' + icon + "</span></div>";
     }).join("");
     return "<h2>" + t("path.title") + '</h2><div class="week">' + cells + "</div>" +
-      '<div class="card"><b class="big">' + t("path.light", { n: n }) + '</b><p class="muted">' + t("path.lightNote") + "</p></div>" +
+      '<div class="card"><b class="big">' + t("path.light", { n: n, t: target() }) + '</b><p class="muted">' + t("path.lightNote") + "</p></div>" +
       '<div class="card"><p><b>' + t("path.month") + '</b></p><p class="muted">' + t("path.monthText", { s: m.s, r: m.r }) + "</p></div>" +
-      '<button class="btn bottom" data-act="go" data-v="paywall">' + t("path.unlock") + "</button>";
+      '<div class="bottom stack"><button class="btn dusk" data-act="go" data-v="goals">' + t("path.goals") + '</button><button class="btn" data-act="go" data-v="paywall">' + t("path.unlock") + "</button></div>";
+  };
+
+  SCREENS.goals = function () {
+    var ws = L.weightSummary(S.weights);
+    var list = S.weights.slice().sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : b.id - a.id; }).slice(0, 5).map(function (w) {
+      return '<div class="libitem"><span>' + esc(w.d) + " · <b>" + w.kg + ' kg</b></span><button class="chip" data-act="weightDel" data-v="' + w.id + '" aria-label="' + esc(t("ai.clear")) + '">×</button></div>';
+    }).join("");
+    return backChip("path") + "<h2>" + t("goals.title") + '</h2><p class="muted">' + t("goals.sub") + '</p><div class="chips">' +
+      D.GOALS.map(function (g) { return chip(t("q2." + g.id), "goal", g.id, S.goals.indexOf(g.id) >= 0); }).join("") + "</div>" +
+      "<b>" + t("goals.target") + '</b><div class="chips">' + [2, 3, 4, 5, 6].map(function (n) { return chip(String(n), "target", n, target() === n); }).join("") + "</div>" +
+      '<p class="muted small">' + t("goals.targetNote") + "</p>" +
+      "<b>" + t("goals.weight") + '</b><form class="ask" data-form="weight"><input id="weightInput" inputmode="decimal" placeholder="' + esc(t("goals.weightPh")) + '" aria-label="' + esc(t("goals.weightPh")) + '" autocomplete="off"><button class="btn" type="submit">' + t("goals.add") + "</button></form>" +
+      (ws ? '<div class="card"><p>' + t("goals.first", { a: ws.first }) + "</p><p>" + t("goals.last", { a: ws.last }) + "</p><p><b>" + t("goals.delta", { d: (ws.delta > 0 ? "+" : "") + ws.delta }) + "</b></p></div>" : '<p class="muted">' + t("goals.none") + "</p>") +
+      '<div class="stack tight">' + list + '</div><p class="muted small">' + t("goals.weightNote") + '</p><p class="muted small">' + t("goals.medical") + "</p>";
+  };
+
+  SCREENS.food = function () {
+    var key = L.dateKey(today()), d = S.food[key] || {}, n = L.foodCount(S.food, key), wk = L.foodWeek(S.food, today());
+    var checks = D.FOOD_CHECKS.map(function (c) {
+      return '<button class="check" data-act="food" data-v="' + c + '" aria-pressed="' + !!d[c] + '"><span class="cbox" aria-hidden="true"></span>' + t("food.c." + c) + "</button>";
+    }).join("");
+    var pr = [1, 2, 3, 4, 5, 6].map(function (i) { return '<div class="card"><b>' + t("food.p" + i + ".t") + '</b><p class="muted">' + t("food.p" + i + ".d") + "</p></div>"; }).join("");
+    var gs = S.goals.filter(function (g) { return ["weight", "muscle", "energy", "sleep"].indexOf(g) >= 0; });
+    var adv = gs.length ? gs.map(function (g) { return "<p>" + t("food.g." + g) + "</p>"; }).join("") : "<p>" + t("food.g.general") + "</p>";
+    var ideas = [1, 2, 3, 4, 5].map(function (i) { return "<li>" + t("food.i" + i) + "</li>"; }).join("");
+    return "<h2>" + t("food.title") + '</h2><p class="muted">' + t("food.sub") + "</p>" +
+      '<div class="card solid"><b>' + t("food.today") + '</b><div class="stack tight">' + checks + '</div><p class="muted small">' + t("food.count", { n: n }) + ". " + t("food.week", { d: wk }) + "</p></div>" +
+      "<h3>" + t("food.byGoal") + '</h3><div class="card">' + adv + "</div><h3>" + t("food.principles") + '</h3><div class="stack tight">' + pr + "</div>" +
+      "<h3>" + t("food.ideas") + '</h3><ul class="plain-list">' + ideas + "</ul>" +
+      '<button class="btn dusk" data-act="askFood">' + t("food.ask") + '</button><p class="muted small">' + t("food.disc") + "</p>";
   };
 
   SCREENS.paywall = function () {
@@ -320,7 +374,7 @@
   SCREENS.settings = function () {
     return backChip("home") + "<h2>" + t("set.title") + "</h2><b>" + t("set.lang") + '</b><div class="chips">' +
       I.LANGS.map(function (l) { return chip(t("lang.name." + l), "lang", l, I.state.lang === l); }).join("") + "</div><b>" + t("set.amb") + "</b>" + ambCards() +
-      levelBlock(true) + "<b>" + t("set.sound") + '</b><div class="chips">' + chip(t("set.on"), "sound", "1", S.sound) + chip(t("set.off"), "sound", "0", !S.sound) + "</div>" +
+      levelBlock(true) + "<b>" + t("set.ai") + "</b>" + aiSettingsHtml() + "<b>" + t("set.sound") + '</b><div class="chips">' + chip(t("set.on"), "sound", "1", S.sound) + chip(t("set.off"), "sound", "0", !S.sound) + "</div>" +
       "<b>" + t("set.text") + '</b><div class="chips">' + [[1, "set.t1"], [1.15, "set.t2"], [1.3, "set.t3"]].map(function (r) { return chip(t(r[1]), "tz", r[0], S.tz === r[0]); }).join("") + "</div>" +
       "<b>" + t("set.demo") + '</b><div class="chips">' + chip(t("who.f"), "demo", "f", S.demo === "f") + chip(t("who.m"), "demo", "m", S.demo === "m") + "</div>" +
       '<p class="muted small">' + t("set.dark") + " " + t("set.data") + '</p><button class="btn ghost" data-act="' + (ui.resetAsk ? "reset" : "resetAsk") + '">' + t(ui.resetAsk ? "set.resetSure" : "set.reset") + "</button>";
@@ -331,12 +385,13 @@
     var icons = {
       home: '<circle cx="12" cy="13" r="4"/><path d="M12 3v3M4.5 7.5 6.6 9.6M19.5 7.5 17.4 9.6M2 17h3M19 17h3"/>',
       body: '<circle cx="12" cy="5" r="2.5"/><path d="M12 8v7M7 10l5-2 5 2M9 21l3-6 3 6"/>',
+      food: '<path d="M7 3v7a3 3 0 0 0 3 3v8M7 3v4M10 3v4M17 3c-2 1.2-3 3.2-3 6s1 4 3 4v8"/>',
       coach: '<path d="M4 5h16v11H9l-5 4z"/>',
       path: '<path d="M4 19V9M10 19V5M16 19v-7M21 19H3"/>'
     };
-    var cur = ui.screen === "lib" || ui.screen === "anat" ? "body" : ui.screen;
-    return ["home", "body", "coach", "path"].map(function (k) {
-      return '<button class="tab" data-act="go" data-v="' + k + '" aria-current="' + (cur === k) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icons[k] + "</svg>" + t("tab." + (k === "home" ? "today" : k)) + "</button>";
+    var cur = ui.screen === "lib" || ui.screen === "anat" ? "body" : ui.screen === "goals" ? "path" : ui.screen;
+    return ["home", "body", "food", "coach", "path"].map(function (k) {
+      return '<button class="tab" data-act="go" data-v="' + k + '" aria-current="' + (cur === k) + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + icons[k] + "</svg><span>" + t("tab." + (k === "home" ? "today" : k)) + "</span></button>";
     }).join("");
   }
 
@@ -421,18 +476,68 @@
     var chat = $("#chat");
     if (chat) { chat.insertAdjacentHTML("beforeend", msgHtml(m)); chat.lastElementChild.scrollIntoView({ block: "nearest" }); }
   }
+  function noteZone(zone) {
+    if (!zone || S.zones[zone]) return;
+    S.zones[zone] = true; save();
+    addMsg(ui.ai, { cls: "ai", who: "", text: t("ai.noted", { z: t("zone." + zone).toLowerCase() }), note: true });
+  }
+  function profileText() {
+    var ages = { a: "40-49", b: "50-59", c: "60+" };
+    return "age " + ages[S.age] + "; goals: " + S.goals.join(", ") + "; sensitive areas: " + (pickedList().join(", ") || "none") +
+      "; session: " + S.dur + " s per exercise, " + S.rounds + " round(s); app exercises: " + D.EX.map(exName).join(", ");
+  }
+  function aiError(e) {
+    var k = e && e.kind;
+    return k === "key" ? t("ai.err.key") : k === "rate" ? t("ai.err.rate") : k === "net" ? t("ai.err.net") : k === "model" ? t("ai.err.model") :
+      k === "blocked" ? t("ai.err.blocked") : t("ai.err.other", { m: (e && e.message) || "" });
+  }
+  function setBusy(b) {
+    ui.busy = b;
+    var f = $("[data-form=ai]"); if (f) { f.querySelector("button").disabled = b; }
+  }
+  function callGemini(history, search) {
+    return SS.gemini.ask(window.fetch.bind(window), { key: S.api.key, model: S.api.model, lang: I.state.lang, profile: profileText(), history: history, search: search });
+  }
+  function askAI(zone) {
+    var history = ui.ai.filter(function (x) { return !x.pending && !x.err && !x.note && (x.cls === "me" || x.cls === "ai"); })
+      .map(function (x) { return { role: x.cls === "me" ? "user" : "model", text: x.text }; });
+    var m = { cls: "ai", who: "", text: t("ai.thinking"), pending: true };
+    addMsg(ui.ai, m);
+    var chat = $("#chat"), el = chat && chat.lastElementChild;
+    setBusy(true);
+    callGemini(history, S.api.search).then(function (r) {
+      m.pending = false; m.text = r.text; m.sources = r.sources;
+    }, function (e) {
+      m.pending = false; m.err = true; m.text = aiError(e);
+    }).then(function () {
+      if (el && el.parentNode) el.outerHTML = msgHtml(m);
+      var c = $("#chat"); if (c) c.lastElementChild.scrollIntoView({ block: "nearest" });
+      setBusy(false); noteZone(zone);
+    });
+  }
   function ask(text) {
-    if (!text.trim()) return;
+    text = String(text).trim();
+    if (!text || ui.busy) return;
     addMsg(ui.ai, { cls: "me", who: "", text: text });
     var r = L.replyFor(text);
+    if (L.isUrgent(text)) { addMsg(ui.ai, { cls: "ai", who: "", text: t("pro.urgent"), note: true }); return; }
+    if (S.api.key) { askAI(r.zone); return; }
     setTimeout(function () {
       if (ui.screen !== "coach" || ui.coachTab !== "ai") return;
-      addMsg(ui.ai, { cls: "ai", who: "", text: t(r.key) });
-      if (r.zone && !S.zones[r.zone]) {
-        S.zones[r.zone] = true; save();
-        addMsg(ui.ai, { cls: "ai", who: "", text: t("ai.noted", { z: t("zone." + r.zone).toLowerCase() }) });
-      }
+      addMsg(ui.ai, { cls: "ai", who: "", text: t(r.key), note: true });
+      noteZone(r.zone);
     }, 500);
+  }
+  function testAI() {
+    if (!S.api.key) { toast(t("ai.err.key")); return; }
+    toast(t("ai.thinking"));
+    SS.gemini.ask(window.fetch.bind(window), { key: S.api.key, model: S.api.model, lang: "en", profile: "connection test", history: [{ role: "user", text: "Reply with the single word OK." }], search: false })
+      .then(function () { toast(t("ai.testOk")); }, function (e) { toast(aiError(e)); });
+  }
+  function addWeight(text) {
+    var v = L.parseWeight(text);
+    if (v === null) { toast(t("goals.bad")); return; }
+    S.weights.push({ id: Date.now(), d: L.dateKey(today()), kg: v }); save(); render();
   }
   function refreshRelay() {
     var lis = document.querySelectorAll(".relay li");
@@ -479,7 +584,20 @@
       case "tz": S.tz = parseFloat(v); save(); render(); break;
       case "demo": S.demo = v; save(); render(); break;
       case "age": S.age = v; save(); render(); break;
-      case "goal": S.goal = v; save(); render(); break;
+      case "goal":
+        var gi = S.goals.indexOf(v);
+        if (gi >= 0) { if (S.goals.length > 1) S.goals.splice(gi, 1); }
+        else if (S.goals.length >= 3) { toast(t("goals.max")); break; }
+        else S.goals.push(v);
+        save(); render(); break;
+      case "target": S.weekTarget = parseInt(v, 10); save(); render(); break;
+      case "food": var fk = L.dateKey(today()); S.food[fk] = S.food[fk] || {}; S.food[fk][v] = !S.food[fk][v]; save(); render(); break;
+      case "askFood": ui.coachTab = "ai"; go("coach"); ask(t("ai.s5")); break;
+      case "aiSetup": ui.aiSetup = !ui.aiSetup; render(); break;
+      case "aiSearch": S.api.search = v === "1"; save(); render(); break;
+      case "aiTest": testAI(); break;
+      case "aiClear": S.api.key = ""; save(); toast(t("ai.keyCleared")); render(); break;
+      case "weightDel": S.weights = S.weights.filter(function (w) { return String(w.id) !== v; }); save(); render(); break;
       case "zone": S.zones[v] = !S.zones[v]; save(); render(); break;
       case "finishOnboarding": S.onboarded = true; save(); go("plan"); break;
       case "startSession": startSession(); break;
@@ -527,8 +645,16 @@
     var f = e.target.closest("[data-form]");
     if (!f) return;
     e.preventDefault();
-    var inp = f.querySelector("input"), v = inp.value; inp.value = "";
-    if (f.getAttribute("data-form") === "ai") ask(v); else sendPro(v);
+    var kind = f.getAttribute("data-form"), inp = f.querySelector("input"), v = inp.value;
+    if (kind === "aikey") {
+      v = v.trim(); inp.value = "";
+      if (v) { S.api.key = v; ui.aiSetup = false; save(); toast(t("ai.keySaved", { k: v.slice(-4) })); render(); }
+      return;
+    }
+    if (kind === "aimodel") { S.api.model = v.trim() || "gemini-3.8-flash"; save(); toast(t("ai.save") + " ✓"); return; }
+    if (kind === "weight") { addWeight(v); return; }
+    inp.value = "";
+    if (kind === "ai") ask(v); else sendPro(v);
   });
 
   if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) {

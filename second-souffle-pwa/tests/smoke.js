@@ -21,12 +21,16 @@ const server = http.createServer((req, res) => {
   const p = await ctx.newPage();
   const errs = [];
   p.on("pageerror", e => errs.push(e.message));
-  p.on("console", m => { if (m.type() === "error") errs.push(m.text()); });
+  /* Les erreurs de chargement réseau sont attendues : réponse 403 simulée du coach IA, polices Google hors connexion. */
+  p.on("console", m => { if (m.type() === "error" && !/Failed to load resource/.test(m.text())) errs.push(m.text()); });
   const c = s => p.click(s);
   const txt = s => p.textContent(s);
   const noOverflow = async name => {
     const o = await p.evaluate(() => { const e = document.querySelector("#screen"); return e.scrollWidth - e.clientWidth; });
-    assert.ok(o <= 1, "débordement horizontal de " + o + " px sur l'écran " + name);
+    if (o > 1) {
+      const who = await p.evaluate(() => { const sc = document.querySelector("#screen"), lim = sc.getBoundingClientRect().right; return [...sc.querySelectorAll("*")].filter(e => e.getBoundingClientRect().right > lim + 1).slice(0, 4).map(e => e.tagName + "." + e.className + "#" + e.id); });
+      assert.fail("débordement horizontal de " + o + " px sur l'écran " + name + " : " + who.join(", "));
+    }
   };
   let n = 0; const ok = m => console.log("ok   " + (++n) + " " + m);
 
@@ -57,7 +61,7 @@ const server = http.createServer((req, res) => {
   assert.ok((await txt("#screen h2")).includes("Bien joué")); await noOverflow("done"); ok("fin de séance");
   await c("[data-act=fb][data-v=hard]"); assert.strictEqual(await p.evaluate(() => SS.app.state().dur), 20); ok("« trop dur » baisse la durée d'un cran");
   await c("[data-act=go][data-v=path]"); await noOverflow("path");
-  assert.ok((await txt(".card .big")).startsWith("1 sur 4")); ok("la semaine compte la séance");
+  assert.ok((await txt(".card .big")).startsWith("1 sur 3")); ok("la semaine compte la séance (objectif : 3 jours)");
   for (const t of ["home", "body", "coach"]) { await c(".tab[data-v=" + t + "]"); await noOverflow(t); }
   await c(".tab[data-v=body]");
   await p.setViewportSize({ width: 320, height: 380 });
@@ -77,6 +81,63 @@ const server = http.createServer((req, res) => {
   await c("[data-act=coachtab][data-v=pro]"); await noOverflow("coach privé");
   await c(".tab[data-v=path]"); await c("[data-act=go][data-v=paywall]"); await noOverflow("paywall");
   await c("[data-act=go][data-v=home]"); await c("[data-act=go][data-v=settings]"); await c("[data-act=tz][data-v=\"1.3\"]"); await noOverflow("settings, texte très grand");
+  // ----- objectifs, alimentation, vrai coach IA (service Google simulé) -----
+  await c("[data-act=go][data-v=home]");
+  await c(".tab[data-v=path]"); await c("[data-act=go][data-v=goals]"); await noOverflow("objectifs");
+  await c("[data-act=goal][data-v=weight]"); await c("[data-act=goal][data-v=muscle]");
+  await c("[data-act=goal][data-v=balance]");
+  assert.ok(await p.evaluate(() => SS.app.state().goals.length) <= 3); ok("trois objectifs au maximum");
+  await c("[data-act=target][data-v=\"5\"]"); assert.strictEqual(await p.evaluate(() => SS.app.state().weekTarget), 5); ok("objectif de la semaine réglable");
+  await p.fill("#weightInput", "abc"); await p.press("#weightInput", "Enter"); assert.ok((await p.textContent(".toast")).includes("25"));
+  await p.fill("#weightInput", "82,4"); await p.press("#weightInput", "Enter"); await p.fill("#weightInput", "81"); await p.press("#weightInput", "Enter");
+  assert.ok((await txt("#screen")).includes("Écart depuis le début")); ok("suivi du poids");
+  await c(".tab[data-v=food]"); await noOverflow("repas");
+  await c("[data-act=food][data-v=water]"); await c("[data-act=food][data-v=protein]");
+  assert.ok((await txt("#screen")).includes("2 sur 5")); ok("repères alimentaires du jour");
+
+  const calls = [];
+  let mode = "ok";
+  await p.route("https://generativelanguage.googleapis.com/**", async route => {
+    const req = route.request(); const body = JSON.parse(req.postData() || "{}");
+    calls.push({ url: req.url(), key: req.headers()["x-goog-api-key"], body });
+    if (mode === "403") return route.fulfill({ status: 403, contentType: "application/json", body: JSON.stringify({ error: { message: "denied" } }) });
+    if (mode === "html") return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ candidates: [{ content: { parts: [{ text: "<img src=x onerror=window.__xss=1> Bien sûr." }] } }] }) });
+    return route.fulfill({ status: 200, contentType: "application/json", headers: { "access-control-allow-origin": "*" },
+      body: JSON.stringify({ candidates: [{ content: { parts: [{ text: "Une marche lente de dix minutes est un bon début." }] },
+        groundingMetadata: { groundingChunks: [{ web: { uri: "https://example.org/marche", title: "Exemple" } }, { web: { uri: "javascript:alert(1)", title: "Mauvais" } }] } }] }) });
+  });
+  await c(".tab[data-v=coach]"); await c("[data-act=coachtab][data-v=ai]");
+  assert.ok((await txt(".aistatus")).includes("démonstration")); ok("sans clé : mode démonstration");
+  await c("[data-act=aiSetup]");
+  const href = await p.getAttribute("a.btn[href*='aistudio']", "href"); assert.strictEqual(href, "https://aistudio.google.com/apikey"); ok("lien vers Google AI Studio pour la clé");
+  assert.strictEqual(await p.getAttribute("#aiKey", "type"), "password"); ok("la clé est saisie en champ masqué");
+  await p.fill("#aiKey", "cle-secrete-1234"); await p.press("#aiKey", "Enter");
+  assert.ok((await txt(".aistatus")).includes("connectée")); ok("clé enregistrée, IA connectée");
+  await p.fill("#aiInput", "Je veux perdre du poids, par où commencer ?"); await p.press("#aiInput", "Enter");
+  await p.waitForSelector(".msg.ai:not(.pending) .src");
+  assert.ok((await txt("#chat")).includes("marche lente")); ok("réponse de l'IA affichée");
+  assert.strictEqual(calls.length, 1);
+  assert.strictEqual(calls[0].key, "cle-secrete-1234"); assert.ok(calls[0].url.indexOf("cle-secrete") < 0); ok("clé envoyée en en-tête, jamais dans l'adresse");
+  assert.deepStrictEqual(calls[0].body.tools, [{ google_search: {} }]); ok("recherche Google activée par défaut");
+  assert.ok(calls[0].body.systemInstruction.parts[0].text.indexOf("French") > 0 && calls[0].body.systemInstruction.parts[0].text.indexOf("weight") > 0); ok("langue et objectifs envoyés à l'IA");
+  const links = await p.$$eval("#chat .src a", a => a.map(x => [x.href, x.target, x.rel])); assert.strictEqual(links.length, 1);
+  assert.deepStrictEqual(links[0], ["https://example.org/marche", "_blank", "noopener noreferrer"]); ok("sources : liens https seulement, ouverts dans un nouvel onglet");
+  await p.fill("#aiInput", "J'ai une douleur forte dans la poitrine"); await p.press("#aiInput", "Enter");
+  await p.waitForTimeout(300); assert.strictEqual(calls.length, 1); assert.ok((await txt("#chat")).includes("avis médical")); ok("symptôme grave : aucun appel à l'IA, renvoi vers un médecin");
+  mode = "html"; await p.fill("#aiInput", "Bonjour"); await p.press("#aiInput", "Enter");
+  await p.waitForFunction(() => document.querySelectorAll("#chat .msg.ai:not(.pending)").length >= 3);
+  assert.strictEqual(await p.evaluate(() => window.__xss), undefined); assert.strictEqual(await p.$$eval("#chat img", e => e.length), 0); ok("une réponse contenant du HTML est affichée en texte");
+  mode = "403"; await p.fill("#aiInput", "Encore une question"); await p.press("#aiInput", "Enter");
+  await p.waitForSelector(".msg.err"); assert.ok((await txt(".msg.err")).includes("refuse la clé")); ok("clé refusée : message clair");
+  await c("[data-act=go][data-v=settings]"); await noOverflow("réglages avec IA");
+  assert.ok((await txt("#screen")).includes("1234")); assert.ok(!(await p.content()).includes("cle-secrete-1234")); ok("la clé n'est jamais réaffichée en entier");
+  await c("[data-act=aiSearch][data-v=\"0\"]"); mode = "ok";
+  await c("[data-act=go][data-v=home]"); await c(".tab[data-v=coach]"); await c("[data-act=coachtab][data-v=ai]"); await p.fill("#aiInput", "Merci"); await p.press("#aiInput", "Enter");
+  await p.waitForFunction(() => document.querySelectorAll("#chat .msg.ai:not(.pending):not(.err)").length >= 4);
+  assert.strictEqual(calls[calls.length - 1].body.tools, undefined); ok("recherche coupée : plus d'outil de recherche dans la requête");
+  await c("[data-act=go][data-v=settings]"); await c("[data-act=aiClear]");
+  assert.ok(!(await p.evaluate(() => SS.app.state().api.key))); ok("clé effacée");
+  await c("[data-act=go][data-v=home]");
   const keep = await p.evaluate(() => JSON.stringify(SS.app.state().zones)); assert.ok(keep.includes("genoux"));
   await p.reload(); assert.ok(await p.evaluate(() => SS.app.state().onboarded)); ok("les données survivent au rechargement");
   await p.evaluate(() => navigator.serviceWorker.ready); await p.waitForTimeout(500);

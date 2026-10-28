@@ -45,6 +45,30 @@
     ex("pectoraux", "stretch", ["epaules"], 0, "Étirement des pectoraux dans une porte", "Doorway chest stretch", "Alongamento do peitoral na porta")
   ];
 
+  /* Étiquettes : str force, mob mobilité, cardio, bal équilibre, core centre du corps, relax détente. */
+  var TAGS = {
+    "marche": ["cardio"], "epaules-rot": ["mob"], "cou-rot": ["mob"], "cercles": ["mob"], "balancement": ["mob"],
+    "squat": ["str"], "pont": ["str", "core"], "levee-jambe": ["str"], "ext-jambe": ["str"], "fente": ["str", "bal"], "pointes": ["str", "bal"], "talon-pointe": ["bal"],
+    "pompes-mur": ["str"], "rowing": ["str"], "developpe": ["str"], "elevations": ["str"], "flexion-bras": ["str"],
+    "dead-bug": ["core"], "bascule": ["core", "mob"], "gainage": ["core", "str"], "bird-dog": ["core", "bal"], "rot-tronc": ["mob", "core"],
+    "une-jambe": ["bal"], "chat": ["mob"], "hanches-etir": ["mob"], "respiration": ["relax"], "mollets": ["mob"], "pectoraux": ["mob"]
+  };
+  EX.forEach(function (e) { e.t = TAGS[e.id] || []; });
+
+  /* Objectifs : étiquettes préférées (la première pèse le plus) et nombre de jours de lumière conseillé par semaine. */
+  var GOALS = [
+    { id: "weight", tags: ["cardio", "str"], week: 4 },
+    { id: "muscle", tags: ["str", "core"], week: 3 },
+    { id: "mobility", tags: ["mob", "relax"], week: 3 },
+    { id: "endurance", tags: ["cardio"], week: 4 },
+    { id: "balance", tags: ["bal", "core"], week: 3 },
+    { id: "energy", tags: ["cardio", "mob"], week: 3 },
+    { id: "back", tags: ["core", "mob"], week: 3 },
+    { id: "sleep", tags: ["relax", "mob"], week: 3 }
+  ];
+
+  var FOOD_CHECKS = ["water", "protein", "veg", "nosugar", "regular"];
+
   var BY_ID = {};
   EX.forEach(function (e) { BY_ID[e.id] = e; });
 
@@ -71,5 +95,5 @@
   };
 
   g.SS = g.SS || {};
-  g.SS.data = { CATS: CATS, ZONES: ZONES, EX: EX, BY_ID: BY_ID, FICHES: FICHES, AMBS: AMBS, ANAT: ANAT };
+  g.SS.data = { GOALS: GOALS, FOOD_CHECKS: FOOD_CHECKS, CATS: CATS, ZONES: ZONES, EX: EX, BY_ID: BY_ID, FICHES: FICHES, AMBS: AMBS, ANAT: ANAT };
 })(typeof window !== "undefined" ? window : globalThis);

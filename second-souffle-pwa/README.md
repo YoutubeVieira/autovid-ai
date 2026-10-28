@@ -13,7 +13,9 @@ Français, anglais et portugais du Brésil. Aucun outil de compilation : du HTML
 - Retour de séance, semaine « de lumière » (une séance ou un repos choisi comptent), repos choisi
 - Bibliothèque des 28 exercices à filmer (19 pour la version 1)
 - Guide d'anatomie simplifié (calques muscles et os, zones cliquables)
-- Coach IA et coach privé avec relais en cas de non-réponse, en mode démonstration
+- Objectifs (jusqu'à 3 parmi 8) qui orientent la séance, objectif de jours de lumière, suivi du poids facultatif
+- Onglet Repas : repères alimentaires, cases du jour, idées de repas par langue
+- Coach IA : réponses écrites d'avance, ou vraie IA Gemini de Google (avec recherche sur Internet et sources) si l'utilisateur colle sa clé d'API ; coach privé avec relais en cas de non-réponse, en démonstration
 - Écran d'abonnement en démonstration
 - Réglages : langue, ambiance, taille du texte, démonstrateur, effacement des données
 - Données enregistrées sur l'appareil (localStorage), hors connexion après la première visite
@@ -34,6 +36,7 @@ Français, anglais et portugais du Brésil. Aucun outil de compilation : du HTML
 cd second-souffle-pwa
 python3 -m http.server 8000      # puis ouvrir http://localhost:8000
 node tests/logic.test.js         # tests de la logique
+node tests/gemini.test.js        # tests du module IA, sans réseau
 node tests/smoke.js              # parcours complet dans un navigateur (Playwright)
 ```
 
@@ -56,9 +59,10 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `js/i18n.js` | Tous les textes, dans les trois langues |
 | `js/data.js` | Exercices, zones, fiches du coach, anatomie |
 | `js/logic.js` | Logique pure : séance, semaine, réponses, tri d'urgence |
+| `js/gemini.js` | Requête et lecture de réponse de l'IA Gemini (fonctions pures) |
 | `js/app.js` | Écrans et actions |
 | `sw.js`, `manifest.webmanifest` | Installation et hors connexion |
-| `tests/logic.test.js`, `tests/smoke.js` | Tests de la logique et parcours de bout en bout |
+| `tests/logic.test.js`, `tests/gemini.test.js`, `tests/smoke.js` | Tests de la logique et parcours de bout en bout |
 | `docs/avant-publication.md` | Revue et liste de contrôle avant publication |
 | `docs/guide-tournage-posture.pdf`, `tools/build-guide.py`, `tools/print-pdf.js` | Guide de tournage et de posture (PDF de 25 pages) |
 | `docs/production-data.json` | Fiches de tournage et scripts de voix off des 19 exercices (FR, EN, PT-BR) |

@@ -11,25 +11,66 @@
     return e.z.filter(function (z) { return picked && picked[z]; });
   }
 
+  function goalWeights(goals) {
+    var w = {};
+    (goals || []).forEach(function (id) {
+      var g = D.GOALS.filter(function (x) { return x.id === id; })[0];
+      if (g) g.tags.forEach(function (tag, i) { w[tag] = (w[tag] || 0) + (i === 0 ? 2 : 1); });
+    });
+    return w;
+  }
+  function score(e, w) { return (e.t || []).reduce(function (s, tag) { return s + (w[tag] || 0); }, 0); }
+
   /* Une séance de 5 mouvements : échauffement, bas du corps, haut du corps, centre, étirements.
-     Pour chaque créneau, on part d'un exercice qui change selon le jour, puis on le remplace
-     par le suivant de la même catégorie si une zone signalée est sollicitée. */
-  function buildSession(picked, dayIndex) {
-    var slots = ["warm", "lower", "upper", "core", "stretch"];
+     Dans chaque catégorie, les exercices qui correspondent le mieux aux objectifs passent en premier ;
+     le choix tourne selon le jour. Si l'exercice choisi sollicite une zone signalée, on prend le suivant. */
+  function buildSession(picked, dayIndex, goals) {
+    var slots = ["warm", "lower", "upper", "core", "stretch"], w = goalWeights(goals);
     return slots.map(function (cat) {
       var pool = D.EX.filter(function (e) { return e.cat === cat && e.v1; });
-      var start = ((dayIndex % pool.length) + pool.length) % pool.length;
-      var preferred = pool[start];
+      var sorted = pool.map(function (e, i) { return { e: e, i: i, s: score(e, w) }; })
+        .sort(function (a, b) { return b.s - a.s || a.i - b.i; }).map(function (x) { return x.e; });
+      var max = score(sorted[0], w);
+      var top = sorted.filter(function (e) { return score(e, w) === max; });
+      if (top.length < 2) top = sorted.slice(0, 2);
+      var preferred = top[((dayIndex % top.length) + top.length) % top.length];
+      var order = [preferred].concat(sorted.filter(function (e) { return e !== preferred; }));
       var chosen = null;
-      for (var k = 0; k < pool.length && !chosen; k++) {
-        var cand = pool[(start + k) % pool.length];
-        if (!hits(cand, picked).length) chosen = cand;
-      }
+      for (var k = 0; k < order.length && !chosen; k++) if (!hits(order[k], picked).length) chosen = order[k];
       if (!chosen) {
         chosen = D.EX.filter(function (e) { return e.cat === cat && !hits(e, picked).length; })[0] || D.BY_ID["respiration"];
       }
       return { ex: chosen, swapped: chosen !== preferred, was: chosen !== preferred ? preferred : null };
     });
+  }
+
+  /* Jours de lumière conseillés par semaine : moyenne des objectifs choisis (3 par défaut). */
+  function defaultTarget(goals) {
+    var ws = (goals || []).map(function (id) { var g = D.GOALS.filter(function (x) { return x.id === id; })[0]; return g ? g.week : null; })
+      .filter(function (x) { return x; });
+    if (!ws.length) return 3;
+    return Math.round(ws.reduce(function (a, b) { return a + b; }, 0) / ws.length);
+  }
+
+  /* Repères alimentaires cochés pour une date. */
+  function foodCount(food, key) {
+    var d = (food || {})[key] || {};
+    return D.FOOD_CHECKS.filter(function (c) { return d[c]; }).length;
+  }
+  function foodWeek(food, today) {
+    var days = weekDays({}, today), n = 0;
+    days.forEach(function (d) { if (foodCount(food, d.key) >= 3) n++; });
+    return n;
+  }
+  function weightSummary(list) {
+    if (!list || !list.length) return null;
+    var sorted = list.slice().sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+    var first = sorted[0].kg, last = sorted[sorted.length - 1].kg;
+    return { first: first, last: last, delta: Math.round((last - first) * 10) / 10, n: sorted.length };
+  }
+  function parseWeight(text) {
+    var v = parseFloat(String(text).replace(",", "."));
+    return isFinite(v) && v >= 25 && v <= 300 ? Math.round(v * 10) / 10 : null;
   }
 
   function dateKey(d) {
@@ -80,6 +121,7 @@
   var RE_TIME = /temps|time|minute|tempo|pressa/;
   var RE_SLEEP = /dor[mts]|durm|sommeil|fatigu|sleep|tired|sono|cansa/;
   var RE_BELLY = /ventre|poids|belly|weight|barriga|peso/;
+  var RE_FOOD = /manger|repas|aliment|nourrit|eat|meal|food|diet|comer|refei|aliment/;
   var RE_URGENT = /douleur forte|poitrine|vertige|malaise|engourdi|fourmill|chest|dizz|numb|tingl|severe pain|peito|tontur|dormencia|formigamento|dor forte/;
 
   /* Réponse du coach IA (mode démonstration) : clé de texte et zone à ajouter à la carte. */
@@ -89,6 +131,7 @@
     if (RE_BACK.test(n)) return { key: "ai.r.back", zone: "dos" };
     if (RE_TIME.test(n)) return { key: "ai.r.time", zone: null };
     if (RE_SLEEP.test(n)) return { key: "ai.r.sleep", zone: null };
+    if (RE_FOOD.test(n)) return { key: "ai.r.food", zone: null };
     if (RE_BELLY.test(n)) return { key: "ai.r.belly", zone: null };
     return { key: "ai.r.default", zone: null };
   }
@@ -168,7 +211,7 @@
   g.SS.logic = {
     DURS: DURS, LEVELS: LEVELS, levelOf: levelOf, sequence: sequence, totalSeconds: totalSeconds, shiftDur: shiftDur,
     newPlayer: newPlayer, tick: tick, next: next, prev: prev, redo: redo, plus: plus, jump: jump, togglePause: togglePause,
-    buildSession: buildSession, hits: hits, dateKey: dateKey, dayOfYear: dayOfYear,
+    buildSession: buildSession, goalWeights: goalWeights, defaultTarget: defaultTarget, foodCount: foodCount, foodWeek: foodWeek, weightSummary: weightSummary, parseWeight: parseWeight, hits: hits, dateKey: dateKey, dayOfYear: dayOfYear,
     weekDays: weekDays, lightCount: lightCount, monthCounts: monthCounts,
     replyFor: replyFor, isUrgent: isUrgent, topicOf: topicOf
   };

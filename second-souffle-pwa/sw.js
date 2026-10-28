@@ -1,9 +1,9 @@
 /* Service worker : garde l'application disponible hors connexion.
    Changez VERSION quand la liste des fichiers change. */
-var VERSION = "ss-v2";
+var VERSION = "ss-v3";
 var SHELL = [
   "./", "./index.html", "./manifest.webmanifest", "./css/styles.css",
-  "./js/i18n.js", "./js/data.js", "./js/logic.js", "./js/app.js",
+  "./js/i18n.js", "./js/data.js", "./js/logic.js", "./js/gemini.js", "./js/app.js",
   "./icons/icon.svg", "./icons/icon-192.png", "./icons/icon-512.png",
   "./img/leo.webp", "./img/ecoute.webp", "./img/bras-leves.webp", "./img/pouce.webp", "./img/double-pouce.webp"
 ];
