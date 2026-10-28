@@ -32,18 +32,19 @@ $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try { $env:GEMINI_API_KEY = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
 finally { [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 
-$modele = Read-Host "Identifiant du modèle de voix (Entrée pour gemini-3.8-flash-lite-tts)"
-if ([string]::IsNullOrWhiteSpace($modele)) { $modele = "gemini-3.8-flash-lite-tts" }
+$modele = Read-Host "Identifiant du modèle de voix (Entrée pour gemini-3.8-flash-tts, la qualité maximale)"
+if ([string]::IsNullOrWhiteSpace($modele)) { $modele = "gemini-3.8-flash-tts" }
 $env:TTS_MODEL = $modele
 if ($audition) {
   Write-Host ""
-  Write-Host "Voix comparées : Achird, Sadaltager, Orus, Charon, Puck (masculines) ; Sulafat, Vindemiatrix, Achernar, Kore, Aoede, Gacrux, Leda (féminines)."
+  Write-Host "Voix comparées : Achird, Sadaltager, Orus, Charon (masculines) ; Sulafat, Vindemiatrix, Achernar, Aoede (féminines).
+  Modèles comparés : gemini-3.8-flash-tts (qualité maximale) et gemini-3.8-flash-lite-tts (plus économique)."
   Write-Host "Pour en comparer d'autres, tapez leurs noms séparés par des virgules, sinon appuyez sur Entrée."
   $autres = Read-Host "Voix à comparer"
   if (-not [string]::IsNullOrWhiteSpace($autres)) { $env:AUDITION_VOICES = $autres }
   node tools/generate-audio.js --audition --out audio-voix
   Write-Host ""
-  Write-Host "Écoutez les fichiers voix-*.wav dans les dossiers audio-voix\fr, audio-voix\en et audio-voix\pt."
+  Write-Host "Écoutez les fichiers voix-*.wav dans audio-voix\fr, audio-voix\en et audio-voix\pt. Le nom indique la voix et le modèle (flash ou lite)."
   Remove-Item Env:GEMINI_API_KEY -ErrorAction SilentlyContinue
   exit 0
 }

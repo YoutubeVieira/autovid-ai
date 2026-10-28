@@ -15,11 +15,12 @@
 
    Variables d'environnement (jamais dans le code) :
      GEMINI_API_KEY   clé d'API Google (AI Studio)
-     TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-lite-tts d'après la page du modèle chez Google)
+     TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-tts pour la qualité maximale, gemini-3.8-flash-lite-tts pour l économie)
      VOICE_F, VOICE_M   voix de femme et voix d'homme (Sulafat et Achird par défaut), les mêmes dans les trois langues
      VOICE_FR_F, VOICE_FR_M, VOICE_EN_F, VOICE_EN_M, VOICE_PT_F, VOICE_PT_M   voix propres à une langue (facultatif)
      VOICE_WELLNESS_F, VOICE_WELLNESS_M   voix des séances de bien-être (facultatif)
      AUDITION_VOICES  voix à comparer avec --audition, séparées par des virgules
+     AUDITION_MODELS  modèles à comparer avec --audition (par défaut gemini-3.8-flash-tts et gemini-3.8-flash-lite-tts)
      TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
                       none      aucune consigne, le texte seul est envoyé (le plus sûr pour un premier essai)
                       metadata  consigne dans speech_metadata.style de chaque partie (nouveaux modèles)
@@ -51,7 +52,8 @@ function voiceFor(item, g) {
   const well = item.cat === "bienetre" ? process.env["VOICE_WELLNESS_" + G] : null;
   return well || process.env["VOICE_" + L + "_" + G] || process.env["VOICE_" + G] || VOICE_DEFAULT[g];
 }
-const AUDITION_VOICES = (process.env.AUDITION_VOICES || "Achird,Sadaltager,Orus,Charon,Puck,Sulafat,Vindemiatrix,Achernar,Kore,Aoede,Gacrux,Leda").split(",").map(x => x.trim()).filter(Boolean);
+const AUDITION_MODELS = (process.env.AUDITION_MODELS || "gemini-3.8-flash-tts,gemini-3.8-flash-lite-tts").split(",").map(x => x.trim()).filter(Boolean);
+const AUDITION_VOICES = (process.env.AUDITION_VOICES || "Achird,Sadaltager,Orus,Charon,Sulafat,Vindemiatrix,Achernar,Aoede").split(",").map(x => x.trim()).filter(Boolean);
 const STYLE = {
   fr: process.env.TTS_STYLE_FR || "Dis ce texte en français, d'un ton chaleureux, calme et encourageant, à un rythme moyen : ",
   en: process.env.TTS_STYLE_EN || "Say this in English, in a warm, calm, encouraging tone, at a medium pace: ",
@@ -115,13 +117,13 @@ function decodeAudio(buf, mime) {
 
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function synth(item, voice) {
+async function synth(item, voice, model) {
   if (DRY) return { pcm: tone(Math.max(0.4, item.est - item.pause), RATE_DEFAULT), rate: RATE_DEFAULT };
   const speech = voice ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } : undefined;
   const part = { text: STYLE_MODE === "inline" ? STYLE[item.lang] + item.text : item.text };
   if (STYLE_MODE === "metadata") part.speech_metadata = { style: STYLE[item.lang] };
   const body = { contents: [{ parts: [part] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: speech } };
-  const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(MODEL) + ":generateContent";
+  const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(model || MODEL) + ":generateContent";
   for (let attempt = 0; attempt < 5; attempt++) {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": KEY }, body: JSON.stringify(body) });
     if (res.status === 429 || res.status >= 500) { await sleep(2000 * Math.pow(2, attempt)); continue; }
@@ -153,17 +155,18 @@ if (SELFTEST) {
 async function audition() {
   const all = parseCsv(fs.readFileSync(path.join(__dirname, "..", "docs", "voiceover-manifest.csv"), "utf8")).slice(1)
     .filter(r => r.length >= 7 && r[1] === "s.intro.standard").map(r => ({ cat: r[0], id: r[1], lang: r[2], text: r[3], pause: 0, est: Number(r[5]) || 3 }));
-  console.log((DRY ? "[essai sans service] " : "") + AUDITION_VOICES.length + " voix × " + LANGS.length + " langue(s)");
+  console.log((DRY ? "[essai sans service] " : "") + AUDITION_VOICES.length + " voix × " + AUDITION_MODELS.length + " modèle(s) × " + LANGS.length + " langue(s)");
+  const short = m => /lite/i.test(m) ? "lite" : /flash/i.test(m) ? "flash" : m.replace(/[^a-z0-9.-]/gi, "");
   for (const it of all.filter(i => LANGS.includes(i.lang))) {
     const dir = path.join(OUT, it.lang); fs.mkdirSync(dir, { recursive: true });
-    for (const v of AUDITION_VOICES) {
-      const file = path.join(dir, "voix-" + v + ".wav");
+    for (const m of AUDITION_MODELS) for (const v of AUDITION_VOICES) {
+      const file = path.join(dir, "voix-" + v + "-" + short(m) + ".wav");
       if (fs.existsSync(file) && !DRY) continue;
-      try { const r = await synth(it, v); fs.writeFileSync(file, wav(r.pcm, r.rate)); console.log("ok   " + it.lang + " " + v); }
-      catch (e) { console.log("échec " + it.lang + " " + v + " : " + e.message.slice(0, 160)); }
+      try { const r = await synth(it, v, m); fs.writeFileSync(file, wav(r.pcm, r.rate)); console.log("ok   " + it.lang + " " + v + " " + short(m)); }
+      catch (e) { console.log("échec " + it.lang + " " + v + " " + short(m) + " : " + e.message.slice(0, 160)); }
     }
   }
-  console.log("Écoutez les fichiers voix-*.wav dans " + path.resolve(OUT) + " puis choisissez une voix par langue.");
+  console.log("Écoutez les fichiers voix-*.wav dans " + path.resolve(OUT) + " puis choisissez une voix et un modèle.");
 }
 if (AUDITION) { audition().catch(e => { console.log("ÉCHEC : " + e.message); process.exit(1); }); return; }
 
