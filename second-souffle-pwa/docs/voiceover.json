@@ -728,7 +728,7 @@
    "items": [
     {
      "id": "w.respiration",
-     "name": "Respiration apaisante (environ 3 minutes)",
+     "name": "Respiration apaisante (environ 2 minutes)",
      "segments": [
       {
        "t": {
@@ -806,7 +806,7 @@
     },
     {
      "id": "w.soir",
-     "name": "Relaxation du soir (environ 5 minutes)",
+     "name": "Relaxation du soir (environ 2 minutes)",
      "segments": [
       {
        "t": {
@@ -892,7 +892,7 @@
     },
     {
      "id": "w.reveil",
-     "name": "Réveil en douceur (environ 4 minutes)",
+     "name": "Réveil en douceur (environ 1 min 30)",
      "segments": [
       {
        "t": {
@@ -946,7 +946,7 @@
     },
     {
      "id": "w.bureau",
-     "name": "Pause bureau (environ 3 minutes)",
+     "name": "Pause bureau (environ 1 min 30)",
      "segments": [
       {
        "t": {

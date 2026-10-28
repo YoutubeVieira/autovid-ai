@@ -41,7 +41,7 @@ def seg(fr, en, pt, pause):
     return {"t": T(fr, en, pt), "pause": pause}
 
 WELLNESS = [
- ("w.respiration", "Respiration apaisante", "environ 3 minutes", [
+ ("w.respiration", "Respiration apaisante", "environ 2 minutes", [
   seg("Installez-vous confortablement, assis ou allongé. Fermez les yeux si vous le souhaitez.", "Settle in comfortably, sitting or lying down. Close your eyes if you like.", "Acomode-se bem, sentado ou deitado. Feche os olhos, se quiser.", 4),
   seg("Posez une main sur le ventre. Nous allons respirer lentement.", "Rest one hand on your belly. We're going to breathe slowly.", "Apoie uma mão na barriga. Vamos respirar devagar.", 3),
   seg("Inspirez par le nez, doucement, en comptant jusqu'à quatre. Un, deux, trois, quatre.", "Breathe in through your nose, gently, counting to four. One, two, three, four.", "Inspire pelo nariz, com suavidade, contando até quatro. Um, dois, três, quatro.", 1),
@@ -52,7 +52,7 @@ WELLNESS = [
   seg("Encore trois respirations. Inspirez… et expirez.", "Three more breaths. Breathe in… and breathe out.", "Mais três respirações. Inspire… e solte o ar.", 12),
   seg("Doucement, reprenez une respiration naturelle. Bougez les doigts et les orteils. Quand vous êtes prêt, ouvrez les yeux.", "Gently return to natural breathing. Wiggle your fingers and toes. When you're ready, open your eyes.", "Aos poucos, volte à respiração natural. Mexa os dedos das mãos e dos pés. Quando estiver pronto, abra os olhos.", 0),
  ]),
- ("w.soir", "Relaxation du soir", "environ 5 minutes", [
+ ("w.soir", "Relaxation du soir", "environ 2 minutes", [
   seg("Allongez-vous confortablement. Laissez le lit ou le tapis vous porter.", "Lie down comfortably. Let the bed or the mat hold you.", "Deite-se confortavelmente. Deixe a cama ou o tapete sustentar você.", 4),
   seg("Prenez une grande inspiration, et soufflez longuement.", "Take a big breath in, and let it out for a long time.", "Respire fundo e solte o ar longamente.", 5),
   seg("Portez votre attention sur vos pieds. Laissez-les devenir lourds et chauds.", "Bring your attention to your feet. Let them become heavy and warm.", "Leve a atenção aos pés. Deixe-os ficarem pesados e quentes.", 8),
@@ -64,7 +64,7 @@ WELLNESS = [
   seg("Restez ici quelques respirations. Si des pensées arrivent, laissez-les passer.", "Stay here for a few breaths. If thoughts come, let them pass.", "Fique aqui por algumas respirações. Se pensamentos surgirem, deixe-os passar.", 20),
   seg("Quand vous le souhaitez, bougez doucement les doigts et les pieds. Vous pouvez rester allongé ou vous endormir.", "Whenever you like, gently move your fingers and feet. You can stay lying down, or drift off to sleep.", "Quando quiser, mexa devagar os dedos das mãos e dos pés. Você pode continuar deitado ou adormecer.", 0),
  ]),
- ("w.reveil", "Réveil en douceur", "environ 4 minutes", [
+ ("w.reveil", "Réveil en douceur", "environ 1 min 30", [
   seg("Bonjour. Avant de vous lever, restez allongé un instant et prenez trois grandes respirations.", "Good morning. Before you get up, stay lying down for a moment and take three deep breaths.", "Bom dia. Antes de levantar, fique deitado um instante e respire fundo três vezes.", 10),
   seg("Étirez les bras au-dessus de la tête et les jambes vers le bas, comme pour vous allonger. Tenez, puis relâchez.", "Stretch your arms overhead and your legs downward, as if lengthening yourself. Hold, then release.", "Estique os braços acima da cabeça e as pernas para baixo, como se quisesse se alongar. Segure e depois solte.", 6),
   seg("Ramenez les genoux vers la poitrine, doucement, et faites quelques petits balancements.", "Bring your knees toward your chest, gently, and rock a little from side to side.", "Leve os joelhos em direção ao peito, com suavidade, e balance um pouco de um lado para o outro.", 8),
@@ -72,7 +72,7 @@ WELLNESS = [
   seg("Tournez doucement la tête à droite, puis à gauche, sans forcer.", "Gently turn your head to the right, then to the left, without forcing.", "Gire a cabeça devagar para a direita e depois para a esquerda, sem forçar.", 8),
   seg("Levez-vous lentement, en vous appuyant si besoin. Vous êtes prêt pour la journée.", "Stand up slowly, using support if you need it. You're ready for the day.", "Levante-se devagar, apoiando-se se precisar. Você está pronto para o dia.", 0),
  ]),
- ("w.bureau", "Pause bureau", "environ 3 minutes", [
+ ("w.bureau", "Pause bureau", "environ 1 min 30", [
   seg("Pause. Asseyez-vous au bord de la chaise, les pieds à plat.", "Break time. Sit at the edge of your chair, feet flat.", "Hora da pausa. Sente-se na beira da cadeira, com os pés apoiados no chão.", 3),
   seg("Faites rouler vos épaules vers l'arrière, dix fois, lentement.", "Roll your shoulders backward, ten times, slowly.", "Gire os ombros para trás, dez vezes, devagar.", 8),
   seg("Penchez doucement l'oreille vers l'épaule droite. Tenez dix secondes. Puis à gauche.", "Gently tilt your ear toward your right shoulder. Hold ten seconds. Then the left.", "Incline suavemente a orelha em direção ao ombro direito. Segure dez segundos. Depois, o esquerdo.", 12),
