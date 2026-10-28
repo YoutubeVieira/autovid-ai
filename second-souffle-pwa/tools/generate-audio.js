@@ -17,8 +17,9 @@
      GEMINI_API_KEY   clé d'API Google (AI Studio)
      TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-tts pour la qualité maximale, gemini-3.8-flash-lite-tts pour l économie)
      VOICE_F, VOICE_M   voix de femme et voix d'homme (Sulafat et Achird par défaut), les mêmes dans les trois langues
+     TTS_MODEL          modèle de voix (gemini-3.8-flash-tts par défaut)
      VOICE_FR_F, VOICE_FR_M, VOICE_EN_F, VOICE_EN_M, VOICE_PT_F, VOICE_PT_M   voix propres à une langue (facultatif)
-     VOICE_WELLNESS_F, VOICE_WELLNESS_M   voix des séances de bien-être (facultatif)
+     VOICE_WELLNESS_F, VOICE_WELLNESS_M   voix des séances de bien-être (Vindemiatrix et Charon par défaut)
      AUDITION_VOICES  voix à comparer avec --audition, séparées par des virgules
      AUDITION_MODELS  modèles à comparer avec --audition (par défaut gemini-3.8-flash-tts et gemini-3.8-flash-lite-tts)
      TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
@@ -41,15 +42,16 @@ const LANG = opt("--lang", TEST ? "all" : null), ONLY = opt("--only", ""), OUT =
 if (!LANG && !SELFTEST && !AUDITION) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
 const LANGS = (LANG === "all" || (!LANG && AUDITION)) ? ["fr", "en", "pt"] : [LANG || "fr"];
 const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
-const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL;
-if (!DRY && !SELFTEST && (!KEY || !MODEL)) { console.log("Il faut GEMINI_API_KEY et TTS_MODEL (ou utilisez --dry-run)."); process.exit(1); }
+const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL || "gemini-3.8-flash-tts";
+if (!DRY && !SELFTEST && !KEY) { console.log("Il faut la variable GEMINI_API_KEY (ou utilisez --dry-run)."); process.exit(1); }
 const { adapt } = require("./audio-fixes.js");
 const GENDER = opt("--gender", "both");
 const GENDERS = GENDER === "f" ? ["f"] : GENDER === "m" ? ["m"] : ["f", "m"];
-const VOICE_DEFAULT = { f: "Sulafat", m: "Achird" };
+const VOICE_DEFAULT = { f: "Sulafat", m: "Achird" };          // coach, séances, motivation
+const VOICE_WELLNESS_DEFAULT = { f: "Vindemiatrix", m: "Charon" }; // séances de bien-être : plus douces
 function voiceFor(item, g) {
   const L = item.lang.toUpperCase(), G = g.toUpperCase();
-  const well = item.cat === "bienetre" ? process.env["VOICE_WELLNESS_" + G] : null;
+  const well = item.cat === "bienetre" ? (process.env["VOICE_WELLNESS_" + G] || VOICE_WELLNESS_DEFAULT[g]) : null;
   return well || process.env["VOICE_" + L + "_" + G] || process.env["VOICE_" + G] || VOICE_DEFAULT[g];
 }
 const AUDITION_MODELS = (process.env.AUDITION_MODELS || "gemini-3.8-flash-tts,gemini-3.8-flash-lite-tts").split(",").map(x => x.trim()).filter(Boolean);
