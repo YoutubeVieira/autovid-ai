@@ -8,7 +8,7 @@
   /* ---------- état ---------- */
   function fresh() {
     return {
-      lang: null, amb: "commun", tz: 1, onboarded: false, age: "a", goals: ["energy"], weekTarget: null, food: {}, weights: [], api: { key: "", model: "gemini-3.8-flash", search: true },
+      lang: null, amb: "commun", tz: 1, onboarded: false, age: "a", goals: ["energy"], weekTarget: null, food: {}, weights: [],
       zones: {}, log: {}, demo: "f", plan: "year", addon: false, dur: 45, rest: 10, rounds: 2, sound: true,
       pro: { msgs: [], relay: ["on", "", "", ""], replied: false, topic: "genoux", waiting: false }
     };
@@ -20,7 +20,6 @@
       if (raw) { var o = JSON.parse(raw); for (var k in o) s[k] = o[k]; }
     } catch (e) { /* stockage indisponible : l'app fonctionne sans */ }
     if (!Array.isArray(s.goals) || !s.goals.length) s.goals = s.goal ? [s.goal] : ["energy"];
-    s.api = Object.assign({ key: "", model: "gemini-3.8-flash", search: true }, s.api || {});
     return s;
   }
   var S = load();
@@ -29,7 +28,7 @@
   var ui = {
     screen: S.onboarded ? "home" : "welcome", coachTab: "ai", ai: [], libF: "all",
     layer: "muscles", azone: null, sess: null, angle: "face", timer: null, resetAsk: false,
-    fbMsg: "", toastTimer: null, custom: false, busy: false, aiSetup: false
+    fbMsg: "", toastTimer: null, custom: false
   };
 
   I.setLang(S.lang || I.guess(navigator.language));
@@ -270,24 +269,7 @@
   };
 
   function msgHtml(m) {
-    var src = m.sources && m.sources.length ? '<div class="src"><b>' + t("ai.sources") + "</b>" + m.sources.map(function (x) {
-      return '<a href="' + esc(x.uri) + '" target="_blank" rel="noopener noreferrer">' + esc(x.title) + "</a>";
-    }).join("") + "</div>" : "";
-    return '<div class="msg ' + m.cls + (m.err ? " err" : "") + (m.pending ? " pending" : "") + '"><span class="who">' + esc(m.who || "") + "</span><span>" + esc(m.text) + "</span>" + (m.fiche ? ficheHtml(m.fiche) : "") + src + "</div>";
-  }
-  function aiSetupHtml() {
-    return '<div class="card solid"><h3>' + t("ai.connect") + '</h3><p class="muted small">' + t("ai.setup.sub") + "</p>" +
-      "<p><b>" + t("ai.step1") + '</b></p><a class="btn ghost" href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">' + t("ai.open") + "</a>" +
-      "<p><b>" + t("ai.step2") + "</b></p><p><b>" + t("ai.step3") + '</b></p><form class="stack tight" data-form="aikey">' +
-      '<input id="aiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="' + esc(t("ai.keyPh")) + '" aria-label="' + esc(t("ai.keyPh")) + '"><button class="btn" type="submit">' + t("ai.save") + "</button></form>" +
-      '<p class="muted small">' + t("ai.keyNote") + "</p></div>";
-  }
-  function aiSettingsHtml() {
-    if (!S.api.key) return aiSetupHtml();
-    return '<div class="card solid"><p><b>' + t("ai.status.on") + '</b></p><p class="muted small">' + t("ai.keySaved", { k: esc(S.api.key.slice(-4)) }) + "</p>" +
-      '<form class="stack tight" data-form="aimodel"><label class="small" for="aiModel"><b>' + t("ai.model") + '</b></label><input id="aiModel" value="' + esc(S.api.model) + '" autocomplete="off" spellcheck="false"><button class="btn ghost" type="submit">' + t("ai.save") + "</button></form>" +
-      '<p class="muted small">' + t("ai.modelNote") + "</p><b>" + t("ai.search") + '</b><div class="chips">' + chip(t("set.on"), "aiSearch", "1", S.api.search) + chip(t("set.off"), "aiSearch", "0", !S.api.search) + '</div><p class="muted small">' + t("ai.searchNote") + "</p>" +
-      '<div class="row"><button class="btn ghost" data-act="aiTest">' + t("ai.test") + '</button><button class="btn ghost" data-act="aiClear">' + t("ai.clear") + "</button></div></div>";
+    return '<div class="msg ' + m.cls + '"><span class="who">' + esc(m.who || "") + "</span><span>" + esc(m.text) + "</span>" + (m.fiche ? ficheHtml(m.fiche) : "") + "</div>";
   }
   function ficheHtml(topic) {
     var list = D.FICHES[topic].map(function (r) { return "<span>• " + esc(exName(D.BY_ID[r[0]])) + " · " + r[1] + "</span>"; }).join("");
@@ -299,11 +281,7 @@
     var body;
     if (ui.coachTab === "ai") {
       var msgs = [{ cls: "ai", who: "", text: t("ai.hello") }].concat(ui.ai);
-      var on = !!S.api.key;
-      body = guideRow(t("guide.illu")) + '<div class="aistatus ' + (on ? "on" : "off") + '"><span class="adot"></span>' + t(on ? "ai.status.on" : "ai.status.off") +
-        (on ? ' <button class="chip" data-act="go" data-v="settings">' + t("home.settings") + "</button>" : ' <button class="chip" data-act="aiSetup">' + t("ai.connect") + "</button>") + "</div>" +
-        (!on && ui.aiSetup ? aiSetupHtml() : "") +
-        '<div class="chat" id="chat" aria-live="polite">' + msgs.map(msgHtml).join("") + "</div>" +
+      body = guideRow(t("guide.illu")) + '<div class="chat" id="chat" aria-live="polite">' + msgs.map(msgHtml).join("") + "</div>" +
         '<div class="chips">' + [1, 2, 3, 4, 5].map(function (i) { return '<button class="chip" data-act="ask" data-v="ai.s' + i + '">' + t("ai.s" + i) + "</button>"; }).join("") + "</div>" +
         '<form class="ask" data-form="ai"><input id="aiInput" placeholder="' + esc(t("ai.ph")) + '" aria-label="' + esc(t("ai.ph")) + '" autocomplete="off"><button class="btn" type="submit">' + t("ai.send") + "</button></form>" +
         '<p class="muted small">' + t("ai.disc") + "</p>";
@@ -336,7 +314,7 @@
   SCREENS.goals = function () {
     var ws = L.weightSummary(S.weights);
     var list = S.weights.slice().sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : b.id - a.id; }).slice(0, 5).map(function (w) {
-      return '<div class="libitem"><span>' + esc(w.d) + " · <b>" + w.kg + ' kg</b></span><button class="chip" data-act="weightDel" data-v="' + w.id + '" aria-label="' + esc(t("ai.clear")) + '">×</button></div>';
+      return '<div class="libitem"><span>' + esc(w.d) + " · <b>" + w.kg + ' kg</b></span><button class="chip" data-act="weightDel" data-v="' + w.id + '" aria-label="' + esc(t("goals.del")) + '">×</button></div>';
     }).join("");
     return backChip("path") + "<h2>" + t("goals.title") + '</h2><p class="muted">' + t("goals.sub") + '</p><div class="chips">' +
       D.GOALS.map(function (g) { return chip(t("q2." + g.id), "goal", g.id, S.goals.indexOf(g.id) >= 0); }).join("") + "</div>" +
@@ -374,7 +352,7 @@
   SCREENS.settings = function () {
     return backChip("home") + "<h2>" + t("set.title") + "</h2><b>" + t("set.lang") + '</b><div class="chips">' +
       I.LANGS.map(function (l) { return chip(t("lang.name." + l), "lang", l, I.state.lang === l); }).join("") + "</div><b>" + t("set.amb") + "</b>" + ambCards() +
-      levelBlock(true) + "<b>" + t("set.ai") + "</b>" + aiSettingsHtml() + "<b>" + t("set.sound") + '</b><div class="chips">' + chip(t("set.on"), "sound", "1", S.sound) + chip(t("set.off"), "sound", "0", !S.sound) + "</div>" +
+      levelBlock(true) + "<b>" + t("set.sound") + '</b><div class="chips">' + chip(t("set.on"), "sound", "1", S.sound) + chip(t("set.off"), "sound", "0", !S.sound) + "</div>" +
       "<b>" + t("set.text") + '</b><div class="chips">' + [[1, "set.t1"], [1.15, "set.t2"], [1.3, "set.t3"]].map(function (r) { return chip(t(r[1]), "tz", r[0], S.tz === r[0]); }).join("") + "</div>" +
       "<b>" + t("set.demo") + '</b><div class="chips">' + chip(t("who.f"), "demo", "f", S.demo === "f") + chip(t("who.m"), "demo", "m", S.demo === "m") + "</div>" +
       '<p class="muted small">' + t("set.dark") + " " + t("set.data") + '</p><button class="btn ghost" data-act="' + (ui.resetAsk ? "reset" : "resetAsk") + '">' + t(ui.resetAsk ? "set.resetSure" : "set.reset") + "</button>";
@@ -479,60 +457,20 @@
   function noteZone(zone) {
     if (!zone || S.zones[zone]) return;
     S.zones[zone] = true; save();
-    addMsg(ui.ai, { cls: "ai", who: "", text: t("ai.noted", { z: t("zone." + zone).toLowerCase() }), note: true });
+    addMsg(ui.ai, { cls: "ai", who: "", text: t("ai.noted", { z: t("zone." + zone).toLowerCase() }) });
   }
-  function profileText() {
-    var ages = { a: "40-49", b: "50-59", c: "60+" };
-    return "age " + ages[S.age] + "; goals: " + S.goals.join(", ") + "; sensitive areas: " + (pickedList().join(", ") || "none") +
-      "; session: " + S.dur + " s per exercise, " + S.rounds + " round(s); app exercises: " + D.EX.map(exName).join(", ");
-  }
-  function aiError(e) {
-    var k = e && e.kind;
-    return k === "key" ? t("ai.err.key") : k === "rate" ? t("ai.err.rate") : k === "net" ? t("ai.err.net") : k === "model" ? t("ai.err.model") :
-      k === "blocked" ? t("ai.err.blocked") : t("ai.err.other", { m: (e && e.message) || "" });
-  }
-  function setBusy(b) {
-    ui.busy = b;
-    var f = $("[data-form=ai]"); if (f) { f.querySelector("button").disabled = b; }
-  }
-  function callGemini(history, search) {
-    return SS.gemini.ask(window.fetch.bind(window), { key: S.api.key, model: S.api.model, lang: I.state.lang, profile: profileText(), history: history, search: search });
-  }
-  function askAI(zone) {
-    var history = ui.ai.filter(function (x) { return !x.pending && !x.err && !x.note && (x.cls === "me" || x.cls === "ai"); })
-      .map(function (x) { return { role: x.cls === "me" ? "user" : "model", text: x.text }; });
-    var m = { cls: "ai", who: "", text: t("ai.thinking"), pending: true };
-    addMsg(ui.ai, m);
-    var chat = $("#chat"), el = chat && chat.lastElementChild;
-    setBusy(true);
-    callGemini(history, S.api.search).then(function (r) {
-      m.pending = false; m.text = r.text; m.sources = r.sources;
-    }, function (e) {
-      m.pending = false; m.err = true; m.text = aiError(e);
-    }).then(function () {
-      if (el && el.parentNode) el.outerHTML = msgHtml(m);
-      var c = $("#chat"); if (c) c.lastElementChild.scrollIntoView({ block: "nearest" });
-      setBusy(false); noteZone(zone);
-    });
-  }
+  /* Coach IA en démonstration : réponses écrites d'avance, choisies selon les mots du message. */
   function ask(text) {
     text = String(text).trim();
-    if (!text || ui.busy) return;
+    if (!text) return;
     addMsg(ui.ai, { cls: "me", who: "", text: text });
+    if (L.isUrgent(text)) { addMsg(ui.ai, { cls: "ai", who: "", text: t("pro.urgent") }); return; }
     var r = L.replyFor(text);
-    if (L.isUrgent(text)) { addMsg(ui.ai, { cls: "ai", who: "", text: t("pro.urgent"), note: true }); return; }
-    if (S.api.key) { askAI(r.zone); return; }
     setTimeout(function () {
       if (ui.screen !== "coach" || ui.coachTab !== "ai") return;
-      addMsg(ui.ai, { cls: "ai", who: "", text: t(r.key), note: true });
+      addMsg(ui.ai, { cls: "ai", who: "", text: t(r.key) });
       noteZone(r.zone);
     }, 500);
-  }
-  function testAI() {
-    if (!S.api.key) { toast(t("ai.err.key")); return; }
-    toast(t("ai.thinking"));
-    SS.gemini.ask(window.fetch.bind(window), { key: S.api.key, model: S.api.model, lang: "en", profile: "connection test", history: [{ role: "user", text: "Reply with the single word OK." }], search: false })
-      .then(function () { toast(t("ai.testOk")); }, function (e) { toast(aiError(e)); });
   }
   function addWeight(text) {
     var v = L.parseWeight(text);
@@ -593,10 +531,6 @@
       case "target": S.weekTarget = parseInt(v, 10); save(); render(); break;
       case "food": var fk = L.dateKey(today()); S.food[fk] = S.food[fk] || {}; S.food[fk][v] = !S.food[fk][v]; save(); render(); break;
       case "askFood": ui.coachTab = "ai"; go("coach"); ask(t("ai.s5")); break;
-      case "aiSetup": ui.aiSetup = !ui.aiSetup; render(); break;
-      case "aiSearch": S.api.search = v === "1"; save(); render(); break;
-      case "aiTest": testAI(); break;
-      case "aiClear": S.api.key = ""; save(); toast(t("ai.keyCleared")); render(); break;
       case "weightDel": S.weights = S.weights.filter(function (w) { return String(w.id) !== v; }); save(); render(); break;
       case "zone": S.zones[v] = !S.zones[v]; save(); render(); break;
       case "finishOnboarding": S.onboarded = true; save(); go("plan"); break;
@@ -646,12 +580,6 @@
     if (!f) return;
     e.preventDefault();
     var kind = f.getAttribute("data-form"), inp = f.querySelector("input"), v = inp.value;
-    if (kind === "aikey") {
-      v = v.trim(); inp.value = "";
-      if (v) { S.api.key = v; ui.aiSetup = false; save(); toast(t("ai.keySaved", { k: v.slice(-4) })); render(); }
-      return;
-    }
-    if (kind === "aimodel") { S.api.model = v.trim() || "gemini-3.8-flash"; save(); toast(t("ai.save") + " ✓"); return; }
     if (kind === "weight") { addWeight(v); return; }
     inp.value = "";
     if (kind === "ai") ask(v); else sendPro(v);
