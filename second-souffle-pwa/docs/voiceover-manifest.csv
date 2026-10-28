@@ -1,0 +1,412 @@
+categorie,id,langue,texte,pause_apres_s,duree_estimee_s,fichier
+seance,s.intro.short,fr,"C'est parti. Installez-vous, et respirez un grand coup.",0,3.2,audio/fr/s.intro.short.mp3
+seance,s.intro.short,en,"Let's go. Get settled, and take a deep breath.",0,3.6,audio/en/s.intro.short.mp3
+seance,s.intro.short,pt,Vamos lá. Acomode-se e respire fundo.,0,2.4,audio/pt/s.intro.short.mp3
+seance,s.intro.standard,fr,"Bonjour, et bravo d'être là. Cette séance dure environ douze minutes. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",0,9.2,audio/fr/s.intro.standard.mp3
+seance,s.intro.standard,en,"Hello, and well done for showing up. This session takes about twelve minutes. Go at your own pace, and stop if anything hurts.",0,9.2,audio/en/s.intro.standard.mp3
+seance,s.intro.standard,pt,"Olá, e parabéns por estar aqui. Esta sessão dura cerca de doze minutos. Vá no seu ritmo e pare se algo doer.",0,8.8,audio/pt/s.intro.standard.mp3
+seance,s.intro.adapted,fr,J'ai adapté la séance à vos zones sensibles. Certains mouvements ont été remplacés.,0,5.2,audio/fr/s.intro.adapted.mp3
+seance,s.intro.adapted,en,I adapted the session to your sensitive areas. Some movements were swapped.,0,4.8,audio/en/s.intro.adapted.mp3
+seance,s.intro.adapted,pt,Adaptei a sessão às suas áreas sensíveis. Alguns movimentos foram trocados.,0,4.4,audio/pt/s.intro.adapted.mp3
+seance,s.next,fr,Prochain exercice.,0,0.8,audio/fr/s.next.mp3
+seance,s.next,en,Next exercise.,0,0.8,audio/en/s.next.mp3
+seance,s.next,pt,Próximo exercício.,0,0.8,audio/pt/s.next.mp3
+seance,s.three,fr,"Trois, deux, un, c'est parti.",0,2.0,audio/fr/s.three.mp3
+seance,s.three,en,"Three, two, one, go.",0,1.6,audio/en/s.three.mp3
+seance,s.three,pt,"Três, dois, um, vai.",0,1.6,audio/pt/s.three.mp3
+seance,s.switch,fr,Changez de côté.,0,1.2,audio/fr/s.switch.mp3
+seance,s.switch,en,Switch sides.,0,0.8,audio/en/s.switch.mp3
+seance,s.switch,pt,Troque de lado.,0,1.2,audio/pt/s.switch.mp3
+seance,s.half,fr,"Vous êtes à la moitié. Continuez, vous le faites très bien.",0,4.4,audio/fr/s.half.mp3
+seance,s.half,en,"You're halfway there. Keep going, you're doing great.",0,3.2,audio/en/s.half.mp3
+seance,s.half,pt,"Você está na metade. Continue, você está indo muito bem.",0,4.0,audio/pt/s.half.mp3
+seance,s.ten,fr,Plus que dix secondes.,0,1.6,audio/fr/s.ten.mp3
+seance,s.ten,en,Ten seconds left.,0,1.2,audio/en/s.ten.mp3
+seance,s.ten,pt,Faltam dez segundos.,0,1.2,audio/pt/s.ten.mp3
+seance,s.five,fr,"Cinq, quatre, trois, deux, un.",0,2.0,audio/fr/s.five.mp3
+seance,s.five,en,"Five, four, three, two, one.",0,2.0,audio/en/s.five.mp3
+seance,s.five,pt,"Cinco, quatro, três, dois, um.",0,2.0,audio/pt/s.five.mp3
+seance,s.rest,fr,Prenez dix secondes pour souffler.,0,2.0,audio/fr/s.rest.mp3
+seance,s.rest,en,Take ten seconds to catch your breath.,0,2.8,audio/en/s.rest.mp3
+seance,s.rest,pt,Tome dez segundos para respirar.,0,2.0,audio/pt/s.rest.mp3
+seance,s.breath,fr,Respirez. Expirez en faisant l'effort.,0,2.0,audio/fr/s.breath.mp3
+seance,s.breath,en,Breathe. Breathe out on the effort.,0,2.4,audio/en/s.breath.mp3
+seance,s.breath,pt,Respire. Solte o ar no esforço.,0,2.4,audio/pt/s.breath.mp3
+seance,s.posture,fr,Gardez le dos long et les épaules basses.,0,3.2,audio/fr/s.posture.mp3
+seance,s.posture,en,Keep your back long and your shoulders down.,0,3.2,audio/en/s.posture.mp3
+seance,s.posture,pt,Mantenha as costas alongadas e os ombros baixos.,0,3.2,audio/pt/s.posture.mp3
+seance,s.pain,fr,"Si vous ressentez une douleur vive, arrêtez ce mouvement. Dites-le au coach, ou voyez un médecin si elle persiste.",0,7.6,audio/fr/s.pain.mp3
+seance,s.pain,en,"If you feel sharp pain, stop this movement. Tell the coach, or see a doctor if it lasts.",0,7.2,audio/en/s.pain.mp3
+seance,s.pain,pt,"Se sentir uma dor aguda, pare este movimento. Avise o coach ou procure um médico se persistir.",0,6.8,audio/pt/s.pain.mp3
+seance,s.pause,fr,Séance en pause. Reprenez quand vous voulez.,0,2.8,audio/fr/s.pause.mp3
+seance,s.pause,en,Session paused. Resume whenever you're ready.,0,2.4,audio/en/s.pause.mp3
+seance,s.pause,pt,Sessão pausada. Retome quando quiser.,0,2.0,audio/pt/s.pause.mp3
+seance,s.resume,fr,On reprend.,0,0.8,audio/fr/s.resume.mp3
+seance,s.resume,en,Back at it.,0,1.2,audio/en/s.resume.mp3
+seance,s.resume,pt,Vamos retomar.,0,0.8,audio/pt/s.resume.mp3
+seance,s.cooldown,fr,"Place au retour au calme. Ralentissez, et laissez le souffle redescendre.",0,4.4,audio/fr/s.cooldown.mp3
+seance,s.cooldown,en,Time to cool down. Slow down and let your breathing settle.,0,4.4,audio/en/s.cooldown.mp3
+seance,s.cooldown,pt,Hora de desacelerar. Vá mais devagar e deixe a respiração se acalmar.,0,4.8,audio/pt/s.cooldown.mp3
+seance,s.end,fr,Séance terminée. Bravo. Buvez un peu d'eau et prenez un instant pour vous.,0,5.2,audio/fr/s.end.mp3
+seance,s.end,en,Session complete. Well done. Have some water and take a moment for yourself.,0,5.2,audio/en/s.end.mp3
+seance,s.end,pt,Sessão concluída. Parabéns. Beba um pouco de água e reserve um momento para você.,0,5.6,audio/pt/s.end.mp3
+seance,s.stop,fr,Vous arrêtez la séance ? Aucun souci. Ce que vous avez fait compte.,0,5.2,audio/fr/s.stop.mp3
+seance,s.stop,en,Stopping the session? No problem. What you did counts.,0,3.6,audio/en/s.stop.mp3
+seance,s.stop,pt,Vai encerrar a sessão? Sem problema. O que você fez conta.,0,4.4,audio/pt/s.stop.mp3
+noms,n.marche,fr,Marche sur place,0,1.2,audio/fr/n.marche.mp3
+noms,n.marche,en,Marching in place,0,1.2,audio/en/n.marche.mp3
+noms,n.marche,pt,Marcha no lugar,0,1.2,audio/pt/n.marche.mp3
+noms,n.epaules-rot,fr,Rotations d'épaules,0,0.8,audio/fr/n.epaules-rot.mp3
+noms,n.epaules-rot,en,Shoulder rolls,0,0.8,audio/en/n.epaules-rot.mp3
+noms,n.epaules-rot,pt,Rotação de ombros,0,1.2,audio/pt/n.epaules-rot.mp3
+noms,n.cou-rot,fr,Rotations lentes du cou,0,1.6,audio/fr/n.cou-rot.mp3
+noms,n.cou-rot,en,Slow neck rotations,0,1.2,audio/en/n.cou-rot.mp3
+noms,n.cou-rot,pt,Rotações lentas do pescoço,0,1.6,audio/pt/n.cou-rot.mp3
+noms,n.cercles,fr,Cercles de poignets et de chevilles,0,2.4,audio/fr/n.cercles.mp3
+noms,n.cercles,en,Wrist and ankle circles,0,1.6,audio/en/n.cercles.mp3
+noms,n.cercles,pt,Círculos de punhos e tornozelos,0,2.0,audio/pt/n.cercles.mp3
+noms,n.balancement,fr,Balancement des bras,0,1.2,audio/fr/n.balancement.mp3
+noms,n.balancement,en,Arm swings,0,0.8,audio/en/n.balancement.mp3
+noms,n.balancement,pt,Balanço dos braços,0,1.2,audio/pt/n.balancement.mp3
+noms,n.squat,fr,Squat sur chaise,0,1.2,audio/fr/n.squat.mp3
+noms,n.squat,en,Chair squat,0,0.8,audio/en/n.squat.mp3
+noms,n.squat,pt,Agachamento na cadeira,0,1.2,audio/pt/n.squat.mp3
+noms,n.pont,fr,Pont fessier,0,0.8,audio/fr/n.pont.mp3
+noms,n.pont,en,Glute bridge,0,0.8,audio/en/n.pont.mp3
+noms,n.pont,pt,Ponte de glúteos,0,1.2,audio/pt/n.pont.mp3
+noms,n.levee-jambe,fr,Levée de jambe allongée,0,1.6,audio/fr/n.levee-jambe.mp3
+noms,n.levee-jambe,en,Lying leg raise,0,1.2,audio/en/n.levee-jambe.mp3
+noms,n.levee-jambe,pt,Elevação de perna deitado,0,1.6,audio/pt/n.levee-jambe.mp3
+noms,n.ext-jambe,fr,Extension de jambe assise,0,1.6,audio/fr/n.ext-jambe.mp3
+noms,n.ext-jambe,en,Seated leg extension,0,1.2,audio/en/n.ext-jambe.mp3
+noms,n.ext-jambe,pt,Extensão de perna sentado,0,1.6,audio/pt/n.ext-jambe.mp3
+noms,n.fente,fr,Fente arrière avec appui,0,1.6,audio/fr/n.fente.mp3
+noms,n.fente,en,Supported reverse lunge,0,1.2,audio/en/n.fente.mp3
+noms,n.fente,pt,Avanço reverso com apoio,0,1.6,audio/pt/n.fente.mp3
+noms,n.pointes,fr,Montée sur pointes avec appui,0,2.0,audio/fr/n.pointes.mp3
+noms,n.pointes,en,Supported calf raise,0,1.2,audio/en/n.pointes.mp3
+noms,n.pointes,pt,Elevação de panturrilha com apoio,0,2.0,audio/pt/n.pointes.mp3
+noms,n.talon-pointe,fr,Marche talon-pointe,0,0.8,audio/fr/n.talon-pointe.mp3
+noms,n.talon-pointe,en,Heel-to-toe walk,0,0.8,audio/en/n.talon-pointe.mp3
+noms,n.talon-pointe,pt,Caminhada calcanhar-ponta,0,0.8,audio/pt/n.talon-pointe.mp3
+noms,n.pompes-mur,fr,Pompes au mur,0,1.2,audio/fr/n.pompes-mur.mp3
+noms,n.pompes-mur,en,Wall push-ups,0,0.8,audio/en/n.pompes-mur.mp3
+noms,n.pompes-mur,pt,Flexão na parede,0,1.2,audio/pt/n.pompes-mur.mp3
+noms,n.rowing,fr,Rowing à l'élastique assis,0,1.6,audio/fr/n.rowing.mp3
+noms,n.rowing,en,Seated band row,0,1.2,audio/en/n.rowing.mp3
+noms,n.rowing,pt,Remada sentado com elástico,0,1.6,audio/pt/n.rowing.mp3
+noms,n.developpe,fr,Développé d'épaules assis,0,1.2,audio/fr/n.developpe.mp3
+noms,n.developpe,en,Seated shoulder press,0,1.2,audio/en/n.developpe.mp3
+noms,n.developpe,pt,Desenvolvimento de ombros sentado,0,1.6,audio/pt/n.developpe.mp3
+noms,n.elevations,fr,Élévations latérales,0,0.8,audio/fr/n.elevations.mp3
+noms,n.elevations,en,Lateral raises,0,0.8,audio/en/n.elevations.mp3
+noms,n.elevations,pt,Elevação lateral,0,0.8,audio/pt/n.elevations.mp3
+noms,n.flexion-bras,fr,Flexion de bras,0,1.2,audio/fr/n.flexion-bras.mp3
+noms,n.flexion-bras,en,Arm curls,0,0.8,audio/en/n.flexion-bras.mp3
+noms,n.flexion-bras,pt,Rosca de braço,0,1.2,audio/pt/n.flexion-bras.mp3
+noms,n.dead-bug,fr,Dead bug lent,0,1.2,audio/fr/n.dead-bug.mp3
+noms,n.dead-bug,en,Slow dead bug,0,1.2,audio/en/n.dead-bug.mp3
+noms,n.dead-bug,pt,Dead bug lento,0,1.2,audio/pt/n.dead-bug.mp3
+noms,n.bascule,fr,Bascule de bassin,0,1.2,audio/fr/n.bascule.mp3
+noms,n.bascule,en,Pelvic tilt,0,0.8,audio/en/n.bascule.mp3
+noms,n.bascule,pt,Inclinação pélvica,0,0.8,audio/pt/n.bascule.mp3
+noms,n.gainage,fr,Gainage sur les genoux,0,1.6,audio/fr/n.gainage.mp3
+noms,n.gainage,en,Kneeling plank,0,0.8,audio/en/n.gainage.mp3
+noms,n.gainage,pt,Prancha com joelhos apoiados,0,1.6,audio/pt/n.gainage.mp3
+noms,n.bird-dog,fr,Quadrupédie bras-jambe opposés,0,1.2,audio/fr/n.bird-dog.mp3
+noms,n.bird-dog,en,Bird dog,0,0.8,audio/en/n.bird-dog.mp3
+noms,n.bird-dog,pt,Bird dog (quatro apoios),0,1.6,audio/pt/n.bird-dog.mp3
+noms,n.rot-tronc,fr,Rotation du tronc assis,0,1.6,audio/fr/n.rot-tronc.mp3
+noms,n.rot-tronc,en,Seated trunk rotation,0,1.2,audio/en/n.rot-tronc.mp3
+noms,n.rot-tronc,pt,Rotação de tronco sentado,0,1.6,audio/pt/n.rot-tronc.mp3
+noms,n.une-jambe,fr,Appui sur une jambe près de la chaise,0,3.2,audio/fr/n.une-jambe.mp3
+noms,n.une-jambe,en,Single-leg stand near a chair,0,2.0,audio/en/n.une-jambe.mp3
+noms,n.une-jambe,pt,Apoio em uma perna perto da cadeira,0,2.8,audio/pt/n.une-jambe.mp3
+noms,n.chat,fr,Étirement du chat,0,1.2,audio/fr/n.chat.mp3
+noms,n.chat,en,Cat stretch,0,0.8,audio/en/n.chat.mp3
+noms,n.chat,pt,Alongamento do gato,0,1.2,audio/pt/n.chat.mp3
+noms,n.hanches-etir,fr,Étirement des hanches,0,1.2,audio/fr/n.hanches-etir.mp3
+noms,n.hanches-etir,en,Hip stretch,0,0.8,audio/en/n.hanches-etir.mp3
+noms,n.hanches-etir,pt,Alongamento de quadril,0,1.2,audio/pt/n.hanches-etir.mp3
+noms,n.respiration,fr,Respiration allongée,0,0.8,audio/fr/n.respiration.mp3
+noms,n.respiration,en,Lying breathing,0,0.8,audio/en/n.respiration.mp3
+noms,n.respiration,pt,Respiração deitado,0,0.8,audio/pt/n.respiration.mp3
+noms,n.mollets,fr,Étirement des mollets au mur,0,2.0,audio/fr/n.mollets.mp3
+noms,n.mollets,en,Wall calf stretch,0,1.2,audio/en/n.mollets.mp3
+noms,n.mollets,pt,Alongamento de panturrilha na parede,0,2.0,audio/pt/n.mollets.mp3
+noms,n.pectoraux,fr,Étirement des pectoraux dans une porte,0,2.4,audio/fr/n.pectoraux.mp3
+noms,n.pectoraux,en,Doorway chest stretch,0,1.2,audio/en/n.pectoraux.mp3
+noms,n.pectoraux,pt,Alongamento do peitoral na porta,0,2.0,audio/pt/n.pectoraux.mp3
+exercices,x.marche,fr,"Marchez sur place, genoux bas. Laissez vos bras se balancer naturellement. Respirez calmement, et gardez un rythme où vous pourriez parler.",0,8.4,audio/fr/x.marche.mp3
+exercices,x.marche,en,"March in place with low knees. Let your arms swing naturally. Breathe calmly, and keep a pace where you could still hold a conversation.",0,9.6,audio/en/x.marche.mp3
+exercices,x.marche,pt,"Marche no lugar, com os joelhos baixos. Deixe os braços balançarem naturalmente. Respire com calma e mantenha um ritmo em que você conseguiria conversar.",0,9.6,audio/pt/x.marche.mp3
+exercices,x.epaules-rot,fr,"Debout, bras détendus. Faites de petits cercles avec les épaules, vers l'arrière. Lentement, sans forcer, et respirez.",0,6.8,audio/fr/x.epaules-rot.mp3
+exercices,x.epaules-rot,en,"Stand with your arms relaxed. Roll your shoulders in small circles, backward. Slowly, no forcing, and keep breathing.",0,7.2,audio/en/x.epaules-rot.mp3
+exercices,x.epaules-rot,pt,"Em pé, com os braços relaxados. Faça pequenos círculos com os ombros, para trás. Devagar, sem forçar, e continue respirando.",0,8.0,audio/pt/x.epaules-rot.mp3
+exercices,x.cou-rot,fr,"Laissez le menton descendre doucement. Dessinez un demi-cercle d'une épaule à l'autre, sans jamais pencher la tête en arrière.",0,7.6,audio/fr/x.cou-rot.mp3
+exercices,x.cou-rot,en,"Let your chin drop gently. Draw a half circle from one shoulder to the other, and never tip your head back.",0,8.4,audio/en/x.cou-rot.mp3
+exercices,x.cou-rot,pt,"Deixe o queixo descer suavemente. Desenhe um meio círculo de um ombro ao outro, sem nunca inclinar a cabeça para trás.",0,8.4,audio/pt/x.cou-rot.mp3
+exercices,x.cercles,fr,"Faites tourner doucement les poignets, puis les chevilles, dans un sens puis dans l'autre. Petits cercles réguliers.",0,6.8,audio/fr/x.cercles.mp3
+exercices,x.cercles,en,"Gently rotate your wrists, then your ankles, one way and then the other. Small, steady circles.",0,6.4,audio/en/x.cercles.mp3
+exercices,x.cercles,pt,"Gire suavemente os punhos e depois os tornozelos, para um lado e para o outro. Círculos pequenos e regulares.",0,7.6,audio/pt/x.cercles.mp3
+exercices,x.balancement,fr,"Debout, laissez vos bras se balancer d'avant en arrière, comme un pendule. Détendez les épaules et respirez.",0,6.8,audio/fr/x.balancement.mp3
+exercices,x.balancement,en,"Standing, let your arms swing forward and back like a pendulum. Relax your shoulders and breathe.",0,6.4,audio/en/x.balancement.mp3
+exercices,x.balancement,pt,"Em pé, deixe os braços balançarem para a frente e para trás, como um pêndulo. Relaxe os ombros e respire.",0,8.0,audio/pt/x.balancement.mp3
+exercices,x.squat,fr,"Asseyez-vous sur la chaise en reculant les hanches, puis levez-vous en poussant dans les talons. Descendez en deux secondes, remontez en deux secondes.",0,9.2,audio/fr/x.squat.mp3
+exercices,x.squat,en,"Sit back onto the chair by sending your hips behind you, then stand up by pushing through your heels. Two seconds down, two seconds up.",0,10.0,audio/en/x.squat.mp3
+exercices,x.squat,pt,"Sente na cadeira levando o quadril para trás e levante-se empurrando pelos calcanhares. Dois segundos para descer, dois para subir.",0,8.0,audio/pt/x.squat.mp3
+exercices,x.pont,fr,"Allongé, genoux pliés. Soulevez le bassin en serrant les fessiers, tenez une seconde, puis redescendez lentement. Expirez en montant.",0,7.6,audio/fr/x.pont.mp3
+exercices,x.pont,en,"Lie on your back, knees bent. Lift your hips while squeezing your glutes, hold one second, then lower slowly. Breathe out as you rise.",0,9.6,audio/en/x.pont.mp3
+exercices,x.pont,pt,"Deitado de costas, joelhos dobrados. Eleve o quadril contraindo os glúteos, segure um segundo e desça devagar. Solte o ar ao subir.",0,8.8,audio/pt/x.pont.mp3
+exercices,x.levee-jambe,fr,"Allongé sur le dos, une jambe pliée. Levez l'autre jambe tendue à hauteur du genou plié, puis redescendez lentement. Dos bien posé.",0,8.8,audio/fr/x.levee-jambe.mp3
+exercices,x.levee-jambe,en,"Lie on your back with one leg bent. Lift the other, straight leg up to the height of the bent knee, then lower it slowly. Keep your back flat.",0,11.6,audio/en/x.levee-jambe.mp3
+exercices,x.levee-jambe,pt,"Deitado de costas, com uma perna dobrada. Levante a outra perna esticada até a altura do joelho dobrado e desça devagar. Mantenha as costas apoiadas.",0,10.0,audio/pt/x.levee-jambe.mp3
+exercices,x.ext-jambe,fr,"Assis, dos droit. Tendez une jambe jusqu'à l'horizontale, tenez deux secondes, puis reposez le pied. Changez de côté à la fin de la série.",0,9.6,audio/fr/x.ext-jambe.mp3
+exercices,x.ext-jambe,en,"Sit tall. Straighten one leg to horizontal, hold two seconds, then lower the foot. Switch sides at the end of the set.",0,8.8,audio/en/x.ext-jambe.mp3
+exercices,x.ext-jambe,pt,"Sentado, com as costas retas. Estique uma perna até a horizontal, segure dois segundos e abaixe o pé. Troque de lado no fim da série.",0,10.0,audio/pt/x.ext-jambe.mp3
+exercices,x.fente,fr,"Une main sur la chaise. Reculez un pied, fléchissez doucement les deux genoux, puis revenez. Petit mouvement, sans forcer.",0,7.6,audio/fr/x.fente.mp3
+exercices,x.fente,en,"One hand on the chair. Step one foot back, bend both knees gently, then come back. Small movement, no forcing.",0,8.0,audio/en/x.fente.mp3
+exercices,x.fente,pt,"Uma mão na cadeira. Leve um pé para trás, dobre os dois joelhos com suavidade e volte. Movimento pequeno, sem forçar.",0,8.4,audio/pt/x.fente.mp3
+exercices,x.pointes,fr,"Une main sur la chaise. Montez sur la pointe des pieds, tenez une seconde, puis redescendez lentement.",0,6.8,audio/fr/x.pointes.mp3
+exercices,x.pointes,en,"One hand on the chair. Rise onto your toes, hold one second, then lower slowly.",0,6.0,audio/en/x.pointes.mp3
+exercices,x.pointes,pt,"Uma mão na cadeira. Suba na ponta dos pés, segure um segundo e desça devagar.",0,6.0,audio/pt/x.pointes.mp3
+exercices,x.talon-pointe,fr,"Marchez en plaçant le talon d'un pied juste devant la pointe de l'autre, comme sur une ligne. Regard devant, un doigt sur le mur si besoin.",0,10.4,audio/fr/x.talon-pointe.mp3
+exercices,x.talon-pointe,en,"Walk by placing the heel of one foot right in front of the toes of the other, as if on a line. Eyes ahead, fingertips on the wall if you need.",0,12.4,audio/en/x.talon-pointe.mp3
+exercices,x.talon-pointe,pt,"Caminhe colocando o calcanhar de um pé logo à frente da ponta do outro, como em uma linha. Olhe para a frente e apoie os dedos na parede se precisar.",0,12.0,audio/pt/x.talon-pointe.mp3
+exercices,x.pompes-mur,fr,"Face au mur, mains à hauteur d'épaules. Fléchissez les coudes pour approcher la poitrine, puis repoussez. Gardez le corps bien droit.",0,8.4,audio/fr/x.pompes-mur.mp3
+exercices,x.pompes-mur,en,"Face the wall, hands at shoulder height. Bend your elbows to bring your chest closer, then push back. Keep your body in one straight line.",0,10.0,audio/en/x.pompes-mur.mp3
+exercices,x.pompes-mur,pt,"De frente para a parede, com as mãos na altura dos ombros. Dobre os cotovelos para aproximar o peito e empurre de volta. Mantenha o corpo em linha reta.",0,11.6,audio/pt/x.pompes-mur.mp3
+exercices,x.rowing,fr,"Assis, élastique tendu devant vous. Tirez les coudes vers l'arrière en rapprochant les omoplates, puis revenez lentement. Épaules basses.",0,7.6,audio/fr/x.rowing.mp3
+exercices,x.rowing,en,"Sit tall with the band stretched in front of you. Pull your elbows back, squeezing your shoulder blades together, then return slowly. Keep your shoulders down.",0,10.4,audio/en/x.rowing.mp3
+exercices,x.rowing,pt,"Sentado, com o elástico esticado à sua frente. Puxe os cotovelos para trás aproximando as escápulas e volte devagar. Mantenha os ombros baixos.",0,9.2,audio/pt/x.rowing.mp3
+exercices,x.developpe,fr,"Assis, élastique sous les pieds. Poussez les mains vers le haut sans cambrer le dos, puis redescendez lentement.",0,7.2,audio/fr/x.developpe.mp3
+exercices,x.developpe,en,"Sit tall with the band under your feet. Press your hands upward without arching your back, then lower slowly.",0,7.6,audio/en/x.developpe.mp3
+exercices,x.developpe,pt,"Sentado, com o elástico sob os pés. Empurre as mãos para cima sem arquear as costas e desça devagar.",0,7.6,audio/pt/x.developpe.mp3
+exercices,x.elevations,fr,"Bras le long du corps. Levez-les sur les côtés jusqu'à hauteur d'épaules, puis redescendez lentement. Pas plus haut.",0,7.2,audio/fr/x.elevations.mp3
+exercices,x.elevations,en,"Arms at your sides. Raise them out to shoulder height, then lower slowly. No higher.",0,6.0,audio/en/x.elevations.mp3
+exercices,x.elevations,pt,Braços ao lado do corpo. Levante-os para os lados até a altura dos ombros e desça devagar. Sem passar disso.,0,8.0,audio/pt/x.elevations.mp3
+exercices,x.flexion-bras,fr,"Coudes près du corps. Pliez les bras pour amener les mains vers les épaules, puis redescendez lentement. Poignets droits.",0,7.6,audio/fr/x.flexion-bras.mp3
+exercices,x.flexion-bras,en,"Elbows close to your body. Bend your arms to bring your hands toward your shoulders, then lower slowly. Keep your wrists straight.",0,8.8,audio/en/x.flexion-bras.mp3
+exercices,x.flexion-bras,pt,Cotovelos junto ao corpo. Dobre os braços levando as mãos aos ombros e desça devagar. Punhos retos.,0,6.8,audio/pt/x.flexion-bras.mp3
+exercices,x.dead-bug,fr,"Dos au sol, bras vers le plafond, genoux à angle droit. Allongez lentement un bras et la jambe opposée, sans décoller le bas du dos.",0,10.0,audio/fr/x.dead-bug.mp3
+exercices,x.dead-bug,en,"Lie on your back, arms up, knees bent at a right angle. Slowly extend one arm and the opposite leg, keeping your lower back on the floor.",0,10.8,audio/en/x.dead-bug.mp3
+exercices,x.dead-bug,pt,"Deitado de costas, braços para cima e joelhos a 90 graus. Estenda devagar um braço e a perna oposta, sem descolar a lombar do chão.",0,10.0,audio/pt/x.dead-bug.mp3
+exercices,x.bascule,fr,"Allongé, genoux pliés. Aplatissez le bas du dos contre le sol en basculant le bassin, tenez deux secondes, puis relâchez. Respirez calmement.",0,8.8,audio/fr/x.bascule.mp3
+exercices,x.bascule,en,"Lie on your back, knees bent. Flatten your lower back to the floor by tilting your pelvis, hold two seconds, then release. Keep breathing calmly.",0,10.0,audio/en/x.bascule.mp3
+exercices,x.bascule,pt,"Deitado, joelhos dobrados. Encoste a lombar no chão inclinando a pelve, segure dois segundos e solte. Respire com calma.",0,7.6,audio/pt/x.bascule.mp3
+exercices,x.gainage,fr,"Sur les genoux et les avant-bras, corps aligné de la tête aux genoux. Serrez le ventre, respirez, et arrêtez dès que le dos se creuse.",0,10.0,audio/fr/x.gainage.mp3
+exercices,x.gainage,en,"On your knees and forearms, body in one line from head to knees. Tighten your belly, keep breathing, and stop as soon as your back sags.",0,10.4,audio/en/x.gainage.mp3
+exercices,x.gainage,pt,"Apoiado nos joelhos e antebraços, corpo alinhado da cabeça aos joelhos. Contraia a barriga, respire e pare assim que a lombar ceder.",0,8.8,audio/pt/x.gainage.mp3
+exercices,x.bird-dog,fr,"À quatre pattes, dos plat. Tendez un bras et la jambe opposée, sans faire bouger le bassin. Revenez, puis changez de côté.",0,8.8,audio/fr/x.bird-dog.mp3
+exercices,x.bird-dog,en,"On all fours, back flat. Extend one arm and the opposite leg without letting your hips move. Come back, then switch sides.",0,8.8,audio/en/x.bird-dog.mp3
+exercices,x.bird-dog,pt,"Em quatro apoios, com as costas retas. Estenda um braço e a perna oposta sem mexer o quadril. Volte e troque de lado.",0,9.2,audio/pt/x.bird-dog.mp3
+exercices,x.rot-tronc,fr,"Assis, dos droit, bras croisés. Tournez doucement le haut du corps d'un côté, puis de l'autre. Les hanches restent de face.",0,8.4,audio/fr/x.rot-tronc.mp3
+exercices,x.rot-tronc,en,"Sit tall with your arms crossed. Gently turn your upper body to one side, then the other. Your hips stay facing forward.",0,8.8,audio/en/x.rot-tronc.mp3
+exercices,x.rot-tronc,pt,"Sentado, com as costas retas e os braços cruzados. Gire suavemente o tronco para um lado e depois para o outro. O quadril fica de frente.",0,10.4,audio/pt/x.rot-tronc.mp3
+exercices,x.une-jambe,fr,"Debout près de la chaise, une main posée dessus. Levez un pied et tenez dix secondes, regard devant. Changez de jambe.",0,8.4,audio/fr/x.une-jambe.mp3
+exercices,x.une-jambe,en,"Stand next to the chair with one hand on it. Lift one foot and hold ten seconds, eyes ahead. Then switch legs.",0,8.8,audio/en/x.une-jambe.mp3
+exercices,x.une-jambe,pt,"Em pé ao lado da cadeira, com uma mão apoiada nela. Levante um pé e segure dez segundos, olhando para a frente. Depois troque de perna.",0,10.4,audio/pt/x.une-jambe.mp3
+exercices,x.chat,fr,"À quatre pattes. Arrondissez le dos en expirant, puis creusez doucement en inspirant. Un mouvement lent, sans douleur.",0,7.2,audio/fr/x.chat.mp3
+exercices,x.chat,en,"On all fours. Round your back as you breathe out, then arch gently as you breathe in. Slow movement, no pain.",0,8.4,audio/en/x.chat.mp3
+exercices,x.chat,pt,"Em quatro apoios. Arredonde as costas ao soltar o ar e arqueie com suavidade ao inspirar. Movimento lento, sem dor.",0,8.0,audio/pt/x.chat.mp3
+exercices,x.hanches-etir,fr,"Un genou au sol, l'autre pied devant. Avancez doucement le bassin jusqu'à sentir l'étirement devant la hanche. Tenez, sans forcer.",0,8.0,audio/fr/x.hanches-etir.mp3
+exercices,x.hanches-etir,en,"One knee on the floor, the other foot in front. Gently shift your hips forward until you feel a stretch at the front of the hip. Hold, no forcing.",0,11.6,audio/en/x.hanches-etir.mp3
+exercices,x.hanches-etir,pt,"Um joelho no chão e o outro pé à frente. Leve o quadril devagar para a frente até sentir o alongamento na frente do quadril. Segure, sem forçar.",0,11.2,audio/pt/x.hanches-etir.mp3
+exercices,x.respiration,fr,"Allongé, genoux pliés, une main sur le ventre. Inspirez par le nez en gonflant le ventre, expirez lentement par la bouche.",0,8.4,audio/fr/x.respiration.mp3
+exercices,x.respiration,en,"Lie on your back, knees bent, one hand on your belly. Breathe in through your nose so your belly rises, then breathe out slowly through your mouth.",0,10.8,audio/en/x.respiration.mp3
+exercices,x.respiration,pt,"Deitado, joelhos dobrados e uma mão na barriga. Inspire pelo nariz enchendo a barriga e solte o ar devagar pela boca.",0,8.4,audio/pt/x.respiration.mp3
+exercices,x.mollets,fr,"Face au mur, un pied en arrière, talon au sol. Penchez-vous vers le mur jusqu'à sentir l'étirement du mollet. Tenez trente secondes.",0,8.8,audio/fr/x.mollets.mp3
+exercices,x.mollets,en,"Face the wall with one foot back, heel on the floor. Lean toward the wall until you feel your calf stretch. Hold thirty seconds.",0,9.6,audio/en/x.mollets.mp3
+exercices,x.mollets,pt,"De frente para a parede, com um pé atrás e o calcanhar no chão. Incline-se para a parede até sentir o alongamento da panturrilha. Segure trinta segundos.",0,10.8,audio/pt/x.mollets.mp3
+exercices,x.pectoraux,fr,"Dans l'encadrement d'une porte, avant-bras posés sur les montants. Avancez un peu le torse jusqu'à sentir l'étirement devant les épaules. Tenez, sans forcer.",0,9.2,audio/fr/x.pectoraux.mp3
+exercices,x.pectoraux,en,"In a doorway, forearms resting on the frame. Lean forward until you feel a stretch across the front of your shoulders. Hold, no forcing.",0,9.6,audio/en/x.pectoraux.mp3
+exercices,x.pectoraux,pt,"Na porta, com os antebraços apoiados nos batentes. Incline o tronco até sentir o alongamento na frente dos ombros. Segure, sem forçar.",0,8.8,audio/pt/x.pectoraux.mp3
+bienetre,w.respiration.01,fr,"Installez-vous confortablement, assis ou allongé. Fermez les yeux si vous le souhaitez.",4,8.8,audio/fr/w.respiration.01.mp3
+bienetre,w.respiration.01,en,"Settle in comfortably, sitting or lying down. Close your eyes if you like.",4,9.2,audio/en/w.respiration.01.mp3
+bienetre,w.respiration.01,pt,"Acomode-se bem, sentado ou deitado. Feche os olhos, se quiser.",4,8.0,audio/pt/w.respiration.01.mp3
+bienetre,w.respiration.02,fr,Posez une main sur le ventre. Nous allons respirer lentement.,3,7.0,audio/fr/w.respiration.02.mp3
+bienetre,w.respiration.02,en,Rest one hand on your belly. We're going to breathe slowly.,3,7.4,audio/en/w.respiration.02.mp3
+bienetre,w.respiration.02,pt,Apoie uma mão na barriga. Vamos respirar devagar.,3,6.2,audio/pt/w.respiration.02.mp3
+bienetre,w.respiration.03,fr,"Inspirez par le nez, doucement, en comptant jusqu'à quatre. Un, deux, trois, quatre.",1,6.2,audio/fr/w.respiration.03.mp3
+bienetre,w.respiration.03,en,"Breathe in through your nose, gently, counting to four. One, two, three, four.",1,6.2,audio/en/w.respiration.03.mp3
+bienetre,w.respiration.03,pt,"Inspire pelo nariz, com suavidade, contando até quatro. Um, dois, três, quatro.",1,5.8,audio/pt/w.respiration.03.mp3
+bienetre,w.respiration.04,fr,"Expirez lentement par la bouche, en comptant jusqu'à six. Un, deux, trois, quatre, cinq, six.",3,9.0,audio/fr/w.respiration.04.mp3
+bienetre,w.respiration.04,en,"Breathe out slowly through your mouth, counting to six. One, two, three, four, five, six.",3,9.0,audio/en/w.respiration.04.mp3
+bienetre,w.respiration.04,pt,"Solte o ar devagar pela boca, contando até seis. Um, dois, três, quatro, cinco, seis.",3,9.0,audio/pt/w.respiration.04.mp3
+bienetre,w.respiration.05,fr,"Recommencez à votre rythme. Le ventre se gonfle, puis se vide.",20,24.4,audio/fr/w.respiration.05.mp3
+bienetre,w.respiration.05,en,"Continue at your own pace. Your belly fills, then empties.",20,24.0,audio/en/w.respiration.05.mp3
+bienetre,w.respiration.05,pt,Continue no seu ritmo. A barriga enche e depois esvazia.,20,24.0,audio/pt/w.respiration.05.mp3
+bienetre,w.respiration.06,fr,"Si vous sentez un vertige, reprenez une respiration normale.",2,5.6,audio/fr/w.respiration.06.mp3
+bienetre,w.respiration.06,en,"If you feel dizzy, go back to normal breathing.",2,5.6,audio/en/w.respiration.06.mp3
+bienetre,w.respiration.06,pt,"Se sentir tontura, volte a respirar normalmente.",2,4.8,audio/pt/w.respiration.06.mp3
+bienetre,w.respiration.07,fr,Laissez les épaules tomber. La mâchoire se détend.,15,18.2,audio/fr/w.respiration.07.mp3
+bienetre,w.respiration.07,en,Let your shoulders drop. Your jaw softens.,15,17.8,audio/en/w.respiration.07.mp3
+bienetre,w.respiration.07,pt,Deixe os ombros caírem. A mandíbula relaxa.,15,17.8,audio/pt/w.respiration.07.mp3
+bienetre,w.respiration.08,fr,Encore trois respirations. Inspirez… et expirez.,12,14.4,audio/fr/w.respiration.08.mp3
+bienetre,w.respiration.08,en,Three more breaths. Breathe in… and breathe out.,12,15.2,audio/en/w.respiration.08.mp3
+bienetre,w.respiration.08,pt,Mais três respirações. Inspire… e solte o ar.,12,15.2,audio/pt/w.respiration.08.mp3
+bienetre,w.respiration.09,fr,"Doucement, reprenez une respiration naturelle. Bougez les doigts et les orteils. Quand vous êtes prêt, ouvrez les yeux.",0,7.2,audio/fr/w.respiration.09.mp3
+bienetre,w.respiration.09,en,"Gently return to natural breathing. Wiggle your fingers and toes. When you're ready, open your eyes.",0,6.4,audio/en/w.respiration.09.mp3
+bienetre,w.respiration.09,pt,"Aos poucos, volte à respiração natural. Mexa os dedos das mãos e dos pés. Quando estiver pronto, abra os olhos.",0,8.0,audio/pt/w.respiration.09.mp3
+bienetre,w.soir.01,fr,Allongez-vous confortablement. Laissez le lit ou le tapis vous porter.,4,8.0,audio/fr/w.soir.01.mp3
+bienetre,w.soir.01,en,Lie down comfortably. Let the bed or the mat hold you.,4,8.4,audio/en/w.soir.01.mp3
+bienetre,w.soir.01,pt,Deite-se confortavelmente. Deixe a cama ou o tapete sustentar você.,4,8.0,audio/pt/w.soir.01.mp3
+bienetre,w.soir.02,fr,"Prenez une grande inspiration, et soufflez longuement.",5,7.8,audio/fr/w.soir.02.mp3
+bienetre,w.soir.02,en,"Take a big breath in, and let it out for a long time.",5,10.2,audio/en/w.soir.02.mp3
+bienetre,w.soir.02,pt,Respire fundo e solte o ar longamente.,5,7.8,audio/pt/w.soir.02.mp3
+bienetre,w.soir.03,fr,Portez votre attention sur vos pieds. Laissez-les devenir lourds et chauds.,8,12.4,audio/fr/w.soir.03.mp3
+bienetre,w.soir.03,en,Bring your attention to your feet. Let them become heavy and warm.,8,12.8,audio/en/w.soir.03.mp3
+bienetre,w.soir.03,pt,Leve a atenção aos pés. Deixe-os ficarem pesados e quentes.,8,12.0,audio/pt/w.soir.03.mp3
+bienetre,w.soir.04,fr,"Remontez vers les jambes, les genoux. Relâchez, sans rien faire.",8,12.0,audio/fr/w.soir.04.mp3
+bienetre,w.soir.04,en,"Move up to your legs and knees. Let go, without doing anything.",8,12.8,audio/en/w.soir.04.mp3
+bienetre,w.soir.04,pt,"Suba para as pernas e os joelhos. Solte, sem fazer nada.",8,12.4,audio/pt/w.soir.04.mp3
+bienetre,w.soir.05,fr,"Les hanches, le bas du dos. Laissez le poids s'enfoncer dans le sol.",8,13.2,audio/fr/w.soir.05.mp3
+bienetre,w.soir.05,en,"Your hips, your lower back. Let the weight sink into the floor.",8,12.8,audio/en/w.soir.05.mp3
+bienetre,w.soir.05,pt,"O quadril, a lombar. Deixe o peso afundar no chão.",8,12.0,audio/pt/w.soir.05.mp3
+bienetre,w.soir.06,fr,Le ventre monte et descend au rythme de votre souffle.,10,14.0,audio/fr/w.soir.06.mp3
+bienetre,w.soir.06,en,Your belly rises and falls with your breath.,10,13.2,audio/en/w.soir.06.mp3
+bienetre,w.soir.06,pt,A barriga sobe e desce no ritmo da sua respiração.,10,14.0,audio/pt/w.soir.06.mp3
+bienetre,w.soir.07,fr,"Les épaules, les bras, jusqu'au bout des doigts. Tout se détend.",8,12.4,audio/fr/w.soir.07.mp3
+bienetre,w.soir.07,en,"Your shoulders, your arms, all the way to your fingertips. Everything softens.",8,12.8,audio/en/w.soir.07.mp3
+bienetre,w.soir.07,pt,"Os ombros, os braços, até a ponta dos dedos. Tudo relaxa.",8,12.4,audio/pt/w.soir.07.mp3
+bienetre,w.soir.08,fr,"Le cou, la mâchoire, le front. Laissez le visage devenir doux.",10,14.4,audio/fr/w.soir.08.mp3
+bienetre,w.soir.08,en,"Your neck, your jaw, your forehead. Let your face go soft.",10,14.4,audio/en/w.soir.08.mp3
+bienetre,w.soir.08,pt,"O pescoço, a mandíbula, a testa. Deixe o rosto ficar macio.",10,14.4,audio/pt/w.soir.08.mp3
+bienetre,w.soir.09,fr,"Restez ici quelques respirations. Si des pensées arrivent, laissez-les passer.",20,24.0,audio/fr/w.soir.09.mp3
+bienetre,w.soir.09,en,"Stay here for a few breaths. If thoughts come, let them pass.",20,24.8,audio/en/w.soir.09.mp3
+bienetre,w.soir.09,pt,"Fique aqui por algumas respirações. Se pensamentos surgirem, deixe-os passar.",20,24.0,audio/pt/w.soir.09.mp3
+bienetre,w.soir.10,fr,"Quand vous le souhaitez, bougez doucement les doigts et les pieds. Vous pouvez rester allongé ou vous endormir.",0,7.2,audio/fr/w.soir.10.mp3
+bienetre,w.soir.10,en,"Whenever you like, gently move your fingers and feet. You can stay lying down, or drift off to sleep.",0,7.6,audio/en/w.soir.10.mp3
+bienetre,w.soir.10,pt,"Quando quiser, mexa devagar os dedos das mãos e dos pés. Você pode continuar deitado ou adormecer.",0,6.8,audio/pt/w.soir.10.mp3
+bienetre,w.reveil.01,fr,"Bonjour. Avant de vous lever, restez allongé un instant et prenez trois grandes respirations.",10,15.6,audio/fr/w.reveil.01.mp3
+bienetre,w.reveil.01,en,"Good morning. Before you get up, stay lying down for a moment and take three deep breaths.",10,16.8,audio/en/w.reveil.01.mp3
+bienetre,w.reveil.01,pt,"Bom dia. Antes de levantar, fique deitado um instante e respire fundo três vezes.",10,15.6,audio/pt/w.reveil.01.mp3
+bienetre,w.reveil.02,fr,"Étirez les bras au-dessus de la tête et les jambes vers le bas, comme pour vous allonger. Tenez, puis relâchez.",6,14.0,audio/fr/w.reveil.02.mp3
+bienetre,w.reveil.02,en,"Stretch your arms overhead and your legs downward, as if lengthening yourself. Hold, then release.",6,12.0,audio/en/w.reveil.02.mp3
+bienetre,w.reveil.02,pt,"Estique os braços acima da cabeça e as pernas para baixo, como se quisesse se alongar. Segure e depois solte.",6,14.0,audio/pt/w.reveil.02.mp3
+bienetre,w.reveil.03,fr,"Ramenez les genoux vers la poitrine, doucement, et faites quelques petits balancements.",8,12.8,audio/fr/w.reveil.03.mp3
+bienetre,w.reveil.03,en,"Bring your knees toward your chest, gently, and rock a little from side to side.",8,14.0,audio/en/w.reveil.03.mp3
+bienetre,w.reveil.03,pt,"Leve os joelhos em direção ao peito, com suavidade, e balance um pouco de um lado para o outro.",8,15.6,audio/pt/w.reveil.03.mp3
+bienetre,w.reveil.04,fr,"Asseyez-vous au bord du lit, pieds au sol. Faites rouler les épaules vers l'arrière, trois fois.",8,14.4,audio/fr/w.reveil.04.mp3
+bienetre,w.reveil.04,en,"Sit on the edge of the bed, feet on the floor. Roll your shoulders backward, three times.",8,14.8,audio/en/w.reveil.04.mp3
+bienetre,w.reveil.04,pt,"Sente-se na beira da cama, com os pés no chão. Gire os ombros para trás, três vezes.",8,14.8,audio/pt/w.reveil.04.mp3
+bienetre,w.reveil.05,fr,"Tournez doucement la tête à droite, puis à gauche, sans forcer.",8,12.4,audio/fr/w.reveil.05.mp3
+bienetre,w.reveil.05,en,"Gently turn your head to the right, then to the left, without forcing.",8,13.2,audio/en/w.reveil.05.mp3
+bienetre,w.reveil.05,pt,"Gire a cabeça devagar para a direita e depois para a esquerda, sem forçar.",8,13.6,audio/pt/w.reveil.05.mp3
+bienetre,w.reveil.06,fr,"Levez-vous lentement, en vous appuyant si besoin. Vous êtes prêt pour la journée.",0,5.2,audio/fr/w.reveil.06.mp3
+bienetre,w.reveil.06,en,"Stand up slowly, using support if you need it. You're ready for the day.",0,5.6,audio/en/w.reveil.06.mp3
+bienetre,w.reveil.06,pt,"Levante-se devagar, apoiando-se se precisar. Você está pronto para o dia.",0,4.4,audio/pt/w.reveil.06.mp3
+bienetre,w.bureau.01,fr,"Pause. Asseyez-vous au bord de la chaise, les pieds à plat.",3,7.4,audio/fr/w.bureau.01.mp3
+bienetre,w.bureau.01,en,"Break time. Sit at the edge of your chair, feet flat.",3,7.4,audio/en/w.bureau.01.mp3
+bienetre,w.bureau.01,pt,"Hora da pausa. Sente-se na beira da cadeira, com os pés apoiados no chão.",3,8.6,audio/pt/w.bureau.01.mp3
+bienetre,w.bureau.02,fr,"Faites rouler vos épaules vers l'arrière, dix fois, lentement.",8,11.6,audio/fr/w.bureau.02.mp3
+bienetre,w.bureau.02,en,"Roll your shoulders backward, ten times, slowly.",8,10.8,audio/en/w.bureau.02.mp3
+bienetre,w.bureau.02,pt,"Gire os ombros para trás, dez vezes, devagar.",8,11.2,audio/pt/w.bureau.02.mp3
+bienetre,w.bureau.03,fr,Penchez doucement l'oreille vers l'épaule droite. Tenez dix secondes. Puis à gauche.,12,16.8,audio/fr/w.bureau.03.mp3
+bienetre,w.bureau.03,en,Gently tilt your ear toward your right shoulder. Hold ten seconds. Then the left.,12,17.6,audio/en/w.bureau.03.mp3
+bienetre,w.bureau.03,pt,"Incline suavemente a orelha em direção ao ombro direito. Segure dez segundos. Depois, o esquerdo.",12,18.0,audio/pt/w.bureau.03.mp3
+bienetre,w.bureau.04,fr,"Étirez un bras devant vous, paume vers le haut, et tirez doucement les doigts vers le bas. Changez de côté.",12,20.0,audio/fr/w.bureau.04.mp3
+bienetre,w.bureau.04,en,"Stretch one arm in front of you, palm up, and gently pull your fingers downward. Switch sides.",12,18.8,audio/en/w.bureau.04.mp3
+bienetre,w.bureau.04,pt,"Estique um braço à frente, com a palma para cima, e puxe os dedos suavemente para baixo. Troque de lado.",12,20.0,audio/pt/w.bureau.04.mp3
+bienetre,w.bureau.05,fr,Joignez les mains derrière le dos et ouvrez la poitrine. Respirez.,10,14.4,audio/fr/w.bureau.05.mp3
+bienetre,w.bureau.05,en,Clasp your hands behind your back and open your chest. Breathe.,10,14.4,audio/en/w.bureau.05.mp3
+bienetre,w.bureau.05,pt,Una as mãos atrás das costas e abra o peito. Respire.,10,14.4,audio/pt/w.bureau.05.mp3
+bienetre,w.bureau.06,fr,"Levez-vous, marchez trente secondes, et buvez un verre d'eau.",0,3.6,audio/fr/w.bureau.06.mp3
+bienetre,w.bureau.06,en,"Stand up, walk for thirty seconds, and drink a glass of water.",0,4.8,audio/en/w.bureau.06.mp3
+bienetre,w.bureau.06,pt,"Levante-se, caminhe por trinta segundos e beba um copo de água.",0,4.4,audio/pt/w.bureau.06.mp3
+motiv-4,o.welcome,fr,"Bienvenue dans Second Souffle. Je suis Léo, votre guide virtuel. Je vous pose trois questions, et votre première séance est prête.",0,8.4,audio/fr/o.welcome.mp3
+motiv-4,o.welcome,en,"Welcome to Second Wind. I'm Léo, your virtual guide. Three questions, and your first session is ready.",0,6.8,audio/en/o.welcome.mp3
+motiv-4,o.welcome,pt,"Bem-vindo ao Segundo Fôlego. Eu sou o Léo, seu guia virtual. Três perguntas e sua primeira sessão está pronta.",0,7.6,audio/pt/o.welcome.mp3
+motiv-4,o.zones,fr,Touchez les zones qui vous tirent. Je les éviterai dans vos séances.,0,4.8,audio/fr/o.zones.mp3
+motiv-4,o.zones,en,Tap the areas that pull. I'll steer your sessions around them.,0,4.4,audio/en/o.zones.mp3
+motiv-4,o.zones,pt,Toque nas áreas que incomodam. Vou evitá-las nas suas sessões.,0,4.0,audio/pt/o.zones.mp3
+motiv-4,o.ready,fr,Votre séance est prête. Elle est adaptée à vous.,0,3.6,audio/fr/o.ready.mp3
+motiv-4,o.ready,en,Your session is ready. It's tailored to you.,0,3.2,audio/en/o.ready.mp3
+motiv-4,o.ready,pt,Sua sessão está pronta. Ela foi adaptada a você.,0,3.6,audio/pt/o.ready.mp3
+motiv-5,m.1,fr,"Bonjour. Aujourd'hui, pas besoin d'être parfait. Dix minutes suffisent.",0,3.6,audio/fr/m.1.mp3
+motiv-5,m.1,en,Good morning. Today you don't have to be perfect. Ten minutes is enough.,0,5.2,audio/en/m.1.mp3
+motiv-5,m.1,pt,Bom dia. Hoje você não precisa ser perfeito. Dez minutos bastam.,0,4.4,audio/pt/m.1.mp3
+motiv-5,m.2,fr,Votre corps vous remercie à chaque mouvement. On y va doucement ?,0,4.8,audio/fr/m.2.mp3
+motiv-5,m.2,en,Your body thanks you with every movement. Shall we start gently?,0,4.4,audio/en/m.2.mp3
+motiv-5,m.2,pt,Seu corpo agradece a cada movimento. Vamos começar com calma?,0,4.0,audio/pt/m.2.mp3
+motiv-5,m.3,fr,"Le plus dur, c'est de commencer. Vous êtes déjà là.",0,4.0,audio/fr/m.3.mp3
+motiv-5,m.3,en,The hardest part is starting. You're already here.,0,3.2,audio/en/m.3.mp3
+motiv-5,m.3,pt,O mais difícil é começar. Você já está aqui.,0,3.6,audio/pt/m.3.mp3
+motiv-5,m.4,fr,Une petite séance vaut mieux qu'aucune. Faisons-en une ensemble.,0,3.6,audio/fr/m.4.mp3
+motiv-5,m.4,en,A short session beats none. Let's do one together.,0,3.6,audio/en/m.4.mp3
+motiv-5,m.4,pt,Uma sessão curta vale mais do que nenhuma. Vamos fazer uma juntos.,0,4.8,audio/pt/m.4.mp3
+motiv-5,m.5,fr,"La lumière monte. Prenez votre temps, et commençons.",0,3.2,audio/fr/m.5.mp3
+motiv-5,m.5,en,"The light is rising. Take your time, and let's begin.",0,4.0,audio/en/m.5.mp3
+motiv-5,m.5,pt,A luz está subindo. Tome seu tempo e vamos começar.,0,4.0,audio/pt/m.5.mp3
+motiv-5,m.6,fr,"Chaque séance est une victoire, même petite.",0,2.8,audio/fr/m.6.mp3
+motiv-5,m.6,en,"Every session is a win, even a small one.",0,3.6,audio/en/m.6.mp3
+motiv-5,m.6,pt,"Cada sessão é uma vitória, mesmo pequena.",0,2.8,audio/pt/m.6.mp3
+motiv-5,m.7,fr,Écoutez votre corps aujourd'hui. Je m'occupe du reste.,0,3.2,audio/fr/m.7.mp3
+motiv-5,m.7,en,Listen to your body today. I'll take care of the rest.,0,4.4,audio/en/m.7.mp3
+motiv-5,m.7,pt,Escute seu corpo hoje. Eu cuido do resto.,0,3.2,audio/pt/m.7.mp3
+motiv-6,r.1,fr,"Un jour de repos choisi, c'est un jour de progrès. Votre corps récupère.",0,5.2,audio/fr/r.1.mp3
+motiv-6,r.1,en,A chosen rest day is a day of progress. Your body is recovering.,0,5.2,audio/en/r.1.mp3
+motiv-6,r.1,pt,Um dia de descanso escolhido é um dia de progresso. Seu corpo está se recuperando.,0,6.0,audio/pt/r.1.mp3
+motiv-6,r.2,fr,"Pas la forme aujourd'hui ? C'est normal. Reposez-vous, on se retrouve demain.",0,4.8,audio/fr/r.2.mp3
+motiv-6,r.2,en,"Not feeling it today? That's normal. Rest up, see you tomorrow.",0,4.4,audio/en/r.2.mp3
+motiv-6,r.2,pt,"Sem energia hoje? É normal. Descanse, nos vemos amanhã.",0,3.6,audio/pt/r.2.mp3
+motiv-6,r.3,fr,Votre semaine reste lumineuse. Le repos fait partie du programme.,0,4.0,audio/fr/r.3.mp3
+motiv-6,r.3,en,Your week stays bright. Rest is part of the plan.,0,4.0,audio/en/r.3.mp3
+motiv-6,r.3,pt,Sua semana continua luminosa. O descanso faz parte do programa.,0,4.0,audio/pt/r.3.mp3
+motiv-6,r.4,fr,"Si vous voulez bouger un peu, une marche lente de cinq minutes suffit.",0,5.2,audio/fr/r.4.mp3
+motiv-6,r.4,en,"If you'd like to move a little, a slow five-minute walk is enough.",0,5.2,audio/en/r.4.mp3
+motiv-6,r.4,pt,"Se quiser se mexer um pouco, uma caminhada lenta de cinco minutos basta.",0,5.2,audio/pt/r.4.mp3
+motiv-7,e.1,fr,Très bien. Continuez à votre rythme.,0,2.4,audio/fr/e.1.mp3
+motiv-7,e.1,en,Very good. Keep going at your own pace.,0,3.2,audio/en/e.1.mp3
+motiv-7,e.1,pt,Muito bem. Continue no seu ritmo.,0,2.4,audio/pt/e.1.mp3
+motiv-7,e.2,fr,"Respirez, vous êtes en train de le faire.",0,3.2,audio/fr/e.2.mp3
+motiv-7,e.2,en,"Breathe, you're doing it.",0,1.6,audio/en/e.2.mp3
+motiv-7,e.2,pt,"Respire, você está conseguindo.",0,1.6,audio/pt/e.2.mp3
+motiv-7,e.3,fr,Beau mouvement. Gardez cette précision.,0,2.0,audio/fr/e.3.mp3
+motiv-7,e.3,en,Nice movement. Keep that control.,0,2.0,audio/en/e.3.mp3
+motiv-7,e.3,pt,Belo movimento. Mantenha esse controle.,0,2.0,audio/pt/e.3.mp3
+motiv-7,e.4,fr,Encore quelques secondes. Vous pouvez le faire.,0,2.8,audio/fr/e.4.mp3
+motiv-7,e.4,en,A few more seconds. You can do this.,0,3.2,audio/en/e.4.mp3
+motiv-7,e.4,pt,Mais alguns segundos. Você consegue.,0,2.0,audio/pt/e.4.mp3
+motiv-7,e.5,fr,"C'est la qualité qui compte, pas la vitesse.",0,3.2,audio/fr/e.5.mp3
+motiv-7,e.5,en,"Quality matters, not speed.",0,1.6,audio/en/e.5.mp3
+motiv-7,e.5,pt,"O que importa é a qualidade, não a velocidade.",0,3.6,audio/pt/e.5.mp3
+motiv-7,e.6,fr,"Si c'est trop, faites plus petit. Votre corps décide.",0,3.6,audio/fr/e.6.mp3
+motiv-7,e.6,en,"If it's too much, make it smaller. Your body decides.",0,4.0,audio/en/e.6.mp3
+motiv-7,e.6,pt,"Se estiver demais, faça menor. Seu corpo decide.",0,3.2,audio/pt/e.6.mp3
+motiv-8,p.hard,fr,"Merci de me le dire. Demain, on baisse d'un cran.",0,4.0,audio/fr/p.hard.mp3
+motiv-8,p.hard,en,"Thanks for telling me. Tomorrow, we'll dial it down a notch.",0,4.4,audio/en/p.hard.mp3
+motiv-8,p.hard,pt,"Obrigado por me dizer. Amanhã, vamos aliviar um pouco.",0,3.6,audio/pt/p.hard.mp3
+motiv-8,p.ok,fr,Parfait. On garde ce rythme et on ajoute un mouvement nouveau demain.,0,4.8,audio/fr/p.ok.mp3
+motiv-8,p.ok,en,Perfect. We keep this pace and add one new movement tomorrow.,0,4.4,audio/en/p.ok.mp3
+motiv-8,p.ok,pt,Perfeito. Mantemos esse ritmo e adicionamos um movimento novo amanhã.,0,4.0,audio/pt/p.ok.mp3
+motiv-8,p.easy,fr,"Super. Demain, on monte d'un cran, doucement.",0,2.8,audio/fr/p.easy.mp3
+motiv-8,p.easy,en,"Great. Tomorrow we step it up a notch, gently.",0,3.6,audio/en/p.easy.mp3
+motiv-8,p.easy,pt,"Ótimo. Amanhã subimos um pouco o nível, com calma.",0,3.6,audio/pt/p.easy.mp3
+motiv-8,p.bravo,fr,Bravo. Vous venez de faire quelque chose de bon pour vous.,0,4.4,audio/fr/p.bravo.mp3
+motiv-8,p.bravo,en,Well done. You just did something good for yourself.,0,3.6,audio/en/p.bravo.mp3
+motiv-8,p.bravo,pt,Parabéns. Você acabou de fazer algo bom por si mesmo.,0,4.0,audio/pt/p.bravo.mp3
+motiv-8,p.sun,fr,Le soleil monte un peu plus haut aujourd'hui.,0,3.2,audio/fr/p.sun.mp3
+motiv-8,p.sun,en,The sun is a little higher today.,0,2.8,audio/en/p.sun.mp3
+motiv-8,p.sun,pt,O sol está um pouco mais alto hoje.,0,3.2,audio/pt/p.sun.mp3
+motiv-9,c.1,fr,Content de vous revoir. Une pause ne fait rien perdre : on reprend en douceur.,0,6.0,audio/fr/c.1.mp3
+motiv-9,c.1,en,Good to see you again. A break doesn't undo your progress: we restart gently.,0,5.6,audio/en/c.1.mp3
+motiv-9,c.1,pt,Que bom ver você de volta. Uma pausa não apaga o que você conquistou: vamos retomar com calma.,0,7.2,audio/pt/c.1.mp3
+motiv-9,c.2,fr,"Pas de culpabilité. Aujourd'hui, une séance courte et facile.",0,3.6,audio/fr/c.2.mp3
+motiv-9,c.2,en,"No guilt. Today, a short, easy session.",0,2.8,audio/en/c.2.mp3
+motiv-9,c.2,pt,"Sem culpa. Hoje, uma sessão curta e fácil.",0,3.2,audio/pt/c.2.mp3
+motiv-9,c.3,fr,"Reprendre, c'est déjà gagner. Allons-y.",0,2.0,audio/fr/c.3.mp3
+motiv-9,c.3,en,Starting again is already a win. Let's go.,0,3.2,audio/en/c.3.mp3
+motiv-9,c.3,pt,Recomeçar já é vencer. Vamos.,0,2.0,audio/pt/c.3.mp3
+motiv-10,b.good,fr,"Belle semaine. Votre lumière grandit, jour après jour.",0,3.2,audio/fr/b.good.mp3
+motiv-10,b.good,en,"A good week. Your light grows, day after day.",0,3.6,audio/en/b.good.mp3
+motiv-10,b.good,pt,"Que boa semana. Sua luz cresce, dia após dia.",0,3.6,audio/pt/b.good.mp3
+motiv-10,b.calm,fr,"Cette semaine a été plus calme, et c'est très bien. On repart ensemble.",0,5.2,audio/fr/b.calm.mp3
+motiv-10,b.calm,en,"This week was quieter, and that's fine. We start again together.",0,4.4,audio/en/b.calm.mp3
+motiv-10,b.calm,pt,"Esta semana foi mais tranquila, e tudo bem. Recomeçamos juntos.",0,4.0,audio/pt/b.calm.mp3
+motiv-11,f.health,fr,"Votre santé passe avant tout. En cas de douleur forte, de vertige ou de gêne dans la poitrine, arrêtez et appelez un médecin ou les urgences.",0,10.4,audio/fr/f.health.mp3
+motiv-11,f.health,en,"Your health comes first. If you feel severe pain, dizziness or chest discomfort, stop and call a doctor or emergency services.",0,8.4,audio/en/f.health.mp3
+motiv-11,f.health,pt,"Sua saúde vem em primeiro lugar. Em caso de dor forte, tontura ou desconforto no peito, pare e chame um médico ou o serviço de emergência.",0,10.4,audio/pt/f.health.mp3
+motiv-11,f.virtual,fr,"Je suis un guide virtuel, pas un médecin. Pour toute question de santé, parlez à un professionnel.",0,6.8,audio/fr/f.virtual.mp3
+motiv-11,f.virtual,en,"I'm a virtual guide, not a doctor. For any health question, talk to a professional.",0,6.0,audio/en/f.virtual.mp3
+motiv-11,f.virtual,pt,"Sou um guia virtual, não um médico. Para qualquer dúvida de saúde, fale com um profissional.",0,6.4,audio/pt/f.virtual.mp3

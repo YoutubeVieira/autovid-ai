@@ -58,6 +58,9 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `tests/logic.test.js` | Tests |
 | `docs/production-data.json` | Fiches de tournage et scripts de voix off des 19 exercices (FR, EN, PT-BR) |
 | `tools/build-production.py` | Génère la page « Dossier de tournage » |
+| `docs/voiceover.json`, `docs/voiceover-manifest.csv` | Tous les textes de voix off (137 par langue) et le manifeste des fichiers audio |
+| `tools/gen-voiceover.py`, `tools/voiceover_content.py` | Génèrent les fichiers de voix off à partir du contenu écrit |
+| `tools/build-voiceover.py` | Génère la page « Voix off » |
 
 ## Prochaines étapes
 
