@@ -37,6 +37,7 @@ cd second-souffle-pwa
 python3 -m http.server 8000      # puis ouvrir http://localhost:8000
 node tests/logic.test.js         # tests de la logique
 node tests/gemini.test.js        # tests du module Gemini (réservé au futur serveur), sans réseau
+node tests/audio.test.js         # adaptations du texte des voix off selon le genre de la voix
 node tests/smoke.js              # parcours complet dans un navigateur (Playwright)
 ```
 
@@ -71,7 +72,7 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `tools/gen-voiceover.py`, `tools/voiceover_content.py` | Génèrent les fichiers de voix off à partir du contenu écrit |
 | `tools/build-voiceover.py` | Génère la page « Voix off » |
 | `tools/generer-audio.ps1` | Assistant Windows : pose les questions et lance la production des voix (clé en saisie masquée) |
-| `tools/generate-audio.js` | Produit les fichiers audio (WAV) depuis le manifeste ; `--audition` compare des voix, `--dry-run` essaie sans clé |
+| `tools/generate-audio.js`, `tools/audio-fixes.js` | Produit les fichiers audio (WAV) depuis le manifeste, une voix de femme et une voix d'homme par langue (dossiers `f` et `m`) ; `--audition` compare des voix, `--dry-run` essaie sans clé ; `audio-fixes.js` met le texte au genre de la voix (Léa, accords) |
 
 ## Prochaines étapes
 

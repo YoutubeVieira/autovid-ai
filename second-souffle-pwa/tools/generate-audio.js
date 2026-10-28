@@ -10,12 +10,15 @@
      node tools/generate-audio.js --audition
    Tout produire :
      node tools/generate-audio.js --lang all
+   Chaque phrase est produite deux fois : une voix de femme (dossier f) et une voix d'homme (dossier m).
+   Pour n'en produire qu'une : --gender f   ou   --gender m.
 
    Variables d'environnement (jamais dans le code) :
      GEMINI_API_KEY   clé d'API Google (AI Studio)
      TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-lite-tts d'après la page du modèle chez Google)
-     VOICE_FR, VOICE_EN, VOICE_PT   nom d'une voix prédéfinie, une par langue
-     VOICE_WELLNESS   voix des séances de bien-être (facultatif ; sinon la voix de la langue)
+     VOICE_F, VOICE_M   voix de femme et voix d'homme (Sulafat et Achird par défaut), les mêmes dans les trois langues
+     VOICE_FR_F, VOICE_FR_M, VOICE_EN_F, VOICE_EN_M, VOICE_PT_F, VOICE_PT_M   voix propres à une langue (facultatif)
+     VOICE_WELLNESS_F, VOICE_WELLNESS_M   voix des séances de bien-être (facultatif)
      AUDITION_VOICES  voix à comparer avec --audition, séparées par des virgules
      TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
                       none      aucune consigne, le texte seul est envoyé (le plus sûr pour un premier essai)
@@ -39,8 +42,15 @@ const LANGS = (LANG === "all" || (!LANG && AUDITION)) ? ["fr", "en", "pt"] : [LA
 const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
 const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL;
 if (!DRY && !SELFTEST && (!KEY || !MODEL)) { console.log("Il faut GEMINI_API_KEY et TTS_MODEL (ou utilisez --dry-run)."); process.exit(1); }
-const VOICE = { fr: process.env.VOICE_FR, en: process.env.VOICE_EN, pt: process.env.VOICE_PT };
-const VOICE_WELLNESS = process.env.VOICE_WELLNESS;
+const { adapt } = require("./audio-fixes.js");
+const GENDER = opt("--gender", "both");
+const GENDERS = GENDER === "f" ? ["f"] : GENDER === "m" ? ["m"] : ["f", "m"];
+const VOICE_DEFAULT = { f: "Sulafat", m: "Achird" };
+function voiceFor(item, g) {
+  const L = item.lang.toUpperCase(), G = g.toUpperCase();
+  const well = item.cat === "bienetre" ? process.env["VOICE_WELLNESS_" + G] : null;
+  return well || process.env["VOICE_" + L + "_" + G] || process.env["VOICE_" + G] || VOICE_DEFAULT[g];
+}
 const AUDITION_VOICES = (process.env.AUDITION_VOICES || "Achird,Sadaltager,Orus,Charon,Puck,Sulafat,Vindemiatrix,Achernar,Kore,Aoede,Gacrux,Leda").split(",").map(x => x.trim()).filter(Boolean);
 const STYLE = {
   fr: process.env.TTS_STYLE_FR || "Dis ce texte en français, d'un ton chaleureux, calme et encourageant, à un rythme moyen : ",
@@ -105,9 +115,8 @@ function decodeAudio(buf, mime) {
 
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function synth(item, voiceOverride) {
+async function synth(item, voice) {
   if (DRY) return { pcm: tone(Math.max(0.4, item.est - item.pause), RATE_DEFAULT), rate: RATE_DEFAULT };
-  const voice = voiceOverride || (item.cat === "bienetre" && VOICE_WELLNESS ? VOICE_WELLNESS : VOICE[item.lang]);
   const speech = voice ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } : undefined;
   const part = { text: STYLE_MODE === "inline" ? STYLE[item.lang] + item.text : item.text };
   if (STYLE_MODE === "metadata") part.speech_metadata = { style: STYLE[item.lang] };
@@ -160,25 +169,28 @@ if (AUDITION) { audition().catch(e => { console.log("ÉCHEC : " + e.message); pr
 
 /* ---------- production ---------- */
 (async () => {
-  console.log((DRY ? "[essai sans service] " : "") + items.length + " phrases à traiter, langues : " + LANGS.join(", "));
-  const segs = {};                       // séances de bien-être à assembler : "lang|id" -> [{n, pcm, rate, pause}]
+  console.log((DRY ? "[essai sans service] " : "") + items.length + " phrases × " + GENDERS.length + " voix, langues : " + LANGS.join(", "));
+  const segs = {};                       // séances de bien-être à assembler : "lang|genre|id" -> [{id, pcm, rate, pause}]
   let done = 0, skipped = 0;
-  for (const it of items) {
-    const dir = path.join(OUT, it.lang); fs.mkdirSync(dir, { recursive: true });
-    const file = path.join(dir, it.id + ".wav");
-    let pcm, rate;
-    if (fs.existsSync(file) && !DRY) { const b = fs.readFileSync(file); pcm = b.subarray(44); rate = b.readUInt32LE(24); skipped++; }
-    else { ({ pcm, rate } = await synth(it)); fs.writeFileSync(file, wav(pcm, rate)); done++; if (!DRY && done % 10 === 0) console.log(done + " fichiers produits"); }
-    if (it.cat === "bienetre") {
-      const base = it.id.replace(/\.\d+$/, ""), k = it.lang + "|" + base;
-      (segs[k] = segs[k] || []).push({ id: it.id, pcm, rate, pause: it.pause });
+  for (const g of GENDERS) {
+    for (const base of items) {
+      const it = Object.assign({}, base, { text: adapt(base.text, base.lang, g) });
+      const dir = path.join(OUT, it.lang, g); fs.mkdirSync(dir, { recursive: true });
+      const file = path.join(dir, it.id + ".wav");
+      let pcm, rate;
+      if (fs.existsSync(file) && !DRY) { const b = fs.readFileSync(file); pcm = b.subarray(44); rate = b.readUInt32LE(24); skipped++; }
+      else { ({ pcm, rate } = await synth(it, voiceFor(it, g))); fs.writeFileSync(file, wav(pcm, rate)); done++; if (!DRY && done % 10 === 0) console.log(done + " fichiers produits"); }
+      if (it.cat === "bienetre") {
+        const k = it.lang + "|" + g + "|" + it.id.replace(/\.\d+$/, "");
+        (segs[k] = segs[k] || []).push({ id: it.id, pcm, rate, pause: it.pause });
+      }
     }
   }
   for (const k of Object.keys(segs)) {
-    const [lang, base] = k.split("|"), list = segs[k].sort((a, b) => a.id.localeCompare(b.id)), rate = list[0].rate;
+    const [lang, g, base] = k.split("|"), list = segs[k].sort((a, b) => a.id.localeCompare(b.id)), rate = list[0].rate;
     const out = Buffer.concat(list.flatMap(s => [s.pcm, silence(s.pause, rate)]));
-    fs.writeFileSync(path.join(OUT, lang, base + ".wav"), wav(out, rate));
-    console.log("séance assemblée : " + lang + "/" + base + ".wav (" + (out.length / 2 / rate).toFixed(0) + " s, " + list.length + " phrases)");
+    fs.writeFileSync(path.join(OUT, lang, g, base + ".wav"), wav(out, rate));
+    console.log("séance assemblée : " + lang + "/" + g + "/" + base + ".wav (" + (out.length / 2 / rate).toFixed(0) + " s, " + list.length + " phrases)");
   }
   console.log("Terminé : " + done + " produits, " + skipped + " déjà présents. Dossier : " + path.resolve(OUT));
 })().catch(e => { console.log("ÉCHEC : " + e.message); process.exit(1); });

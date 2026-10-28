@@ -13,10 +13,10 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host ""
-Write-Host "Voix off Second Souffle : 411 fichiers (137 par langue), séances de bien-être assemblées."
+Write-Host "Voix off Second Souffle : 822 fichiers (137 phrases × 3 langues × voix de femme et d'homme), séances de bien-être assemblées."
 Write-Host ""
 Write-Host "1) Essai sans clé (vérifie le découpage, produit des sons de test)"
-Write-Host "2) Production réelle avec le service de voix de Google"
+Write-Host "2) Production réelle avec le service de voix de Google (une voix de femme et une voix d'homme)"
 Write-Host "3) Écouter plusieurs voix sur la même phrase, dans les trois langues"
 $choix = Read-Host "Votre choix (1, 2 ou 3)"
 
@@ -47,19 +47,25 @@ if ($audition) {
   Remove-Item Env:GEMINI_API_KEY -ErrorAction SilentlyContinue
   exit 0
 }
-$env:VOICE_FR = Read-Host "Nom de la voix en français"
-$env:VOICE_EN = Read-Host "Nom de la voix en anglais"
-$env:VOICE_PT = Read-Host "Nom de la voix en portugais du Brésil"
-$bienEtre = Read-Host "Voix des séances de bien-être (Entrée pour garder la voix de chaque langue)"
-if (-not [string]::IsNullOrWhiteSpace($bienEtre)) { $env:VOICE_WELLNESS = $bienEtre }
+$vf = Read-Host "Voix de femme (Entrée pour Sulafat)"
+if ([string]::IsNullOrWhiteSpace($vf)) { $vf = "Sulafat" }
+$vm = Read-Host "Voix d'homme (Entrée pour Achird)"
+if ([string]::IsNullOrWhiteSpace($vm)) { $vm = "Achird" }
+$env:VOICE_F = $vf
+$env:VOICE_M = $vm
+Write-Host "Ces deux voix parleront dans les trois langues (français, anglais, portugais du Brésil)."
+$bf = Read-Host "Autre voix de femme pour les séances de bien-être (Entrée pour garder $vf)"
+if (-not [string]::IsNullOrWhiteSpace($bf)) { $env:VOICE_WELLNESS_F = $bf }
+$bm = Read-Host "Autre voix d'homme pour les séances de bien-être (Entrée pour garder $vm)"
+if (-not [string]::IsNullOrWhiteSpace($bm)) { $env:VOICE_WELLNESS_M = $bm }
 
 Write-Host ""
-Write-Host "Essai d'une phrase par langue..."
+Write-Host "Essai d'une phrase par langue, avec la voix de femme et la voix d'homme (6 fichiers)..."
 node tools/generate-audio.js --test --out audio-essai
 if ($LASTEXITCODE -ne 0) { Write-Host "L'essai a échoué. Copiez le message ci-dessus et envoyez-le moi."; exit 1 }
 Write-Host ""
-Write-Host "Écoutez les trois fichiers dans le dossier audio-essai (fr, en, pt)."
-$suite = Read-Host "Les voix vous conviennent ? Produire les 411 fichiers maintenant (o/n)"
+Write-Host "Écoutez les six fichiers dans audio-essai (fr, en, pt, chacun dans les dossiers f et m)."
+$suite = Read-Host "Les voix vous conviennent ? Produire les 822 fichiers maintenant (o/n)"
 if ($suite -ne "o") { Write-Host "Arrêt. Relancez le script quand vous aurez choisi vos voix."; exit 0 }
 
 node tools/generate-audio.js --lang all --out audio-out
