@@ -56,6 +56,8 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `js/app.js` | Écrans et actions |
 | `sw.js`, `manifest.webmanifest` | Installation et hors connexion |
 | `tests/logic.test.js` | Tests |
+| `docs/production-data.json` | Fiches de tournage et scripts de voix off des 19 exercices (FR, EN, PT-BR) |
+| `tools/build-production.py` | Génère la page « Dossier de tournage » |
 
 ## Prochaines étapes
 
