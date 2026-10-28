@@ -66,6 +66,7 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `docs/voiceover.json`, `docs/voiceover-manifest.csv` | Tous les textes de voix off (137 par langue) et le manifeste des fichiers audio |
 | `tools/gen-voiceover.py`, `tools/voiceover_content.py` | Génèrent les fichiers de voix off à partir du contenu écrit |
 | `tools/build-voiceover.py` | Génère la page « Voix off » |
+| `tools/generer-audio.ps1` | Assistant Windows : pose les questions et lance la production des voix (clé en saisie masquée) |
 | `tools/generate-audio.js` | Produit les fichiers audio (WAV) depuis le manifeste ; essai sans clé avec `--dry-run` |
 
 ## Prochaines étapes
