@@ -8,6 +8,8 @@ Français, anglais et portugais du Brésil. Aucun outil de compilation : du HTML
 - Bienvenue, choix de la langue et de l'ambiance (Second Souffle, Aube, Ardoise), clair et sombre
 - Questionnaire en 3 étapes et carte du corps (zones sensibles)
 - Séance de 5 mouvements composée selon les zones signalées, avec minuteur
+- Contrôles de séance : précédent, suivant, refaire, pause, +10 s, sauter la pause, saut direct à un exercice
+- Niveaux de durée (20, 30, 45, 60, 90 s), pause entre exercices, 1 à 3 tours, sons de décompte, écran maintenu allumé
 - Retour de séance, semaine « de lumière » (une séance ou un repos choisi comptent), repos choisi
 - Bibliothèque des 28 exercices à filmer (19 pour la version 1)
 - Guide d'anatomie simplifié (calques muscles et os, zones cliquables)
@@ -32,6 +34,7 @@ Français, anglais et portugais du Brésil. Aucun outil de compilation : du HTML
 cd second-souffle-pwa
 python3 -m http.server 8000      # puis ouvrir http://localhost:8000
 node tests/logic.test.js         # tests de la logique
+node tests/smoke.js              # parcours complet dans un navigateur (Playwright)
 ```
 
 Le service worker ne fonctionne que sur `localhost` ou en HTTPS.
@@ -55,7 +58,9 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `js/logic.js` | Logique pure : séance, semaine, réponses, tri d'urgence |
 | `js/app.js` | Écrans et actions |
 | `sw.js`, `manifest.webmanifest` | Installation et hors connexion |
-| `tests/logic.test.js` | Tests |
+| `tests/logic.test.js`, `tests/smoke.js` | Tests de la logique et parcours de bout en bout |
+| `docs/avant-publication.md` | Revue et liste de contrôle avant publication |
+| `docs/guide-tournage-posture.pdf`, `tools/build-guide.py`, `tools/print-pdf.js` | Guide de tournage et de posture (PDF de 25 pages) |
 | `docs/production-data.json` | Fiches de tournage et scripts de voix off des 19 exercices (FR, EN, PT-BR) |
 | `tools/build-production.py` | Génère la page « Dossier de tournage » |
 | `docs/voiceover.json`, `docs/voiceover-manifest.csv` | Tous les textes de voix off (137 par langue) et le manifeste des fichiers audio |

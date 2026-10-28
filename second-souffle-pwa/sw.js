@@ -1,6 +1,6 @@
 /* Service worker : garde l'application disponible hors connexion.
-   Changez VERSION à chaque mise à jour des fichiers pour renouveler le cache. */
-var VERSION = "ss-v1";
+   Changez VERSION quand la liste des fichiers change. */
+var VERSION = "ss-v2";
 var SHELL = [
   "./", "./index.html", "./manifest.webmanifest", "./css/styles.css",
   "./js/i18n.js", "./js/data.js", "./js/logic.js", "./js/app.js",
@@ -18,16 +18,19 @@ self.addEventListener("activate", function (e) {
   }).then(function () { return self.clients.claim(); }));
 });
 
+/* Réponse immédiate depuis le cache, mise à jour en arrière-plan : une modification est visible à la visite suivante. */
 self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== self.location.origin) return;
   e.respondWith(
-    caches.match(req).then(function (hit) {
-      return hit || fetch(req).then(function (res) {
-        var copy = res.clone();
-        caches.open(VERSION).then(function (c) { c.put(req, copy); });
-        return res;
-      }).catch(function () { return caches.match("./index.html"); });
+    caches.open(VERSION).then(function (cache) {
+      return cache.match(req).then(function (hit) {
+        var net = fetch(req).then(function (res) {
+          if (res && res.ok && res.type === "basic") cache.put(req, res.clone());
+          return res;
+        }).catch(function () { return hit || cache.match("./index.html"); });
+        return hit || net;
+      });
     })
   );
 });

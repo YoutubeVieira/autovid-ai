@@ -55,7 +55,7 @@
   };
 
   var AMBS = [
-    { id: "commun", sw: ["#3B3F8F", "#F2784B", "#2F8F6B"] },
+    { id: "commun", sw: ["#3B3F8F", "#E9622F", "#1D7350"] },
     { id: "aube", sw: ["#6B3FA0", "#E8636F", "#7FA88F"] },
     { id: "ardoise", sw: ["#1F5F7A", "#E0672B", "#4C8C6B"] }
   ];

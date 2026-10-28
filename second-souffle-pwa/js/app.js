@@ -108,7 +108,7 @@
     var h = '<div class="stack tight"><b>' + t("lvl.title") + '</b><div class="chips">' +
       ["soft", "std", "hard"].map(function (k) { return chip(t("lvl." + k), "level", k, cur === k); }).join("") +
       (forceOpen ? "" : chip(t("lvl.edit"), "custom", "1", open)) + "</div>" +
-      '<p class="muted small">' + t("lvl.sub", { d: S.dur, r: S.rest, n: S.rounds, m: minutes() }) + "</p>";
+      '<p class="muted small">' + t("lvl.sub", { d: S.dur, r: S.rest, n: S.rounds === 1 ? t("lvl.r1") : t("lvl.rN", { n: S.rounds }), m: minutes() }) + "</p>";
     if (open) {
       h += '<b class="small">' + t("set.durLabel") + '</b><div class="chips">' + L.DURS.map(function (d) { return chip(t("set.sec", { n: d }), "dur", d, S.dur === d); }).join("") + "</div>" +
         '<b class="small">' + t("set.restLabel") + '</b><div class="chips">' + [0, 10, 20, 30].map(function (r) { return chip(r === 0 ? t("set.none") : t("set.sec", { n: r }), "restlen", r, S.rest === r); }).join("") + "</div>" +
@@ -343,9 +343,15 @@
   function render() {
     applyPrefs();
     var el = $("#screen"), tabs = $("#tabs");
+    var changed = ui.lastScreen !== ui.screen, keep = changed ? 0 : el.scrollTop;
     el.className = "screen" + (SKY[ui.screen] ? " sky" : "");
     el.innerHTML = SCREENS[ui.screen]();
-    el.scrollTop = 0;
+    el.scrollTop = keep;
+    ui.lastScreen = ui.screen;
+    if (changed) {
+      var h = el.querySelector("h1,h2");
+      if (h) { h.setAttribute("tabindex", "-1"); try { h.focus({ preventScroll: true }); } catch (e) { /* ignoré */ } }
+    }
     var showTabs = !!TABS[ui.screen];
     tabs.hidden = !showTabs;
     if (showTabs) tabs.innerHTML = tabsHtml();
@@ -363,32 +369,50 @@
   function beep(freq, len) {
     if (!S.sound) return;
     try {
-      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      ensureAudio();
       var o = audioCtx.createOscillator(), g = audioCtx.createGain();
       o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(audioCtx.destination);
       o.start(); o.stop(audioCtx.currentTime + len);
     } catch (e) { /* son indisponible */ }
   }
   function stopTimer() { if (ui.timer) { clearInterval(ui.timer); ui.timer = null; } unwake(); }
+  function ensureAudio() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === "suspended") audioCtx.resume();
+    } catch (e) { /* son indisponible */ }
+  }
   function startSession() {
+    ensureAudio();
     ui.sess = L.newPlayer(L.sequence(sessionItems(), S.rounds), S.dur, S.rest);
     ui.screen = "player"; render(); runTimer(); wake();
   }
   function finish() {
     stopTimer(); S.log[L.dateKey(today())] = "s"; save(); ui.fbMsg = ""; ui.screen = "done"; render();
   }
-  function afterMove() { if (ui.sess.done) finish(); else render(); }
+  function afterMove() { ui.last = Date.now(); if (ui.sess.done) finish(); else render(); }
   function runTimer() {
     if (ui.timer) clearInterval(ui.timer);
-    ui.timer = setInterval(function () {
-      var p = ui.sess; if (!p || p.paused) return;
+    ui.last = Date.now();
+    ui.timer = setInterval(step, 250);
+  }
+  /* Le décompte suit l'horloge : si l'écran se met en veille, on rattrape les secondes écoulées. */
+  function step() {
+    var p = ui.sess, now = Date.now();
+    if (!p || p.paused) { ui.last = now; return; }
+    var n = Math.floor((now - ui.last) / 1000);
+    if (n < 1) return;
+    ui.last += n * 1000;
+    var moved = false;
+    for (var i = 0; i < n && !p.done; i++) {
       var ph = p.phase, ix = p.idx;
       L.tick(p);
-      if (p.done) { beep(520, 0.4); finish(); return; }
-      if (p.phase !== ph || p.idx !== ix) { beep(660, 0.25); render(); return; }
-      var c = $("#count"); if (c) c.textContent = p.left;
-      if (p.left <= 3) beep(880, 0.1);
-    }, 1000);
+      if (p.phase !== ph || p.idx !== ix) moved = true;
+    }
+    if (p.done) { beep(520, 0.4); finish(); return; }
+    if (moved) { beep(660, 0.25); render(); return; }
+    var c = $("#count"); if (c) c.textContent = p.left;
+    if (p.left <= 3) beep(880, 0.1);
   }
 
   /* ---------- coach ---------- */
@@ -459,7 +483,7 @@
       case "zone": S.zones[v] = !S.zones[v]; save(); render(); break;
       case "finishOnboarding": S.onboarded = true; save(); go("plan"); break;
       case "startSession": startSession(); break;
-      case "pause": L.togglePause(ui.sess); render(); break;
+      case "pause": L.togglePause(ui.sess); ui.last = Date.now(); render(); break;
       case "prev": L.prev(ui.sess); afterMove(); break;
       case "next": case "skipRest": L.next(ui.sess); afterMove(); break;
       case "redo": L.redo(ui.sess); afterMove(); break;
