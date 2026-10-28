@@ -1,4 +1,4 @@
-# Assistant Windows pour produire les voix off de Second Souffle.
+﻿# Assistant Windows pour produire les voix off de Second Souffle.
 # Lancer depuis le dossier second-souffle-pwa :
 #   powershell -ExecutionPolicy Bypass -File tools\generer-audio.ps1
 # La clé d'API est demandée en saisie masquée. Elle n'est écrite dans aucun fichier
