@@ -98,7 +98,13 @@ svg.body .mus *{fill:var(--sun);fill-opacity:.35;stroke:var(--sun);stroke-width:
 .today{background:var(--card);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:12px;border:1px solid var(--line)}
 .today.tight{gap:8px}
 
-.dots{display:flex;gap:6px;justify-content:center}
+.dots{display:flex;flex-wrap:wrap;gap:0;justify-content:center}
+.dot{width:24px;height:24px;background:none;border:0;padding:0;display:grid;place-items:center}
+.dot::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dot.on::before{background:var(--sun)}
+.dot.done::before{background:var(--dusk)}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.row3 .btn{padding:12px 6px;font-size:15px}
 .dots i{width:9px;height:9px;border-radius:50%;background:var(--line)}
 .dots i.on{background:var(--sun)}
 .dots i.done{background:var(--dusk)}

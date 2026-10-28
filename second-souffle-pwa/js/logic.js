@@ -103,7 +103,71 @@
     return RE_BACK.test(n) ? "dos" : "genoux";
   }
 
+
+  /* ---------- lecteur de séance (machine d'états) ---------- */
+  var DURS = [20, 30, 45, 60, 90];
+  var LEVELS = {
+    soft: { dur: 30, rest: 20, rounds: 1 },
+    std: { dur: 45, rest: 10, rounds: 2 },
+    hard: { dur: 60, rest: 10, rounds: 3 }
+  };
+
+  function levelOf(cfg) {
+    for (var k in LEVELS) {
+      var l = LEVELS[k];
+      if (l.dur === cfg.dur && l.rest === cfg.rest && l.rounds === cfg.rounds) return k;
+    }
+    return "custom";
+  }
+  function sequence(items, rounds) {
+    var out = [];
+    for (var r = 0; r < rounds; r++) out = out.concat(items);
+    return out;
+  }
+  /* Durée totale en secondes : exercices + pauses entre deux exercices (pas après le dernier). */
+  function totalSeconds(n, dur, rest) { return n * dur + Math.max(0, n - 1) * rest; }
+  function shiftDur(dur, dir) {
+    var i = DURS.indexOf(dur);
+    if (i < 0) i = 2;
+    return DURS[Math.max(0, Math.min(DURS.length - 1, i + dir))];
+  }
+
+  function newPlayer(seq, dur, rest) {
+    return { seq: seq, idx: 0, phase: "work", left: dur, paused: false, dur: dur, rest: rest, done: false };
+  }
+  function startWork(p, idx) { p.idx = idx; p.phase = "work"; p.left = p.dur; return p; }
+  function advance(p) {
+    if (p.phase === "work") {
+      if (p.idx >= p.seq.length - 1) { p.done = true; return p; }
+      if (p.rest > 0) { p.phase = "rest"; p.left = p.rest; return p; }
+      return startWork(p, p.idx + 1);
+    }
+    return startWork(p, p.idx + 1);
+  }
+  function tick(p) {
+    if (p.paused || p.done) return p;
+    p.left--;
+    if (p.left <= 0) advance(p);
+    return p;
+  }
+  /* Suivant : va directement au prochain exercice (saute aussi la pause en cours). */
+  function next(p) {
+    if (p.idx >= p.seq.length - 1) { p.done = true; return p; }
+    return startWork(p, p.idx + 1);
+  }
+  /* Précédent : pendant une pause, revient à l'exercice qui vient de finir ; sinon exercice d'avant. */
+  function prev(p) {
+    if (p.phase === "rest") return startWork(p, p.idx);
+    return startWork(p, Math.max(0, p.idx - 1));
+  }
+  function redo(p) { return p.phase === "rest" ? startWork(p, p.idx) : startWork(p, p.idx); }
+  function plus(p, s) { p.left = Math.min(300, p.left + (s || 10)); return p; }
+  function jump(p, i) { return startWork(p, Math.max(0, Math.min(p.seq.length - 1, i))); }
+  function togglePause(p) { p.paused = !p.paused; return p; }
+
   g.SS.logic = {
+    DURS: DURS, LEVELS: LEVELS, levelOf: levelOf, sequence: sequence, totalSeconds: totalSeconds, shiftDur: shiftDur,
+    newPlayer: newPlayer, tick: tick, next: next, prev: prev, redo: redo, plus: plus, jump: jump, togglePause: togglePause,
     buildSession: buildSession, hits: hits, dateKey: dateKey, dayOfYear: dayOfYear,
     weekDays: weekDays, lightCount: lightCount, monthCounts: monthCounts,
     replyFor: replyFor, isUrgent: isUrgent, topicOf: topicOf

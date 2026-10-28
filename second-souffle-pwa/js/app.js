@@ -9,7 +9,7 @@
   function fresh() {
     return {
       lang: null, amb: "commun", tz: 1, onboarded: false, age: "a", goal: "energy",
-      zones: {}, log: {}, demo: "f", plan: "year", addon: false,
+      zones: {}, log: {}, demo: "f", plan: "year", addon: false, dur: 45, rest: 10, rounds: 2, sound: true,
       pro: { msgs: [], relay: ["on", "", "", ""], replied: false, topic: "genoux", waiting: false }
     };
   }
@@ -27,7 +27,7 @@
   var ui = {
     screen: S.onboarded ? "home" : "welcome", coachTab: "ai", ai: [], libF: "all",
     layer: "muscles", azone: null, sess: null, angle: "face", timer: null, resetAsk: false,
-    fbMsg: "", toastTimer: null
+    fbMsg: "", toastTimer: null, custom: false
   };
 
   I.setLang(S.lang || I.guess(navigator.language));
@@ -101,6 +101,22 @@
     return n === 0 ? t("plan.adapted") : n === 1 ? t("plan.one") : t("plan.many", { n: n });
   }
 
+  function cfg() { return { dur: S.dur, rest: S.rest, rounds: S.rounds }; }
+  function minutes() { return Math.max(1, Math.round(L.totalSeconds(5 * S.rounds, S.dur, S.rest) / 60)); }
+  function levelBlock(forceOpen) {
+    var cur = L.levelOf(cfg()), open = forceOpen || ui.custom || cur === "custom";
+    var h = '<div class="stack tight"><b>' + t("lvl.title") + '</b><div class="chips">' +
+      ["soft", "std", "hard"].map(function (k) { return chip(t("lvl." + k), "level", k, cur === k); }).join("") +
+      (forceOpen ? "" : chip(t("lvl.edit"), "custom", "1", open)) + "</div>" +
+      '<p class="muted small">' + t("lvl.sub", { d: S.dur, r: S.rest, n: S.rounds, m: minutes() }) + "</p>";
+    if (open) {
+      h += '<b class="small">' + t("set.durLabel") + '</b><div class="chips">' + L.DURS.map(function (d) { return chip(t("set.sec", { n: d }), "dur", d, S.dur === d); }).join("") + "</div>" +
+        '<b class="small">' + t("set.restLabel") + '</b><div class="chips">' + [0, 10, 20, 30].map(function (r) { return chip(r === 0 ? t("set.none") : t("set.sec", { n: r }), "restlen", r, S.rest === r); }).join("") + "</div>" +
+        '<b class="small">' + t("set.roundsLabel") + '</b><div class="chips">' + [1, 2, 3].map(function (n) { return chip(String(n), "rounds", n, S.rounds === n); }).join("") + "</div>";
+    }
+    return h + "</div>";
+  }
+
   /* ---------- écrans ---------- */
   var SCREENS = {};
   var SKY = { plan: 1, home: 1, done: 1, paywall: 1 };
@@ -142,10 +158,10 @@
   SCREENS.plan = function () {
     var items = sessionItems();
     return hero("bras-leves", t("guide.name")) + '<span class="step ink">' + t("plan.ready") + "</span><h2>" + t("plan.title") + "</h2>" +
-      '<div class="card solid"><div class="tags"><span class="tag">' + t("plan.min", { n: 12 }) + '</span><span class="tag">' + t("plan.nogear") + '</span><span class="tag ok">' + swapLabel(items) + "</span></div><ol class=\"plist\">" +
+      '<div class="card solid"><div class="tags"><span class="tag">' + t("plan.min", { n: minutes() }) + '</span><span class="tag">' + t("plan.nogear") + '</span><span class="tag ok">' + swapLabel(items) + "</span></div><ol class=\"plist\">" +
       items.map(function (x) {
         return "<li><b>" + esc(exName(x.ex)) + "</b>" + (x.swapped ? '<br><span class="swap">' + t("plan.replaces", { x: esc(exName(x.was)) }) + "</span>" : "") + "</li>";
-      }).join("") + "</ol></div>" +
+      }).join("") + "</ol></div>" + '<div class="card solid">' + levelBlock(false) + "</div>" +
       '<div class="bottom stack"><button class="btn" data-act="startSession">' + t("plan.start") + '</button><button class="btn ghost solid" data-act="go" data-v="home">' + t("plan.later") + "</button></div>";
   };
 
@@ -164,21 +180,32 @@
     var rested = S.log[key] === "r";
     return '<div class="row between"><div class="hello">' + t("home.hello") + '</div><button class="chip" data-act="go" data-v="settings">' + t("home.settings") + "</button></div>" +
       arcSvg(n) +
-      '<div class="today"><span class="step">' + t("home.today") + "</span><h3>" + t("plan.title") + '</h3><div class="tags"><span class="tag">' + t("plan.min", { n: 12 }) + '</span><span class="tag ok">' + swapLabel(items) + "</span></div>" +
+      '<div class="today"><span class="step">' + t("home.today") + "</span><h3>" + t("plan.title") + '</h3><div class="tags"><span class="tag">' + t("plan.min", { n: minutes() }) + '</span><span class="tag ok">' + swapLabel(items) + "</span></div>" +
       '<button class="btn" data-act="startSession">' + t("home.start") + "</button></div>" +
       '<div class="today tight"><div class="row between"><span>' + t("home.tired") + '</span><button class="chip" data-act="rest"' + (rested ? " disabled" : "") + ">" + (rested ? t("home.restDone") : t("home.rest")) + "</button></div><p class=\"muted small\">" + t("home.restNote") + "</p></div>";
   };
 
   SCREENS.player = function () {
-    var s = ui.sess, cur = s.items[s.idx], e = cur.ex;
-    var dots = s.items.map(function (_, i) { return '<i class="' + (i < s.idx ? "done" : i === s.idx ? "on" : "") + '"></i>'; }).join("");
-    return '<div class="dots">' + dots + '</div><div class="center"><h2>' + esc(exName(e)) + '</h2><p class="muted">' + esc(pick(e.c)) + "</p>" +
+    var p = ui.sess, cur = p.seq[p.idx], e = cur.ex, rest = p.phase === "rest";
+    var dots = p.seq.map(function (_, i) {
+      var c = i < p.idx || (rest && i === p.idx) ? "done" : i === p.idx ? "on" : "";
+      return '<button class="dot ' + c + '" data-act="jump" data-v="' + i + '" aria-label="' + esc(t("player.jump", { n: i + 1 })) + '"></button>';
+    }).join("");
+    var round = t("player.round", { a: Math.floor(p.idx / 5) + 1, b: S.rounds });
+    var orb = '<div class="orbwrap"><div class="orb' + (p.paused ? " paused" : "") + '" id="orb"><div><b id="count">' + p.left + "</b><span>" + t("player.seconds") + "</span></div></div></div>";
+    if (rest) {
+      var nx = p.seq[p.idx + 1].ex;
+      return '<div class="dots">' + dots + '</div><div class="center"><span class="step">' + round + "</span><h2>" + t("player.restTitle") + '</h2><p class="muted">' + t("player.upnext", { x: esc(exName(nx)) }) + "</p></div>" + orb +
+        '<div class="row3"><button class="btn ghost" data-act="prev">‹ ' + t("player.prev") + '</button><button class="btn ghost" data-act="plus">' + t("player.plus") + '</button><button class="btn" data-act="skipRest">' + t("player.skipRest") + "</button></div>" +
+        '<div class="row"><button class="btn dusk" data-act="pause">' + (p.paused ? t("player.resume") : t("player.pause")) + '</button></div><button class="btn plain" data-act="stopSession">' + t("player.stop") + "</button>";
+    }
+    return '<div class="dots">' + dots + '</div><div class="center"><span class="step">' + round + "</span><h2>" + esc(exName(e)) + '</h2><p class="muted">' + esc(pick(e.c)) + "</p>" +
       (cur.swapped ? '<span class="swap">' + t("player.swapped") + "</span>" : "") + "</div>" +
       '<div class="vid"><div><b>' + t("player.vid", { x: esc(exName(e)) }) + "</b><br><span>" +
       t("player.vidinfo", { who: t(S.demo === "f" ? "who.f" : "who.m"), angle: t(ui.angle === "face" ? "angle.face" : "angle.side") }) + "</span></div></div>" +
-      '<div class="chips">' + chip(t("angle.face"), "angle", "face", ui.angle === "face") + chip(t("angle.side"), "angle", "side", ui.angle === "side") + "</div>" +
-      '<div class="orbwrap"><div class="orb' + (s.paused ? " paused" : "") + '" id="orb"><div><b id="count">' + s.left + "</b><span>" + t("player.seconds") + "</span></div></div></div>" +
-      '<div class="row"><button class="btn ghost" data-act="pause">' + (s.paused ? t("player.resume") : t("player.pause")) + '</button><button class="btn dusk" data-act="skip">' + t("player.skip") + "</button></div>" +
+      '<div class="chips">' + chip(t("angle.face"), "angle", "face", ui.angle === "face") + chip(t("angle.side"), "angle", "side", ui.angle === "side") + "</div>" + orb +
+      '<div class="row3"><button class="btn ghost" data-act="prev">‹ ' + t("player.prev") + '</button><button class="btn dusk" data-act="pause">' + (p.paused ? t("player.resume") : t("player.pause")) + '</button><button class="btn ghost" data-act="next">' + t("player.next") + " ›</button></div>" +
+      '<div class="row"><button class="chip" data-act="redo">↻ ' + t("player.redo") + '</button><button class="chip" data-act="plus">' + t("player.plus") + '</button></div>' +
       '<button class="btn plain" data-act="stopSession">' + t("player.stop") + "</button>";
   };
 
@@ -293,6 +320,7 @@
   SCREENS.settings = function () {
     return backChip("home") + "<h2>" + t("set.title") + "</h2><b>" + t("set.lang") + '</b><div class="chips">' +
       I.LANGS.map(function (l) { return chip(t("lang.name." + l), "lang", l, I.state.lang === l); }).join("") + "</div><b>" + t("set.amb") + "</b>" + ambCards() +
+      levelBlock(true) + "<b>" + t("set.sound") + '</b><div class="chips">' + chip(t("set.on"), "sound", "1", S.sound) + chip(t("set.off"), "sound", "0", !S.sound) + "</div>" +
       "<b>" + t("set.text") + '</b><div class="chips">' + [[1, "set.t1"], [1.15, "set.t2"], [1.3, "set.t3"]].map(function (r) { return chip(t(r[1]), "tz", r[0], S.tz === r[0]); }).join("") + "</div>" +
       "<b>" + t("set.demo") + '</b><div class="chips">' + chip(t("who.f"), "demo", "f", S.demo === "f") + chip(t("who.m"), "demo", "m", S.demo === "m") + "</div>" +
       '<p class="muted small">' + t("set.dark") + " " + t("set.data") + '</p><button class="btn ghost" data-act="' + (ui.resetAsk ? "reset" : "resetAsk") + '">' + t(ui.resetAsk ? "set.resetSure" : "set.reset") + "</button>";
@@ -327,27 +355,40 @@
   function go(name) { stopTimer(); ui.screen = name; ui.resetAsk = false; render(); }
 
   /* ---------- séance ---------- */
-  var DUR = 30;
-  function stopTimer() { if (ui.timer) { clearInterval(ui.timer); ui.timer = null; } }
+  var wakeLock = null, audioCtx = null;
+  function wake() {
+    try { if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; }).catch(function () { /* refusé */ }); } catch (e) { /* ignoré */ }
+  }
+  function unwake() { try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) { /* ignoré */ } }
+  function beep(freq, len) {
+    if (!S.sound) return;
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.frequency.value = freq; g.gain.value = 0.08; o.connect(g); g.connect(audioCtx.destination);
+      o.start(); o.stop(audioCtx.currentTime + len);
+    } catch (e) { /* son indisponible */ }
+  }
+  function stopTimer() { if (ui.timer) { clearInterval(ui.timer); ui.timer = null; } unwake(); }
   function startSession() {
-    ui.sess = { items: sessionItems(), idx: 0, left: DUR, paused: false };
-    ui.screen = "player"; render(); runTimer();
+    ui.sess = L.newPlayer(L.sequence(sessionItems(), S.rounds), S.dur, S.rest);
+    ui.screen = "player"; render(); runTimer(); wake();
   }
+  function finish() {
+    stopTimer(); S.log[L.dateKey(today())] = "s"; save(); ui.fbMsg = ""; ui.screen = "done"; render();
+  }
+  function afterMove() { if (ui.sess.done) finish(); else render(); }
   function runTimer() {
-    stopTimer();
+    if (ui.timer) clearInterval(ui.timer);
     ui.timer = setInterval(function () {
-      var s = ui.sess; if (!s || s.paused) return;
-      s.left--;
-      var c = $("#count"); if (c) c.textContent = s.left;
-      if (s.left <= 0) nextEx();
+      var p = ui.sess; if (!p || p.paused) return;
+      var ph = p.phase, ix = p.idx;
+      L.tick(p);
+      if (p.done) { beep(520, 0.4); finish(); return; }
+      if (p.phase !== ph || p.idx !== ix) { beep(660, 0.25); render(); return; }
+      var c = $("#count"); if (c) c.textContent = p.left;
+      if (p.left <= 3) beep(880, 0.1);
     }, 1000);
-  }
-  function nextEx() {
-    var s = ui.sess; s.idx++;
-    if (s.idx >= s.items.length) {
-      stopTimer(); S.log[L.dateKey(today())] = "s"; save(); ui.fbMsg = ""; ui.screen = "done"; render(); return;
-    }
-    s.left = DUR; render(); runTimer();
   }
 
   /* ---------- coach ---------- */
@@ -418,12 +459,23 @@
       case "zone": S.zones[v] = !S.zones[v]; save(); render(); break;
       case "finishOnboarding": S.onboarded = true; save(); go("plan"); break;
       case "startSession": startSession(); break;
-      case "pause": ui.sess.paused = !ui.sess.paused; render(); break;
-      case "skip": nextEx(); break;
+      case "pause": L.togglePause(ui.sess); render(); break;
+      case "prev": L.prev(ui.sess); afterMove(); break;
+      case "next": case "skipRest": L.next(ui.sess); afterMove(); break;
+      case "redo": L.redo(ui.sess); afterMove(); break;
+      case "plus": L.plus(ui.sess, 10); var cnt = $("#count"); if (cnt) cnt.textContent = ui.sess.left; break;
+      case "jump": L.jump(ui.sess, parseInt(v, 10)); afterMove(); break;
       case "stopSession": go("home"); break;
+      case "level": var lv = L.LEVELS[v]; S.dur = lv.dur; S.rest = lv.rest; S.rounds = lv.rounds; ui.custom = false; save(); render(); break;
+      case "custom": ui.custom = !ui.custom; render(); break;
+      case "dur": S.dur = parseInt(v, 10); save(); render(); break;
+      case "restlen": S.rest = parseInt(v, 10); save(); render(); break;
+      case "rounds": S.rounds = parseInt(v, 10); save(); render(); break;
+      case "sound": S.sound = v === "1"; save(); render(); break;
       case "angle": ui.angle = v; render(); break;
       case "rest": if (S.log[L.dateKey(today())] !== "s") S.log[L.dateKey(today())] = "r"; save(); toast(t("home.restToast")); render(); break;
-      case "fb": ui.fbMsg = t("fb." + v + ".msg") + " " + t("fb.thanks"); var b = $("#fbMsg"); if (b) { b.hidden = false; b.textContent = ui.fbMsg; } break;
+      case "fb": var dir = v === "hard" ? -1 : v === "easy" ? 1 : 0; if (dir) { S.dur = L.shiftDur(S.dur, dir); save(); }
+        ui.fbMsg = t("fb." + v + ".msg") + (dir ? " " + t("fb.dur", { n: S.dur }) : "") + " " + t("fb.thanks"); var b = $("#fbMsg"); if (b) { b.hidden = false; b.textContent = ui.fbMsg; } break;
       case "libf": ui.libF = v; render(); break;
       case "layer": ui.layer = v; render(); break;
       case "azone": ui.azone = v; render(); break;

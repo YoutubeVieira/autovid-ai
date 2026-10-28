@@ -6,7 +6,7 @@ def T(fr, en, pt):
 
 SESSION = [
  ("s.intro.short", "Début court", T("C'est parti. Installez-vous, et respirez un grand coup.", "Let's go. Get settled, and take a deep breath.", "Vamos lá. Acomode-se e respire fundo.")),
- ("s.intro.standard", "Début standard", T("Bonjour, et bravo d'être là. Cette séance dure environ douze minutes. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.", "Hello, and well done for showing up. This session takes about twelve minutes. Go at your own pace, and stop if anything hurts.", "Olá, e parabéns por estar aqui. Esta sessão dura cerca de doze minutos. Vá no seu ritmo e pare se algo doer.")),
+ ("s.intro.standard", "Début standard", T("Bonjour, et bravo d'être là. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.", "Hello, and well done for showing up. Go at your own pace, and stop if anything hurts.", "Olá, e parabéns por estar aqui. Vá no seu ritmo e pare se algo doer.")),
  ("s.intro.adapted", "Début, séance adaptée", T("J'ai adapté la séance à vos zones sensibles. Certains mouvements ont été remplacés.", "I adapted the session to your sensitive areas. Some movements were swapped.", "Adaptei a sessão às suas áreas sensíveis. Alguns movimentos foram trocados.")),
  ("s.next", "Exercice suivant", T("Prochain exercice.", "Next exercise.", "Próximo exercício.")),
  ("s.three", "Décompte de départ", T("Trois, deux, un, c'est parti.", "Three, two, one, go.", "Três, dois, um, vai.")),

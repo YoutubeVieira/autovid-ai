@@ -2,9 +2,9 @@ categorie,id,langue,texte,pause_apres_s,duree_estimee_s,fichier
 seance,s.intro.short,fr,"C'est parti. Installez-vous, et respirez un grand coup.",0,3.2,audio/fr/s.intro.short.mp3
 seance,s.intro.short,en,"Let's go. Get settled, and take a deep breath.",0,3.6,audio/en/s.intro.short.mp3
 seance,s.intro.short,pt,Vamos lá. Acomode-se e respire fundo.,0,2.4,audio/pt/s.intro.short.mp3
-seance,s.intro.standard,fr,"Bonjour, et bravo d'être là. Cette séance dure environ douze minutes. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",0,9.2,audio/fr/s.intro.standard.mp3
-seance,s.intro.standard,en,"Hello, and well done for showing up. This session takes about twelve minutes. Go at your own pace, and stop if anything hurts.",0,9.2,audio/en/s.intro.standard.mp3
-seance,s.intro.standard,pt,"Olá, e parabéns por estar aqui. Esta sessão dura cerca de doze minutos. Vá no seu ritmo e pare se algo doer.",0,8.8,audio/pt/s.intro.standard.mp3
+seance,s.intro.standard,fr,"Bonjour, et bravo d'être là. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",0,6.8,audio/fr/s.intro.standard.mp3
+seance,s.intro.standard,en,"Hello, and well done for showing up. Go at your own pace, and stop if anything hurts.",0,6.8,audio/en/s.intro.standard.mp3
+seance,s.intro.standard,pt,"Olá, e parabéns por estar aqui. Vá no seu ritmo e pare se algo doer.",0,6.0,audio/pt/s.intro.standard.mp3
 seance,s.intro.adapted,fr,J'ai adapté la séance à vos zones sensibles. Certains mouvements ont été remplacés.,0,5.2,audio/fr/s.intro.adapted.mp3
 seance,s.intro.adapted,en,I adapted the session to your sensitive areas. Some movements were swapped.,0,4.8,audio/en/s.intro.adapted.mp3
 seance,s.intro.adapted,pt,Adaptei a sessão às suas áreas sensíveis. Alguns movimentos foram trocados.,0,4.4,audio/pt/s.intro.adapted.mp3

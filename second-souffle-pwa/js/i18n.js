@@ -13,7 +13,7 @@
     "common.demo": ["Démonstration", "Demo", "Demonstração"],
 
     "welcome.title": ["Reprenez le sport. Votre corps a son mot à dire.", "Get back to exercise. Your body has a say.", "Volte aos exercícios. Seu corpo tem voz."],
-    "welcome.sub": ["Des séances de 10 à 20 minutes, qui s'adaptent à vos articulations et à votre énergie du jour.", "10 to 20 minute sessions that adapt to your joints and your energy today.", "Sessões de 10 a 20 minutos, adaptadas às suas articulações e à sua energia do dia."],
+    "welcome.sub": ["Des séances courtes, de 5 à 20 minutes, qui s'adaptent à vos articulations et à votre énergie du jour.", "Short sessions, from 5 to 20 minutes, that adapt to your joints and your energy today.", "Sessões curtas, de 5 a 20 minutos, adaptadas às suas articulações e à sua energia do dia."],
     "welcome.start": ["Commencer, c'est gratuit", "Start for free", "Começar, é grátis"],
     "welcome.lang": ["Langue", "Language", "Idioma"],
 
@@ -238,7 +238,33 @@
     "set.dark": ["Le mode sombre suit celui de votre téléphone.", "Dark mode follows your phone's setting.", "O modo escuro segue o do seu celular."],
     "set.reset": ["Effacer mes données", "Erase my data", "Apagar meus dados"],
     "set.resetSure": ["Confirmer : tout effacer", "Confirm: erase everything", "Confirmar: apagar tudo"],
-    "set.data": ["Vos données restent sur cet appareil.", "Your data stays on this device.", "Seus dados ficam neste aparelho."]
+    "set.data": ["Vos données restent sur cet appareil.", "Your data stays on this device.", "Seus dados ficam neste aparelho."],
+
+    "player.prev": ["Précédent", "Previous", "Anterior"],
+    "player.next": ["Suivant", "Next", "Próximo"],
+    "player.redo": ["Refaire", "Redo", "Refazer"],
+    "player.plus": ["+10 s", "+10 s", "+10 s"],
+    "player.skipRest": ["Sauter la pause", "Skip rest", "Pular o descanso"],
+    "player.restTitle": ["Récupération", "Recovery", "Recuperação"],
+    "player.upnext": ["Ensuite : {x}", "Up next: {x}", "A seguir: {x}"],
+    "player.round": ["Tour {a} sur {b}", "Round {a} of {b}", "Rodada {a} de {b}"],
+    "player.jump": ["Aller à l'exercice {n}", "Go to exercise {n}", "Ir para o exercício {n}"],
+    "lvl.title": ["Niveau", "Level", "Nível"],
+    "lvl.soft": ["Doux", "Gentle", "Leve"],
+    "lvl.std": ["Standard", "Standard", "Padrão"],
+    "lvl.hard": ["Soutenu", "Intense", "Intenso"],
+    "lvl.custom": ["Personnalisé", "Custom", "Personalizado"],
+    "lvl.edit": ["Personnaliser", "Customize", "Personalizar"],
+    "lvl.sub": ["{d} s par exercice · pause {r} s · {n} tour(s) · {m} min", "{d} s per exercise · {r} s rest · {n} round(s) · {m} min", "{d} s por exercício · {r} s de descanso · {n} rodada(s) · {m} min"],
+    "set.durLabel": ["Durée de chaque exercice", "Length of each exercise", "Duração de cada exercício"],
+    "set.restLabel": ["Pause entre les exercices", "Rest between exercises", "Descanso entre exercícios"],
+    "set.roundsLabel": ["Nombre de tours", "Number of rounds", "Número de rodadas"],
+    "set.none": ["Aucune", "None", "Nenhum"],
+    "set.sec": ["{n} s", "{n} s", "{n} s"],
+    "set.sound": ["Sons de décompte", "Countdown sounds", "Sons de contagem"],
+    "set.on": ["Activés", "On", "Ligados"],
+    "set.off": ["Coupés", "Off", "Desligados"],
+    "fb.dur": ["{n} s par exercice.", "{n} s per exercise.", "{n} s por exercício."]
   };
 
   var state = { lang: "fr" };

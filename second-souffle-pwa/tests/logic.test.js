@@ -112,5 +112,97 @@ test("sujet de la fiche : genou par défaut, dos si mentionné", function () {
   assert.strictEqual(L.topicOf("ça tire"), "genoux");
 });
 
+
+test("durée totale : pauses seulement entre deux exercices", function () {
+  assert.strictEqual(L.totalSeconds(10, 45, 10), 540);
+  assert.strictEqual(L.totalSeconds(5, 30, 0), 150);
+});
+
+test("niveaux : reconnaissance et réglage personnalisé", function () {
+  assert.strictEqual(L.levelOf({ dur: 45, rest: 10, rounds: 2 }), "std");
+  assert.strictEqual(L.levelOf({ dur: 30, rest: 20, rounds: 1 }), "soft");
+  assert.strictEqual(L.levelOf({ dur: 90, rest: 0, rounds: 3 }), "custom");
+});
+
+test("durées proposées : 20, 30, 45, 60, 90 secondes, avec bornes", function () {
+  assert.deepStrictEqual(L.DURS, [20, 30, 45, 60, 90]);
+  assert.strictEqual(L.shiftDur(45, 1), 60);
+  assert.strictEqual(L.shiftDur(30, -1), 20);
+  assert.strictEqual(L.shiftDur(20, -1), 20);
+  assert.strictEqual(L.shiftDur(90, 1), 90);
+});
+
+function mk(n, dur, rest) { var seq = []; for (var i = 0; i < n; i++) seq.push({ ex: D.EX[i] }); return L.newPlayer(seq, dur, rest); }
+
+test("lecteur : exercice, pause, exercice suivant, fin", function () {
+  var p = mk(2, 3, 2);
+  for (var i = 0; i < 3; i++) L.tick(p);
+  assert.strictEqual(p.phase, "rest"); assert.strictEqual(p.left, 2);
+  L.tick(p); L.tick(p);
+  assert.strictEqual(p.phase, "work"); assert.strictEqual(p.idx, 1); assert.strictEqual(p.left, 3);
+  for (i = 0; i < 3; i++) L.tick(p);
+  assert.ok(p.done);
+});
+
+test("lecteur : sans pause, enchaîne directement", function () {
+  var p = mk(2, 2, 0);
+  L.tick(p); L.tick(p);
+  assert.strictEqual(p.phase, "work"); assert.strictEqual(p.idx, 1);
+});
+
+test("lecteur : la pause (mise en pause) arrête le décompte", function () {
+  var p = mk(2, 5, 2);
+  L.togglePause(p); L.tick(p); L.tick(p);
+  assert.strictEqual(p.left, 5);
+  L.togglePause(p); L.tick(p);
+  assert.strictEqual(p.left, 4);
+});
+
+test("lecteur : suivant saute l'exercice et la pause", function () {
+  var p = mk(3, 5, 5);
+  L.next(p);
+  assert.strictEqual(p.idx, 1); assert.strictEqual(p.phase, "work");
+  for (var i = 0; i < 5; i++) L.tick(p);
+  assert.strictEqual(p.phase, "rest");
+  L.next(p);
+  assert.strictEqual(p.idx, 2); assert.strictEqual(p.phase, "work");
+  L.next(p);
+  assert.ok(p.done);
+});
+
+test("lecteur : précédent revient en arrière, refaire recommence", function () {
+  var p = mk(3, 5, 5);
+  L.jump(p, 2); L.tick(p);
+  L.prev(p);
+  assert.strictEqual(p.idx, 1); assert.strictEqual(p.left, 5);
+  L.prev(p); L.prev(p);
+  assert.strictEqual(p.idx, 0);
+  L.tick(p); L.tick(p); L.redo(p);
+  assert.strictEqual(p.idx, 0); assert.strictEqual(p.left, 5);
+});
+
+test("lecteur : précédent pendant une pause revient à l'exercice qui vient de finir", function () {
+  var p = mk(3, 2, 4);
+  L.tick(p); L.tick(p);
+  assert.strictEqual(p.phase, "rest");
+  L.prev(p);
+  assert.strictEqual(p.phase, "work"); assert.strictEqual(p.idx, 0);
+});
+
+test("lecteur : +10 s ajoute du temps, plafonné à 300 s ; saut borné", function () {
+  var p = mk(3, 30, 5);
+  L.plus(p, 10);
+  assert.strictEqual(p.left, 40);
+  p.left = 295; L.plus(p, 10);
+  assert.strictEqual(p.left, 300);
+  L.jump(p, 99); assert.strictEqual(p.idx, 2);
+  L.jump(p, -4); assert.strictEqual(p.idx, 0);
+});
+
+test("séquence : les tours répètent les 5 exercices", function () {
+  var items = L.buildSession({}, 0);
+  assert.strictEqual(L.sequence(items, 3).length, 15);
+});
+
 console.log(failures ? "\n" + failures + " test(s) en échec" : "\nTous les tests passent");
 process.exit(failures ? 1 : 0);

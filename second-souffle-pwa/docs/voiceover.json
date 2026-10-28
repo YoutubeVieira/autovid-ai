@@ -24,9 +24,9 @@
      "id": "s.intro.standard",
      "name": "Début standard",
      "t": {
-      "fr": "Bonjour, et bravo d'être là. Cette séance dure environ douze minutes. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",
-      "en": "Hello, and well done for showing up. This session takes about twelve minutes. Go at your own pace, and stop if anything hurts.",
-      "pt": "Olá, e parabéns por estar aqui. Esta sessão dura cerca de doze minutos. Vá no seu ritmo e pare se algo doer."
+      "fr": "Bonjour, et bravo d'être là. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",
+      "en": "Hello, and well done for showing up. Go at your own pace, and stop if anything hurts.",
+      "pt": "Olá, e parabéns por estar aqui. Vá no seu ritmo e pare se algo doer."
      }
     },
     {
