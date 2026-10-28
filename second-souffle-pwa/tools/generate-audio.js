@@ -6,6 +6,8 @@
      node tools/generate-audio.js --dry-run --lang fr --only w.respiration
    Essai réel d'une phrase par langue :
      node tools/generate-audio.js --test
+   Écouter plusieurs voix sur la même phrase (une fois par langue) :
+     node tools/generate-audio.js --audition
    Tout produire :
      node tools/generate-audio.js --lang all
 
@@ -13,6 +15,8 @@
      GEMINI_API_KEY   clé d'API Google (AI Studio)
      TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-lite-tts d'après la page du modèle chez Google)
      VOICE_FR, VOICE_EN, VOICE_PT   nom d'une voix prédéfinie, une par langue
+     VOICE_WELLNESS   voix des séances de bien-être (facultatif ; sinon la voix de la langue)
+     AUDITION_VOICES  voix à comparer avec --audition, séparées par des virgules
      TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
                       none      aucune consigne, le texte seul est envoyé (le plus sûr pour un premier essai)
                       metadata  consigne dans speech_metadata.style de chaque partie (nouveaux modèles)
@@ -28,14 +32,16 @@ const fs = require("fs"), path = require("path");
 const args = process.argv.slice(2);
 const has = f => args.includes(f);
 const opt = (f, d) => { const i = args.indexOf(f); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
-const DRY = has("--dry-run"), TEST = has("--test"), SELFTEST = has("--selftest");
+const DRY = has("--dry-run"), TEST = has("--test"), SELFTEST = has("--selftest"), AUDITION = has("--audition");
 const LANG = opt("--lang", TEST ? "all" : null), ONLY = opt("--only", ""), OUT = opt("--out", "audio-out");
-if (!LANG && !SELFTEST) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
-const LANGS = LANG === "all" ? ["fr", "en", "pt"] : [LANG || "fr"];
+if (!LANG && !SELFTEST && !AUDITION) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
+const LANGS = (LANG === "all" || (!LANG && AUDITION)) ? ["fr", "en", "pt"] : [LANG || "fr"];
 const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
 const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL;
 if (!DRY && !SELFTEST && (!KEY || !MODEL)) { console.log("Il faut GEMINI_API_KEY et TTS_MODEL (ou utilisez --dry-run)."); process.exit(1); }
 const VOICE = { fr: process.env.VOICE_FR, en: process.env.VOICE_EN, pt: process.env.VOICE_PT };
+const VOICE_WELLNESS = process.env.VOICE_WELLNESS;
+const AUDITION_VOICES = (process.env.AUDITION_VOICES || "Achird,Sadaltager,Orus,Charon,Puck,Sulafat,Vindemiatrix,Achernar,Kore,Aoede,Gacrux,Leda").split(",").map(x => x.trim()).filter(Boolean);
 const STYLE = {
   fr: process.env.TTS_STYLE_FR || "Dis ce texte en français, d'un ton chaleureux, calme et encourageant, à un rythme moyen : ",
   en: process.env.TTS_STYLE_EN || "Say this in English, in a warm, calm, encouraging tone, at a medium pace: ",
@@ -99,9 +105,10 @@ function decodeAudio(buf, mime) {
 
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function synth(item) {
+async function synth(item, voiceOverride) {
   if (DRY) return { pcm: tone(Math.max(0.4, item.est - item.pause), RATE_DEFAULT), rate: RATE_DEFAULT };
-  const speech = VOICE[item.lang] ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE[item.lang] } } } : undefined;
+  const voice = voiceOverride || (item.cat === "bienetre" && VOICE_WELLNESS ? VOICE_WELLNESS : VOICE[item.lang]);
+  const speech = voice ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } : undefined;
   const part = { text: STYLE_MODE === "inline" ? STYLE[item.lang] + item.text : item.text };
   if (STYLE_MODE === "metadata") part.speech_metadata = { style: STYLE[item.lang] };
   const body = { contents: [{ parts: [part] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: speech } };
@@ -132,6 +139,24 @@ if (SELFTEST) {
   console.log("Autotest réussi : lecture du WAV, du PCM brut et du CSV.");
   process.exit(0);
 }
+
+/* ---------- écoute comparée des voix ---------- */
+async function audition() {
+  const all = parseCsv(fs.readFileSync(path.join(__dirname, "..", "docs", "voiceover-manifest.csv"), "utf8")).slice(1)
+    .filter(r => r.length >= 7 && r[1] === "s.intro.standard").map(r => ({ cat: r[0], id: r[1], lang: r[2], text: r[3], pause: 0, est: Number(r[5]) || 3 }));
+  console.log((DRY ? "[essai sans service] " : "") + AUDITION_VOICES.length + " voix × " + LANGS.length + " langue(s)");
+  for (const it of all.filter(i => LANGS.includes(i.lang))) {
+    const dir = path.join(OUT, it.lang); fs.mkdirSync(dir, { recursive: true });
+    for (const v of AUDITION_VOICES) {
+      const file = path.join(dir, "voix-" + v + ".wav");
+      if (fs.existsSync(file) && !DRY) continue;
+      try { const r = await synth(it, v); fs.writeFileSync(file, wav(r.pcm, r.rate)); console.log("ok   " + it.lang + " " + v); }
+      catch (e) { console.log("échec " + it.lang + " " + v + " : " + e.message.slice(0, 160)); }
+    }
+  }
+  console.log("Écoutez les fichiers voix-*.wav dans " + path.resolve(OUT) + " puis choisissez une voix par langue.");
+}
+if (AUDITION) { audition().catch(e => { console.log("ÉCHEC : " + e.message); process.exit(1); }); return; }
 
 /* ---------- production ---------- */
 (async () => {

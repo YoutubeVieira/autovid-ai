@@ -17,7 +17,8 @@ Write-Host "Voix off Second Souffle : 411 fichiers (137 par langue), séances de
 Write-Host ""
 Write-Host "1) Essai sans clé (vérifie le découpage, produit des sons de test)"
 Write-Host "2) Production réelle avec le service de voix de Google"
-$choix = Read-Host "Votre choix (1 ou 2)"
+Write-Host "3) Écouter plusieurs voix sur la même phrase, dans les trois langues"
+$choix = Read-Host "Votre choix (1, 2 ou 3)"
 
 if ($choix -eq "1") {
   node tools/generate-audio.js --dry-run --lang all --out audio-essai
@@ -25,6 +26,7 @@ if ($choix -eq "1") {
   exit 0
 }
 
+if ($choix -eq "3") { $audition = $true }
 $secure = Read-Host "Clé d'API Google (AI Studio), saisie masquée" -AsSecureString
 $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try { $env:GEMINI_API_KEY = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
@@ -33,9 +35,23 @@ finally { [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 $modele = Read-Host "Identifiant du modèle de voix (Entrée pour gemini-3.8-flash-lite-tts)"
 if ([string]::IsNullOrWhiteSpace($modele)) { $modele = "gemini-3.8-flash-lite-tts" }
 $env:TTS_MODEL = $modele
+if ($audition) {
+  Write-Host ""
+  Write-Host "Voix comparées : Achird, Sadaltager, Orus, Charon, Puck (masculines) ; Sulafat, Vindemiatrix, Achernar, Kore, Aoede, Gacrux, Leda (féminines)."
+  Write-Host "Pour en comparer d'autres, tapez leurs noms séparés par des virgules, sinon appuyez sur Entrée."
+  $autres = Read-Host "Voix à comparer"
+  if (-not [string]::IsNullOrWhiteSpace($autres)) { $env:AUDITION_VOICES = $autres }
+  node tools/generate-audio.js --audition --out audio-voix
+  Write-Host ""
+  Write-Host "Écoutez les fichiers voix-*.wav dans les dossiers audio-voix\fr, audio-voix\en et audio-voix\pt."
+  Remove-Item Env:GEMINI_API_KEY -ErrorAction SilentlyContinue
+  exit 0
+}
 $env:VOICE_FR = Read-Host "Nom de la voix en français"
 $env:VOICE_EN = Read-Host "Nom de la voix en anglais"
 $env:VOICE_PT = Read-Host "Nom de la voix en portugais du Brésil"
+$bienEtre = Read-Host "Voix des séances de bien-être (Entrée pour garder la voix de chaque langue)"
+if (-not [string]::IsNullOrWhiteSpace($bienEtre)) { $env:VOICE_WELLNESS = $bienEtre }
 
 Write-Host ""
 Write-Host "Essai d'une phrase par langue..."

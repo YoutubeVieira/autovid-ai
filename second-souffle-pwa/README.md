@@ -71,7 +71,7 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `tools/gen-voiceover.py`, `tools/voiceover_content.py` | Génèrent les fichiers de voix off à partir du contenu écrit |
 | `tools/build-voiceover.py` | Génère la page « Voix off » |
 | `tools/generer-audio.ps1` | Assistant Windows : pose les questions et lance la production des voix (clé en saisie masquée) |
-| `tools/generate-audio.js` | Produit les fichiers audio (WAV) depuis le manifeste ; essai sans clé avec `--dry-run` |
+| `tools/generate-audio.js` | Produit les fichiers audio (WAV) depuis le manifeste ; `--audition` compare des voix, `--dry-run` essaie sans clé |
 
 ## Prochaines étapes
 
