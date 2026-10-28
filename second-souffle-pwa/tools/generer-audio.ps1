@@ -30,7 +30,9 @@ $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
 try { $env:GEMINI_API_KEY = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ptr) }
 finally { [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ptr) }
 
-$env:TTS_MODEL = Read-Host "Identifiant du modèle de voix (à copier depuis la documentation Google)"
+$modele = Read-Host "Identifiant du modèle de voix (Entrée pour gemini-3.8-flash-lite-tts)"
+if ([string]::IsNullOrWhiteSpace($modele)) { $modele = "gemini-3.8-flash-lite-tts" }
+$env:TTS_MODEL = $modele
 $env:VOICE_FR = Read-Host "Nom de la voix en français"
 $env:VOICE_EN = Read-Host "Nom de la voix en anglais"
 $env:VOICE_PT = Read-Host "Nom de la voix en portugais du Brésil"

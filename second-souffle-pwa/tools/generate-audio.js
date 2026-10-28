@@ -11,9 +11,13 @@
 
    Variables d'environnement (jamais dans le code) :
      GEMINI_API_KEY   clé d'API Google (AI Studio)
-     TTS_MODEL        identifiant du modèle de voix, à copier depuis la documentation Google
+     TTS_MODEL        identifiant du modèle de voix (gemini-3.8-flash-lite-tts d'après la page du modèle chez Google)
      VOICE_FR, VOICE_EN, VOICE_PT   nom d'une voix prédéfinie, une par langue
-     TTS_STYLE_FR, TTS_STYLE_EN, TTS_STYLE_PT   consigne de ton (facultatif)
+     TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
+                      none      aucune consigne, le texte seul est envoyé (le plus sûr pour un premier essai)
+                      metadata  consigne dans speech_metadata.style de chaque partie (nouveaux modèles)
+                      inline    consigne écrite devant le texte (anciens modèles)
+     TTS_STYLE_FR, TTS_STYLE_EN, TTS_STYLE_PT   consigne de ton, utilisée si le mode n'est pas none
 
    Les fichiers sont écrits en WAV dans le dossier --out (audio-out par défaut). Les séances de
    bien-être sont assemblées avec leurs silences. Un fichier déjà produit n'est pas régénéré.
@@ -24,12 +28,13 @@ const fs = require("fs"), path = require("path");
 const args = process.argv.slice(2);
 const has = f => args.includes(f);
 const opt = (f, d) => { const i = args.indexOf(f); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
-const DRY = has("--dry-run"), TEST = has("--test");
+const DRY = has("--dry-run"), TEST = has("--test"), SELFTEST = has("--selftest");
 const LANG = opt("--lang", TEST ? "all" : null), ONLY = opt("--only", ""), OUT = opt("--out", "audio-out");
-if (!LANG) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
-const LANGS = LANG === "all" ? ["fr", "en", "pt"] : [LANG];
+if (!LANG && !SELFTEST) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
+const LANGS = LANG === "all" ? ["fr", "en", "pt"] : [LANG || "fr"];
+const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
 const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL;
-if (!DRY && (!KEY || !MODEL)) { console.log("Il faut GEMINI_API_KEY et TTS_MODEL (ou utilisez --dry-run)."); process.exit(1); }
+if (!DRY && !SELFTEST && (!KEY || !MODEL)) { console.log("Il faut GEMINI_API_KEY et TTS_MODEL (ou utilisez --dry-run)."); process.exit(1); }
 const VOICE = { fr: process.env.VOICE_FR, en: process.env.VOICE_EN, pt: process.env.VOICE_PT };
 const STYLE = {
   fr: process.env.TTS_STYLE_FR || "Dis ce texte en français, d'un ton chaleureux, calme et encourageant, à un rythme moyen : ",
@@ -51,8 +56,8 @@ function parseCsv(text) {
   if (cur || row.length) { row.push(cur); rows.push(row); }
   return rows;
 }
-const csv = parseCsv(fs.readFileSync(path.join(__dirname, "..", "docs", "voiceover-manifest.csv"), "utf8"));
-const head = csv.shift();
+const csv = SELFTEST ? [] : parseCsv(fs.readFileSync(path.join(__dirname, "..", "docs", "voiceover-manifest.csv"), "utf8"));
+if (csv.length) csv.shift();
 let items = csv.filter(r => r.length >= 7).map(r => ({ cat: r[0], id: r[1], lang: r[2], text: r[3], pause: Number(r[4]) || 0, est: Number(r[5]) || 1 }));
 items = items.filter(i => LANGS.includes(i.lang) && i.id.startsWith(ONLY));
 if (TEST) { const seen = {}; items = items.filter(i => (seen[i.lang] ? false : (seen[i.lang] = true))); }
@@ -74,27 +79,58 @@ function tone(sec, rate) {
 }
 const RATE_DEFAULT = 24000;
 
+/* Le service peut répondre en WAV complet (en-tête RIFF) ou en PCM brut avec la fréquence dans le type MIME. */
+function decodeAudio(buf, mime) {
+  if (buf.length > 44 && buf.toString("ascii", 0, 4) === "RIFF" && buf.toString("ascii", 8, 12) === "WAVE") {
+    let pos = 12, rate = RATE_DEFAULT, channels = 1, bits = 16, data = null;
+    while (pos + 8 <= buf.length) {
+      const id = buf.toString("ascii", pos, pos + 4); let size = buf.readUInt32LE(pos + 4);
+      if (id === "fmt ") { channels = buf.readUInt16LE(pos + 10); rate = buf.readUInt32LE(pos + 12); bits = buf.readUInt16LE(pos + 22); }
+      if (id === "data") { if (pos + 8 + size > buf.length) size = buf.length - pos - 8; data = buf.subarray(pos + 8, pos + 8 + size); break; }
+      pos += 8 + size + (size % 2);
+    }
+    if (!data) throw new Error("WAV sans données audio.");
+    if (channels !== 1 || bits !== 16) throw new Error("Format WAV non pris en charge (" + channels + " canal, " + bits + " bits) : il faut du mono 16 bits.");
+    return { pcm: data, rate };
+  }
+  const m = /rate=(\d+)/.exec(mime || "");
+  return { pcm: buf, rate: m ? Number(m[1]) : RATE_DEFAULT };
+}
+
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function synth(item) {
   if (DRY) return { pcm: tone(Math.max(0.4, item.est - item.pause), RATE_DEFAULT), rate: RATE_DEFAULT };
-  const body = {
-    contents: [{ parts: [{ text: STYLE[item.lang] + item.text }] }],
-    generationConfig: { responseModalities: ["AUDIO"], speechConfig: VOICE[item.lang] ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE[item.lang] } } } : undefined }
-  };
-  const url = "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(MODEL) + ":generateContent";
+  const speech = VOICE[item.lang] ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE[item.lang] } } } : undefined;
+  const part = { text: STYLE_MODE === "inline" ? STYLE[item.lang] + item.text : item.text };
+  if (STYLE_MODE === "metadata") part.speech_metadata = { style: STYLE[item.lang] };
+  const body = { contents: [{ parts: [part] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: speech } };
+  const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(MODEL) + ":generateContent";
   for (let attempt = 0; attempt < 5; attempt++) {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": KEY }, body: JSON.stringify(body) });
     if (res.status === 429 || res.status >= 500) { await sleep(2000 * Math.pow(2, attempt)); continue; }
     if (!res.ok) throw new Error("Service de voix : HTTP " + res.status + " " + (await res.text()).slice(0, 300));
     const j = await res.json();
-    const part = (((j.candidates || [])[0] || {}).content || {}).parts;
-    const inline = part && part.find(p => p.inlineData);
+    const parts = (((j.candidates || [])[0] || {}).content || {}).parts;
+    const inline = parts && parts.find(p => p.inlineData || p.inline_data);
     if (!inline) throw new Error("Réponse sans audio : " + JSON.stringify(j).slice(0, 300));
-    const m = /rate=(\d+)/.exec(inline.inlineData.mimeType || "");
-    return { pcm: Buffer.from(inline.inlineData.data, "base64"), rate: m ? Number(m[1]) : RATE_DEFAULT };
+    const d = inline.inlineData || inline.inline_data;
+    return decodeAudio(Buffer.from(d.data, "base64"), d.mimeType || d.mime_type);
   }
   throw new Error("Service de voix : trop d'échecs, réessayez plus tard.");
+}
+
+/* ---------- autotest ---------- */
+if (SELFTEST) {
+  const assert = require("assert");
+  const pcm = tone(0.5, 16000);
+  const a = decodeAudio(wav(pcm, 16000), "audio/wav");
+  assert.strictEqual(a.rate, 16000); assert.strictEqual(a.pcm.length, pcm.length);
+  const b = decodeAudio(pcm, "audio/L16;codec=pcm;rate=22050");
+  assert.strictEqual(b.rate, 22050); assert.strictEqual(b.pcm.length, pcm.length);
+  assert.strictEqual(parseCsv('a,"b, c",d\n1,"x ""y""",3\n')[1][1], 'x "y"');
+  console.log("Autotest réussi : lecture du WAV, du PCM brut et du CSV.");
+  process.exit(0);
 }
 
 /* ---------- production ---------- */
