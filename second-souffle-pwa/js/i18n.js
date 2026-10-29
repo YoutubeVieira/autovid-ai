@@ -220,6 +220,7 @@
     "pay.noteYear": ["Puis 39,99 € par an. Vous serez prévenu le jour 5.", "Then €39.99 a year. You'll be reminded on day 5.", "Depois € 39,99 por ano. Você será avisado no dia 5."],
     "pay.noteMonth": ["Puis 5,99 € par mois. Vous serez prévenu le jour 5.", "Then €5.99 a month. You'll be reminded on day 5.", "Depois € 5,99 por mês. Você será avisado no dia 5."],
     "pay.free": ["Continuer avec la version gratuite", "Continue with the free version", "Continuar com a versão gratuita"],
+    "demo.bar": ["Version de démonstration : coach, abonnement et vidéos simulés", "Demo version: coach, subscription and videos are simulated", "Versão de demonstração: coach, assinatura e vídeos simulados"],
     "pay.demo": ["Démonstration : aucun paiement n'est effectué. Prix proposés, à valider.", "Demo: no payment is made. Proposed prices, to be confirmed.", "Demonstração: nenhum pagamento é feito. Preços propostos, a confirmar."],
     "pay.trialToast": ["Essai lancé (démonstration). Rappel prévu le jour 5.", "Trial started (demo). Reminder planned for day 5.", "Teste iniciado (demonstração). Lembrete previsto para o dia 5."],
     "pay.addonOn": ["Coach privé ajouté à l'essai (démonstration).", "Private coach added to the trial (demo).", "Coach particular adicionado ao teste (demonstração)."],

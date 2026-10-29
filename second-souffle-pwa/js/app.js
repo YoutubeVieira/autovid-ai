@@ -385,6 +385,7 @@
       var h = el.querySelector("h1,h2");
       if (h) { h.setAttribute("tabindex", "-1"); try { h.focus({ preventScroll: true }); } catch (e) { /* ignoré */ } }
     }
+    $("#demo-bar").textContent = t("demo.bar");
     var showTabs = !!TABS[ui.screen];
     tabs.hidden = !showTabs;
     if (showTabs) tabs.innerHTML = tabsHtml();

@@ -1,6 +1,6 @@
 /* Service worker : garde l'application disponible hors connexion.
    Changez VERSION quand la liste des fichiers change. */
-var VERSION = "ss-v4";
+var VERSION = "ss-v5";
 var SHELL = [
   "./", "./index.html", "./manifest.webmanifest", "./css/styles.css",
   "./js/i18n.js", "./js/data.js", "./js/logic.js", "./js/app.js",
