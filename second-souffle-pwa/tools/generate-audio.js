@@ -28,6 +28,10 @@
                       inline    consigne écrite devant le texte (anciens modèles)
      TTS_STYLE_FR, TTS_STYLE_EN, TTS_STYLE_PT   consigne de ton, utilisée si le mode n'est pas none
 
+   Quotas : le script ne force jamais. Une demande toutes les 6 secondes (TTS_MIN_INTERVAL). Si Google répond
+   « quota atteint », il attend (jusqu'à minuit heure du Pacifique pour le quota du jour) puis reprend seul.
+   Si vous l'arrêtez (Ctrl+C), relancez la même commande : les fichiers déjà produits sont conservés.
+
    Les fichiers sont écrits en WAV dans le dossier --out (audio-out par défaut). Les séances de
    bien-être sont assemblées avec leurs silences. Un fichier déjà produit n'est pas régénéré.
    Cette partie n'a pas été testée avec le vrai service : lancez d'abord --test. */
@@ -119,6 +123,31 @@ function decodeAudio(buf, mime) {
 
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const MIN_INTERVAL = (process.env.TTS_MIN_INTERVAL === undefined ? 6 : Number(process.env.TTS_MIN_INTERVAL)) * 1000;  // secondes entre deux demandes
+const MIN_WAIT = (process.env.TTS_MIN_WAIT === undefined ? 60 : Number(process.env.TTS_MIN_WAIT)) * 1000;              // pause minimale après un refus de quota
+let lastCall = 0, waitStep = 0;
+const hhmm = t => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+const dur = ms => ms >= 3600000 ? Math.floor(ms / 3600000) + " h " + Math.round((ms % 3600000) / 60000) + " min" : ms >= 60000 ? Math.round(ms / 60000) + " min" : Math.round(ms / 1000) + " s";
+
+/* Le quota par jour de Google se renouvelle à minuit, heure du Pacifique. */
+function untilPacificMidnight(now) {
+  const f = new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", hour12: false, hour: "numeric", minute: "numeric", second: "numeric" }).formatToParts(new Date(now));
+  const g = t => Number((f.find(p => p.type === t) || {}).value) % 24;
+  return ((24 - g("hour")) * 3600 - g("minute") * 60 - g("second")) * 1000;
+}
+
+/* Lit le refus de quota : délai demandé par Google, quota du jour ou de la minute, quota nul. */
+function readQuota(status, headers, text) {
+  const q = { zero: false, perDay: false, waitMs: 0 };
+  if (/limit:\s*0\b/.test(text)) q.zero = true;
+  if (/PerDay|per day|daily/i.test(text)) q.perDay = true;
+  const m = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(text) || /retry in (\d+(?:\.\d+)?)s/i.exec(text);
+  if (m) q.waitMs = Number(m[1]) * 1000;
+  const ra = Number(headers.get && headers.get("retry-after"));
+  if (ra > 0) q.waitMs = Math.max(q.waitMs, ra * 1000);
+  return q;
+}
+
 async function synth(item, voice, model) {
   if (DRY) return { pcm: tone(Math.max(0.4, item.est - item.pause), RATE_DEFAULT), rate: RATE_DEFAULT };
   const speech = voice ? { voiceConfig: { prebuiltVoiceConfig: { voiceName: voice } } } : undefined;
@@ -126,10 +155,29 @@ async function synth(item, voice, model) {
   if (STYLE_MODE === "metadata") part.speech_metadata = { style: STYLE[item.lang] };
   const body = { contents: [{ parts: [part] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: speech } };
   const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(model || MODEL) + ":generateContent";
-  for (let attempt = 0; attempt < 5; attempt++) {
+  let failures = 0;
+  for (;;) {
+    const gap = lastCall + MIN_INTERVAL - Date.now();      // cadence régulière : on reste sous la limite par minute
+    if (gap > 0) await sleep(gap);
+    lastCall = Date.now();
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": KEY }, body: JSON.stringify(body) });
-    if (res.status === 429 || res.status >= 500) { await sleep(2000 * Math.pow(2, attempt)); continue; }
+    if (res.status === 429) {
+      const text = await res.text(), q = readQuota(res.status, res.headers, text);
+      if (q.zero) throw new Error("Cette clé n'a aucun quota pour ce modèle (limite 0). Essayez TTS_MODEL=gemini-3.8-flash-lite-tts ou une autre clé. " + text.slice(0, 200));
+      let ms;
+      if (q.perDay) ms = untilPacificMidnight(Date.now()) + 120000;
+      else { waitStep = Math.min(waitStep + 1, 6); ms = Math.max(q.waitMs + 5000, MIN_WAIT * waitStep); }
+      console.log("Quota atteint (" + (q.perDay ? "limite du jour" : "limite par minute") + "). Pause de " + dur(ms) + ", reprise vers " + hhmm(Date.now() + ms) + ". Laissez la fenêtre ouverte, ne l'éteignez pas.");
+      await sleep(ms);
+      continue;                                               // un refus de quota n'est jamais un échec : on attend, puis on reprend
+    }
+    if (res.status >= 500) {
+      if (++failures >= 6) throw new Error("Service de voix : erreurs répétées (HTTP " + res.status + "). Relancez plus tard, les fichiers déjà produits sont conservés.");
+      await sleep(Math.min(60000, 2000 * Math.pow(2, failures)));
+      continue;
+    }
     if (!res.ok) throw new Error("Service de voix : HTTP " + res.status + " " + (await res.text()).slice(0, 300));
+    waitStep = 0;
     const j = await res.json();
     const parts = (((j.candidates || [])[0] || {}).content || {}).parts;
     const inline = parts && parts.find(p => p.inlineData || p.inline_data);
@@ -137,7 +185,6 @@ async function synth(item, voice, model) {
     const d = inline.inlineData || inline.inline_data;
     return decodeAudio(Buffer.from(d.data, "base64"), d.mimeType || d.mime_type);
   }
-  throw new Error("Service de voix : trop d'échecs, réessayez plus tard.");
 }
 
 /* ---------- autotest ---------- */
