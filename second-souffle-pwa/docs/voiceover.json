@@ -1,0 +1,1348 @@
+{
+ "note": "Voix off de Second Souffle en français, anglais et portugais du Brésil. À relire (portugais : personne de langue maternelle brésilienne) et à faire valider pour les consignes d'exercice.",
+ "langs": [
+  "fr",
+  "en",
+  "pt"
+ ],
+ "categories": [
+  {
+   "id": "seance",
+   "title": "Séances",
+   "desc": "Annonces pendant une séance : début, transitions, décomptes, fin.",
+   "items": [
+    {
+     "id": "s.intro.short",
+     "name": "Début court",
+     "t": {
+      "fr": "C'est parti. Installez-vous, et respirez un grand coup.",
+      "en": "Let's go. Get settled, and take a deep breath.",
+      "pt": "Vamos lá. Acomode-se e respire fundo."
+     }
+    },
+    {
+     "id": "s.intro.standard",
+     "name": "Début standard",
+     "t": {
+      "fr": "Bonjour, et bravo d'être là. Avancez à votre rythme, et arrêtez si quelque chose vous fait mal.",
+      "en": "Hello, and well done for showing up. Go at your own pace, and stop if anything hurts.",
+      "pt": "Olá, e parabéns por estar aqui. Vá no seu ritmo e pare se algo doer."
+     }
+    },
+    {
+     "id": "s.intro.adapted",
+     "name": "Début, séance adaptée",
+     "t": {
+      "fr": "J'ai adapté la séance à vos zones sensibles. Certains mouvements ont été remplacés.",
+      "en": "I adapted the session to your sensitive areas. Some movements were swapped.",
+      "pt": "Adaptei a sessão às suas áreas sensíveis. Alguns movimentos foram trocados."
+     }
+    },
+    {
+     "id": "s.next",
+     "name": "Exercice suivant",
+     "t": {
+      "fr": "Prochain exercice.",
+      "en": "Next exercise.",
+      "pt": "Próximo exercício."
+     }
+    },
+    {
+     "id": "s.three",
+     "name": "Décompte de départ",
+     "t": {
+      "fr": "Trois, deux, un, c'est parti.",
+      "en": "Three, two, one, go.",
+      "pt": "Três, dois, um, vai."
+     }
+    },
+    {
+     "id": "s.switch",
+     "name": "Changement de côté",
+     "t": {
+      "fr": "Changez de côté.",
+      "en": "Switch sides.",
+      "pt": "Troque de lado."
+     }
+    },
+    {
+     "id": "s.half",
+     "name": "Moitié de séance",
+     "t": {
+      "fr": "Vous êtes à la moitié. Continuez, vous le faites très bien.",
+      "en": "You're halfway there. Keep going, you're doing great.",
+      "pt": "Você está na metade. Continue, você está indo muito bem."
+     }
+    },
+    {
+     "id": "s.ten",
+     "name": "Dix secondes restantes",
+     "t": {
+      "fr": "Plus que dix secondes.",
+      "en": "Ten seconds left.",
+      "pt": "Faltam dez segundos."
+     }
+    },
+    {
+     "id": "s.five",
+     "name": "Décompte final",
+     "t": {
+      "fr": "Cinq, quatre, trois, deux, un.",
+      "en": "Five, four, three, two, one.",
+      "pt": "Cinco, quatro, três, dois, um."
+     }
+    },
+    {
+     "id": "s.rest",
+     "name": "Récupération entre deux exercices",
+     "t": {
+      "fr": "Prenez dix secondes pour souffler.",
+      "en": "Take ten seconds to catch your breath.",
+      "pt": "Tome dez segundos para respirar."
+     }
+    },
+    {
+     "id": "s.breath",
+     "name": "Rappel de respiration",
+     "t": {
+      "fr": "Respirez. Expirez en faisant l'effort.",
+      "en": "Breathe. Breathe out on the effort.",
+      "pt": "Respire. Solte o ar no esforço."
+     }
+    },
+    {
+     "id": "s.posture",
+     "name": "Rappel de posture",
+     "t": {
+      "fr": "Gardez le dos long et les épaules basses.",
+      "en": "Keep your back long and your shoulders down.",
+      "pt": "Mantenha as costas alongadas e os ombros baixos."
+     }
+    },
+    {
+     "id": "s.pain",
+     "name": "Douleur pendant un mouvement",
+     "t": {
+      "fr": "Si vous ressentez une douleur vive, arrêtez ce mouvement. Dites-le au coach, ou voyez un médecin si elle persiste.",
+      "en": "If you feel sharp pain, stop this movement. Tell the coach, or see a doctor if it lasts.",
+      "pt": "Se sentir uma dor aguda, pare este movimento. Avise o coach ou procure um médico se persistir."
+     }
+    },
+    {
+     "id": "s.pause",
+     "name": "Séance en pause",
+     "t": {
+      "fr": "Séance en pause. Reprenez quand vous voulez.",
+      "en": "Session paused. Resume whenever you're ready.",
+      "pt": "Sessão pausada. Retome quando quiser."
+     }
+    },
+    {
+     "id": "s.resume",
+     "name": "Reprise",
+     "t": {
+      "fr": "On reprend.",
+      "en": "Back at it.",
+      "pt": "Vamos retomar."
+     }
+    },
+    {
+     "id": "s.cooldown",
+     "name": "Retour au calme",
+     "t": {
+      "fr": "Place au retour au calme. Ralentissez, et laissez le souffle redescendre.",
+      "en": "Time to cool down. Slow down and let your breathing settle.",
+      "pt": "Hora de desacelerar. Vá mais devagar e deixe a respiração se acalmar."
+     }
+    },
+    {
+     "id": "s.end",
+     "name": "Fin de séance",
+     "t": {
+      "fr": "Séance terminée. Bravo. Buvez un peu d'eau et prenez un instant pour vous.",
+      "en": "Session complete. Well done. Have some water and take a moment for yourself.",
+      "pt": "Sessão concluída. Parabéns. Beba um pouco de água e reserve um momento para você."
+     }
+    },
+    {
+     "id": "s.stop",
+     "name": "Arrêt de la séance",
+     "t": {
+      "fr": "Vous arrêtez la séance ? Aucun souci. Ce que vous avez fait compte.",
+      "en": "Stopping the session? No problem. What you did counts.",
+      "pt": "Vai encerrar a sessão? Sem problema. O que você fez conta."
+     }
+    }
+   ]
+  },
+  {
+   "id": "noms",
+   "title": "Noms des exercices",
+   "desc": "À dire avant chaque exercice, après « Prochain exercice ».",
+   "items": [
+    {
+     "id": "n.marche",
+     "name": "Marche sur place",
+     "t": {
+      "fr": "Marche sur place",
+      "en": "Marching in place",
+      "pt": "Marcha no lugar"
+     }
+    },
+    {
+     "id": "n.epaules-rot",
+     "name": "Rotations d'épaules",
+     "t": {
+      "fr": "Rotations d'épaules",
+      "en": "Shoulder rolls",
+      "pt": "Rotação de ombros"
+     }
+    },
+    {
+     "id": "n.cou-rot",
+     "name": "Rotations lentes du cou",
+     "t": {
+      "fr": "Rotations lentes du cou",
+      "en": "Slow neck rotations",
+      "pt": "Rotações lentas do pescoço"
+     }
+    },
+    {
+     "id": "n.cercles",
+     "name": "Cercles de poignets et de chevilles",
+     "t": {
+      "fr": "Cercles de poignets et de chevilles",
+      "en": "Wrist and ankle circles",
+      "pt": "Círculos de punhos e tornozelos"
+     }
+    },
+    {
+     "id": "n.balancement",
+     "name": "Balancement des bras",
+     "t": {
+      "fr": "Balancement des bras",
+      "en": "Arm swings",
+      "pt": "Balanço dos braços"
+     }
+    },
+    {
+     "id": "n.squat",
+     "name": "Squat sur chaise",
+     "t": {
+      "fr": "Squat sur chaise",
+      "en": "Chair squat",
+      "pt": "Agachamento na cadeira"
+     }
+    },
+    {
+     "id": "n.pont",
+     "name": "Pont fessier",
+     "t": {
+      "fr": "Pont fessier",
+      "en": "Glute bridge",
+      "pt": "Ponte de glúteos"
+     }
+    },
+    {
+     "id": "n.levee-jambe",
+     "name": "Levée de jambe allongée",
+     "t": {
+      "fr": "Levée de jambe allongée",
+      "en": "Lying leg raise",
+      "pt": "Elevação de perna deitado"
+     }
+    },
+    {
+     "id": "n.ext-jambe",
+     "name": "Extension de jambe assise",
+     "t": {
+      "fr": "Extension de jambe assise",
+      "en": "Seated leg extension",
+      "pt": "Extensão de perna sentado"
+     }
+    },
+    {
+     "id": "n.fente",
+     "name": "Fente arrière avec appui",
+     "t": {
+      "fr": "Fente arrière avec appui",
+      "en": "Supported reverse lunge",
+      "pt": "Avanço reverso com apoio"
+     }
+    },
+    {
+     "id": "n.pointes",
+     "name": "Montée sur pointes avec appui",
+     "t": {
+      "fr": "Montée sur pointes avec appui",
+      "en": "Supported calf raise",
+      "pt": "Elevação de panturrilha com apoio"
+     }
+    },
+    {
+     "id": "n.talon-pointe",
+     "name": "Marche talon-pointe",
+     "t": {
+      "fr": "Marche talon-pointe",
+      "en": "Heel-to-toe walk",
+      "pt": "Caminhada calcanhar-ponta"
+     }
+    },
+    {
+     "id": "n.pompes-mur",
+     "name": "Pompes au mur",
+     "t": {
+      "fr": "Pompes au mur",
+      "en": "Wall push-ups",
+      "pt": "Flexão na parede"
+     }
+    },
+    {
+     "id": "n.rowing",
+     "name": "Rowing à l'élastique assis",
+     "t": {
+      "fr": "Rowing à l'élastique assis",
+      "en": "Seated band row",
+      "pt": "Remada sentado com elástico"
+     }
+    },
+    {
+     "id": "n.developpe",
+     "name": "Développé d'épaules assis",
+     "t": {
+      "fr": "Développé d'épaules assis",
+      "en": "Seated shoulder press",
+      "pt": "Desenvolvimento de ombros sentado"
+     }
+    },
+    {
+     "id": "n.elevations",
+     "name": "Élévations latérales",
+     "t": {
+      "fr": "Élévations latérales",
+      "en": "Lateral raises",
+      "pt": "Elevação lateral"
+     }
+    },
+    {
+     "id": "n.flexion-bras",
+     "name": "Flexion de bras",
+     "t": {
+      "fr": "Flexion de bras",
+      "en": "Arm curls",
+      "pt": "Rosca de braço"
+     }
+    },
+    {
+     "id": "n.dead-bug",
+     "name": "Dead bug lent",
+     "t": {
+      "fr": "Dead bug lent",
+      "en": "Slow dead bug",
+      "pt": "Dead bug lento"
+     }
+    },
+    {
+     "id": "n.bascule",
+     "name": "Bascule de bassin",
+     "t": {
+      "fr": "Bascule de bassin",
+      "en": "Pelvic tilt",
+      "pt": "Inclinação pélvica"
+     }
+    },
+    {
+     "id": "n.gainage",
+     "name": "Gainage sur les genoux",
+     "t": {
+      "fr": "Gainage sur les genoux",
+      "en": "Kneeling plank",
+      "pt": "Prancha com joelhos apoiados"
+     }
+    },
+    {
+     "id": "n.bird-dog",
+     "name": "Quadrupédie bras-jambe opposés",
+     "t": {
+      "fr": "Quadrupédie bras-jambe opposés",
+      "en": "Bird dog",
+      "pt": "Bird dog (quatro apoios)"
+     }
+    },
+    {
+     "id": "n.rot-tronc",
+     "name": "Rotation du tronc assis",
+     "t": {
+      "fr": "Rotation du tronc assis",
+      "en": "Seated trunk rotation",
+      "pt": "Rotação de tronco sentado"
+     }
+    },
+    {
+     "id": "n.une-jambe",
+     "name": "Appui sur une jambe près de la chaise",
+     "t": {
+      "fr": "Appui sur une jambe près de la chaise",
+      "en": "Single-leg stand near a chair",
+      "pt": "Apoio em uma perna perto da cadeira"
+     }
+    },
+    {
+     "id": "n.chat",
+     "name": "Étirement du chat",
+     "t": {
+      "fr": "Étirement du chat",
+      "en": "Cat stretch",
+      "pt": "Alongamento do gato"
+     }
+    },
+    {
+     "id": "n.hanches-etir",
+     "name": "Étirement des hanches",
+     "t": {
+      "fr": "Étirement des hanches",
+      "en": "Hip stretch",
+      "pt": "Alongamento de quadril"
+     }
+    },
+    {
+     "id": "n.respiration",
+     "name": "Respiration allongée",
+     "t": {
+      "fr": "Respiration allongée",
+      "en": "Lying breathing",
+      "pt": "Respiração deitado"
+     }
+    },
+    {
+     "id": "n.mollets",
+     "name": "Étirement des mollets au mur",
+     "t": {
+      "fr": "Étirement des mollets au mur",
+      "en": "Wall calf stretch",
+      "pt": "Alongamento de panturrilha na parede"
+     }
+    },
+    {
+     "id": "n.pectoraux",
+     "name": "Étirement des pectoraux dans une porte",
+     "t": {
+      "fr": "Étirement des pectoraux dans une porte",
+      "en": "Doorway chest stretch",
+      "pt": "Alongamento do peitoral na porta"
+     }
+    }
+   ]
+  },
+  {
+   "id": "exercices",
+   "title": "Exercices",
+   "desc": "Consigne parlée de chacun des 28 exercices (19 pour la version 1).",
+   "items": [
+    {
+     "id": "x.marche",
+     "name": "Marche sur place",
+     "t": {
+      "fr": "Marchez sur place, genoux bas. Laissez vos bras se balancer naturellement. Respirez calmement, et gardez un rythme où vous pourriez parler.",
+      "en": "March in place with low knees. Let your arms swing naturally. Breathe calmly, and keep a pace where you could still hold a conversation.",
+      "pt": "Marche no lugar, com os joelhos baixos. Deixe os braços balançarem naturalmente. Respire com calma e mantenha um ritmo em que você conseguiria conversar."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.epaules-rot",
+     "name": "Rotations d'épaules",
+     "t": {
+      "fr": "Debout, bras détendus. Faites de petits cercles avec les épaules, vers l'arrière. Lentement, sans forcer, et respirez.",
+      "en": "Stand with your arms relaxed. Roll your shoulders in small circles, backward. Slowly, no forcing, and keep breathing.",
+      "pt": "Em pé, com os braços relaxados. Faça pequenos círculos com os ombros, para trás. Devagar, sem forçar, e continue respirando."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.cou-rot",
+     "name": "Rotations lentes du cou",
+     "t": {
+      "fr": "Laissez le menton descendre doucement. Dessinez un demi-cercle d'une épaule à l'autre, sans jamais pencher la tête en arrière.",
+      "en": "Let your chin drop gently. Draw a half circle from one shoulder to the other, and never tip your head back.",
+      "pt": "Deixe o queixo descer suavemente. Desenhe um meio círculo de um ombro ao outro, sem nunca inclinar a cabeça para trás."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.cercles",
+     "name": "Cercles de poignets et de chevilles",
+     "t": {
+      "fr": "Faites tourner doucement les poignets, puis les chevilles, dans un sens puis dans l'autre. Petits cercles réguliers.",
+      "en": "Gently rotate your wrists, then your ankles, one way and then the other. Small, steady circles.",
+      "pt": "Gire suavemente os punhos e depois os tornozelos, para um lado e para o outro. Círculos pequenos e regulares."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.balancement",
+     "name": "Balancement des bras",
+     "t": {
+      "fr": "Debout, laissez vos bras se balancer d'avant en arrière, comme un pendule. Détendez les épaules et respirez.",
+      "en": "Standing, let your arms swing forward and back like a pendulum. Relax your shoulders and breathe.",
+      "pt": "Em pé, deixe os braços balançarem para a frente e para trás, como um pêndulo. Relaxe os ombros e respire."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.squat",
+     "name": "Squat sur chaise",
+     "t": {
+      "fr": "Asseyez-vous sur la chaise en reculant les hanches, puis levez-vous en poussant dans les talons. Descendez en deux secondes, remontez en deux secondes.",
+      "en": "Sit back onto the chair by sending your hips behind you, then stand up by pushing through your heels. Two seconds down, two seconds up.",
+      "pt": "Sente na cadeira levando o quadril para trás e levante-se empurrando pelos calcanhares. Dois segundos para descer, dois para subir."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.pont",
+     "name": "Pont fessier",
+     "t": {
+      "fr": "Allongé, genoux pliés. Soulevez le bassin en serrant les fessiers, tenez une seconde, puis redescendez lentement. Expirez en montant.",
+      "en": "Lie on your back, knees bent. Lift your hips while squeezing your glutes, hold one second, then lower slowly. Breathe out as you rise.",
+      "pt": "Deitado de costas, joelhos dobrados. Eleve o quadril contraindo os glúteos, segure um segundo e desça devagar. Solte o ar ao subir."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.levee-jambe",
+     "name": "Levée de jambe allongée",
+     "t": {
+      "fr": "Allongé sur le dos, une jambe pliée. Levez l'autre jambe tendue à hauteur du genou plié, puis redescendez lentement. Dos bien posé.",
+      "en": "Lie on your back with one leg bent. Lift the other, straight leg up to the height of the bent knee, then lower it slowly. Keep your back flat.",
+      "pt": "Deitado de costas, com uma perna dobrada. Levante a outra perna esticada até a altura do joelho dobrado e desça devagar. Mantenha as costas apoiadas."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.ext-jambe",
+     "name": "Extension de jambe assise",
+     "t": {
+      "fr": "Assis, dos droit. Tendez une jambe jusqu'à l'horizontale, tenez deux secondes, puis reposez le pied. Changez de côté à la fin de la série.",
+      "en": "Sit tall. Straighten one leg to horizontal, hold two seconds, then lower the foot. Switch sides at the end of the set.",
+      "pt": "Sentado, com as costas retas. Estique uma perna até a horizontal, segure dois segundos e abaixe o pé. Troque de lado no fim da série."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.fente",
+     "name": "Fente arrière avec appui",
+     "t": {
+      "fr": "Une main sur la chaise. Reculez un pied, fléchissez doucement les deux genoux, puis revenez. Petit mouvement, sans forcer.",
+      "en": "One hand on the chair. Step one foot back, bend both knees gently, then come back. Small movement, no forcing.",
+      "pt": "Uma mão na cadeira. Leve um pé para trás, dobre os dois joelhos com suavidade e volte. Movimento pequeno, sem forçar."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.pointes",
+     "name": "Montée sur pointes avec appui",
+     "t": {
+      "fr": "Une main sur la chaise. Montez sur la pointe des pieds, tenez une seconde, puis redescendez lentement.",
+      "en": "One hand on the chair. Rise onto your toes, hold one second, then lower slowly.",
+      "pt": "Uma mão na cadeira. Suba na ponta dos pés, segure um segundo e desça devagar."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.talon-pointe",
+     "name": "Marche talon-pointe",
+     "t": {
+      "fr": "Marchez en plaçant le talon d'un pied juste devant la pointe de l'autre, comme sur une ligne. Regard devant, un doigt sur le mur si besoin.",
+      "en": "Walk by placing the heel of one foot right in front of the toes of the other, as if on a line. Eyes ahead, fingertips on the wall if you need.",
+      "pt": "Caminhe colocando o calcanhar de um pé logo à frente da ponta do outro, como em uma linha. Olhe para a frente e apoie os dedos na parede se precisar."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.pompes-mur",
+     "name": "Pompes au mur",
+     "t": {
+      "fr": "Face au mur, mains à hauteur d'épaules. Fléchissez les coudes pour approcher la poitrine, puis repoussez. Gardez le corps bien droit.",
+      "en": "Face the wall, hands at shoulder height. Bend your elbows to bring your chest closer, then push back. Keep your body in one straight line.",
+      "pt": "De frente para a parede, com as mãos na altura dos ombros. Dobre os cotovelos para aproximar o peito e empurre de volta. Mantenha o corpo em linha reta."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.rowing",
+     "name": "Rowing à l'élastique assis",
+     "t": {
+      "fr": "Assis, élastique tendu devant vous. Tirez les coudes vers l'arrière en rapprochant les omoplates, puis revenez lentement. Épaules basses.",
+      "en": "Sit tall with the band stretched in front of you. Pull your elbows back, squeezing your shoulder blades together, then return slowly. Keep your shoulders down.",
+      "pt": "Sentado, com o elástico esticado à sua frente. Puxe os cotovelos para trás aproximando as escápulas e volte devagar. Mantenha os ombros baixos."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.developpe",
+     "name": "Développé d'épaules assis",
+     "t": {
+      "fr": "Assis, élastique sous les pieds. Poussez les mains vers le haut sans cambrer le dos, puis redescendez lentement.",
+      "en": "Sit tall with the band under your feet. Press your hands upward without arching your back, then lower slowly.",
+      "pt": "Sentado, com o elástico sob os pés. Empurre as mãos para cima sem arquear as costas e desça devagar."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.elevations",
+     "name": "Élévations latérales",
+     "t": {
+      "fr": "Bras le long du corps. Levez-les sur les côtés jusqu'à hauteur d'épaules, puis redescendez lentement. Pas plus haut.",
+      "en": "Arms at your sides. Raise them out to shoulder height, then lower slowly. No higher.",
+      "pt": "Braços ao lado do corpo. Levante-os para os lados até a altura dos ombros e desça devagar. Sem passar disso."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.flexion-bras",
+     "name": "Flexion de bras",
+     "t": {
+      "fr": "Coudes près du corps. Pliez les bras pour amener les mains vers les épaules, puis redescendez lentement. Poignets droits.",
+      "en": "Elbows close to your body. Bend your arms to bring your hands toward your shoulders, then lower slowly. Keep your wrists straight.",
+      "pt": "Cotovelos junto ao corpo. Dobre os braços levando as mãos aos ombros e desça devagar. Punhos retos."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.dead-bug",
+     "name": "Dead bug lent",
+     "t": {
+      "fr": "Dos au sol, bras vers le plafond, genoux à angle droit. Allongez lentement un bras et la jambe opposée, sans décoller le bas du dos.",
+      "en": "Lie on your back, arms up, knees bent at a right angle. Slowly extend one arm and the opposite leg, keeping your lower back on the floor.",
+      "pt": "Deitado de costas, braços para cima e joelhos a 90 graus. Estenda devagar um braço e a perna oposta, sem descolar a lombar do chão."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.bascule",
+     "name": "Bascule de bassin",
+     "t": {
+      "fr": "Allongé, genoux pliés. Aplatissez le bas du dos contre le sol en basculant le bassin, tenez deux secondes, puis relâchez. Respirez calmement.",
+      "en": "Lie on your back, knees bent. Flatten your lower back to the floor by tilting your pelvis, hold two seconds, then release. Keep breathing calmly.",
+      "pt": "Deitado, joelhos dobrados. Encoste a lombar no chão inclinando a pelve, segure dois segundos e solte. Respire com calma."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.gainage",
+     "name": "Gainage sur les genoux",
+     "t": {
+      "fr": "Sur les genoux et les avant-bras, corps aligné de la tête aux genoux. Serrez le ventre, respirez, et arrêtez dès que le dos se creuse.",
+      "en": "On your knees and forearms, body in one line from head to knees. Tighten your belly, keep breathing, and stop as soon as your back sags.",
+      "pt": "Apoiado nos joelhos e antebraços, corpo alinhado da cabeça aos joelhos. Contraia a barriga, respire e pare assim que a lombar ceder."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.bird-dog",
+     "name": "Quadrupédie bras-jambe opposés",
+     "t": {
+      "fr": "À quatre pattes, dos plat. Tendez un bras et la jambe opposée, sans faire bouger le bassin. Revenez, puis changez de côté.",
+      "en": "On all fours, back flat. Extend one arm and the opposite leg without letting your hips move. Come back, then switch sides.",
+      "pt": "Em quatro apoios, com as costas retas. Estenda um braço e a perna oposta sem mexer o quadril. Volte e troque de lado."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.rot-tronc",
+     "name": "Rotation du tronc assis",
+     "t": {
+      "fr": "Assis, dos droit, bras croisés. Tournez doucement le haut du corps d'un côté, puis de l'autre. Les hanches restent de face.",
+      "en": "Sit tall with your arms crossed. Gently turn your upper body to one side, then the other. Your hips stay facing forward.",
+      "pt": "Sentado, com as costas retas e os braços cruzados. Gire suavemente o tronco para um lado e depois para o outro. O quadril fica de frente."
+     },
+     "v1": false
+    },
+    {
+     "id": "x.une-jambe",
+     "name": "Appui sur une jambe près de la chaise",
+     "t": {
+      "fr": "Debout près de la chaise, une main posée dessus. Levez un pied et tenez dix secondes, regard devant. Changez de jambe.",
+      "en": "Stand next to the chair with one hand on it. Lift one foot and hold ten seconds, eyes ahead. Then switch legs.",
+      "pt": "Em pé ao lado da cadeira, com uma mão apoiada nela. Levante um pé e segure dez segundos, olhando para a frente. Depois troque de perna."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.chat",
+     "name": "Étirement du chat",
+     "t": {
+      "fr": "À quatre pattes. Arrondissez le dos en expirant, puis creusez doucement en inspirant. Un mouvement lent, sans douleur.",
+      "en": "On all fours. Round your back as you breathe out, then arch gently as you breathe in. Slow movement, no pain.",
+      "pt": "Em quatro apoios. Arredonde as costas ao soltar o ar e arqueie com suavidade ao inspirar. Movimento lento, sem dor."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.hanches-etir",
+     "name": "Étirement des hanches",
+     "t": {
+      "fr": "Un genou au sol, l'autre pied devant. Avancez doucement le bassin jusqu'à sentir l'étirement devant la hanche. Tenez, sans forcer.",
+      "en": "One knee on the floor, the other foot in front. Gently shift your hips forward until you feel a stretch at the front of the hip. Hold, no forcing.",
+      "pt": "Um joelho no chão e o outro pé à frente. Leve o quadril devagar para a frente até sentir o alongamento na frente do quadril. Segure, sem forçar."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.respiration",
+     "name": "Respiration allongée",
+     "t": {
+      "fr": "Allongé, genoux pliés, une main sur le ventre. Inspirez par le nez en gonflant le ventre, expirez lentement par la bouche.",
+      "en": "Lie on your back, knees bent, one hand on your belly. Breathe in through your nose so your belly rises, then breathe out slowly through your mouth.",
+      "pt": "Deitado, joelhos dobrados e uma mão na barriga. Inspire pelo nariz enchendo a barriga e solte o ar devagar pela boca."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.mollets",
+     "name": "Étirement des mollets au mur",
+     "t": {
+      "fr": "Face au mur, un pied en arrière, talon au sol. Penchez-vous vers le mur jusqu'à sentir l'étirement du mollet. Tenez trente secondes.",
+      "en": "Face the wall with one foot back, heel on the floor. Lean toward the wall until you feel your calf stretch. Hold thirty seconds.",
+      "pt": "De frente para a parede, com um pé atrás e o calcanhar no chão. Incline-se para a parede até sentir o alongamento da panturrilha. Segure trinta segundos."
+     },
+     "v1": true
+    },
+    {
+     "id": "x.pectoraux",
+     "name": "Étirement des pectoraux dans une porte",
+     "t": {
+      "fr": "Dans l'encadrement d'une porte, avant-bras posés sur les montants. Avancez un peu le torse jusqu'à sentir l'étirement devant les épaules. Tenez, sans forcer.",
+      "en": "In a doorway, forearms resting on the frame. Lean forward until you feel a stretch across the front of your shoulders. Hold, no forcing.",
+      "pt": "Na porta, com os antebraços apoiados nos batentes. Incline o tronco até sentir o alongamento na frente dos ombros. Segure, sem forçar."
+     },
+     "v1": false
+    }
+   ]
+  },
+  {
+   "id": "bienetre",
+   "title": "Bien-être",
+   "desc": "Séances guidées avec pauses. Chaque phrase est un fichier audio ; la pause est du silence ajouté ensuite.",
+   "items": [
+    {
+     "id": "w.respiration",
+     "name": "Respiration apaisante (environ 2 minutes)",
+     "segments": [
+      {
+       "t": {
+        "fr": "Installez-vous confortablement, assis ou allongé. Fermez les yeux si vous le souhaitez.",
+        "en": "Settle in comfortably, sitting or lying down. Close your eyes if you like.",
+        "pt": "Acomode-se bem, sentado ou deitado. Feche os olhos, se quiser."
+       },
+       "pause": 4
+      },
+      {
+       "t": {
+        "fr": "Posez une main sur le ventre. Nous allons respirer lentement.",
+        "en": "Rest one hand on your belly. We're going to breathe slowly.",
+        "pt": "Apoie uma mão na barriga. Vamos respirar devagar."
+       },
+       "pause": 3
+      },
+      {
+       "t": {
+        "fr": "Inspirez par le nez, doucement, en comptant jusqu'à quatre. Un, deux, trois, quatre.",
+        "en": "Breathe in through your nose, gently, counting to four. One, two, three, four.",
+        "pt": "Inspire pelo nariz, com suavidade, contando até quatro. Um, dois, três, quatro."
+       },
+       "pause": 1
+      },
+      {
+       "t": {
+        "fr": "Expirez lentement par la bouche, en comptant jusqu'à six. Un, deux, trois, quatre, cinq, six.",
+        "en": "Breathe out slowly through your mouth, counting to six. One, two, three, four, five, six.",
+        "pt": "Solte o ar devagar pela boca, contando até seis. Um, dois, três, quatro, cinco, seis."
+       },
+       "pause": 3
+      },
+      {
+       "t": {
+        "fr": "Recommencez à votre rythme. Le ventre se gonfle, puis se vide.",
+        "en": "Continue at your own pace. Your belly fills, then empties.",
+        "pt": "Continue no seu ritmo. A barriga enche e depois esvazia."
+       },
+       "pause": 20
+      },
+      {
+       "t": {
+        "fr": "Si vous sentez un vertige, reprenez une respiration normale.",
+        "en": "If you feel dizzy, go back to normal breathing.",
+        "pt": "Se sentir tontura, volte a respirar normalmente."
+       },
+       "pause": 2
+      },
+      {
+       "t": {
+        "fr": "Laissez les épaules tomber. La mâchoire se détend.",
+        "en": "Let your shoulders drop. Your jaw softens.",
+        "pt": "Deixe os ombros caírem. A mandíbula relaxa."
+       },
+       "pause": 15
+      },
+      {
+       "t": {
+        "fr": "Encore trois respirations. Inspirez… et expirez.",
+        "en": "Three more breaths. Breathe in… and breathe out.",
+        "pt": "Mais três respirações. Inspire… e solte o ar."
+       },
+       "pause": 12
+      },
+      {
+       "t": {
+        "fr": "Doucement, reprenez une respiration naturelle. Bougez les doigts et les orteils. Quand vous êtes prêt, ouvrez les yeux.",
+        "en": "Gently return to natural breathing. Wiggle your fingers and toes. When you're ready, open your eyes.",
+        "pt": "Aos poucos, volte à respiração natural. Mexa os dedos das mãos e dos pés. Quando estiver pronto, abra os olhos."
+       },
+       "pause": 0
+      }
+     ]
+    },
+    {
+     "id": "w.soir",
+     "name": "Relaxation du soir (environ 2 minutes)",
+     "segments": [
+      {
+       "t": {
+        "fr": "Allongez-vous confortablement. Laissez le lit ou le tapis vous porter.",
+        "en": "Lie down comfortably. Let the bed or the mat hold you.",
+        "pt": "Deite-se confortavelmente. Deixe a cama ou o tapete sustentar você."
+       },
+       "pause": 4
+      },
+      {
+       "t": {
+        "fr": "Prenez une grande inspiration, et soufflez longuement.",
+        "en": "Take a big breath in, and let it out for a long time.",
+        "pt": "Respire fundo e solte o ar longamente."
+       },
+       "pause": 5
+      },
+      {
+       "t": {
+        "fr": "Portez votre attention sur vos pieds. Laissez-les devenir lourds et chauds.",
+        "en": "Bring your attention to your feet. Let them become heavy and warm.",
+        "pt": "Leve a atenção aos pés. Deixe-os ficarem pesados e quentes."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Remontez vers les jambes, les genoux. Relâchez, sans rien faire.",
+        "en": "Move up to your legs and knees. Let go, without doing anything.",
+        "pt": "Suba para as pernas e os joelhos. Solte, sem fazer nada."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Les hanches, le bas du dos. Laissez le poids s'enfoncer dans le sol.",
+        "en": "Your hips, your lower back. Let the weight sink into the floor.",
+        "pt": "O quadril, a lombar. Deixe o peso afundar no chão."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Le ventre monte et descend au rythme de votre souffle.",
+        "en": "Your belly rises and falls with your breath.",
+        "pt": "A barriga sobe e desce no ritmo da sua respiração."
+       },
+       "pause": 10
+      },
+      {
+       "t": {
+        "fr": "Les épaules, les bras, jusqu'au bout des doigts. Tout se détend.",
+        "en": "Your shoulders, your arms, all the way to your fingertips. Everything softens.",
+        "pt": "Os ombros, os braços, até a ponta dos dedos. Tudo relaxa."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Le cou, la mâchoire, le front. Laissez le visage devenir doux.",
+        "en": "Your neck, your jaw, your forehead. Let your face go soft.",
+        "pt": "O pescoço, a mandíbula, a testa. Deixe o rosto ficar macio."
+       },
+       "pause": 10
+      },
+      {
+       "t": {
+        "fr": "Restez ici quelques respirations. Si des pensées arrivent, laissez-les passer.",
+        "en": "Stay here for a few breaths. If thoughts come, let them pass.",
+        "pt": "Fique aqui por algumas respirações. Se pensamentos surgirem, deixe-os passar."
+       },
+       "pause": 20
+      },
+      {
+       "t": {
+        "fr": "Quand vous le souhaitez, bougez doucement les doigts et les pieds. Vous pouvez rester allongé ou vous endormir.",
+        "en": "Whenever you like, gently move your fingers and feet. You can stay lying down, or drift off to sleep.",
+        "pt": "Quando quiser, mexa devagar os dedos das mãos e dos pés. Você pode continuar deitado ou adormecer."
+       },
+       "pause": 0
+      }
+     ]
+    },
+    {
+     "id": "w.reveil",
+     "name": "Réveil en douceur (environ 1 min 30)",
+     "segments": [
+      {
+       "t": {
+        "fr": "Bonjour. Avant de vous lever, restez allongé un instant et prenez trois grandes respirations.",
+        "en": "Good morning. Before you get up, stay lying down for a moment and take three deep breaths.",
+        "pt": "Bom dia. Antes de levantar, fique deitado um instante e respire fundo três vezes."
+       },
+       "pause": 10
+      },
+      {
+       "t": {
+        "fr": "Étirez les bras au-dessus de la tête et les jambes vers le bas, comme pour vous allonger. Tenez, puis relâchez.",
+        "en": "Stretch your arms overhead and your legs downward, as if lengthening yourself. Hold, then release.",
+        "pt": "Estique os braços acima da cabeça e as pernas para baixo, como se quisesse se alongar. Segure e depois solte."
+       },
+       "pause": 6
+      },
+      {
+       "t": {
+        "fr": "Ramenez les genoux vers la poitrine, doucement, et faites quelques petits balancements.",
+        "en": "Bring your knees toward your chest, gently, and rock a little from side to side.",
+        "pt": "Leve os joelhos em direção ao peito, com suavidade, e balance um pouco de um lado para o outro."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Asseyez-vous au bord du lit, pieds au sol. Faites rouler les épaules vers l'arrière, trois fois.",
+        "en": "Sit on the edge of the bed, feet on the floor. Roll your shoulders backward, three times.",
+        "pt": "Sente-se na beira da cama, com os pés no chão. Gire os ombros para trás, três vezes."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Tournez doucement la tête à droite, puis à gauche, sans forcer.",
+        "en": "Gently turn your head to the right, then to the left, without forcing.",
+        "pt": "Gire a cabeça devagar para a direita e depois para a esquerda, sem forçar."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Levez-vous lentement, en vous appuyant si besoin. Vous êtes prêt pour la journée.",
+        "en": "Stand up slowly, using support if you need it. You're ready for the day.",
+        "pt": "Levante-se devagar, apoiando-se se precisar. Você está pronto para o dia."
+       },
+       "pause": 0
+      }
+     ]
+    },
+    {
+     "id": "w.bureau",
+     "name": "Pause bureau (environ 1 min 30)",
+     "segments": [
+      {
+       "t": {
+        "fr": "Pause. Asseyez-vous au bord de la chaise, les pieds à plat.",
+        "en": "Break time. Sit at the edge of your chair, feet flat.",
+        "pt": "Hora da pausa. Sente-se na beira da cadeira, com os pés apoiados no chão."
+       },
+       "pause": 3
+      },
+      {
+       "t": {
+        "fr": "Faites rouler vos épaules vers l'arrière, dix fois, lentement.",
+        "en": "Roll your shoulders backward, ten times, slowly.",
+        "pt": "Gire os ombros para trás, dez vezes, devagar."
+       },
+       "pause": 8
+      },
+      {
+       "t": {
+        "fr": "Penchez doucement l'oreille vers l'épaule droite. Tenez dix secondes. Puis à gauche.",
+        "en": "Gently tilt your ear toward your right shoulder. Hold ten seconds. Then the left.",
+        "pt": "Incline suavemente a orelha em direção ao ombro direito. Segure dez segundos. Depois, o esquerdo."
+       },
+       "pause": 12
+      },
+      {
+       "t": {
+        "fr": "Étirez un bras devant vous, paume vers le haut, et tirez doucement les doigts vers le bas. Changez de côté.",
+        "en": "Stretch one arm in front of you, palm up, and gently pull your fingers downward. Switch sides.",
+        "pt": "Estique um braço à frente, com a palma para cima, e puxe os dedos suavemente para baixo. Troque de lado."
+       },
+       "pause": 12
+      },
+      {
+       "t": {
+        "fr": "Joignez les mains derrière le dos et ouvrez la poitrine. Respirez.",
+        "en": "Clasp your hands behind your back and open your chest. Breathe.",
+        "pt": "Una as mãos atrás das costas e abra o peito. Respire."
+       },
+       "pause": 10
+      },
+      {
+       "t": {
+        "fr": "Levez-vous, marchez trente secondes, et buvez un verre d'eau.",
+        "en": "Stand up, walk for thirty seconds, and drink a glass of water.",
+        "pt": "Levante-se, caminhe por trinta segundos e beba um copo de água."
+       },
+       "pause": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "motiv-4",
+   "title": "Motivation · Accueil",
+   "desc": "",
+   "items": [
+    {
+     "id": "o.welcome",
+     "name": "o.welcome",
+     "t": {
+      "fr": "Bienvenue dans Second Souffle. Je suis Léo, votre guide virtuel. Je vous pose trois questions, et votre première séance est prête.",
+      "en": "Welcome to Second Wind. I'm Léo, your virtual guide. Three questions, and your first session is ready.",
+      "pt": "Bem-vindo ao Segundo Fôlego. Eu sou o Léo, seu guia virtual. Três perguntas e sua primeira sessão está pronta."
+     }
+    },
+    {
+     "id": "o.zones",
+     "name": "o.zones",
+     "t": {
+      "fr": "Touchez les zones qui vous tirent. Je les éviterai dans vos séances.",
+      "en": "Tap the areas that pull. I'll steer your sessions around them.",
+      "pt": "Toque nas áreas que incomodam. Vou evitá-las nas suas sessões."
+     }
+    },
+    {
+     "id": "o.ready",
+     "name": "o.ready",
+     "t": {
+      "fr": "Votre séance est prête. Elle est adaptée à vous.",
+      "en": "Your session is ready. It's tailored to you.",
+      "pt": "Sua sessão está pronta. Ela foi adaptada a você."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-5",
+   "title": "Motivation · Message du matin",
+   "desc": "",
+   "items": [
+    {
+     "id": "m.1",
+     "name": "m.1",
+     "t": {
+      "fr": "Bonjour. Aujourd'hui, pas besoin d'être parfait. Dix minutes suffisent.",
+      "en": "Good morning. Today you don't have to be perfect. Ten minutes is enough.",
+      "pt": "Bom dia. Hoje você não precisa ser perfeito. Dez minutos bastam."
+     }
+    },
+    {
+     "id": "m.2",
+     "name": "m.2",
+     "t": {
+      "fr": "Votre corps vous remercie à chaque mouvement. On y va doucement ?",
+      "en": "Your body thanks you with every movement. Shall we start gently?",
+      "pt": "Seu corpo agradece a cada movimento. Vamos começar com calma?"
+     }
+    },
+    {
+     "id": "m.3",
+     "name": "m.3",
+     "t": {
+      "fr": "Le plus dur, c'est de commencer. Vous êtes déjà là.",
+      "en": "The hardest part is starting. You're already here.",
+      "pt": "O mais difícil é começar. Você já está aqui."
+     }
+    },
+    {
+     "id": "m.4",
+     "name": "m.4",
+     "t": {
+      "fr": "Une petite séance vaut mieux qu'aucune. Faisons-en une ensemble.",
+      "en": "A short session beats none. Let's do one together.",
+      "pt": "Uma sessão curta vale mais do que nenhuma. Vamos fazer uma juntos."
+     }
+    },
+    {
+     "id": "m.5",
+     "name": "m.5",
+     "t": {
+      "fr": "La lumière monte. Prenez votre temps, et commençons.",
+      "en": "The light is rising. Take your time, and let's begin.",
+      "pt": "A luz está subindo. Tome seu tempo e vamos começar."
+     }
+    },
+    {
+     "id": "m.6",
+     "name": "m.6",
+     "t": {
+      "fr": "Chaque séance est une victoire, même petite.",
+      "en": "Every session is a win, even a small one.",
+      "pt": "Cada sessão é uma vitória, mesmo pequena."
+     }
+    },
+    {
+     "id": "m.7",
+     "name": "m.7",
+     "t": {
+      "fr": "Écoutez votre corps aujourd'hui. Je m'occupe du reste.",
+      "en": "Listen to your body today. I'll take care of the rest.",
+      "pt": "Escute seu corpo hoje. Eu cuido do resto."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-6",
+   "title": "Motivation · Repos choisi",
+   "desc": "",
+   "items": [
+    {
+     "id": "r.1",
+     "name": "r.1",
+     "t": {
+      "fr": "Un jour de repos choisi, c'est un jour de progrès. Votre corps récupère.",
+      "en": "A chosen rest day is a day of progress. Your body is recovering.",
+      "pt": "Um dia de descanso escolhido é um dia de progresso. Seu corpo está se recuperando."
+     }
+    },
+    {
+     "id": "r.2",
+     "name": "r.2",
+     "t": {
+      "fr": "Pas la forme aujourd'hui ? C'est normal. Reposez-vous, on se retrouve demain.",
+      "en": "Not feeling it today? That's normal. Rest up, see you tomorrow.",
+      "pt": "Sem energia hoje? É normal. Descanse, nos vemos amanhã."
+     }
+    },
+    {
+     "id": "r.3",
+     "name": "r.3",
+     "t": {
+      "fr": "Votre semaine reste lumineuse. Le repos fait partie du programme.",
+      "en": "Your week stays bright. Rest is part of the plan.",
+      "pt": "Sua semana continua luminosa. O descanso faz parte do programa."
+     }
+    },
+    {
+     "id": "r.4",
+     "name": "r.4",
+     "t": {
+      "fr": "Si vous voulez bouger un peu, une marche lente de cinq minutes suffit.",
+      "en": "If you'd like to move a little, a slow five-minute walk is enough.",
+      "pt": "Se quiser se mexer um pouco, uma caminhada lenta de cinco minutos basta."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-7",
+   "title": "Motivation · Encouragement pendant l'effort",
+   "desc": "",
+   "items": [
+    {
+     "id": "e.1",
+     "name": "e.1",
+     "t": {
+      "fr": "Très bien. Continuez à votre rythme.",
+      "en": "Very good. Keep going at your own pace.",
+      "pt": "Muito bem. Continue no seu ritmo."
+     }
+    },
+    {
+     "id": "e.2",
+     "name": "e.2",
+     "t": {
+      "fr": "Respirez, vous êtes en train de le faire.",
+      "en": "Breathe, you're doing it.",
+      "pt": "Respire, você está conseguindo."
+     }
+    },
+    {
+     "id": "e.3",
+     "name": "e.3",
+     "t": {
+      "fr": "Beau mouvement. Gardez cette précision.",
+      "en": "Nice movement. Keep that control.",
+      "pt": "Belo movimento. Mantenha esse controle."
+     }
+    },
+    {
+     "id": "e.4",
+     "name": "e.4",
+     "t": {
+      "fr": "Encore quelques secondes. Vous pouvez le faire.",
+      "en": "A few more seconds. You can do this.",
+      "pt": "Mais alguns segundos. Você consegue."
+     }
+    },
+    {
+     "id": "e.5",
+     "name": "e.5",
+     "t": {
+      "fr": "C'est la qualité qui compte, pas la vitesse.",
+      "en": "Quality matters, not speed.",
+      "pt": "O que importa é a qualidade, não a velocidade."
+     }
+    },
+    {
+     "id": "e.6",
+     "name": "e.6",
+     "t": {
+      "fr": "Si c'est trop, faites plus petit. Votre corps décide.",
+      "en": "If it's too much, make it smaller. Your body decides.",
+      "pt": "Se estiver demais, faça menor. Seu corpo decide."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-8",
+   "title": "Motivation · Après la séance",
+   "desc": "",
+   "items": [
+    {
+     "id": "p.hard",
+     "name": "p.hard",
+     "t": {
+      "fr": "Merci de me le dire. Demain, on baisse d'un cran.",
+      "en": "Thanks for telling me. Tomorrow, we'll dial it down a notch.",
+      "pt": "Obrigado por me dizer. Amanhã, vamos aliviar um pouco."
+     }
+    },
+    {
+     "id": "p.ok",
+     "name": "p.ok",
+     "t": {
+      "fr": "Parfait. On garde ce rythme et on ajoute un mouvement nouveau demain.",
+      "en": "Perfect. We keep this pace and add one new movement tomorrow.",
+      "pt": "Perfeito. Mantemos esse ritmo e adicionamos um movimento novo amanhã."
+     }
+    },
+    {
+     "id": "p.easy",
+     "name": "p.easy",
+     "t": {
+      "fr": "Super. Demain, on monte d'un cran, doucement.",
+      "en": "Great. Tomorrow we step it up a notch, gently.",
+      "pt": "Ótimo. Amanhã subimos um pouco o nível, com calma."
+     }
+    },
+    {
+     "id": "p.bravo",
+     "name": "p.bravo",
+     "t": {
+      "fr": "Bravo. Vous venez de faire quelque chose de bon pour vous.",
+      "en": "Well done. You just did something good for yourself.",
+      "pt": "Parabéns. Você acabou de fazer algo bom por si mesmo."
+     }
+    },
+    {
+     "id": "p.sun",
+     "name": "p.sun",
+     "t": {
+      "fr": "Le soleil monte un peu plus haut aujourd'hui.",
+      "en": "The sun is a little higher today.",
+      "pt": "O sol está um pouco mais alto hoje."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-9",
+   "title": "Motivation · Reprise après une pause",
+   "desc": "",
+   "items": [
+    {
+     "id": "c.1",
+     "name": "c.1",
+     "t": {
+      "fr": "Content de vous revoir. Une pause ne fait rien perdre : on reprend en douceur.",
+      "en": "Good to see you again. A break doesn't undo your progress: we restart gently.",
+      "pt": "Que bom ver você de volta. Uma pausa não apaga o que você conquistou: vamos retomar com calma."
+     }
+    },
+    {
+     "id": "c.2",
+     "name": "c.2",
+     "t": {
+      "fr": "Pas de culpabilité. Aujourd'hui, une séance courte et facile.",
+      "en": "No guilt. Today, a short, easy session.",
+      "pt": "Sem culpa. Hoje, uma sessão curta e fácil."
+     }
+    },
+    {
+     "id": "c.3",
+     "name": "c.3",
+     "t": {
+      "fr": "Reprendre, c'est déjà gagner. Allons-y.",
+      "en": "Starting again is already a win. Let's go.",
+      "pt": "Recomeçar já é vencer. Vamos."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-10",
+   "title": "Motivation · Bilan de la semaine",
+   "desc": "",
+   "items": [
+    {
+     "id": "b.good",
+     "name": "b.good",
+     "t": {
+      "fr": "Belle semaine. Votre lumière grandit, jour après jour.",
+      "en": "A good week. Your light grows, day after day.",
+      "pt": "Que boa semana. Sua luz cresce, dia após dia."
+     }
+    },
+    {
+     "id": "b.calm",
+     "name": "b.calm",
+     "t": {
+      "fr": "Cette semaine a été plus calme, et c'est très bien. On repart ensemble.",
+      "en": "This week was quieter, and that's fine. We start again together.",
+      "pt": "Esta semana foi mais tranquila, e tudo bem. Recomeçamos juntos."
+     }
+    }
+   ]
+  },
+  {
+   "id": "motiv-11",
+   "title": "Motivation · Sécurité",
+   "desc": "",
+   "items": [
+    {
+     "id": "f.health",
+     "name": "f.health",
+     "t": {
+      "fr": "Votre santé passe avant tout. En cas de douleur forte, de vertige ou de gêne dans la poitrine, arrêtez et appelez un médecin ou les urgences.",
+      "en": "Your health comes first. If you feel severe pain, dizziness or chest discomfort, stop and call a doctor or emergency services.",
+      "pt": "Sua saúde vem em primeiro lugar. Em caso de dor forte, tontura ou desconforto no peito, pare e chame um médico ou o serviço de emergência."
+     }
+    },
+    {
+     "id": "f.virtual",
+     "name": "f.virtual",
+     "t": {
+      "fr": "Je suis un guide virtuel, pas un médecin. Pour toute question de santé, parlez à un professionnel.",
+      "en": "I'm a virtual guide, not a doctor. For any health question, talk to a professional.",
+      "pt": "Sou um guia virtual, não um médico. Para qualquer dúvida de saúde, fale com um profissional."
+     }
+    }
+   ]
+  }
+ ]
+}
