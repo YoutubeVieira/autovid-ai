@@ -76,3 +76,7 @@ export default function AutoVidCreator() {
     </div>
   );
 }
+
+## Monteur autonome
+
+Voir `editor/README.md` (pipeline ffmpeg), `docs/ANALYSE.md` (analyse des videos de reference) et `.claude/agents` + `.claude/skills` (agents et skills).
