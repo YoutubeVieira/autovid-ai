@@ -71,6 +71,8 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `docs/voiceover.json`, `docs/voiceover-manifest.csv` | Tous les textes de voix off (137 par langue) et le manifeste des fichiers audio |
 | `tools/gen-voiceover.py`, `tools/voiceover_content.py` | Génèrent les fichiers de voix off à partir du contenu écrit |
 | `tools/build-voiceover.py` | Génère la page « Voix off » |
+| `Verifier-ma-cle.bat`, `tools/verifier-cle.js` | Vérifie que votre clé d'API Google accepte les modèles de voix (sans rien produire, sans afficher la clé) |
+| `Produire-les-voix.bat`, `tools/tout-faire.ps1` | Double-clic : produit tous les audios avec les voix par défaut (seule la clé est demandée) |
 | `tools/generer-audio.ps1` | Assistant Windows : pose les questions et lance la production des voix (clé en saisie masquée) |
 | `tools/generate-audio.js`, `tools/audio-fixes.js` | Produit les fichiers audio (WAV) depuis le manifeste, une voix de femme et une voix d'homme par langue (dossiers `f` et `m`) ; `--audition` compare des voix, `--dry-run` essaie sans clé ; `audio-fixes.js` met le texte au genre de la voix (Léa, accords) |
 
