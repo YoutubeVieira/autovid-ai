@@ -5,8 +5,8 @@ import { FLAGS, Flag } from "./flags";
 import basemap from "../public/geo/basemap.json";
 import type { Camera, FillKey, Item, LonLat, Scene, StoryProps } from "./types";
 
-const EMOJI = "'Noto Color Emoji'";
-const FONT = `Inter, ${EMOJI}, 'DejaVu Sans', sans-serif`;
+export const EMOJI = "'Noto Color Emoji'";
+export const FONT = `Inter, ${EMOJI}, 'DejaVu Sans', sans-serif`;
 const TINT: Record<string, string> = { gray: "#b9b6ab", red: "#b3322d", yellow: "#dcb52a" };
 const FADE = 14; // images de fondu quand un pays change de remplissage
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -71,11 +71,11 @@ const FillLayer: React.FC<{ f: (typeof features)[number]; k: FillKey; opacity: n
   return <path d={f.d} fill={TINT[k]} opacity={opacity * 0.88} />;
 };
 
-const MapLayer: React.FC<{ scenes: Scene[]; i: number; f: number; cam: Camera; blur: number }> = ({ scenes, i, f, cam, blur }) => {
+export const MapLayer: React.FC<{ scenes: Scene[]; i: number; f: number; cam: Camera; blur: number; w?: number; h?: number }> = ({ scenes, i, f, cam, blur, w = W, h = H }) => {
   const cur = fillsAt(scenes, i), prev = i > 0 ? fillsAt(scenes, i - 1) : {};
   const a = interpolate(f, [0, FADE], [0, 1], { extrapolateRight: "clamp" });
   return (
-    <svg width={W} height={H} style={{ position: "absolute", inset: 0, filter: blur > 0.6 ? `blur(${blur.toFixed(1)}px)` : undefined }}>
+    <svg width={w} height={h} style={{ position: "absolute", inset: 0, filter: blur > 0.6 ? `blur(${blur.toFixed(1)}px)` : undefined }}>
       <defs>
         {features.filter(x => FLAGS[x.id.toLowerCase()]).map(x => (
           <pattern key={x.id} id={`flag-${x.id}`} patternUnits="userSpaceOnUse" x={x.flagBox[0]} y={x.flagBox[1]} width={x.flagBox[2]} height={x.flagBox[3]}>
@@ -85,7 +85,7 @@ const MapLayer: React.FC<{ scenes: Scene[]; i: number; f: number; cam: Camera; b
         <clipPath id="free-zone"><path d={polygonPath(FREE_ZONE)} /></clipPath>
         <filter id="glow" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="5" /></filter>
       </defs>
-      <g transform={cameraTransform(cam)}>
+      <g transform={cameraTransform(cam, w, h)}>
         <image href={staticFile("geo/basemap.jpg")} x={basemap.x} y={basemap.y} width={basemap.width} height={basemap.height} />
         {features.map(x => {
           const c = cur[x.id] || "land", p = prev[x.id] || "land";
@@ -110,7 +110,7 @@ const MapLayer: React.FC<{ scenes: Scene[]; i: number; f: number; cam: Camera; b
 const hex = (r: number) => Array.from({ length: 6 }, (_, k) => { const a = Math.PI / 3 * k - Math.PI / 6; return `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)}`; }).join(" ");
 const GLOW = "drop-shadow(0 0 14px #ffffffaa) drop-shadow(0 8px 10px #000a)";
 
-const Hex: React.FC<{ r?: number; children?: React.ReactNode; fill?: string }> = ({ r = 90, children, fill = "#f4f4f0" }) => (
+export const Hex: React.FC<{ r?: number; children?: React.ReactNode; fill?: string }> = ({ r = 90, children, fill = "#f4f4f0" }) => (
   <svg width={r * 2.2} height={r * 2.2} viewBox={`${-r * 1.1} ${-r * 1.1} ${r * 2.2} ${r * 2.2}`} style={{ overflow: "visible", filter: GLOW }}>
     <polygon points={hex(r)} fill="#9aa4a6" />
     <polygon points={hex(r * 0.9)} fill={fill} />
@@ -189,7 +189,7 @@ const Ping: React.FC<{ at: [number, number]; delay: number; color: string }> = (
   );
 };
 
-const Arrow: React.FC<{ from: [number, number]; to: [number, number]; delay: number; color: string }> = ({ from, to, delay, color }) => {
+export const Arrow: React.FC<{ from: [number, number]; to: [number, number]; delay: number; color: string }> = ({ from, to, delay, color }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   const p = clamp((f - delay) / (fps * 0.9));
   if (f < delay) return null;
@@ -207,7 +207,7 @@ const Arrow: React.FC<{ from: [number, number]; to: [number, number]; delay: num
 };
 
 /* Gros chiffre qui défile (finance) : carte sombre, nombre en police grasse, intitulé dessous. */
-const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number }> = ({ it, delay }) => {
+export const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number }> = ({ it, delay }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   const p = 1 - Math.pow(1 - clamp((f - delay - 4) / (fps * 1.2)), 3);
   const v = (it.from ?? 0) + (it.value - (it.from ?? 0)) * p;

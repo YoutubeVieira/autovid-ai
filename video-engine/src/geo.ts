@@ -30,15 +30,15 @@ export const project = (p: LonLat): [number, number] => projection(p) as [number
 export const polygonPath = (pts: LonLat[]) => "M" + pts.map(p => project(p).join(",")).join("L") + "Z";
 
 /* Position écran d'un point géographique pour une caméra donnée. */
-export function toScreen(p: LonLat, cam: Camera): [number, number] {
+export function toScreen(p: LonLat, cam: Camera, w = W, h = H): [number, number] {
   const [cx, cy] = project([cam.lon, cam.lat]);
   const [x, y] = project(p);
-  return [(x - cx) * cam.zoom + W / 2, (y - cy) * cam.zoom + H / 2];
+  return [(x - cx) * cam.zoom + w / 2, (y - cy) * cam.zoom + h / 2];
 }
 
-export function cameraTransform(cam: Camera): string {
+export function cameraTransform(cam: Camera, w = W, h = H): string {
   const [cx, cy] = project([cam.lon, cam.lat]);
-  return `translate(${W / 2} ${H / 2}) scale(${cam.zoom}) translate(${-cx} ${-cy})`;
+  return `translate(${w / 2} ${h / 2}) scale(${cam.zoom}) translate(${-cx} ${-cy})`;
 }
 
 /* Zone « libre » de la France de 1940 (au sud de la ligne de démarcation), tracée à la main :
