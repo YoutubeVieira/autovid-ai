@@ -23,6 +23,14 @@ node tools/render.mjs <sujet> --frame 120  # une image de contrôle (out/<sujet>
 npm test
 ```
 
+## Rendu « viral » : ce que fait le moteur
+
+- **Fond satellite réel** : relief ombré naturel Natural Earth (domaine public), reprojeté en Mercator et assombri (`python3 tools/make-basemap.py`), aligné sur les contours des pays.
+- **Caméra vivante** : ressort avec rebond (`move`: `pan`, `zoomin`, `zoomout`, `cut`), dérive lente, flou de mouvement proportionnel à la vitesse, secousse + coup de zoom + flash blanc à chaque impact (`impacts`, `flash`).
+- **Éléments qui claquent** : apparition à fort rebond avec bascule, onde de choc, flottement ; `burst` (explosion), `arrow` (flèche d'attaque qui se dessine), `ping` (anneaux sur un lieu).
+- **Grain de pellicule**, vignette, halo lumineux sur les pays en jeu, sous-titres qui claquent.
+- **Bruitages synthétisés** (`node tools/make-sfx.mjs`) calés sur l'image : whoosh à chaque mouvement de caméra, pop à chaque apparition, impact sur les explosions, ding sur les pictogrammes, riser, plus une nappe sonore de tension en boucle. Ce n'est pas de la musique : une vraie musique libre de droits reste à choisir.
+
 ## Voix off
 
 Les voix sont déclarées dans `voices.json` ; un projet en choisit une avec `"voice": "<id>"` (ou `VOICE=<id>` en ligne de commande).
@@ -60,7 +68,7 @@ Ajouter un drapeau : `src/flags.tsx`. Ajouter un portrait : déposer l'image dan
 
 ## Limites actuelles
 
-- **Fond de carte stylisé** (terres vert sombre sur océan dégradé), pas une vraie photo satellite. Les sources d'imagerie haute résolution ne sont pas accessibles depuis l'environnement de développement ; une image reprojetée peut s'ajouter dans `Ocean`/`MapLayer`.
+- **Fond de carte** : relief naturel Natural Earth (résolution ~30 px/degré), pas de la photo satellite fine. Google Earth n'est pas utilisable (licence, pas d'API) ; une image haute résolution libre de droits peut remplacer `public/geo/basemap.jpg` (même étendue Mercator, voir `basemap.json`).
 - **Portraits** : silhouettes par défaut. Les photos d'archives sont à fournir (vérifier les droits).
 - **Sous-titres** : répartition approximative, pas un alignement mot à mot. Un alignement réel (Whisper ou équivalent) peut remplacer `chunkTimings`.
 - **Zone libre de la France de 1940** : tracée à la main, approximative.

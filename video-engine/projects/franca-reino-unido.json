@@ -8,56 +8,287 @@
     {
       "id": "s01",
       "text": "E se a França e o Reino Unido tivessem virado um só país?",
-      "camera": { "lon": 0.5, "lat": 51.5, "zoom": 2.0 },
-      "fills": { "GBR": "flag", "FRA": "flag" },
+      "camera": {
+        "lon": 0.5,
+        "lat": 51.5,
+        "zoom": 2.0
+      },
+      "fills": {
+        "GBR": "flag",
+        "FRA": "flag"
+      },
       "items": [
-        { "kind": "tag", "text": "REINO UNIDO", "at": [-2.5, 53.2], "delay": 0.4 },
-        { "kind": "tag", "text": "FRANÇA", "at": [2.3, 46.6], "delay": 0.9 },
-        { "kind": "bubble", "emoji": "😍", "at": [-1.5, 52.3], "dy": -70, "delay": 1.4 },
-        { "kind": "bubble", "emoji": "😍", "at": [3.0, 47.6], "dy": -70, "tail": "right", "delay": 1.8 }
-      ]
+        {
+          "kind": "tag",
+          "text": "REINO UNIDO",
+          "at": [
+            -2.5,
+            53.2
+          ],
+          "delay": 0.35
+        },
+        {
+          "kind": "tag",
+          "text": "FRANÇA",
+          "at": [
+            2.3,
+            46.2
+          ],
+          "delay": 0.7
+        },
+        {
+          "kind": "bubble",
+          "emoji": "😍",
+          "at": [
+            -1.5,
+            52.3
+          ],
+          "dy": -80,
+          "delay": 1.2
+        },
+        {
+          "kind": "bubble",
+          "emoji": "😍",
+          "at": [
+            3.0,
+            47.6
+          ],
+          "dy": -80,
+          "tail": "right",
+          "delay": 1.55
+        }
+      ],
+      "move": "zoomin"
     },
     {
       "id": "s02",
       "text": "Em maio de 1940, a Alemanha nazista invade a França.",
-      "camera": { "lon": 4.5, "lat": 50.5, "zoom": 2.15 },
-      "fills": { "DEU": "flag", "NLD": "red", "BEL": "red", "LUX": "red", "DNK": "red", "NOR": "red", "POL": "red", "CZE": "red", "AUT": "red" },
+      "camera": {
+        "lon": 4.5,
+        "lat": 50.5,
+        "zoom": 2.15
+      },
+      "fills": {
+        "DEU": "flag",
+        "NLD": "red",
+        "BEL": "red",
+        "LUX": "red",
+        "DNK": "red",
+        "NOR": "red",
+        "POL": "red",
+        "CZE": "red",
+        "AUT": "red"
+      },
       "items": [
-        { "kind": "title", "text": "2ª GUERRA MUNDIAL", "sub": "(1939-1945)", "delay": 0.2 },
-        { "kind": "flagBadge", "flag": "deu", "emoji": "😈", "at": [10.5, 51.5], "delay": 1.0 }
+        {
+          "kind": "title",
+          "text": "2ª GUERRA MUNDIAL",
+          "sub": "(1939-1945)",
+          "delay": 0.15
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "deu",
+          "emoji": "😈",
+          "at": [
+            10.5,
+            51.5
+          ],
+          "delay": 0.8
+        },
+        {
+          "kind": "arrow",
+          "from": [
+            10.5,
+            51.2
+          ],
+          "to": [
+            2.6,
+            48.9
+          ],
+          "delay": 1.1,
+          "color": "#ff3b30"
+        },
+        {
+          "kind": "burst",
+          "at": [
+            2.6,
+            48.9
+          ],
+          "delay": 1.9
+        }
+      ],
+      "move": "zoomout",
+      "impacts": [
+        1.7
       ]
     },
     {
       "id": "s03",
       "text": "Paris cai em junho, e o governo francês foge para o sul.",
-      "camera": { "lon": 1.5, "lat": 47.2, "zoom": 3.0 },
-      "fills": { "FRA": "split" },
+      "camera": {
+        "lon": 1.5,
+        "lat": 47.2,
+        "zoom": 3.0
+      },
+      "fills": {
+        "FRA": "split"
+      },
       "items": [
-        { "kind": "tag", "text": "PARIS", "at": [2.35, 48.86], "delay": 0.3 },
-        { "kind": "bubble", "text": "NÃO VAMOS RESISTIR POR MUITO TEMPO!", "at": [-0.58, 44.84], "dy": -110, "delay": 2.2 },
-        { "kind": "flagBadge", "flag": "fra", "emoji": "🏛️", "at": [-0.58, 44.84], "dy": 20, "delay": 2.0 }
+        {
+          "kind": "ping",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "delay": 0.1,
+          "color": "#ffffff"
+        },
+        {
+          "kind": "tag",
+          "text": "PARIS",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": -50,
+          "delay": 0.3
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "🏛️",
+          "at": [
+            -0.58,
+            44.84
+          ],
+          "dy": 30,
+          "delay": 1.9
+        },
+        {
+          "kind": "bubble",
+          "text": "NÃO VAMOS RESISTIR POR MUITO TEMPO!",
+          "at": [
+            -0.58,
+            44.84
+          ],
+          "dy": -150,
+          "delay": 2.3
+        }
+      ],
+      "move": "zoomin",
+      "impacts": [
+        0.3
       ]
     },
     {
       "id": "s04",
       "text": "Então Churchill faz uma proposta inédita: unir os dois países em um só.",
-      "camera": { "lon": 0.0, "lat": 49.5, "zoom": 2.35 },
-      "fills": { "FRA": "red" },
+      "camera": {
+        "lon": 0.0,
+        "lat": 49.5,
+        "zoom": 2.35
+      },
+      "fills": {
+        "FRA": "red"
+      },
       "items": [
-        { "kind": "title", "text": "PROPOSTA DE UNIÃO", "delay": 0.2 },
-        { "kind": "person", "label": "CHURCHILL", "at": [-0.12, 51.5], "dy": -40, "delay": 0.8 },
-        { "kind": "bubble", "text": "EU TENHO UM PLANO!", "at": [-3.0, 53.3], "delay": 1.8 }
+        {
+          "kind": "title",
+          "text": "PROPOSTA DE UNIÃO",
+          "delay": 0.15
+        },
+        {
+          "kind": "ping",
+          "at": [
+            -0.12,
+            51.5
+          ],
+          "delay": 0.6,
+          "color": "#ffd60a"
+        },
+        {
+          "kind": "person",
+          "label": "CHURCHILL",
+          "at": [
+            -0.12,
+            51.5
+          ],
+          "dy": -110,
+          "delay": 0.7
+        },
+        {
+          "kind": "bubble",
+          "text": "EU TENHO UM PLANO!",
+          "at": [
+            -3.2,
+            53.6
+          ],
+          "delay": 1.9
+        }
+      ],
+      "move": "pan",
+      "flash": [
+        0.0
       ]
     },
     {
       "id": "s05",
       "text": "Uma só nação, com um só governo e uma só cidadania.",
-      "camera": { "lon": 0.5, "lat": 50.0, "zoom": 2.35 },
-      "fills": { "FRA": "flag" },
+      "camera": {
+        "lon": 0.5,
+        "lat": 50.0,
+        "zoom": 2.35
+      },
+      "fills": {
+        "FRA": "flag"
+      },
       "items": [
-        { "kind": "icon", "emoji": "🤝", "screen": [540, 250], "delay": 0.3 },
-        { "kind": "flagBadge", "flag": "gbr", "emoji": "👨‍💼", "at": [-1.5, 52.5], "delay": 1.2 },
-        { "kind": "flagBadge", "flag": "fra", "emoji": "👩", "at": [3.0, 47.0], "delay": 1.8 }
+        {
+          "kind": "icon",
+          "emoji": "🤝",
+          "screen": [
+            540,
+            260
+          ],
+          "delay": 1.0
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "gbr",
+          "emoji": "👨‍💼",
+          "at": [
+            -1.5,
+            52.5
+          ],
+          "delay": 1.5
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "👩",
+          "at": [
+            3.0,
+            47.0
+          ],
+          "delay": 1.9
+        }
+      ],
+      "move": "zoomout",
+      "flash": [
+        1.0
+      ],
+      "sfx": [
+        {
+          "name": "riser",
+          "at": 0.0,
+          "volume": 0.5
+        },
+        {
+          "name": "impact",
+          "at": 1.0,
+          "volume": 0.7
+        }
       ]
     }
   ]

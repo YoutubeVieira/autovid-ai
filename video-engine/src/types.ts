@@ -12,13 +12,22 @@ export type Item =
   | (Base & { kind: "flagBadge"; flag: "gbr" | "fra" | "deu"; emoji?: string }) // hexagone drapeau
   | (Base & { kind: "bubble"; text?: string; emoji?: string; tail?: "left" | "right" })
   | (Base & { kind: "tag"; text: string })                                     // pastille grise (nom de pays)
-  | (Base & { kind: "title"; text: string; sub?: string });                    // titre en haut
+  | (Base & { kind: "title"; text: string; sub?: string })                     // titre en haut
+  | (Base & { kind: "ping"; color?: string })                                  // anneaux qui pulsent sur un lieu
+  | (Base & { kind: "arrow"; from: LonLat; to: LonLat; color?: string })       // flèche d'attaque qui se dessine
+  | (Base & { kind: "burst"; emoji?: string });                                // explosion : emoji + onde de choc + étincelles
 
 export type Subtitle = { text: string; from: number; to: number };
+export type Sfx = { name: "whoosh" | "pop" | "impact" | "ding" | "riser"; at: number; volume?: number };
 export type Scene = {
   id: string;
   text: string;
   camera: Camera;
+  /* pan : glisse depuis la caméra précédente ; zoomin / zoomout : coup de zoom avec rebond ; cut : sans mouvement */
+  move?: "pan" | "zoomin" | "zoomout" | "cut";
+  impacts?: number[];   // secondes : secousse d'écran + flash + bruit sourd
+  flash?: number[];     // secondes : flash blanc seul
+  sfx?: Sfx[];          // bruitages supplémentaires (secondes depuis le début de la scène)
   fills?: Record<string, FillKey>;
   items?: Item[];
   audio?: string;

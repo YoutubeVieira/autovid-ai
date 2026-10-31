@@ -31,4 +31,6 @@ assert.strictEqual(loadVoice("test").provider, "espeak");
 assert.throws(() => loadVoice("inconnue"), /Voix inconnue/);
 for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWith(".json")))
   loadVoice(JSON.parse(fs.readFileSync(path.join(root, "projects", f), "utf8")).voice || "test");
+for (const n of ["whoosh", "pop", "impact", "ding", "riser", "bed"]) assert.ok(fs.existsSync(path.join(root, "public/sfx", n + ".wav")), "bruitage manquant : " + n);
+assert.ok(fs.existsSync(path.join(root, "public/geo/basemap.jpg")), "fond de carte manquant : python3 tools/make-basemap.py");
 console.log("Tests OK");
