@@ -33,7 +33,7 @@ L'exemple, en détail (calcul d'annuité constante, hors assurance et frais) :
 
 C'est un exemple pédagogique, pas une prévision de taux. Les banques ne répercutent pas tout, ni au même rythme : ça dépend de chaque établissement et de ton dossier. Compare les offres et regarde le coût total, pas seulement la mensualité.
 
-Contenu éducatif, pas un conseil en investissement ni en crédit.
+Avis : contenu éducatif et informatif. Aucun achat, aucune souscription ni aucun crédit n'est proposé ou demandé dans cette vidéo, et rien ne t'oblige à acheter quoi que ce soit. Ce n'est pas un conseil en investissement ni en crédit, ni une recommandation personnalisée. Les exemples chiffrés sont illustratifs. Pour ta situation, demande l'avis d'un professionnel agréé.
 
 #Shorts #CréditImmobilier #BCE #ÉducationFinancière #FinancePersonnelle
 ```
@@ -41,6 +41,14 @@ Contenu éducatif, pas un conseil en investissement ni en crédit.
 Remarques :
 - Les 3 premiers hashtags apparaissent au-dessus du titre : `#Shorts #CréditImmobilier #BCE`. Les autres restent dans la description.
 - La voix est de synthèse. À vérifier au moment de l'envoi : la case « contenu modifié ou synthétique » de YouTube et les règles de monétisation sur les contenus produits en série. Je n'ai pas pu relire ces règles depuis cette session.
+
+## Avis de non-obligation d'achat (trois formats)
+
+- **À l'écran, derniers secondes (2 lignes, petit)** : « Contenu éducatif. Aucune obligation d'achat ni de souscription. Pas un conseil en investissement. »
+- **Description** : paragraphe « Avis : … » ci-dessus.
+- **Commentaire épinglé** (ajouter en dernière ligne) : « Contenu éducatif : aucune obligation d'achat, pas un conseil personnalisé. »
+
+À savoir : la voix dit déjà « Contenu éducatif, pas un conseil en investissement » à la scène 14, mais la vidéo n'affiche pas encore cet avis à l'écran. Si un lien d'affiliation, un partenariat ou un produit vendu apparaît un jour, il faudra l'indiquer clairement (mention de partenariat commercial). Ce texte n'a pas été relu par un juriste.
 
 ## Mots-clés (champ « tags », facultatif et de faible poids)
 
