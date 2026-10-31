@@ -1,0 +1,495 @@
+{
+  "title": "Pourquoi ton crédit coûte plus cher : le trajet de Francfort à ta mensualité",
+  "theme": "finance",
+  "lang": "fr-FR",
+  "voice": "fenrir",
+  "pad": 0.3,
+  "subtitleWords": 3,
+  "faits": [
+    {
+      "id": "f1",
+      "claim": "La Banque centrale européenne a son siège à Francfort-sur-le-Main",
+      "value": "Francfort",
+      "source": "BCE (ecb.europa.eu), page « À propos » : connaissance générale, page non ouverte depuis la session (réseau bloqué)",
+      "statut": "a_confirmer",
+      "date": "2026-10"
+    },
+    {
+      "id": "f2",
+      "claim": "Exemple : emprunt de 200 000 € sur 20 ans à 3 % : mensualité ≈ 1 109 €",
+      "value": "1109.20 €/mois",
+      "source": "Calcul : annuité constante M = P·r/(1−(1+r)^−n), r = taux/12, n = 240 ; hors assurance et frais",
+      "statut": "calcul",
+      "date": "2026-10"
+    },
+    {
+      "id": "f3",
+      "claim": "Même emprunt à 4 % : mensualité ≈ 1 212 € ; écart ≈ 103 € par mois",
+      "value": "1211.96 €/mois ; +102.77 €",
+      "source": "Calcul : même formule, r = 4 %/12 ; hors assurance et frais",
+      "statut": "calcul",
+      "date": "2026-10"
+    },
+    {
+      "id": "f4",
+      "claim": "Sur 20 ans, écart de coût total entre 4 % et 3 % ≈ 24 664 €",
+      "value": "24663.71 €",
+      "source": "Calcul : écart de mensualité × 240 mois ; hors assurance et frais",
+      "statut": "calcul",
+      "date": "2026-10"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s01",
+      "text": "Ta banque n'a rien décidé. Pourtant, ton crédit va te coûter plus cher.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.7
+      },
+      "move": "zoomin",
+      "fills": {
+        "FRA": "flag"
+      },
+      "items": [
+        {
+          "kind": "title",
+          "text": "POURQUOI TON CRÉDIT MONTE",
+          "delay": 0.2
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "🏠",
+          "at": [
+            2.3,
+            47.6
+          ],
+          "delay": 0.7
+        },
+        {
+          "kind": "bubble",
+          "emoji": "💸",
+          "at": [
+            2.3,
+            47.6
+          ],
+          "dy": -130,
+          "delay": 2.2
+        }
+      ],
+      "flash": [
+        0.0
+      ]
+    },
+    {
+      "id": "s02",
+      "text": "Et tout part d'une ville : Francfort.",
+      "camera": {
+        "lon": 7.0,
+        "lat": 49.8,
+        "zoom": 2.5
+      },
+      "move": "pan",
+      "fills": {
+        "DEU": "flag"
+      },
+      "items": [
+        {
+          "kind": "ping",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "delay": 0.3,
+          "color": "#ffffff"
+        },
+        {
+          "kind": "tag",
+          "text": "FRANCFORT",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -60,
+          "delay": 0.6
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "text": "C'est là que siège la BCE, la banque centrale de la zone euro.",
+      "camera": {
+        "lon": 8.0,
+        "lat": 50.0,
+        "zoom": 3.1
+      },
+      "move": "zoomin",
+      "items": [
+        {
+          "kind": "icon",
+          "emoji": "🏦",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -190,
+          "delay": 0.5
+        },
+        {
+          "kind": "ping",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "delay": 0.2,
+          "color": "#ffd60a"
+        }
+      ],
+      "faits": [
+        "f1"
+      ]
+    },
+    {
+      "id": "s04",
+      "text": "Quand elle relève ses taux, l'argent devient plus cher pour les banques.",
+      "camera": {
+        "lon": 7.5,
+        "lat": 49.6,
+        "zoom": 2.7
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "burst",
+          "emoji": "📈",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -20,
+          "delay": 0.9
+        }
+      ],
+      "impacts": [
+        0.9
+      ]
+    },
+    {
+      "id": "s05",
+      "text": "Elles répercutent cette hausse, surtout sur les nouveaux crédits.",
+      "camera": {
+        "lon": 5.0,
+        "lat": 49.0,
+        "zoom": 2.6
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "arrow",
+          "from": [
+            8.68,
+            50.11
+          ],
+          "to": [
+            2.35,
+            48.86
+          ],
+          "delay": 0.3,
+          "color": "#ffd60a"
+        },
+        {
+          "kind": "icon",
+          "emoji": "💶",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": -170,
+          "delay": 1.3
+        },
+        {
+          "kind": "tag",
+          "text": "PARIS",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": 60,
+          "delay": 1.5
+        }
+      ]
+    },
+    {
+      "id": "s06",
+      "text": "Prenons un exemple : tu empruntes 200 000 euros sur 20 ans.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.7
+      },
+      "move": "zoomin",
+      "fills": {
+        "FRA": "flag"
+      },
+      "items": [
+        {
+          "kind": "stat",
+          "value": 200000,
+          "suffix": " €",
+          "label": "emprunt sur 20 ans (exemple)",
+          "delay": 0.5,
+          "screen": [
+            540,
+            620
+          ]
+        }
+      ],
+      "faits": [
+        "f2"
+      ]
+    },
+    {
+      "id": "s07",
+      "text": "À 3 % de taux, tu rembourses environ 1 109 euros par mois.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.8
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "stat",
+          "value": 1109,
+          "suffix": " €",
+          "label": "par mois à 3 %",
+          "delay": 0.5,
+          "screen": [
+            540,
+            620
+          ],
+          "color": "#7CFC9A"
+        },
+        {
+          "kind": "tag",
+          "text": "HORS ASSURANCE ET FRAIS",
+          "delay": 2.0,
+          "screen": [
+            540,
+            830
+          ]
+        }
+      ],
+      "faits": [
+        "f2"
+      ]
+    },
+    {
+      "id": "s08",
+      "text": "À 4 %, environ 1 212 euros. Soit 103 euros de plus, chaque mois.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.9
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "stat",
+          "value": 1212,
+          "suffix": " €",
+          "label": "par mois à 4 %",
+          "delay": 0.4,
+          "screen": [
+            540,
+            520
+          ],
+          "color": "#ffb347"
+        },
+        {
+          "kind": "stat",
+          "value": 103,
+          "prefix": "+",
+          "suffix": " €",
+          "label": "de plus chaque mois",
+          "delay": 2.2,
+          "screen": [
+            540,
+            860
+          ],
+          "color": "#ff4d4d"
+        }
+      ],
+      "impacts": [
+        2.2
+      ],
+      "faits": [
+        "f3"
+      ]
+    },
+    {
+      "id": "s09",
+      "text": "Sur 20 ans, ça fait plus de 24 000 euros de plus.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 3.0
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "stat",
+          "value": 24664,
+          "prefix": "+",
+          "suffix": " €",
+          "label": "sur 20 ans (exemple)",
+          "delay": 0.5,
+          "screen": [
+            540,
+            620
+          ],
+          "color": "#ff4d4d"
+        }
+      ],
+      "impacts": [
+        1.6
+      ],
+      "faits": [
+        "f4"
+      ]
+    },
+    {
+      "id": "s10",
+      "text": "Mais attention : si ton crédit est à taux fixe et déjà signé, ta mensualité ne bouge pas.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.7
+      },
+      "move": "zoomout",
+      "fills": {
+        "FRA": "flag"
+      },
+      "items": [
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "🔒",
+          "at": [
+            2.3,
+            47.2
+          ],
+          "delay": 0.5
+        },
+        {
+          "kind": "bubble",
+          "emoji": "😌",
+          "at": [
+            2.3,
+            47.2
+          ],
+          "dy": -130,
+          "delay": 1.6
+        }
+      ],
+      "flash": [
+        0.0
+      ]
+    },
+    {
+      "id": "s11",
+      "text": "Et les banques ne répercutent pas tout, ni au même rythme : ça dépend de chaque établissement.",
+      "camera": {
+        "lon": 3.0,
+        "lat": 47.5,
+        "zoom": 2.5
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "bubble",
+          "emoji": "🤷",
+          "at": [
+            2.3,
+            47.5
+          ],
+          "dy": -120,
+          "delay": 0.8
+        }
+      ]
+    },
+    {
+      "id": "s12",
+      "text": "Les taux peuvent aussi baisser : personne ne sait dire quand, ni de combien.",
+      "camera": {
+        "lon": 4.0,
+        "lat": 48.5,
+        "zoom": 2.4
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "icon",
+          "emoji": "📉",
+          "at": [
+            2.3,
+            47.5
+          ],
+          "dy": -40,
+          "delay": 0.8
+        }
+      ]
+    },
+    {
+      "id": "s13",
+      "text": "Alors compare les offres, et regarde le coût total, pas seulement la mensualité.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.7
+      },
+      "move": "zoomin",
+      "items": [
+        {
+          "kind": "icon",
+          "emoji": "🔍",
+          "at": [
+            2.3,
+            47.0
+          ],
+          "dy": -60,
+          "delay": 0.7
+        }
+      ]
+    },
+    {
+      "id": "s14",
+      "text": "Contenu éducatif, pas un conseil en investissement. Abonne-toi pour comprendre la suite.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.5
+      },
+      "move": "zoomout",
+      "fills": {
+        "FRA": "flag"
+      },
+      "items": [
+        {
+          "kind": "burst",
+          "emoji": "🔔",
+          "at": [
+            2.3,
+            47.0
+          ],
+          "delay": 1.2
+        }
+      ],
+      "flash": [
+        1.2
+      ]
+    }
+  ]
+}

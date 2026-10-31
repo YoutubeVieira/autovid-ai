@@ -12,5 +12,19 @@
     "provider": "gemini",
     "voiceName": "Sulafat",
     "model": "gemini-3.8-flash-tts"
+  },
+  "fenrir": {
+    "label": "Fenrir (Gemini, homme, énergique)",
+    "provider": "gemini",
+    "voiceName": "Fenrir",
+    "model": "gemini-3.8-flash-tts",
+    "styleMode": "metadata",
+    "style": "Dis ce texte en français, comme un narrateur de short YouTube de finance : énergique, rythme soutenu, ton direct et complice, sans crier."
+  },
+  "fenrir-25": {
+    "label": "Fenrir (Gemini 2.5 flash, sans consigne de ton) : secours quand les quotas des modèles 3.8 sont épuisés",
+    "provider": "gemini",
+    "voiceName": "Fenrir",
+    "model": "gemini-2.5-flash-preview-tts"
   }
 }

@@ -33,7 +33,9 @@ let last = 0;
 async function gemini(text) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY manquante (ou TTS_PROVIDER=espeak).");
-  const body = { contents: [{ parts: [{ text }] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } } };
+  const part = { text };
+  if (V.style && V.styleMode === "metadata") part.speech_metadata = { style: V.style };   // consigne de ton (nouveaux modèles)
+  const body = { contents: [{ parts: [part] }], generationConfig: { responseModalities: ["AUDIO"], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE } } } } };
   const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(MODEL) + ":generateContent";
   for (let tries = 0; ; tries++) {
     const gap = last + MIN_INTERVAL - Date.now();   // cadence régulière pour rester sous la limite par minute
@@ -43,7 +45,8 @@ async function gemini(text) {
     if (res.status === 429 || res.status >= 500) {
       if (tries >= 6) throw new Error("Service de voix : HTTP " + res.status + " répété. Relancez plus tard, les scènes déjà produites sont conservées.");
       const ms = Math.min(120000, 15000 * (tries + 1));
-      console.log("  HTTP " + res.status + " : pause de " + ms / 1000 + " s puis reprise");
+      const msg = (await res.text()).replace(/\s+/g, " ").slice(0, 1400);
+      console.log("  HTTP " + res.status + " : pause de " + ms / 1000 + " s puis reprise" + (tries === 0 ? " — " + msg : ""));
       await sleep(ms); continue;
     }
     if (!res.ok) throw new Error("Service de voix : HTTP " + res.status + " " + (await res.text()).slice(0, 300));
@@ -72,8 +75,17 @@ const outDir = path.join(root, "public/projects", name, "audio");
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(path.join(root, ".cache"), { recursive: true });
 const manifest = {};
+const oi = process.argv.indexOf("--only");
+const ONLY = oi > 0 ? process.argv[oi + 1].split(",") : null;   // --only s13,s14 : ne produit que ces scènes, garde les autres telles quelles
 console.log("Voix off « " + name + " » : voix « " + voiceId + " » (" + provider + (provider === "gemini" ? ", " + MODEL + ", " + VOICE : "") + ")");
 for (const s of project.scenes) {
+  if (ONLY && !ONLY.includes(s.id)) {
+    const keep = fs.readdirSync(outDir).find(x => x.startsWith(s.id + "."));
+    if (!keep) throw new Error("Scène " + s.id + " sans audio : lancez sans --only.");
+    const { pcm, rate } = readWav(fs.readFileSync(path.join(outDir, keep)));
+    manifest[s.id] = { file: "projects/" + name + "/audio/" + keep, seconds: +(pcm.length / 2 / rate).toFixed(3), provider };
+    console.log("  =  " + s.id + " (conservé)"); continue;
+  }
   const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, s.text].join("|")).digest("hex").slice(0, 10);
   const file = path.join(outDir, s.id + "." + hash + ".wav");
   let buf;
