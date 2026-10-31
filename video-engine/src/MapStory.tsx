@@ -206,6 +206,21 @@ const Arrow: React.FC<{ from: [number, number]; to: [number, number]; delay: num
   );
 };
 
+/* Gros chiffre qui défile (finance) : carte sombre, nombre en police grasse, intitulé dessous. */
+const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number }> = ({ it, delay }) => {
+  const f = useCurrentFrame(), { fps } = useVideoConfig();
+  const p = 1 - Math.pow(1 - clamp((f - delay - 4) / (fps * 1.2)), 3);
+  const v = (it.from ?? 0) + (it.value - (it.from ?? 0)) * p;
+  const txt = (it.prefix || "") + v.toLocaleString("fr-FR", { minimumFractionDigits: it.decimals ?? 0, maximumFractionDigits: it.decimals ?? 0 }) + (it.suffix || "");
+  const c = it.color || "#ffd60a";
+  return (
+    <div style={{ background: "#0b0f12ee", border: `6px solid ${c}`, borderRadius: 28, padding: "22px 44px 26px", textAlign: "center", boxShadow: `0 0 40px ${c}66, 0 10px 24px #000b`, minWidth: 560 }}>
+      <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 118, color: c, lineHeight: 1, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", WebkitTextStroke: "3px #000", paintOrder: "stroke fill" }}>{txt}</div>
+      <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 38, color: "#f2f2ec", marginTop: 10, letterSpacing: 1, textTransform: "uppercase" }}>{it.label}</div>
+    </div>
+  );
+};
+
 const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({ it, cam, dur, n }) => {
   const { fps } = useVideoConfig();
   const delay = Math.round((it.delay ?? 0.2) * fps), end = it.until ? Math.round(it.until * fps) : dur;
@@ -235,6 +250,7 @@ const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({
         <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 64, color: "#fff", textAlign: "center", whiteSpace: "nowrap", WebkitTextStroke: "8px #000", paintOrder: "stroke fill", textShadow: "0 5px 0 #000" }}>{it.text}{it.sub && <div style={{ fontSize: 40, fontWeight: 800, opacity: 0.9 }}>{it.sub}</div>}</div>
       </Pop>
     );
+    case "stat": return <Pop delay={delay} end={end} rot={rot * 0.3} style={it.at || it.screen ? pos : { left: W / 2, top: 640 }}><Stat it={it} delay={delay} /></Pop>;
     case "ping": return <Ping at={[left, top]} delay={delay} color={it.color || "#ffd60a"} />;
     case "burst": return <Burst at={[left, top]} delay={delay} emoji={it.emoji || "💥"} />;
     case "arrow": {
@@ -274,6 +290,7 @@ function soundEvents(scenes: Scene[], starts: number[], fps: number): Ev[] {
       const fr = b + Math.round((it.delay ?? 0.2) * fps);
       if (["icon", "person", "flagBadge", "bubble", "tag", "title"].includes(it.kind)) ev.push({ name: "pop", frame: fr, volume: 0.55, rate: 0.9 + 0.3 * hash(n + i * 7) });
       if (it.kind === "icon") ev.push({ name: "ding", frame: fr + 4, volume: 0.28 });
+      if (it.kind === "stat") { ev.push({ name: "pop", frame: fr, volume: 0.6 }); ev.push({ name: "ding", frame: fr + Math.round(fps * 1.2), volume: 0.35 }); }
       if (it.kind === "burst") ev.push({ name: "impact", frame: fr, volume: 0.9 });
       if (it.kind === "arrow") ev.push({ name: "whoosh", frame: fr, volume: 0.55, rate: 1.25 });
     });

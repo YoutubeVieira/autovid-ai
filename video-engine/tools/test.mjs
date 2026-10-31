@@ -24,7 +24,15 @@ for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWi
   for (const s of p.scenes) {
     assert.ok(!seen.has(s.id), f + " : scène en double " + s.id); seen.add(s.id);
     assert.ok(s.text && s.camera && s.camera.zoom > 0, f + " : scène " + s.id + " incomplète");
+    for (const it of s.items || []) if (it.kind === "stat") assert.ok(typeof it.value === "number" && it.label, f + " : stat incomplète en " + s.id);
     for (const iso of Object.keys(s.fills || {})) assert.ok(ids.has(iso), f + " : pays inconnu " + iso);
+  }
+  if (p.theme === "finance") {  // une vidéo finance sans faits sourcés ne passe pas
+    assert.ok(Array.isArray(p.faits) && p.faits.length > 0, f + " : projet finance sans registre « faits »");
+    for (const x of p.faits) assert.ok(x.id && x.claim && x.source && /^\d{4}-\d{2}(-\d{2})?$/.test(x.date || ""), f + " : fait incomplet (id, claim, source, date AAAA-MM[-JJ]) : " + JSON.stringify(x).slice(0, 80));
+    const fid = new Set(p.faits.map(x => x.id));
+    for (const s of p.scenes) for (const r of s.faits || []) assert.ok(fid.has(r), f + " : scène " + s.id + " cite un fait inconnu " + r);
+    for (const s of p.scenes) if (/\d/.test(s.text) || (s.items || []).some(i => i.kind === "stat")) assert.ok((s.faits || []).length, f + " : scène " + s.id + " contient un chiffre sans fait sourcé (champ faits)");
   }
 }
 assert.strictEqual(loadVoice("test").provider, "espeak");

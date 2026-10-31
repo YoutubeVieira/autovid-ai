@@ -15,7 +15,8 @@ export type Item =
   | (Base & { kind: "title"; text: string; sub?: string })                     // titre en haut
   | (Base & { kind: "ping"; color?: string })                                  // anneaux qui pulsent sur un lieu
   | (Base & { kind: "arrow"; from: LonLat; to: LonLat; color?: string })       // flèche d'attaque qui se dessine
-  | (Base & { kind: "burst"; emoji?: string });                                // explosion : emoji + onde de choc + étincelles
+  | (Base & { kind: "burst"; emoji?: string })
+  | (Base & { kind: "stat"; value: number; label: string; prefix?: string; suffix?: string; decimals?: number; from?: number; color?: string }); // gros chiffre qui défile                                // explosion : emoji + onde de choc + étincelles
 
 export type Subtitle = { text: string; from: number; to: number };
 export type Sfx = { name: "whoosh" | "pop" | "impact" | "ding" | "riser"; at: number; volume?: number };
