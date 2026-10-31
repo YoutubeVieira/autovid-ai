@@ -1,4 +1,16 @@
 {
   "_note": "Registre des voix. Pour en ajouter une : une entrée ici, puis \"voice\": \"<id>\" dans le projet (ou VOICE=<id>). provider = espeak | gemini.",
-  "test": { "label": "Test (voix locale robotique, pour le montage)", "provider": "espeak", "espeakVoice": "pt-br", "speed": 150, "pitch": 40 }
+  "test": {
+    "label": "Test (voix locale robotique, pour le montage)",
+    "provider": "espeak",
+    "espeakVoice": "pt-br",
+    "speed": 150,
+    "pitch": 40
+  },
+  "sulafat": {
+    "label": "Sulafat (Gemini, chaleureuse)",
+    "provider": "gemini",
+    "voiceName": "Sulafat",
+    "model": "gemini-3.8-flash-tts"
+  }
 }

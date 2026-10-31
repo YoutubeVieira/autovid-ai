@@ -1,0 +1,194 @@
+{
+  "title": "TEST 15 s : pourquoi ton crédit coûte plus cher (mécanisme, sans chiffres)",
+  "theme": "test",
+  "lang": "fr-FR",
+  "voice": "sulafat",
+  "pad": 0.2,
+  "subtitleWords": 3,
+  "scenes": [
+    {
+      "id": "s01",
+      "text": "Ta banque n'a rien décidé, pourtant ton crédit coûte plus cher.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.7
+      },
+      "move": "zoomin",
+      "fills": {
+        "FRA": "flag"
+      },
+      "items": [
+        {
+          "kind": "tag",
+          "text": "FRANCE",
+          "at": [
+            2.3,
+            46.4
+          ],
+          "delay": 0.3
+        },
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "🏠",
+          "at": [
+            2.3,
+            47.8
+          ],
+          "delay": 0.7
+        },
+        {
+          "kind": "bubble",
+          "emoji": "🤨",
+          "at": [
+            2.3,
+            47.8
+          ],
+          "dy": -130,
+          "delay": 1.5
+        }
+      ]
+    },
+    {
+      "id": "s02",
+      "text": "Tout part de Francfort : la BCE relève ses taux.",
+      "camera": {
+        "lon": 6.0,
+        "lat": 49.6,
+        "zoom": 2.5
+      },
+      "move": "pan",
+      "fills": {
+        "DEU": "flag"
+      },
+      "impacts": [
+        1.7
+      ],
+      "items": [
+        {
+          "kind": "ping",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "delay": 0.3,
+          "color": "#ffffff"
+        },
+        {
+          "kind": "tag",
+          "text": "FRANCFORT",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -60,
+          "delay": 0.5
+        },
+        {
+          "kind": "icon",
+          "emoji": "🏦",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -190,
+          "delay": 0.9
+        },
+        {
+          "kind": "burst",
+          "emoji": "📈",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -20,
+          "delay": 1.7
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "text": "Les banques empruntent plus cher, et le répercutent sur les nouveaux prêts.",
+      "camera": {
+        "lon": 5.0,
+        "lat": 48.8,
+        "zoom": 2.6
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "arrow",
+          "from": [
+            8.68,
+            50.11
+          ],
+          "to": [
+            2.35,
+            48.86
+          ],
+          "delay": 0.4,
+          "color": "#ffd60a"
+        },
+        {
+          "kind": "icon",
+          "emoji": "💶",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": -170,
+          "delay": 1.3
+        },
+        {
+          "kind": "tag",
+          "text": "PARIS",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": 60,
+          "delay": 1.5
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "text": "Ton crédit à taux fixe en cours, lui, ne bouge pas.",
+      "camera": {
+        "lon": 2.5,
+        "lat": 47.0,
+        "zoom": 2.8
+      },
+      "move": "zoomout",
+      "fills": {
+        "FRA": "flag"
+      },
+      "flash": [
+        0.0
+      ],
+      "items": [
+        {
+          "kind": "flagBadge",
+          "flag": "fra",
+          "emoji": "🔒",
+          "at": [
+            2.3,
+            47.2
+          ],
+          "delay": 0.6
+        },
+        {
+          "kind": "bubble",
+          "emoji": "😌",
+          "at": [
+            2.3,
+            47.2
+          ],
+          "dy": -130,
+          "delay": 1.4
+        }
+      ]
+    }
+  ]
+}
