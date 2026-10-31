@@ -3,7 +3,7 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { root, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
+import { root, loadVoice, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
 
 const pcm = Buffer.alloc(24000 * 2); // 1 s de silence à 24 kHz
 assert.strictEqual(wavSeconds(wav(pcm, 24000)), 1);
@@ -27,4 +27,8 @@ for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWi
     for (const iso of Object.keys(s.fills || {})) assert.ok(ids.has(iso), f + " : pays inconnu " + iso);
   }
 }
+assert.strictEqual(loadVoice("test").provider, "espeak");
+assert.throws(() => loadVoice("inconnue"), /Voix inconnue/);
+for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWith(".json")))
+  loadVoice(JSON.parse(fs.readFileSync(path.join(root, "projects", f), "utf8")).voice || "test");
 console.log("Tests OK");

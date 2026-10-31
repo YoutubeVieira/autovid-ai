@@ -25,16 +25,14 @@ npm test
 
 ## Voix off
 
-Même principe que `second-souffle-pwa/tools/generate-audio.js` (API Gemini, voix Sulafat par défaut, cadence limitée, reprise sur quota).
+Les voix sont déclarées dans `voices.json` ; un projet en choisit une avec `"voice": "<id>"` (ou `VOICE=<id>` en ligne de commande).
+Pour l'instant : **`test`** (voix locale espeak, robotique, pour essayer le montage). Pour en ajouter une, ajoutez une entrée, par exemple une voix Gemini (même principe que `second-souffle-pwa/tools/generate-audio.js`) :
 
-| Variable | Rôle |
-|---|---|
-| `GEMINI_API_KEY` | clé Google AI Studio (jamais dans le code) |
-| `TTS_MODEL` | `gemini-3.8-flash-tts` par défaut |
-| `TTS_VOICE` | voix (sinon `voice.name` du projet) |
-| `TTS_PROVIDER` | `gemini` ou `espeak` ; sans clé, `espeak` (voix robotique locale pour tester le montage) |
+```json
+"sulafat": { "label": "Sulafat (Gemini)", "provider": "gemini", "voiceName": "Sulafat", "model": "gemini-3.8-flash-tts" }
+```
 
-Les fichiers audio sont conservés par empreinte (texte + voix) : relancer ne régénère que les scènes modifiées.
+Les voix Gemini demandent `GEMINI_API_KEY` (jamais dans le code). Les fichiers audio sont conservés par empreinte (texte + voix) : relancer ne régénère que les scènes modifiées.
 
 ## Écrire un projet (`projects/<sujet>.json`)
 

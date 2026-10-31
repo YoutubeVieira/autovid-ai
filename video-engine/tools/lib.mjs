@@ -11,6 +11,13 @@ export function loadProject(name) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
+export function loadVoice(id) {
+  const all = JSON.parse(fs.readFileSync(path.join(root, "voices.json"), "utf8"));
+  const v = all[id];
+  if (!v || id.startsWith("_")) throw new Error("Voix inconnue « " + id + " ». Voix disponibles : " + Object.keys(all).filter(k => !k.startsWith("_")).join(", "));
+  return v;
+}
+
 /* WAV mono 16 bits : en-tête + données PCM */
 export function wav(pcm, rate) {
   const h = Buffer.alloc(44);

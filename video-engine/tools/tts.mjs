@@ -2,12 +2,12 @@
 /* Produit la voix off de chaque scène : public/projects/<projet>/audio/<scène>.wav
    et .cache/<projet>.audio.json (durées réelles, utilisées pour caler la vidéo).
 
+   Les voix sont décrites dans voices.json ; le projet choisit la sienne ("voice": "test"), ou VOICE=<id> pour forcer.
    Fournisseurs :
      gemini  voix Google (mêmes modèles et voix que second-souffle-pwa/tools/generate-audio.js).
-             Variables : GEMINI_API_KEY (jamais dans le code), TTS_MODEL (gemini-3.8-flash-tts par défaut),
-             TTS_VOICE (Sulafat par défaut)
+             Entrée : { "provider": "gemini", "voiceName": "Sulafat", "model": "gemini-3.8-flash-tts" }
+             Variable : GEMINI_API_KEY (jamais dans le code)
      espeak  voix locale, sans clé ni réseau (robotique : pour essayer le montage, pas pour publier)
-   Choix : TTS_PROVIDER=gemini|espeak, sinon gemini si GEMINI_API_KEY existe, sinon espeak.
    Un fichier déjà produit pour le même texte, la même voix et le même fournisseur n'est pas régénéré.
 
    Usage : node tools/tts.mjs <projet> */
@@ -15,14 +15,16 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { root, loadProject, wav, decodeAudio, readWav } from "./lib.mjs";
+import { root, loadProject, loadVoice, wav, decodeAudio, readWav } from "./lib.mjs";
 
 const name = process.argv[2];
 if (!name) { console.log("Usage : node tools/tts.mjs <projet>"); process.exit(1); }
 const project = loadProject(name);
-const provider = process.env.TTS_PROVIDER || (process.env.GEMINI_API_KEY ? "gemini" : "espeak");
-const MODEL = process.env.TTS_MODEL || "gemini-3.8-flash-tts";
-const VOICE = process.env.TTS_VOICE || project.voice?.name || "Sulafat";
+const voiceId = process.env.VOICE || (typeof project.voice === "string" ? project.voice : "test");
+const V = loadVoice(voiceId);
+const provider = V.provider;
+const MODEL = process.env.TTS_MODEL || V.model || "gemini-3.8-flash-tts";
+const VOICE = V.voiceName || voiceId;
 const LANG = project.lang || "pt-BR";
 const MIN_INTERVAL = Number(process.env.TTS_MIN_INTERVAL || 6000);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -59,7 +61,7 @@ function espeak(text) {
   const tmp = path.join(root, ".cache", "espeak-" + process.pid + ".wav");
   fs.mkdirSync(path.dirname(tmp), { recursive: true });
   const voice = LANG.toLowerCase().startsWith("pt") ? "pt-br" : LANG.slice(0, 2).toLowerCase();
-  const r = spawnSync("espeak-ng", ["-v", voice, "-s", "150", "-p", "40", "-w", tmp, text]);
+  const r = spawnSync("espeak-ng", ["-v", V.espeakVoice || voice, "-s", String(V.speed || 150), "-p", String(V.pitch || 40), "-w", tmp, text]);
   if (r.error || r.status !== 0) throw new Error("espeak-ng introuvable ou en erreur (apt-get install espeak-ng) : " + (r.error?.message || r.stderr));
   const { pcm, rate } = readWav(fs.readFileSync(tmp));
   fs.unlinkSync(tmp);
@@ -70,9 +72,9 @@ const outDir = path.join(root, "public/projects", name, "audio");
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(path.join(root, ".cache"), { recursive: true });
 const manifest = {};
-console.log("Voix off « " + name + " » avec " + provider + (provider === "gemini" ? " (" + MODEL + ", " + VOICE + ")" : ""));
+console.log("Voix off « " + name + " » : voix « " + voiceId + " » (" + provider + (provider === "gemini" ? ", " + MODEL + ", " + VOICE : "") + ")");
 for (const s of project.scenes) {
-  const hash = crypto.createHash("sha1").update([provider, MODEL, VOICE, LANG, s.text].join("|")).digest("hex").slice(0, 10);
+  const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, s.text].join("|")).digest("hex").slice(0, 10);
   const file = path.join(outDir, s.id + "." + hash + ".wav");
   let buf;
   if (fs.existsSync(file)) { buf = fs.readFileSync(file); console.log("  =  " + s.id + " (déjà produit)"); }

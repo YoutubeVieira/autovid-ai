@@ -1,0 +1,4 @@
+{
+  "_note": "Registre des voix. Pour en ajouter une : une entrée ici, puis \"voice\": \"<id>\" dans le projet (ou VOICE=<id>). provider = espeak | gemini.",
+  "test": { "label": "Test (voix locale robotique, pour le montage)", "provider": "espeak", "espeakVoice": "pt-br", "speed": 150, "pitch": 40 }
+}
