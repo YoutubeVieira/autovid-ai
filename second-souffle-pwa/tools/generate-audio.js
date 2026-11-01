@@ -43,13 +43,14 @@ const fs = require("fs"), path = require("path");
 const args = process.argv.slice(2);
 const has = f => args.includes(f);
 const opt = (f, d) => { const i = args.indexOf(f); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
+const EXPORT = opt("--export-texts", "");
 const DRY = has("--dry-run"), TEST = has("--test"), SELFTEST = has("--selftest"), AUDITION = has("--audition");
 const LANG = opt("--lang", TEST ? "all" : null), ONLY = opt("--only", ""), OUT = opt("--out", "audio-out");
 if (!LANG && !SELFTEST && !AUDITION) { console.log("Indiquez --lang fr|en|pt|all, ou --test, ou --dry-run. Lisez l'en-tête du fichier."); process.exit(1); }
 const LANGS = (LANG === "all" || (!LANG && AUDITION)) ? ["fr", "en", "pt"] : [LANG || "fr"];
 const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
 const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL || "gemini-3.8-flash-tts";
-if (!DRY && !SELFTEST && !KEY) { console.log("Il faut la variable GEMINI_API_KEY (ou utilisez --dry-run)."); process.exit(1); }
+if (!DRY && !SELFTEST && !EXPORT && !KEY) { console.log("Il faut la variable GEMINI_API_KEY (ou utilisez --dry-run)."); process.exit(1); }
 const { adapt } = require("./audio-fixes.js");
 const GENDER = opt("--gender", "both");
 const MAXN = Number(opt("--max", 0)) || 0;                   // s'arrête après N nouveaux fichiers (0 : pas de limite)
@@ -88,6 +89,15 @@ if (csv.length) csv.shift();
 let items = csv.filter(r => r.length >= 7).map(r => ({ cat: r[0], id: r[1], lang: r[2], text: r[3], pause: Number(r[4]) || 0, est: Number(r[5]) || 1 }));
 items = items.filter(i => LANGS.includes(i.lang) && i.id.startsWith(ONLY));
 if (TEST) { const seen = {}; items = items.filter(i => (seen[i.lang] ? false : (seen[i.lang] = true))); }
+
+/* Textes adaptés au genre de la voix, pour un autre moteur de voix (tools/generate-chatterbox.py) */
+if (EXPORT) {
+  const out = [];
+  for (const g of GENDERS) for (const b of items) out.push({ gender: g, cat: b.cat, id: b.id, lang: b.lang, text: adapt(b.text, b.lang, g), pause: b.pause, est: b.est });
+  fs.writeFileSync(EXPORT, JSON.stringify(out, null, 1), "utf8");
+  console.log(out.length + " textes écrits dans " + EXPORT);
+  process.exit(0);
+}
 
 /* ---------- WAV (PCM 16 bits, mono) ---------- */
 function wav(pcm, rate) {

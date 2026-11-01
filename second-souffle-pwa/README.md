@@ -75,6 +75,7 @@ Pour un aperçu en une seule page : `python3 tools/build-artifact.py sortie.html
 | `Produire-les-voix.bat`, `tools/tout-faire.ps1` | Double-clic : produit tous les audios avec les voix par défaut (seule la clé est demandée) |
 | `tools/generer-audio.ps1` | Assistant Windows : pose les questions et lance la production des voix (clé en saisie masquée) |
 | `tools/generate-audio.js`, `tools/audio-fixes.js` | Produit les fichiers audio (WAV) depuis le manifeste, une voix de femme et une voix d'homme par langue (dossiers `f` et `m`) ; `--audition` compare des voix, `--dry-run` essaie sans clé ; `audio-fixes.js` met le texte au genre de la voix (Léa, accords) |
+| `tools/generate-chatterbox.py`, `docs/CHATTERBOX.md` | Autre moteur de voix, libre et sans quota (Chatterbox), avec voix de référence consentie ; non essayé avec le vrai modèle |
 
 ## Prochaines étapes
 
