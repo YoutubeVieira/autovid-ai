@@ -28,6 +28,8 @@
                       inline    consigne écrite devant le texte (anciens modèles)
      TTS_STYLE_FR, TTS_STYLE_EN, TTS_STYLE_PT   consigne de ton, utilisée si le mode n'est pas none
 
+   Pour limiter la dépense ou l'essai : --max 50 s'arrête après 50 nouveaux fichiers.
+
    Quotas : le script ne force jamais. Une demande toutes les 6 secondes (TTS_MIN_INTERVAL). Si Google répond
    « quota atteint », il attend (jusqu'à minuit heure du Pacifique pour le quota du jour) puis reprend seul.
    Si vous l'arrêtez (Ctrl+C), relancez la même commande : les fichiers déjà produits sont conservés.
@@ -50,6 +52,7 @@ const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL || "gemini
 if (!DRY && !SELFTEST && !KEY) { console.log("Il faut la variable GEMINI_API_KEY (ou utilisez --dry-run)."); process.exit(1); }
 const { adapt } = require("./audio-fixes.js");
 const GENDER = opt("--gender", "both");
+const MAXN = Number(opt("--max", 0)) || 0;                   // s'arrête après N nouveaux fichiers (0 : pas de limite)
 const GENDERS = GENDER === "f" ? ["f"] : GENDER === "m" ? ["m"] : ["f", "m"];
 const VOICE_DEFAULT = { f: "Sulafat", m: "Achird" };          // coach, séances, motivation
 const VOICE_WELLNESS_DEFAULT = { f: "Vindemiatrix", m: "Charon" }; // séances de bien-être : plus douces
@@ -226,9 +229,10 @@ if (AUDITION) { audition().catch(e => { console.log("ÉCHEC : " + e.message); pr
 (async () => {
   console.log((DRY ? "[essai sans service] " : "") + items.length + " phrases × " + GENDERS.length + " voix, langues : " + LANGS.join(", "));
   const segs = {};                       // séances de bien-être à assembler : "lang|genre|id" -> [{id, pcm, rate, pause}]
-  let done = 0, skipped = 0;
+  let done = 0, skipped = 0, stopped = false;
   for (const g of GENDERS) {
     for (const base of items) {
+      if (MAXN && done >= MAXN) { stopped = true; break; }
       const it = Object.assign({}, base, { text: adapt(base.text, base.lang, g) });
       const dir = path.join(OUT, it.lang, g); fs.mkdirSync(dir, { recursive: true });
       const file = path.join(dir, it.id + ".wav");
@@ -241,6 +245,7 @@ if (AUDITION) { audition().catch(e => { console.log("ÉCHEC : " + e.message); pr
       }
     }
   }
+  if (stopped) { console.log("Arrêt demandé après " + done + " fichiers (--max). Relancez la même commande pour continuer ; les séances de bien-être seront assemblées à la fin."); return; }
   for (const k of Object.keys(segs)) {
     const [lang, g, base] = k.split("|"), list = segs[k].sort((a, b) => a.id.localeCompare(b.id)), rate = list[0].rate;
     const out = Buffer.concat(list.flatMap(s => [s.pcm, silence(s.pause, rate)]));
