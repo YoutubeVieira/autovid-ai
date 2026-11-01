@@ -31,7 +31,8 @@
 
    Pour limiter la dépense ou l'essai : --max 50 s'arrête après 50 nouveaux fichiers.
 
-   Quotas : le script ne force jamais. Une demande toutes les 6 secondes (TTS_MIN_INTERVAL). Si Google répond
+   Quotas : le script ne force jamais. Une demande toutes les 7 secondes (TTS_MIN_INTERVAL) et au plus 95 par jour et par
+   modèle (TTS_DAILY_MAX) : la limite de Google pour les modèles de voix 3.8 est de 10 par minute et 100 par jour. Si Google répond
    « quota atteint », il attend (jusqu'à minuit heure du Pacifique pour le quota du jour) puis reprend seul.
    Si vous l'arrêtez (Ctrl+C), relancez la même commande : les fichiers déjà produits sont conservés.
 
@@ -141,9 +142,14 @@ function decodeAudio(buf, mime) {
 
 /* ---------- service de voix ---------- */
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const MIN_INTERVAL = (process.env.TTS_MIN_INTERVAL === undefined ? 6 : Number(process.env.TTS_MIN_INTERVAL)) * 1000;  // secondes entre deux demandes
+const MIN_INTERVAL = (process.env.TTS_MIN_INTERVAL === undefined ? 7 : Number(process.env.TTS_MIN_INTERVAL)) * 1000;  // secondes entre deux demandes
 const MIN_WAIT = (process.env.TTS_MIN_WAIT === undefined ? 60 : Number(process.env.TTS_MIN_WAIT)) * 1000;              // pause minimale après un refus de quota
 let lastCall = 0, waitStep = 0;
+const DAILY_MAX = process.env.TTS_DAILY_MAX === undefined ? 95 : Number(process.env.TTS_DAILY_MAX);   // demandes par jour et par modèle (la limite de Google est de 100)
+const ptDay = () => new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles" }).format(new Date());
+const quotaFile = () => path.join(OUT, ".quota.json");
+function quotaRead() { try { const q = JSON.parse(fs.readFileSync(quotaFile(), "utf8")); if (q.day === ptDay()) return q; } catch (e) { /* premier lancement */ } return { day: ptDay(), n: {} }; }
+function quotaCount(model) { const q = quotaRead(); q.n[model] = (q.n[model] || 0) + 1; fs.mkdirSync(OUT, { recursive: true }); fs.writeFileSync(quotaFile(), JSON.stringify(q)); }
 const hhmm = t => new Date(t).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
 const dur = ms => ms >= 3600000 ? Math.floor(ms / 3600000) + " h " + Math.round((ms % 3600000) / 60000) + " min" : ms >= 60000 ? Math.round(ms / 60000) + " min" : Math.round(ms / 1000) + " s";
 
@@ -178,10 +184,18 @@ async function synth(item, voice, model) {
   const url = (process.env.TTS_BASE_URL || "https://generativelanguage.googleapis.com/v1beta") + "/models/" + encodeURIComponent(model || MODEL) + ":generateContent";
   let failures = 0;
   for (;;) {
+    const used = quotaRead().n[model || MODEL] || 0;
+    if (DAILY_MAX && used >= DAILY_MAX) {                  // on s'arrête avant la limite du jour, sans la tester
+      const ms = untilPacificMidnight(Date.now()) + 120000;
+      console.log("Limite prudente du jour atteinte (" + used + " demandes avec " + (model || MODEL) + "). Pause de " + dur(ms) + ", reprise vers " + hhmm(Date.now() + ms) + ". Laissez la fenêtre ouverte, ou faites Ctrl+C et relancez demain.");
+      await sleep(ms);
+      continue;
+    }
     const gap = lastCall + MIN_INTERVAL - Date.now();      // cadence régulière : on reste sous la limite par minute
     if (gap > 0) await sleep(gap);
     lastCall = Date.now();
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": KEY }, body: JSON.stringify(body) });
+    quotaCount(model || MODEL);
     if (res.status === 429) {
       const text = await res.text(), q = readQuota(res.status, res.headers, text);
       if (q.zero) throw new Error("Cette clé n'a aucun quota pour ce modèle (limite 0). Essayez TTS_MODEL=gemini-3.8-flash-lite-tts ou une autre clé. " + text.slice(0, 200));
