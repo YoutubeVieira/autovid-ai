@@ -22,6 +22,7 @@
      VOICE_WELLNESS_F, VOICE_WELLNESS_M   voix des séances de bien-être (Vindemiatrix et Charon par défaut)
      AUDITION_VOICES  voix à comparer avec --audition, séparées par des virgules
      AUDITION_MODELS  modèles à comparer avec --audition (par défaut gemini-3.8-flash-tts et gemini-3.8-flash-lite-tts)
+     TTS_REFUSE_SUFFIX   les derniers caractères d'une clé à ne jamais utiliser (par exemple celle du projet payant) : le script refuse de démarrer avec elle
      TTS_STYLE_MODE   none (défaut), metadata ou inline : où placer la consigne de ton
                       none      aucune consigne, le texte seul est envoyé (le plus sûr pour un premier essai)
                       metadata  consigne dans speech_metadata.style de chaque partie (nouveaux modèles)
@@ -51,6 +52,10 @@ const LANGS = (LANG === "all" || (!LANG && AUDITION)) ? ["fr", "en", "pt"] : [LA
 const STYLE_MODE = process.env.TTS_STYLE_MODE || "none";
 const KEY = process.env.GEMINI_API_KEY, MODEL = process.env.TTS_MODEL || "gemini-3.8-flash-tts";
 if (!DRY && !SELFTEST && !EXPORT && !KEY) { console.log("Il faut la variable GEMINI_API_KEY (ou utilisez --dry-run)."); process.exit(1); }
+if (KEY && process.env.TTS_REFUSE_SUFFIX && KEY.endsWith(process.env.TTS_REFUSE_SUFFIX)) {
+  console.log("Cette clé est dans votre liste de clés interdites (TTS_REFUSE_SUFFIX) : utilisez une clé du niveau sans frais.");
+  process.exit(1);
+}
 const { adapt } = require("./audio-fixes.js");
 const GENDER = opt("--gender", "both");
 const MAXN = Number(opt("--max", 0)) || 0;                   // s'arrête après N nouveaux fichiers (0 : pas de limite)
