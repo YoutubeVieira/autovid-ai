@@ -140,7 +140,10 @@ function untilPacificMidnight(now) {
 function readQuota(status, headers, text) {
   const q = { zero: false, perDay: false, waitMs: 0 };
   if (/limit:\s*0\b/.test(text)) q.zero = true;
-  if (/PerDay|per day|daily/i.test(text)) q.perDay = true;
+  q.ids = [];                                              // quotas nommés par Google dans le refus
+  const re = /"quota(?:Id|Metric)"\s*:\s*"([^"]+)"/g; let mm;
+  while ((mm = re.exec(text))) if (q.ids.indexOf(mm[1]) < 0) q.ids.push(mm[1]);
+  if (q.ids.length ? q.ids.some(x => /PerDay/i.test(x)) : /per day|daily/i.test(text)) q.perDay = true;
   const m = /"retryDelay"\s*:\s*"(\d+(?:\.\d+)?)s"/.exec(text) || /retry in (\d+(?:\.\d+)?)s/i.exec(text);
   if (m) q.waitMs = Number(m[1]) * 1000;
   const ra = Number(headers.get && headers.get("retry-after"));
@@ -165,9 +168,9 @@ async function synth(item, voice, model) {
       const text = await res.text(), q = readQuota(res.status, res.headers, text);
       if (q.zero) throw new Error("Cette clé n'a aucun quota pour ce modèle (limite 0). Essayez TTS_MODEL=gemini-3.8-flash-lite-tts ou une autre clé. " + text.slice(0, 200));
       let ms;
-      if (q.perDay) ms = untilPacificMidnight(Date.now()) + 120000;
+      if (q.perDay) ms = Math.min(untilPacificMidnight(Date.now()) + 120000, 30 * 60000);  // on revérifie au plus tard toutes les 30 min : un refus ne coûte rien
       else { waitStep = Math.min(waitStep + 1, 6); ms = Math.max(q.waitMs + 5000, MIN_WAIT * waitStep); }
-      console.log("Quota atteint (" + (q.perDay ? "limite du jour" : "limite par minute") + "). Pause de " + dur(ms) + ", reprise vers " + hhmm(Date.now() + ms) + ". Laissez la fenêtre ouverte, ne l'éteignez pas.");
+      console.log("Quota atteint (" + (q.perDay ? "limite du jour" : "limite par minute") + "). Pause de " + dur(ms) + ", reprise vers " + hhmm(Date.now() + ms) + ". Laissez la fenêtre ouverte, ne l'éteignez pas." + (q.ids.length ? "\n   Quota concerné : " + q.ids.join(", ") : ""));
       await sleep(ms);
       continue;                                               // un refus de quota n'est jamais un échec : on attend, puis on reprend
     }
