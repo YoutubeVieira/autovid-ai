@@ -9,7 +9,7 @@ type Base = { delay?: number; until?: number; at?: LonLat; screen?: [number, num
 export type Item =
   | (Base & { kind: "icon"; emoji: string })                                   // hexagone avec pictogramme
   | (Base & { kind: "person"; label: string; img?: string; ring?: string })    // médaillon + étiquette
-  | (Base & { kind: "flagBadge"; flag: "gbr" | "fra" | "deu"; emoji?: string }) // hexagone drapeau
+  | (Base & { kind: "flagBadge"; flag: "gbr" | "fra" | "deu" | "ukr" | "rus"; emoji?: string }) // hexagone drapeau
   | (Base & { kind: "bubble"; text?: string; emoji?: string; tail?: "left" | "right" })
   | (Base & { kind: "tag"; text: string; size?: number })                                     // pastille grise (nom de pays)
   | (Base & { kind: "title"; text: string; sub?: string })                     // titre en haut

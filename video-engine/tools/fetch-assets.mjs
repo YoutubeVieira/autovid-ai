@@ -30,6 +30,18 @@ for (const f of src.features) {
     geometry: { type: "MultiPolygon", coordinates: keep.map(p => p.map(r => r.map(([x, y]) => [round(x), round(y)]))) }
   });
 }
+/* Correction de frontières : Natural Earth attribue par défaut la Crimée à la Russie (point de vue « de facto »).
+   Nous la rattachons à l'Ukraine, conformément au droit international et à la position de la France. */
+{
+  const rus = features.find(f => f.properties.id === "RUS"), ukr = features.find(f => f.properties.id === "UKR");
+  if (rus && ukr) {
+    const inCrimea = p => { const b = bbox(p[0]); return b[0] > 32 && b[2] < 37.2 && b[1] > 44 && b[3] < 47; };
+    const moved = rus.geometry.coordinates.filter(inCrimea);
+    rus.geometry.coordinates = rus.geometry.coordinates.filter(p => !inCrimea(p));
+    ukr.geometry.coordinates.push(...moved);
+    console.log("Crimée rattachée à l'Ukraine : " + moved.length + " polygone(s) déplacé(s)");
+  }
+}
 fs.mkdirSync(path.join(root, "public/geo"), { recursive: true });
 const out = path.join(root, "public/geo/europe.json");
 fs.writeFileSync(out, JSON.stringify({ type: "FeatureCollection", features }));

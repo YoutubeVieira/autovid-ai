@@ -1,0 +1,3100 @@
+{
+ "title": "Si la France entrait en guerre contre la Russie : ton pouvoir d'achat ? (scénario d'école)",
+ "theme": "finance",
+ "format": "16:9",
+ "lang": "fr-FR",
+ "voice": "fenrir-lite",
+ "pad": 0.35,
+ "subtitleWords": 3,
+ "cible_s": 600,
+ "faits": [
+  {
+   "id": "g1",
+   "claim": "Prix de gros du gaz européen en 2022 : +163 % ; TTF ≈ 47 €/MWh (2021) → ≈ 132 €/MWh (2022) ; pic ≈ 311 €/MWh en août 2022",
+   "value": "163 ; 47 ; 132 ; 311",
+   "source": "Banque de France, « Choc gazier » (2024), extrait de recherche web non ouvert",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g2",
+   "claim": "Prix de l'énergie hors pétrole +46 % pour les consommateurs de la zone euro en 2022",
+   "value": "46 %",
+   "source": "Banque de France, extrait de recherche web non ouvert",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g3",
+   "claim": "Part du gaz russe dans les importations de gaz de l'UE : 40-45 % avant 2022 ; ≈ 15-19 % en 2024 selon le périmètre",
+   "value": "40-45 ; 15-19",
+   "source": "Presse (AFP, La Finance pour tous), Commission européenne relayée ; sources divergentes ; non ouvertes",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g4",
+   "claim": "LPM 2024-2030 : 413 Md€ (+118 Md€) ; budget annuel visé 69 Md€ en 2030 contre 32 Md€ en 2017",
+   "value": "413 ; 118 ; 69 ; 32",
+   "source": "LCP, Public Sénat, extraits de recherche web non ouverts",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g5",
+   "claim": "Le bouclier tarifaire a limité la hausse des factures en 2022 (financé par l'État)",
+   "value": "mécanisme",
+   "source": "La Finance pour tous, extrait de recherche web non ouvert",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g6",
+   "claim": "Budget type (hypothèses) : alimentation +10 % sur 450 € = 45 € ; énergie +25 % sur 170 € = 42,50 € ; carburant +30 % sur 150 € = 45 € ; total 132,50 €/mois = 4,4 % de 3 000 €",
+   "value": "132.5 ; 4.4 %",
+   "source": "Calcul sur hypothèses illustratives",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "g7",
+   "claim": "Repère : 10 Md€ / ≈ 30 millions de ménages ≈ 333 €/an (≈ 28 €/mois)",
+   "value": "333",
+   "source": "Calcul ; nombre de ménages (≈ 30 M) à confirmer à l'INSEE",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g8",
+   "claim": "+1 point de taux sur 200 000 € / 20 ans ≈ +103 €/mois",
+   "value": "102.77",
+   "source": "Calcul d'annuité constante (voir vidéo « Pourquoi ton crédit coûte plus cher »)",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "g9",
+   "claim": "Cumul du budget type : 132,50 + 102,77 ≈ 235 €/mois ≈ 7,8 % de 3 000 €",
+   "value": "235 ; 7.8 %",
+   "source": "Calcul",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "g10",
+   "claim": "Le SMIC est revalorisé automatiquement quand l'inflation dépasse un seuil, avec décalage",
+   "value": "mécanisme",
+   "source": "Connaissance générale du droit du travail, non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g11",
+   "claim": "L'électricité française est majoritairement d'origine nucléaire, donc moins liée au gaz que chez certains voisins",
+   "value": "mécanisme",
+   "source": "Connaissance générale, non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g12",
+   "claim": "Précédents : chocs pétroliers des années 1970, économies de guerre du XXe siècle ; non transposables tels quels",
+   "value": "qualitatif",
+   "source": "Histoire économique, non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g14",
+   "claim": "Quand l'inflation dépasse le rendement d'un placement, la valeur réelle de l'argent placé diminue (mécanisme)",
+   "value": "mécanisme",
+   "source": "Notion économique générale, non vérifiée à la source",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g15",
+   "claim": "Depuis 2022, l'Europe a constitué des réserves de gaz et diversifié ses fournisseurs",
+   "value": "qualitatif",
+   "source": "Connaissance générale ; couverture presse ; non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "g13",
+   "claim": "Russie et Ukraine pèsent sur les marchés mondiaux des céréales et des engrais ; une perturbation peut faire monter leurs prix",
+   "value": "qualitatif",
+   "source": "Connaissance générale ; non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  }
+ ],
+ "scenes": [
+  {
+   "id": "c1-01",
+   "chapter": "c1",
+   "text": "Et si la France entrait un jour en guerre contre la Russie ? Je ne te pose pas la question pour te faire peur, mais pour te faire réfléchir.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Si la France entrait en guerre",
+     "sub": "TON POUVOIR D'ACHAT, EN 7 ÉTAPES",
+     "delay": 0.4
+    },
+    {
+     "kind": "bubble",
+     "delay": 1.2,
+     "emoji": "🤔",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -100
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "rus",
+     "emoji": "❓",
+     "at": [
+      37.6,
+      55.75
+     ],
+     "delay": 2.4
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "flash": [
+    0.0
+   ]
+  },
+  {
+   "id": "c1-02",
+   "chapter": "c1",
+   "text": "Parce que dans ce genre de scénario, on parle de soldats, de frontières, de diplomatie. Rarement de ce qui arrive dans ton portefeuille, ton panier de courses et ta facture d'énergie.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🪖",
+     "delay": 1.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🌍",
+     "delay": 3.0,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "👛",
+     "delay": 5.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "ET TON PORTEFEUILLE ?",
+     "delay": 6.6,
+     "size": 34,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c1-03",
+   "chapter": "c1",
+   "text": "Alors voici le cadre, très clair. Ce n'est pas une prédiction : personne ne peut dire si, quand, ni comment un tel conflit arriverait. C'est un scénario d'école, pour comprendre les mécanismes.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "PAS UNE PRÉDICTION",
+     "delay": 2.4,
+     "size": 40,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🎓",
+     "delay": 6.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "UN SCÉNARIO D'ÉCOLE",
+     "delay": 6.6,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c1-04",
+   "chapter": "c1",
+   "text": "Je ne te dis pas quoi acheter, quoi vendre, ni de vider ton compte. Les chiffres que je montre sont soit des faits datés, avec leurs sources, soit des exemples calculés, que j'annonce comme tels.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🚫",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUN CONSEIL D'ACHAT OU DE VENTE",
+     "delay": 2.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧮",
+     "delay": 6.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EXEMPLES CALCULÉS = « EXEMPLE »",
+     "delay": 6.6,
+     "size": 30,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c1-05",
+   "chapter": "c1",
+   "text": "La question centrale : est-ce que tu perdrais du pouvoir d'achat ? Le pouvoir d'achat, c'est ce que tu peux acheter avec ton revenu. Il baisse quand les prix montent plus vite que ce que tu gagnes.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "POUVOIR D'ACHAT = CE QUE TU PEUX ACHETER",
+     "delay": 3.6,
+     "size": 30,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "💶",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛒",
+     "delay": 5.4,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PRIX ↑ + REVENU = ?",
+     "delay": 7.6,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c1-06",
+   "chapter": "c1",
+   "text": "Pour y répondre, on va suivre le trajet de l'argent en sept étapes : ce que 2022 nous a appris, l'énergie, l'alimentation, le crédit, l'État, un budget type, puis tout ce qui dépend de l'ampleur du conflit.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "7 étapes",
+     "sub": "ÉNERGIE · ALIMENTATION · CRÉDIT · ÉTAT · BUDGET TYPE",
+     "delay": 0.4
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      37.6,
+      55.75
+     ],
+     "to": [
+      13.4,
+      52.5
+     ],
+     "delay": 2.0,
+     "color": "#ff3b30"
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      13.4,
+      52.5
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 3.4,
+     "color": "#ffd60a"
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g1"
+   ]
+  },
+  {
+   "id": "c2-01",
+   "chapter": "c2",
+   "text": "Première étape : ce que 2022 nous a appris. Quand la Russie a envahi l'Ukraine, en février 2022, les marchés de l'énergie ont réagi tout de suite.",
+   "camera": {
+    "lon": 28.0,
+    "lat": 52.0,
+    "zoom": 2.5
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 1 · Ce que 2022 nous a appris",
+     "sub": "LE PRÉCÉDENT LE PLUS RÉCENT",
+     "delay": 0.3
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "ukr",
+     "emoji": "💥",
+     "at": [
+      30.5,
+      50.45
+     ],
+     "delay": 2.6
+    },
+    {
+     "kind": "burst",
+     "emoji": "🔥",
+     "at": [
+      30.5,
+      50.45
+     ],
+     "delay": 5.6
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red",
+    "UKR": "flag"
+   },
+   "impacts": [
+    5.6
+   ],
+   "faits": [
+    "g1"
+   ]
+  },
+  {
+   "id": "c2-02",
+   "chapter": "c2",
+   "text": "Selon la Banque de France, le prix de gros du gaz en Europe a augmenté de cent soixante-trois pour cent sur l'année 2022. Le repère européen, le TTF, est passé d'environ quarante-sept euros le mégawattheure en 2021, à environ cent trente-deux en 2022, avec un pic à trois cent onze en août.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 163,
+     "suffix": " %",
+     "label": "hausse du prix de gros du gaz en 2022 · Banque de France",
+     "delay": 3.2,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 311,
+     "suffix": " €",
+     "label": "€/MWh : pic du TTF en août 2022",
+     "delay": 10.0,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ffb347"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g1"
+   ],
+   "impacts": [
+    3.2
+   ]
+  },
+  {
+   "id": "c2-03",
+   "chapter": "c2",
+   "text": "Avant la guerre, la Russie fournissait entre quarante et quarante-cinq pour cent du gaz importé par l'Union européenne, selon les sources. Cette dépendance explique l'ampleur du choc.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "arrow",
+     "from": [
+      37.6,
+      55.75
+     ],
+     "to": [
+      13.4,
+      52.5
+     ],
+     "delay": 1.4,
+     "color": "#ff3b30"
+    },
+    {
+     "kind": "stat",
+     "value": 45,
+     "suffix": " %",
+     "label": "jusqu'à 45 % du gaz importé par l'UE (2021)",
+     "delay": 4.2,
+     "screen": [
+      1420,
+      330
+     ],
+     "color": "#ff4d4d"
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g3"
+   ]
+  },
+  {
+   "id": "c2-04",
+   "chapter": "c2",
+   "text": "Depuis, l'Europe s'est adaptée : en 2024, cette part est retombée entre quinze et dix-neuf pour cent, selon le périmètre retenu. La dépendance existe encore, notamment via le gaz naturel liquéfié.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 19,
+     "suffix": " %",
+     "label": "jusqu'à 19 % en 2024 (selon le périmètre)",
+     "delay": 1.8,
+     "screen": [
+      1420,
+      330
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🚢",
+     "delay": 6.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "GAZ NATUREL LIQUÉFIÉ",
+     "delay": 7.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g3"
+   ]
+  },
+  {
+   "id": "c2-05",
+   "chapter": "c2",
+   "text": "Et les ménages français ? Ils ont été en partie protégés par le bouclier tarifaire, financé par l'État. Autrement dit : une partie de la facture n'a pas disparu, elle est passée dans les comptes publics.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🛡️",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧾",
+     "delay": 4.2,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "LA FACTURE PASSE DANS LES COMPTES PUBLICS",
+     "delay": 7.0,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g5"
+   ]
+  },
+  {
+   "id": "c2-06",
+   "chapter": "c2",
+   "text": "Retiens ça : un choc d'énergie touche d'abord les prix, ensuite les budgets, et enfin les finances de l'État. C'est le fil rouge de cette vidéo.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "PRIX → BUDGETS → FINANCES PUBLIQUES",
+     "delay": 1.2,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧵",
+     "delay": 3.4,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c2-07",
+   "chapter": "c2",
+   "text": "Il faut aussi distinguer le prix de marché et le prix payé. Ce que tu paies à la fin dépend de ton contrat, des tarifs réglementés, des taxes et des aides. Voilà pourquoi la hausse du marché n'est jamais égale à celle de ta facture.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📄",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PRIX DE MARCHÉ ≠ PRIX PAYÉ",
+     "delay": 3.4,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧾",
+     "delay": 6.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "CONTRAT · TAXES · AIDES",
+     "delay": 7.8,
+     "size": 30,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g5"
+   ]
+  },
+  {
+   "id": "c3-01",
+   "chapter": "c3",
+   "text": "Deuxième étape : l'énergie. Dans un scénario de conflit direct, trois prix seraient surveillés : le gaz, le carburant, et l'électricité.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 2 · L'énergie",
+     "sub": "GAZ · CARBURANT · ÉLECTRICITÉ",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔥",
+     "delay": 3.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⛽",
+     "delay": 5.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⚡",
+     "delay": 7.4,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c3-02",
+   "chapter": "c3",
+   "text": "Le gaz et le carburant dépendent des marchés mondiaux : s'ils se tendent, ils montent, parfois en quelques jours. Ce sont les prix qui réagissent le plus vite.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RÉACTION RAPIDE : QUELQUES JOURS",
+     "delay": 4.8,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c3-03",
+   "chapter": "c3",
+   "text": "L'électricité est un cas particulier : en France, une grande partie est produite par le nucléaire, donc moins directement liée au gaz que chez certains voisins. Mais le prix de gros européen reste lié, et ce lien peut se retrouver dans les factures.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⚛️",
+     "delay": 3.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "NUCLÉAIRE : MOINS LIÉ AU GAZ",
+     "delay": 5.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "MAIS PRIX DE GROS EUROPÉEN LIÉ",
+     "delay": 9.0,
+     "size": 30,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g11"
+   ]
+  },
+  {
+   "id": "c3-04",
+   "chapter": "c3",
+   "text": "Prends un exemple, avec des chiffres que j'invente pour calculer : un foyer qui dépense cent soixante-dix euros par mois en énergie à domicile. Si cette facture augmente de vingt-cinq pour cent, il paie environ quarante-deux euros de plus par mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 170,
+     "suffix": " €",
+     "label": "énergie à domicile par mois · hypothèse",
+     "delay": 2.6,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 42,
+     "suffix": " €",
+     "label": "de plus par mois si +25 % · exemple",
+     "delay": 9.2,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ],
+   "impacts": [
+    9.2
+   ]
+  },
+  {
+   "id": "c3-05",
+   "chapter": "c3",
+   "text": "Et pour un foyer qui dépense cent cinquante euros de carburant par mois, trente pour cent de hausse font quarante-cinq euros de plus. Ce sont des hypothèses, pas des prévisions.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 150,
+     "suffix": " €",
+     "label": "carburant par mois · hypothèse",
+     "delay": 1.4,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 45,
+     "suffix": " €",
+     "label": "de plus par mois si +30 % · exemple",
+     "delay": 5.4,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "tag",
+     "text": "HYPOTHÈSES, PAS PRÉVISIONS",
+     "delay": 8.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ]
+  },
+  {
+   "id": "c3-06",
+   "chapter": "c3",
+   "text": "Les États peuvent amortir : bouclier tarifaire, aides ciblées. Mais cet amortisseur a un prix, et c'est nous, collectivement, qui le payons.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🛡️",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "💸",
+     "delay": 4.8,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "L'AMORTISSEUR A UN PRIX",
+     "delay": 6.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g5"
+   ]
+  },
+  {
+   "id": "c3-07",
+   "chapter": "c3",
+   "text": "Pour te repérer, regarde la part de ton budget qui dépend de l'énergie : chauffage, électricité, déplacements. Plus cette part est grande, plus tu es sensible à un choc. Un foyer qui prend la voiture tous les jours n'est pas dans la même situation qu'un foyer en ville, sans voiture.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 2.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🚗",
+     "delay": 5.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🚇",
+     "delay": 9.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TA SENSIBILITÉ DÉPEND DE TON MODE DE VIE",
+     "delay": 11.0,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-01",
+   "chapter": "c4",
+   "text": "Troisième étape : ton panier de courses. La Russie et l'Ukraine pèsent lourd sur les marchés des céréales et des engrais.",
+   "camera": {
+    "lon": 28.0,
+    "lat": 52.0,
+    "zoom": 2.5
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 3 · L'alimentation",
+     "sub": "CÉRÉALES · ENGRAIS · TRANSPORT",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🌾",
+     "delay": 3.6,
+     "at": [
+      30.5,
+      50.45
+     ],
+     "dy": -110
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧪",
+     "delay": 5.2,
+     "at": [
+      37.6,
+      55.75
+     ],
+     "dy": -110
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red",
+    "UKR": "flag"
+   },
+   "faits": [
+    "g13"
+   ]
+  },
+  {
+   "id": "c4-02",
+   "chapter": "c4",
+   "text": "Quand ces flux se perturbent, le prix du blé, des engrais et du transport peut monter, et cette hausse finit, avec retard, sur les rayons.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "arrow",
+     "from": [
+      30.5,
+      50.45
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 1.6,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🥖",
+     "delay": 3.6,
+     "at": [
+      2.35,
+      48.86
+     ],
+     "dy": -120
+    },
+    {
+     "kind": "tag",
+     "text": "AVEC RETARD",
+     "delay": 5.6,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red",
+    "UKR": "flag"
+   },
+   "faits": [
+    "g13"
+   ]
+  },
+  {
+   "id": "c4-03",
+   "chapter": "c4",
+   "text": "Le retard compte : entre le marché mondial et le prix en magasin, il y a des intermédiaires, des contrats, des stocks. L'effet n'arrive pas en un jour, mais il peut durer.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📦",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏭",
+     "delay": 3.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏪",
+     "delay": 5.8,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "INTERMÉDIAIRES · CONTRATS · STOCKS",
+     "delay": 7.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-04",
+   "chapter": "c4",
+   "text": "Autre canal, moins visible : le transport. Plus le carburant coûte cher, plus acheminer les produits coûte cher, et cette facture se répartit sur tout ce que tu achètes.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🚚",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⛽",
+     "delay": 3.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "LE TRANSPORT SE RÉPARTIT SUR TOUT",
+     "delay": 6.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-05",
+   "chapter": "c4",
+   "text": "Exemple calculé : un foyer qui dépense quatre cent cinquante euros par mois en alimentation. Avec dix pour cent de hausse, ça fait quarante-cinq euros de plus par mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 450,
+     "suffix": " €",
+     "label": "alimentation par mois · hypothèse",
+     "delay": 2.0,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 45,
+     "suffix": " €",
+     "label": "de plus par mois si +10 % · exemple",
+     "delay": 6.8,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ],
+   "impacts": [
+    6.8
+   ]
+  },
+  {
+   "id": "c4-06",
+   "chapter": "c4",
+   "text": "Les produits les plus touchés ne sont pas les mêmes selon ton mode de vie. Ce qui est transformé, emballé, transporté, réagit à des coûts différents de ce qui est local et de saison.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🥫",
+     "delay": 3.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🥕",
+     "delay": 6.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TRANSFORMÉ ≠ LOCAL ET DE SAISON",
+     "delay": 7.4,
+     "size": 30,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-07",
+   "chapter": "c4",
+   "text": "Face à la hausse, les ménages s'adaptent : on change de marque, on réduit les produits les plus chers, on cuisine davantage. Cette adaptation limite la perte de pouvoir d'achat, mais elle a un coût en temps et en confort.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏷️",
+     "delay": 1.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🍳",
+     "delay": 4.4,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⏱️",
+     "delay": 7.2,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "S'ADAPTER A UN COÛT EN TEMPS",
+     "delay": 8.2,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c5-01",
+   "chapter": "c5",
+   "text": "Quatrième étape : les taux et le crédit. Quand les prix montent vite, la Banque centrale européenne peut relever ses taux pour freiner l'inflation.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 3.4
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 4 · Les taux et le crédit",
+     "sub": "L'EFFET SUR TES EMPRUNTS",
+     "delay": 0.3
+    },
+    {
+     "kind": "ping",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 2.0,
+     "color": "#ffffff"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 3.0,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -150
+    },
+    {
+     "kind": "burst",
+     "emoji": "📈",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 6.0
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "impacts": [
+    6.0
+   ]
+  },
+  {
+   "id": "c5-02",
+   "chapter": "c5",
+   "text": "On l'a vu dans une autre vidéo : quand la BCE relève ses taux, les nouveaux crédits coûtent plus cher. Un point de taux de plus sur deux cent mille euros sur vingt ans, c'est environ cent trois euros de plus par mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 103,
+     "suffix": " €",
+     "label": "de plus par mois pour +1 point · exemple",
+     "delay": 7.8,
+     "screen": [
+      1420,
+      330
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "200 000 € · 20 ANS",
+     "delay": 4.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g8"
+   ]
+  },
+  {
+   "id": "c5-03",
+   "chapter": "c5",
+   "text": "Il y a aussi l'incertitude. En période de tension, les investisseurs peuvent demander plus pour prêter à certains États, et cet écart peut se répercuter sur le crédit.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "arrow",
+     "from": [
+      13.4,
+      52.5
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 2.0,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧑‍💼",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "L'INCERTITUDE A UN PRIX",
+     "delay": 4.8,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c5-04",
+   "chapter": "c5",
+   "text": "Mais attention, le sens n'est pas automatique : une crise grave peut aussi pousser une banque centrale à soutenir l'économie, donc à baisser ses taux. Personne ne sait quelle réaction l'emporterait.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📉",
+     "delay": 3.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🤷",
+     "delay": 6.4,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "HAUSSE OU BAISSE : PERSONNE NE SAIT",
+     "delay": 7.6,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c5-05",
+   "chapter": "c5",
+   "text": "Pour toi, la règle de base reste la même : si ton crédit est à taux fixe et déjà signé, ta mensualité ne bouge pas. Ceux qui sont exposés, ce sont les futurs emprunteurs et les taux variables.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "flagBadge",
+     "flag": "fra",
+     "emoji": "🔒",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 1.6
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX FIXE SIGNÉ = MENSUALITÉ STABLE",
+     "delay": 3.4,
+     "size": 30,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EXPOSÉS : FUTURS EMPRUNTEURS · TAUX VARIABLES",
+     "delay": 7.4,
+     "size": 28,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c5-06",
+   "chapter": "c5",
+   "text": "Un mot sur l'épargne : quand l'inflation est forte, l'argent qui dort perd en valeur réelle si son rendement est plus faible que la hausse des prix. Ce n'est pas un appel à agir, c'est un mécanisme à connaître pour comprendre ce qui se passe autour de toi.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🐷",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📉",
+     "delay": 4.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RENDEMENT < INFLATION = VALEUR RÉELLE ↓",
+     "delay": 6.0,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "UN MÉCANISME, PAS UN CONSEIL",
+     "delay": 9.8,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g14"
+   ]
+  },
+  {
+   "id": "c6-01",
+   "chapter": "c6",
+   "text": "Cinquième étape : l'État. Une guerre, même sans combats sur ton sol, coûte cher : des armes, des soldats, des aides aux entreprises, des aides aux ménages.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 5 · L'État",
+     "sub": "DÉPENSES, AIDES, DETTE",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🪖",
+     "delay": 3.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏭",
+     "delay": 5.2,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧾",
+     "delay": 6.8,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c6-02",
+   "chapter": "c6",
+   "text": "La loi de programmation militaire 2024-2030 prévoit déjà quatre cent treize milliards d'euros pour les armées, soit cent dix-huit milliards de plus que la loi précédente. Le budget annuel doit atteindre soixante-neuf milliards en 2030, contre trente-deux en 2017.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 413,
+     "suffix": " Md€",
+     "label": "Md€ prévus pour les armées, 2024-2030 · LPM",
+     "delay": 2.8,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 69,
+     "suffix": " Md€",
+     "label": "Md€ par an visés en 2030 (32 en 2017)",
+     "delay": 10.2,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ffb347"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g4"
+   ]
+  },
+  {
+   "id": "c6-03",
+   "chapter": "c6",
+   "text": "Imaginons, pour le calcul, une dépense supplémentaire de dix milliards d'euros par an. Répartie sur environ trente millions de ménages, ça représente environ trois cent trente-trois euros par an et par ménage, soit environ vingt-huit euros par mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 10,
+     "suffix": " Md€",
+     "label": "Md€ de dépense en plus par an · hypothèse",
+     "delay": 3.0,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 333,
+     "suffix": " €",
+     "label": "€ par an et par ménage · exemple",
+     "delay": 9.6,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g7"
+   ],
+   "impacts": [
+    9.6
+   ]
+  },
+  {
+   "id": "c6-04",
+   "chapter": "c6",
+   "text": "Comment financer ? Trois leviers seulement : des impôts, des économies ailleurs, ou plus de dette. Aucun n'est gratuit, et le choix est politique, pas économique.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🧾",
+     "delay": 2.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "✂️",
+     "delay": 4.0,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 5.4,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "IMPÔTS · ÉCONOMIES · DETTE",
+     "delay": 6.4,
+     "size": 34,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c6-05",
+   "chapter": "c6",
+   "text": "Et plus de dette, ce sont plus d'intérêts à payer plus tard : l'effet sur ton budget n'est pas immédiat, mais il s'étale dans le temps.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⏳",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "L'EFFET S'ÉTALE DANS LE TEMPS",
+     "delay": 4.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c6-06",
+   "chapter": "c6",
+   "text": "Attention aussi à l'autre face : les dépenses militaires créent aussi de l'activité et des emplois dans certaines industries. L'effet net dépend de ce qu'on arrête de financer.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏭",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "👷",
+     "delay": 3.2,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EFFET NET = CE QU'ON ARRÊTE DE FINANCER",
+     "delay": 5.6,
+     "size": 30,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c6-07",
+   "chapter": "c6",
+   "text": "Enfin, les aides publiques : chèque énergie, remises sur le carburant, boucliers. Elles protègent une partie des foyers, souvent les plus modestes, mais leur coût s'ajoute au budget de l'État. Une aide n'efface pas le coût, elle le déplace.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🎁",
+     "delay": 1.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "➡️",
+     "delay": 6.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏛️",
+     "delay": 7.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "UNE AIDE DÉPLACE LE COÛT",
+     "delay": 8.6,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g5"
+   ]
+  },
+  {
+   "id": "c7-01",
+   "chapter": "c7",
+   "text": "Sixième étape : mettons tout ensemble, dans un budget type. Un foyer avec trois mille euros de revenu net par mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 6 · Un budget type",
+     "sub": "3 000 € DE REVENU NET PAR MOIS · EXEMPLE",
+     "delay": 0.3
+    },
+    {
+     "kind": "stat",
+     "value": 3000,
+     "suffix": " €",
+     "label": "revenu net par mois · hypothèse",
+     "delay": 3.2,
+     "screen": [
+      1420,
+      330
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "icon",
+     "emoji": "👨‍👩‍👧",
+     "delay": 1.2,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ]
+  },
+  {
+   "id": "c7-02",
+   "chapter": "c7",
+   "text": "Hypothèses du scénario : l'alimentation augmente de dix pour cent, l'énergie à domicile de vingt-cinq pour cent, le carburant de trente pour cent.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "ALIMENTATION +10 %",
+     "delay": 2.0,
+     "size": 32,
+     "screen": [
+      500,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "ÉNERGIE +25 %",
+     "delay": 4.2,
+     "size": 32,
+     "screen": [
+      960,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "CARBURANT +30 %",
+     "delay": 6.4,
+     "size": 32,
+     "screen": [
+      1420,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "HYPOTHÈSES, PAS PRÉVISIONS",
+     "delay": 8.0,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ]
+  },
+  {
+   "id": "c7-03",
+   "chapter": "c7",
+   "text": "Ça donne quarante-cinq euros, quarante-deux euros cinquante, et quarante-cinq euros : environ cent trente-trois euros de plus par mois, soit plus de quatre pour cent du revenu.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 133,
+     "suffix": " €",
+     "label": "de plus par mois · exemple",
+     "delay": 5.6,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 4.4,
+     "suffix": " %",
+     "label": "du revenu net · exemple",
+     "delay": 9.2,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d",
+     "decimals": 1
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g6"
+   ],
+   "impacts": [
+    5.6
+   ]
+  },
+  {
+   "id": "c7-04",
+   "chapter": "c7",
+   "text": "Si, en plus, ce foyer emprunte à un taux plus élevé d'un point, il ajoute environ cent trois euros par mois. Le total approche deux cent trente-cinq euros, soit près de huit pour cent du revenu.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 103,
+     "suffix": " €",
+     "label": "crédit : +1 point de taux · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      360
+     ],
+     "color": "#ffb347",
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 235,
+     "suffix": " €",
+     "label": "au total par mois · exemple (≈ 7,8 %)",
+     "delay": 8.2,
+     "screen": [
+      1280,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g8",
+    "g9"
+   ],
+   "impacts": [
+    8.2
+   ]
+  },
+  {
+   "id": "c7-05",
+   "chapter": "c7",
+   "text": "Alors, perte de pouvoir d'achat ? Oui, si le revenu n'augmente pas autant. Mais certains revenus s'ajustent : le SMIC, par exemple, est revalorisé automatiquement quand l'inflation dépasse un seuil. L'ajustement arrive avec un décalage.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📉",
+     "delay": 1.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "💼",
+     "delay": 6.0,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "LE SMIC S'AJUSTE, AVEC DÉCALAGE",
+     "delay": 8.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g10"
+   ]
+  },
+  {
+   "id": "c7-06",
+   "chapter": "c7",
+   "text": "Résultat : l'effet réel dépend de ton profil. Salarié au SMIC, retraité, indépendant, propriétaire, locataire : tu ne vis pas le même scénario.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "SMIC",
+     "delay": 1.6,
+     "size": 34,
+     "screen": [
+      400,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RETRAITÉ",
+     "delay": 2.8,
+     "size": 34,
+     "screen": [
+      700,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "INDÉPENDANT",
+     "delay": 4.0,
+     "size": 34,
+     "screen": [
+      1000,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PROPRIÉTAIRE",
+     "delay": 5.2,
+     "size": 34,
+     "screen": [
+      1300,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "LOCATAIRE",
+     "delay": 6.4,
+     "size": 34,
+     "screen": [
+      1600,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c7-07",
+   "chapter": "c7",
+   "text": "Pour t'y retrouver, sépare tes dépenses en deux : celles qui sont fixes, comme le loyer ou le crédit, et celles qui sont variables, comme les courses et le carburant. Face à un choc de prix, ce sont les dépenses variables qui bougent le plus vite, et sur lesquelles tu peux agir.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "DÉPENSES FIXES : LOYER · CRÉDIT",
+     "delay": 4.0,
+     "size": 30,
+     "screen": [
+      640,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "VARIABLES : COURSES · CARBURANT",
+     "delay": 8.6,
+     "size": 30,
+     "screen": [
+      1280,
+      330
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🗂️",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-01",
+   "chapter": "c8",
+   "text": "Septième étape : tout dépend de l'ampleur. Parler de guerre, c'est parler de situations très différentes.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 7 · Tout dépend de l'ampleur",
+     "sub": "TROIS NIVEAUX POSSIBLES",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🎚️",
+     "delay": 2.0,
+     "screen": [
+      300,
+      400
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c8-02",
+   "chapter": "c8",
+   "text": "Premier niveau : des tensions et des sanctions, sans combats directs. L'effet passe surtout par les prix de l'énergie et des matières premières, comme en 2022.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "NIVEAU 1 · TENSIONS ET SANCTIONS",
+     "delay": 0.8,
+     "size": 36,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔥",
+     "delay": 3.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛢️",
+     "delay": 5.4,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g12"
+   ]
+  },
+  {
+   "id": "c8-03",
+   "chapter": "c8",
+   "text": "Deuxième niveau : un conflit limité, avec des perturbations de transport, de commerce, de chaînes d'approvisionnement. Les prix montent plus largement et plus durablement.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "NIVEAU 2 · CONFLIT LIMITÉ",
+     "delay": 0.8,
+     "size": 36,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🚢",
+     "delay": 3.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⛓️",
+     "delay": 5.8,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c8-04",
+   "chapter": "c8",
+   "text": "Troisième niveau : une guerre de grande ampleur. Là, les précédents historiques, comme les chocs pétroliers des années soixante-dix ou les économies de guerre du vingtième siècle, montrent des inflations élevées, des restrictions et des changements profonds. Aucun chiffre d'hier ne se transpose tel quel.",
+   "camera": {
+    "lon": 17.0,
+    "lat": 51.5,
+    "zoom": 1.75
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "NIVEAU 3 · GUERRE DE GRANDE AMPLEUR",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📚",
+     "delay": 4.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUN CHIFFRE D'HIER NE SE TRANSPOSE TEL QUEL",
+     "delay": 11.0,
+     "size": 28,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g12"
+   ]
+  },
+  {
+   "id": "c8-05",
+   "chapter": "c8",
+   "text": "Ce qui change aujourd'hui : l'Europe a réduit sa part de gaz russe, a diversifié ses sources, et dispose d'outils que n'avaient pas les générations précédentes. Mais l'économie est aussi plus interconnectée.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🧭",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔗",
+     "delay": 6.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PLUS DE SOURCES · PLUS D'INTERDÉPENDANCES",
+     "delay": 8.0,
+     "size": 28,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g3"
+   ]
+  },
+  {
+   "id": "c8-06",
+   "chapter": "c8",
+   "text": "La seule honnêteté possible : personne ne connaît l'ampleur. C'est pour ça que ce n'est pas une prédiction.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "bubble",
+     "delay": 1.6,
+     "emoji": "🤷",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -110
+    },
+    {
+     "kind": "tag",
+     "text": "PERSONNE NE CONNAÎT L'AMPLEUR",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-07",
+   "chapter": "c8",
+   "text": "Depuis 2022, l'Europe a aussi constitué des réserves de gaz et multiplié les fournisseurs. Cela réduit le risque d'une pénurie brutale, sans supprimer celui d'une hausse des prix : un marché mondial reste un marché mondial.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏗️",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🌍",
+     "delay": 5.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "MOINS DE PÉNURIE · TOUJOURS DES PRIX MONDIAUX",
+     "delay": 7.0,
+     "size": 28,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   },
+   "faits": [
+    "g15"
+   ]
+  },
+  {
+   "id": "c9-01",
+   "chapter": "c9",
+   "text": "Pour finir : ce qu'il faut retenir.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Pour finir · À retenir",
+     "sub": "3 IDÉES",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "📝",
+     "delay": 1.0,
+     "screen": [
+      300,
+      400
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c9-02",
+   "chapter": "c9",
+   "text": "Un : une guerre touche ton budget par quatre canaux, l'énergie, l'alimentation, le crédit, et l'État. Pas tous en même temps, pas tous avec la même force.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "1 · QUATRE CANAUX",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔥",
+     "delay": 2.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛒",
+     "delay": 4.0,
+     "screen": [
+      700,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 5.6,
+     "screen": [
+      1100,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏛️",
+     "delay": 7.2,
+     "screen": [
+      1500,
+      300
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "RUS": "red"
+   }
+  },
+  {
+   "id": "c9-03",
+   "chapter": "c9",
+   "text": "Deux : l'effet dépend de l'ampleur et de ton profil. Un budget type perd, dans notre exemple, plusieurs pour cent de pouvoir d'achat, mais ce n'est qu'un exemple.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "2 · AMPLEUR ET PROFIL",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 235,
+     "suffix": " €",
+     "label": "par mois dans l'exemple · hypothèses",
+     "delay": 4.0,
+     "screen": [
+      1420,
+      360
+     ],
+     "color": "#ff4d4d",
+     "prefix": "−"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "g9"
+   ]
+  },
+  {
+   "id": "c9-04",
+   "chapter": "c9",
+   "text": "Trois : ce que tu peux faire, c'est te préparer sans paniquer. Connaître ton budget, savoir ce qui est fixe et variable, avoir un petit matelas d'épargne, comprendre ton crédit. Pas de décision brutale.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "3 · SE PRÉPARER SANS PANIQUER",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📒",
+     "delay": 3.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛟",
+     "delay": 6.0,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔍",
+     "delay": 8.4,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c9-05",
+   "chapter": "c9",
+   "text": "Un dernier mot sur le réflexe à éviter : prendre une décision sur un placement, ou sur ton crédit, à cause d'un titre de journal. Les scénarios effrayants font réagir, les budgets bien compris font tenir. Si tu doutes, demande l'avis d'un professionnel agréé.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📰",
+     "delay": 1.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛑",
+     "delay": 5.2,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PAS DE DÉCISION SUR UN TITRE DE JOURNAL",
+     "delay": 6.4,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧑‍⚖️",
+     "delay": 11.0,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c9-06",
+   "chapter": "c9",
+   "text": "Cette vidéo est un contenu éducatif : aucune obligation d'achat ni de souscription, et pas un conseil en investissement ni en crédit. Les chiffres sont des exemples calculés ou des faits à confirmer à la source.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "CONTENU ÉDUCATIF · PAS UN CONSEIL EN INVESTISSEMENT NI EN CRÉDIT",
+     "delay": 0.6,
+     "size": 28,
+     "screen": [
+      960,
+      960
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUNE OBLIGATION D'ACHAT OU DE SOUSCRIPTION",
+     "delay": 1.4,
+     "size": 28,
+     "screen": [
+      960,
+      1020
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⚠️",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c9-07",
+   "chapter": "c9",
+   "text": "Si ça t'a aidé, abonne-toi. Un short résume l'essentiel, et la prochaine vidéo répond à une question liée : pourquoi la France emprunte plus cher que l'Allemagne.",
+   "camera": {
+    "lon": 12.0,
+    "lat": 50.5,
+    "zoom": 2.3
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "burst",
+     "emoji": "🔔",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 1.6
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "fra",
+     "emoji": "❓",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 5.0
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "deu",
+     "emoji": "❓",
+     "at": [
+      10.3,
+      51.0
+     ],
+     "delay": 5.6
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      10.3,
+      51.0
+     ],
+     "to": [
+      2.3,
+      47.0
+     ],
+     "delay": 6.4,
+     "color": "#ff3b30"
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "flash": [
+    1.6
+   ]
+  }
+ ]
+}

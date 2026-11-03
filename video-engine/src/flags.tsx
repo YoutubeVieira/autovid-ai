@@ -25,6 +25,25 @@ export const FLAGS: Record<string, FlagDef> = {
       </>
     )
   },
+  ukr: {
+    w: 3, h: 2,
+    node: (
+      <>
+        <rect width="3" height="1" fill="#0057B7" />
+        <rect y="1" width="3" height="1" fill="#FFD700" />
+      </>
+    )
+  },
+  rus: {
+    w: 3, h: 2,
+    node: (
+      <>
+        <rect width="3" height="0.67" fill="#fff" />
+        <rect y="0.67" width="3" height="0.67" fill="#0039A6" />
+        <rect y="1.33" width="3" height="0.67" fill="#D52B1E" />
+      </>
+    )
+  },
   deu: {
     w: 5, h: 3,
     node: (
