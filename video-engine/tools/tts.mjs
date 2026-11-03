@@ -56,6 +56,9 @@ async function gemini(text) {
     if (!inline) throw new Error("Réponse sans audio : " + JSON.stringify(j).slice(0, 300));
     const d = inline.inlineData || inline.inline_data;
     const { pcm, rate } = decodeAudio(Buffer.from(d.data, "base64"), d.mimeType || d.mime_type);
+    // registre de consommation (sans clé ni texte) : voir tools/tts-usage.mjs
+    fs.mkdirSync(path.join(root, "serie"), { recursive: true });
+    fs.appendFileSync(path.join(root, "serie", "tts-usage.jsonl"), JSON.stringify({ ts: new Date().toISOString(), projet: name, modele: MODEL, voix: VOICE, caracteres: text.length, secondes_audio: +(pcm.length / 2 / rate).toFixed(1) }) + "\n");
     return wav(pcm, rate);
   }
 }

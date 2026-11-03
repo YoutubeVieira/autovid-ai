@@ -4,6 +4,7 @@ import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
 import { plan } from "./daily-plan.mjs";
+import { summarize } from "./tts-usage.mjs";
 import { root, loadVoice, splitByPauses, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
 
 const pcm = Buffer.alloc(24000 * 2); // 1 s de silence à 24 kHz
@@ -70,5 +71,12 @@ for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWi
   assert.ok(j1.issues.some(i => /orphelin/.test(i)), "short orphelin signalé");
   const j2 = plan({ ...serie, dernier_type: "long" });
   assert.strictEqual(j2.job.jour, "short"); assert.strictEqual(j2.job.long_lie, "L1");
+}
+{ // compteur de voix : 3 requêtes le même jour (Pacifique) sur un modèle, 1 sur un autre
+  const L = [{ ts: "2026-11-03T08:00:00Z", modele: "m1", projet: "a", caracteres: 100, secondes_audio: 10 }, { ts: "2026-11-03T20:00:00Z", modele: "m1", projet: "a", caracteres: 50, secondes_audio: 5 }, { ts: "2026-11-04T02:00:00Z", modele: "m1", projet: "b", caracteres: 10, secondes_audio: 1 }, { ts: "2026-11-03T09:00:00Z", modele: "m2", projet: "a", caracteres: 5, secondes_audio: 1 }];
+  const r = summarize(L, 10);
+  assert.strictEqual(r.find(x => x.jour_modele === "2026-11-03 | m1").requetes, 3, "02:00Z du 4 = 18:00 PST du 3");
+  assert.strictEqual(r.find(x => x.jour_modele === "2026-11-03 | m1").reste_sur_limite, 7);
+  assert.strictEqual(r.length, 2);
 }
 console.log("Tests OK");
