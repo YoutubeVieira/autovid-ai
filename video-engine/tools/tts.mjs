@@ -15,7 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { root, loadProject, loadVoice, wav, decodeAudio, readWav } from "./lib.mjs";
+import { root, loadProject, loadVoice, wav, decodeAudio, readWav, splitByPauses } from "./lib.mjs";
 
 const name = process.argv[2];
 if (!name) { console.log("Usage : node tools/tts.mjs <projet>"); process.exit(1); }
@@ -78,7 +78,26 @@ const manifest = {};
 const oi = process.argv.indexOf("--only");
 const ONLY = oi > 0 ? process.argv[oi + 1].split(",") : null;   // --only s13,s14 : ne produit que ces scènes, garde les autres telles quelles
 console.log("Voix off « " + name + " » : voix « " + voiceId + " » (" + provider + (provider === "gemini" ? ", " + MODEL + ", " + VOICE : "") + ")");
+/* Chapitres : les scènes qui partagent "chapter" sont dites en UNE requête, puis découpées sur les pauses
+   (économise le quota : 10 requêtes par jour et par modèle sur le compte gratuit). */
+const groups = {};
+for (const s of project.scenes) if (s.chapter) (groups[s.chapter] = groups[s.chapter] || []).push(s);
+const doneChapters = new Set();
+async function doChapter(ch) {
+  const sc = groups[ch], texts = sc.map(x => x.text);
+  const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, texts.join("|")].join("|")).digest("hex").slice(0, 10);
+  const files = sc.map(x => path.join(outDir, x.id + "." + hash + ".wav"));
+  if (!files.every(f => fs.existsSync(f))) {
+    const text = texts.join(" ");
+    const buf = provider === "gemini" ? await gemini(text) : espeak(text);
+    const parts = splitByPauses(buf, texts);
+    sc.forEach((x, i) => { for (const old of fs.readdirSync(outDir)) if (old.startsWith(x.id + ".")) fs.unlinkSync(path.join(outDir, old)); fs.writeFileSync(files[i], parts[i]); });
+    console.log("  ok chapitre " + ch + " : 1 requête, " + sc.length + " scènes (" + sc.map((x, i) => (readWav(parts[i]).pcm.length / 2 / readWav(parts[i]).rate).toFixed(1) + " s").join(", ") + ")");
+  } else console.log("  =  chapitre " + ch + " (déjà produit)");
+  sc.forEach((x, i) => { const { pcm, rate } = readWav(fs.readFileSync(files[i])); manifest[x.id] = { file: "projects/" + name + "/audio/" + path.basename(files[i]), seconds: +(pcm.length / 2 / rate).toFixed(3), provider }; });
+}
 for (const s of project.scenes) {
+  if (s.chapter && groups[s.chapter].length > 1) { if (!doneChapters.has(s.chapter)) { doneChapters.add(s.chapter); await doChapter(s.chapter); } continue; }
   if (ONLY && !ONLY.includes(s.id)) {
     const keep = fs.readdirSync(outDir).find(x => x.startsWith(s.id + "."));
     if (!keep) throw new Error("Scène " + s.id + " sans audio : lancez sans --only.");

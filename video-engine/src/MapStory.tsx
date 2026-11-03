@@ -1,5 +1,5 @@
-import React from "react";
-import { AbsoluteFill, Audio, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import React, { createContext, useContext } from "react";
+import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { FREE_ZONE, H, W, cameraTransform, features, polygonPath, project, toScreen } from "./geo";
 import { FLAGS, Flag } from "./flags";
 import basemap from "../public/geo/basemap.json";
@@ -9,6 +9,8 @@ export const EMOJI = "'Noto Color Emoji'";
 export const FONT = `Inter, ${EMOJI}, 'DejaVu Sans', sans-serif`;
 const TINT: Record<string, string> = { gray: "#b9b6ab", red: "#b3322d", yellow: "#dcb52a" };
 const FADE = 14; // images de fondu quand un pays change de remplissage
+const UI = createContext(1);                              // échelle des éléments (0,8 en 16:9)
+const Size = createContext<{ w: number; h: number }>({ w: W, h: H });
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const hash = (n: number) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 
@@ -138,13 +140,14 @@ const Bubble: React.FC<{ text?: string; emoji?: string; tail?: "left" | "right" 
 
 /* Apparition « punchy » : ressort à fort rebond, bascule, léger flottement, sortie rapide. */
 const Pop: React.FC<{ delay: number; end: number; children: React.ReactNode; style: React.CSSProperties; rot?: number }> = ({ delay, end, children, style, rot = 0 }) => {
+  const ui = useContext(UI);
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   const s = spring({ frame: f - delay, fps, config: { damping: 7, stiffness: 210, mass: 0.55 } });
   const out = interpolate(f, [end - 7, end], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const k = Math.max(0, f - delay);
   const sc = Math.max(0, s) * out * (1 + 0.03 * Math.sin(k / 5));
   if (f < delay || sc <= 0.001) return null;
-  return <div style={{ position: "absolute", transform: `translate(-50%, -50%) translateY(${4 * Math.sin(k / 9)}px) scale(${sc}) rotate(${(1 - s) * rot}deg)`, ...style }}>{children}</div>;
+  return <div style={{ position: "absolute", transform: `translate(-50%, -50%) translateY(${4 * Math.sin(k / 9)}px) scale(${sc * ui}) rotate(${(1 - s) * rot}deg)`, ...style }}>{children}</div>;
 };
 
 const Ring: React.FC<{ delay: number; at: [number, number]; color?: string; size?: number }> = ({ delay, at, color = "#fff", size = 150 }) => {
@@ -190,6 +193,7 @@ const Ping: React.FC<{ at: [number, number]; delay: number; color: string }> = (
 };
 
 export const Arrow: React.FC<{ from: [number, number]; to: [number, number]; delay: number; color: string }> = ({ from, to, delay, color }) => {
+  const { w, h } = useContext(Size);
   const f = useCurrentFrame(), { fps } = useVideoConfig();
   const p = clamp((f - delay) / (fps * 0.9));
   if (f < delay) return null;
@@ -199,7 +203,7 @@ export const Arrow: React.FC<{ from: [number, number]; to: [number, number]; del
   const q = (t: number): [number, number] => [(1 - t) ** 2 * from[0] + 2 * (1 - t) * t * c[0] + t * t * to[0], (1 - t) ** 2 * from[1] + 2 * (1 - t) * t * c[1] + t * t * to[1]];
   const head = q(e), ahead = q(Math.min(1, e + 0.02)), ang = Math.atan2(ahead[1] - head[1], ahead[0] - head[0]) * 180 / Math.PI;
   return (
-    <svg width={W} height={H} style={{ position: "absolute", inset: 0, overflow: "visible", filter: `drop-shadow(0 0 14px ${color})` }}>
+    <svg width={w} height={h} style={{ position: "absolute", inset: 0, overflow: "visible", filter: `drop-shadow(0 0 14px ${color})` }}>
       <path d={`M${from[0]},${from[1]} Q${c[0]},${c[1]} ${to[0]},${to[1]}`} pathLength={1} fill="none" stroke={color} strokeWidth="22" strokeLinecap="round" strokeDasharray={`${e} 1`} />
       <polygon points="0,-34 62,0 0,34" fill={color} transform={`translate(${head[0]} ${head[1]}) rotate(${ang})`} />
     </svg>
@@ -221,10 +225,28 @@ export const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number
   );
 };
 
+/* Image ou vidéo déposée (public/media) : cadre arrondi, zoom lent, mention de la source toujours affichée. */
+const MediaFrame: React.FC<{ it: Extract<Item, { kind: "media" }>; delay: number }> = ({ it, delay }) => {
+  const f = useCurrentFrame();
+  const bw = it.w ?? 760, bh = it.h ?? 428;
+  const z = 1.04 + 0.0007 * Math.max(0, f - delay);
+  const fx = it.focus ?? [0.5, 0.5];
+  const style: React.CSSProperties = { width: "100%", height: "100%", objectFit: "cover", transform: `scale(${z})`, transformOrigin: `${fx[0] * 100}% ${fx[1] * 100}%` };
+  const isVideo = (it.type ?? (/\.(mp4|mov|webm)$/i.test(it.src) ? "video" : "image")) === "video";
+  return (
+    <div style={{ width: bw, height: bh, borderRadius: 18, overflow: "hidden", border: "6px solid #f0efe8", boxShadow: "0 14px 30px #000b", position: "relative", background: "#000" }}>
+      {isVideo ? <OffthreadVideo src={staticFile(it.src)} muted style={style} /> : <Img src={staticFile(it.src)} style={style} />}
+      <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, padding: "6px 14px", background: "#000a", color: "#fff", fontFamily: FONT, fontWeight: 700, fontSize: 20, textAlign: "left" }}>Source : {it.credit}</div>
+    </div>
+  );
+};
+
 const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({ it, cam, dur, n }) => {
   const { fps } = useVideoConfig();
+  const { w, h } = useContext(Size);
+  const wide = w > h;
   const delay = Math.round((it.delay ?? 0.2) * fps), end = it.until ? Math.round(it.until * fps) : dur;
-  const base = it.screen ? it.screen : it.at ? toScreen(it.at, cam) : [W / 2, H / 2];
+  const base = it.screen ? it.screen : it.at ? toScreen(it.at, cam, w, h) : [w / 2, h / 2];
   const left = base[0] + (it.dx || 0), top = base[1] + (it.dy || 0);
   const pos = { left, top } as React.CSSProperties;
   const rot = (hash(n + 3) > 0.5 ? 1 : -1) * (14 + 12 * hash(n));
@@ -246,15 +268,28 @@ const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({
     case "bubble": return <Pop delay={delay} end={end} rot={rot * 0.6} style={{ ...pos, transformOrigin: "50% 100%" }}><Bubble text={it.text} emoji={it.emoji} tail={it.tail} /></Pop>;
     case "tag": return <Pop delay={delay} end={end} rot={rot * 0.3} style={pos}><div style={{ fontFamily: FONT, fontWeight: 900, fontSize: it.size ?? 34, whiteSpace: "nowrap", letterSpacing: 3, color: "#f0f0ea", background: "#6b7377dd", padding: "7px 22px", borderRadius: 7, boxShadow: "0 6px 12px #0007" }}>{it.text}</div></Pop>;
     case "title": return (
-      <Pop delay={delay} end={end} style={{ left: W / 2, top: it.screen ? it.screen[1] : 200 }}>
+      <Pop delay={delay} end={end} style={{ left: w / 2, top: it.screen ? it.screen[1] : wide ? 120 : 200 }}>
         <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 64, color: "#fff", textAlign: "center", whiteSpace: "nowrap", WebkitTextStroke: "8px #000", paintOrder: "stroke fill", textShadow: "0 5px 0 #000" }}>{it.text}{it.sub && <div style={{ fontSize: 40, fontWeight: 800, opacity: 0.9 }}>{it.sub}</div>}</div>
       </Pop>
     );
-    case "stat": return <Pop delay={delay} end={end} rot={rot * 0.3} style={it.at || it.screen ? pos : { left: W / 2, top: 640 }}><Stat it={it} delay={delay} /></Pop>;
+    case "stat": return <Pop delay={delay} end={end} rot={rot * 0.3} style={it.at || it.screen ? pos : { left: w / 2, top: h * 0.33 }}><Stat it={it} delay={delay} /></Pop>;
+    case "lower": return (
+      <Pop delay={delay} end={end} style={{ left: it.screen ? it.screen[0] : wide ? 600 : 380, top: it.screen ? it.screen[1] : wide ? 120 : h - 420 }}>
+        <div style={{ background: "#0b0f12e6", borderLeft: "12px solid #ffd60a", padding: "14px 34px 16px 26px", boxShadow: "0 8px 20px #000a", textAlign: "left" }}>
+          <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 46, color: "#fff", textTransform: "uppercase", whiteSpace: "nowrap" }}>{it.text}</div>
+          {it.sub && <div style={{ fontFamily: FONT, fontWeight: 700, fontSize: 28, color: "#ffd60a", letterSpacing: 2, whiteSpace: "nowrap" }}>{it.sub}</div>}
+        </div>
+      </Pop>
+    );
+    case "media": return (
+      <Pop delay={delay} end={end} rot={rot * 0.2} style={it.at || it.screen ? pos : { left: w * 0.72, top: h * 0.42 }}>
+        <MediaFrame it={it} delay={delay} />
+      </Pop>
+    );
     case "ping": return <Ping at={[left, top]} delay={delay} color={it.color || "#ffd60a"} />;
     case "burst": return <Burst at={[left, top]} delay={delay} emoji={it.emoji || "💥"} />;
     case "arrow": {
-      const a = toScreen(it.from, cam), b = toScreen(it.to, cam);
+      const a = toScreen(it.from, cam, w, h), b = toScreen(it.to, cam, w, h);
       return <Arrow from={a} to={b} delay={delay} color={it.color || "#ff3b30"} />;
     }
   }
@@ -263,6 +298,8 @@ const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({
 /* ---------- sous-titres : groupes de mots qui claquent à l'écran ---------- */
 const Subtitles: React.FC<{ scene: Scene; f: number }> = ({ scene, f }) => {
   const { fps } = useVideoConfig();
+  const { w, h } = useContext(Size);
+  const wide = w > h;
   const t = f / fps;
   const idx = scene.subtitles.findIndex(s => t >= s.from && t < s.to);
   const cur = idx >= 0 ? scene.subtitles[idx] : (t >= (scene.subtitles.at(-1)?.to ?? 0) ? scene.subtitles.at(-1) : undefined);
@@ -270,8 +307,8 @@ const Subtitles: React.FC<{ scene: Scene; f: number }> = ({ scene, f }) => {
   const s = spring({ frame: Math.round((t - cur.from) * fps), fps, config: { damping: 8, stiffness: 320, mass: 0.5 } });
   const n = scene.subtitles.indexOf(cur);
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, top: H * 0.72, display: "flex", justifyContent: "center", padding: "0 50px" }}>
-      <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 104, textTransform: "uppercase", textAlign: "center", color: "#ffd60a", WebkitTextStroke: "16px #000", paintOrder: "stroke fill", transform: `scale(${0.55 + 0.45 * s}) rotate(${(1 - s) * (n % 2 ? 4 : -4)}deg)`, lineHeight: 1.04, textShadow: "0 10px 0 #000", filter: "drop-shadow(0 8px 10px #000a)" }}>
+    <div style={{ position: "absolute", left: 0, right: 0, top: h * (wide ? 0.76 : 0.72), display: "flex", justifyContent: "center", padding: "0 50px" }}>
+      <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: wide ? 84 : 104, textTransform: "uppercase", textAlign: "center", color: "#ffd60a", WebkitTextStroke: wide ? "13px #000" : "16px #000", paintOrder: "stroke fill", transform: `scale(${0.55 + 0.45 * s}) rotate(${(1 - s) * (n % 2 ? 4 : -4)}deg)`, lineHeight: 1.04, textShadow: "0 10px 0 #000", filter: "drop-shadow(0 8px 10px #000a)" }}>
         {cur.text}
       </div>
     </div>
@@ -303,7 +340,8 @@ function soundEvents(scenes: Scene[], starts: number[], fps: number): Ev[] {
 /* ---------- vidéo ---------- */
 export const MapStory: React.FC<StoryProps> = ({ scenes, bg }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width: w, height: h } = useVideoConfig();
+  const wide = w > h;
   let acc = 0, idx = 0;
   const starts = scenes.map(s => { const a = acc; acc += s.durationInFrames; return a; });
   for (let k = 0; k < scenes.length; k++) if (frame >= starts[k]) idx = k;
@@ -318,18 +356,19 @@ export const MapStory: React.FC<StoryProps> = ({ scenes, bg }) => {
   const grainShift = [Math.floor(hash(frame) * 200), Math.floor(hash(frame + 99) * 200)];
   const events = soundEvents(scenes, starts, fps);
   return (
+    <Size.Provider value={{ w, h }}><UI.Provider value={wide ? 0.8 : 1}>
     <AbsoluteFill style={{ background: bg || "#0a1f29" }}>
       <AbsoluteFill style={{ transform: `translate(${shake[0]}px, ${shake[1]}px)` }}>
-        <MapLayer scenes={scenes} i={idx} f={f} cam={cam} blur={blur} />
+        <MapLayer scenes={scenes} i={idx} f={f} cam={cam} blur={blur} w={w} h={h} />
         <Sequence from={starts[idx]} durationInFrames={scene.durationInFrames} layout="none">
           {(scene.items || []).map((it, n) => <ItemView key={idx + "-" + n} it={it} cam={cam} dur={scene.durationInFrames} n={n + idx * 10} />)}
         </Sequence>
       </AbsoluteFill>
       <Subtitles scene={scene} f={f} />
       {/* grain de pellicule + vignette + flash */}
-      <svg width={W + 200} height={H + 200} style={{ position: "absolute", left: -grainShift[0], top: -grainShift[1], opacity: 0.2, mixBlendMode: "overlay", pointerEvents: "none" }}>
+      <svg width={w + 200} height={h + 200} style={{ position: "absolute", left: -grainShift[0], top: -grainShift[1], opacity: 0.2, mixBlendMode: "overlay", pointerEvents: "none" }}>
         <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" /><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.6 -0.3" /></filter>
-        <rect width={W + 200} height={H + 200} filter="url(#grain)" />
+        <rect width={w + 200} height={h + 200} filter="url(#grain)" />
       </svg>
       <AbsoluteFill style={{ boxShadow: "inset 0 0 280px 60px #000c", pointerEvents: "none" }} />
       {flash > 0.01 && <AbsoluteFill style={{ background: "#fff", opacity: flash, pointerEvents: "none" }} />}
@@ -342,5 +381,6 @@ export const MapStory: React.FC<StoryProps> = ({ scenes, bg }) => {
         </Sequence>
       ))}
     </AbsoluteFill>
+    </UI.Provider></Size.Provider>
   );
 };

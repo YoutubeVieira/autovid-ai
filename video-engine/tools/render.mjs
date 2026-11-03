@@ -11,11 +11,12 @@ const props = path.join(root, ".cache", name + ".props.json");
 if (!fs.existsSync(props)) { console.log("Lancez d'abord : node tools/build-props.mjs " + name); process.exit(1); }
 fs.mkdirSync(path.join(root, "out"), { recursive: true });
 const fi = process.argv.indexOf("--frame");
+const comp = JSON.parse(fs.readFileSync(props, "utf8")).format === "16:9" ? "MapStoryWide" : "MapStory";
 const bin = path.join(root, "node_modules/.bin/remotion");
 const common = ["--props=" + props, "--gl=angle", "--concurrency=" + (process.env.CONCURRENCY || "2")];
 if (fs.existsSync("/opt/pw-browsers/chromium")) common.push("--browser-executable=/opt/pw-browsers/chromium");
 const args = fi > 0
-  ? ["still", "src/index.ts", "MapStory", path.join(root, "out", name + "-f" + process.argv[fi + 1] + ".png"), "--frame=" + process.argv[fi + 1], ...common]
-  : ["render", "src/index.ts", "MapStory", path.join(root, "out", name + ".mp4"), "--codec=h264", ...common];
+  ? ["still", "src/index.ts", comp, path.join(root, "out", name + "-f" + process.argv[fi + 1] + ".png"), "--frame=" + process.argv[fi + 1], ...common]
+  : ["render", "src/index.ts", comp, path.join(root, "out", name + ".mp4"), "--codec=h264", ...common];
 const r = spawnSync(bin, args, { cwd: root, stdio: "inherit" });
 process.exit(r.status ?? 1);

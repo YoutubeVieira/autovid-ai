@@ -3,7 +3,8 @@
 import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
-import { root, loadVoice, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
+import { plan } from "./daily-plan.mjs";
+import { root, loadVoice, splitByPauses, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
 
 const pcm = Buffer.alloc(24000 * 2); // 1 s de silence à 24 kHz
 assert.strictEqual(wavSeconds(wav(pcm, 24000)), 1);
@@ -41,4 +42,33 @@ for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWi
   loadVoice(JSON.parse(fs.readFileSync(path.join(root, "projects", f), "utf8")).voice || "test");
 for (const n of ["whoosh", "pop", "impact", "ding", "riser", "bed"]) assert.ok(fs.existsSync(path.join(root, "public/sfx", n + ".wav")), "bruitage manquant : " + n);
 assert.ok(fs.existsSync(path.join(root, "public/geo/basemap.jpg")), "fond de carte manquant : python3 tools/make-basemap.py");
+{ // découpe par pauses : 3 « phrases » (tons) séparées par des silences de longueurs différentes
+  const R = 24000, seg = (sec, f) => Buffer.concat([...Array(Math.round(sec * R))].map((_, i) => { const b = Buffer.alloc(2); b.writeInt16LE(Math.round(8000 * Math.sin(2 * Math.PI * f * i / R)), 0); return b; }));
+  const sil = sec => Buffer.alloc(Math.round(sec * R) * 2);
+  const audio = wav(Buffer.concat([seg(1.0, 300), sil(0.5), seg(2.0, 400), sil(0.3), seg(1.0, 500)]), R);
+  const parts = splitByPauses(audio, ["un", "deux deux", "trois"]);
+  assert.strictEqual(parts.length, 3);
+  const d = parts.map(p => wavSeconds(p));
+  assert.ok(Math.abs(d[0] - 1.25) < 0.1 && Math.abs(d[1] - 2.4) < 0.15, "découpe sur les silences : " + d.map(x => x.toFixed(2)).join(" "));
+  assert.ok(Math.abs(d.reduce((a, b) => a + b, 0) - 4.8) < 0.01, "aucune perte d'audio");
+}
+for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWith(".json"))) {
+  const p = JSON.parse(fs.readFileSync(path.join(root, "projects", f), "utf8"));
+  for (const s of p.scenes) for (const it of s.items || []) if (it.kind === "media") {
+    assert.ok(it.credit && it.credit.length > 3, f + " : média sans mention de source en " + s.id);
+    assert.ok(fs.existsSync(path.join(root, "public", it.src)), f + " : fichier média introuvable " + it.src);
+  }
+}
+{ // planificateur : alternance et liens long <-> short
+  const serie = { dernier_type: "short", videos: [
+    { id: "L1", type: "long", slug: "a", titre: "A", statut: "rendu", short_lie: "S1" },
+    { id: "S1", type: "short", slug: "a-60s", statut: "a_faire", long_lie: "L1" },
+    { id: "L2", type: "long", slug: "b", titre: "B", statut: "a_ecrire", short_lie: null },
+    { id: "S9", type: "short", slug: "z", statut: "rendu", long_lie: null } ] };
+  const j1 = plan(serie);
+  assert.strictEqual(j1.job.jour, "longue"); assert.strictEqual(j1.job.id, "L2");
+  assert.ok(j1.issues.some(i => /orphelin/.test(i)), "short orphelin signalé");
+  const j2 = plan({ ...serie, dernier_type: "long" });
+  assert.strictEqual(j2.job.jour, "short"); assert.strictEqual(j2.job.long_lie, "L1");
+}
 console.log("Tests OK");

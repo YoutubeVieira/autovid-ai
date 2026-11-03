@@ -26,5 +26,13 @@
     "provider": "gemini",
     "voiceName": "Fenrir",
     "model": "gemini-2.5-flash-preview-tts"
+  },
+  "fenrir-lite": {
+    "label": "Fenrir (Gemini 3.8 lite, homme, énergique) : quota séparé du modèle flash",
+    "provider": "gemini",
+    "voiceName": "Fenrir",
+    "model": "gemini-3.8-flash-lite-tts",
+    "styleMode": "metadata",
+    "style": "Dis ce texte en français, comme un narrateur de vidéo éducative dynamique : énergique, rythme soutenu, ton direct et complice, avec de petites pauses entre les phrases."
   }
 }

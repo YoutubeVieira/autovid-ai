@@ -30,7 +30,7 @@ for (const s of project.scenes) {
   });
   t += seconds;
 }
-const props = { title: project.title, brand: project.brand, scenes, bg: project.bg };
+const props = { title: project.title, brand: project.brand, format: project.format || "9:16", scenes, bg: project.bg };
 fs.mkdirSync(path.join(root, ".cache"), { recursive: true });
 const out = path.join(root, ".cache", name + ".props.json");
 fs.writeFileSync(out, JSON.stringify(props, null, 1));

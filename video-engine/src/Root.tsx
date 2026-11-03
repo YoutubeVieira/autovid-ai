@@ -18,6 +18,16 @@ export const Root: React.FC = () => (
   <>
     <Composition id="ThumbSpreadWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
     <Composition id="ThumbSpreadTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
+    <Composition
+      id="MapStoryWide"
+      component={MapStory}
+      width={1920}
+      height={1080}
+      fps={FPS}
+      durationInFrames={90}
+      defaultProps={{ ...demo, format: "16:9" }}
+      calculateMetadata={({ props }) => ({ durationInFrames: Math.max(1, (props as StoryProps).scenes.reduce((n, s) => n + s.durationInFrames, 0)) })}
+    />
     <Composition id="ThumbWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbDefaults} />
     <Composition id="ThumbTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbDefaults} />
   <Composition

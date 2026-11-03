@@ -1,0 +1,255 @@
+{
+  "title": "TEST 16:9 : Pourquoi ton crédit coûte plus cher (ouverture 30 s)",
+  "theme": "finance",
+  "format": "16:9",
+  "lang": "fr-FR",
+  "voice": "fenrir-lite",
+  "pad": 0.25,
+  "subtitleWords": 3,
+  "faits": [
+    {
+      "id": "f1",
+      "claim": "La Banque centrale européenne a son siège à Francfort-sur-le-Main",
+      "value": "Francfort",
+      "source": "BCE : connaissance générale, page officielle non ouverte depuis la session (réseau bloqué)",
+      "statut": "a_confirmer",
+      "date": "2026-11"
+    },
+    {
+      "id": "f3",
+      "claim": "Exemple : emprunt de 200 000 € sur 20 ans, 4 % au lieu de 3 % : environ 103 € de plus par mois",
+      "value": "102.77 €/mois",
+      "source": "Calcul : annuité constante M = P·r/(1−(1+r)^−n), hors assurance et frais",
+      "statut": "calcul",
+      "date": "2026-11"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "s01",
+      "chapter": "c1",
+      "text": "Imagine deux personnes qui empruntent la même somme, dans la même banque, à un an d'écart. L'une paie cent trois euros de plus, chaque mois.",
+      "camera": {
+        "lon": 4,
+        "lat": 49,
+        "zoom": 3.0
+      },
+      "move": "zoomin",
+      "fills": {
+        "FRA": "flag"
+      },
+      "faits": [
+        "f3"
+      ],
+      "items": [
+        {
+          "kind": "lower",
+          "text": "Pourquoi ton crédit coûte plus cher",
+          "sub": "ÉPISODE 1 · LA MÉCANIQUE",
+          "delay": 0.4
+        },
+        {
+          "kind": "icon",
+          "emoji": "🏠",
+          "screen": [
+            190,
+            330
+          ],
+          "delay": 1.2
+        },
+        {
+          "kind": "stat",
+          "value": 103,
+          "prefix": "+",
+          "suffix": " €",
+          "label": "de plus par mois · exemple",
+          "screen": [
+            1400,
+            330
+          ],
+          "delay": 6.3,
+          "color": "#ff4d4d"
+        }
+      ],
+      "flash": [
+        0.0
+      ]
+    },
+    {
+      "id": "s02",
+      "chapter": "c1",
+      "text": "Personne n'a mal négocié. Alors, qui a changé le prix ?",
+      "camera": {
+        "lon": 4,
+        "lat": 49,
+        "zoom": 3.1
+      },
+      "move": "pan",
+      "items": [
+        {
+          "kind": "tag",
+          "text": "MÊME SOMME · MÊME BANQUE",
+          "screen": [
+            960,
+            170
+          ],
+          "delay": 0.3
+        },
+        {
+          "kind": "bubble",
+          "emoji": "🤔",
+          "at": [
+            2.3,
+            47.0
+          ],
+          "dy": -90,
+          "delay": 1.1
+        }
+      ]
+    },
+    {
+      "id": "s03",
+      "chapter": "c1",
+      "text": "La réponse commence à Francfort, au siège de la Banque centrale européenne.",
+      "camera": {
+        "lon": 6.5,
+        "lat": 49.6,
+        "zoom": 3.8
+      },
+      "move": "zoomin",
+      "fills": {
+        "DEU": "flag"
+      },
+      "faits": [
+        "f1"
+      ],
+      "items": [
+        {
+          "kind": "ping",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "delay": 0.3,
+          "color": "#ffffff"
+        },
+        {
+          "kind": "tag",
+          "text": "FRANCFORT",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -70,
+          "delay": 0.6
+        },
+        {
+          "kind": "icon",
+          "emoji": "🏦",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "dy": -190,
+          "delay": 1.2
+        },
+        {
+          "kind": "media",
+          "src": "geo/basemap.jpg",
+          "credit": "Natural Earth (domaine public)",
+          "screen": [
+            1560,
+            360
+          ],
+          "w": 560,
+          "h": 315,
+          "focus": [
+            0.45,
+            0.55
+          ],
+          "delay": 1.8
+        }
+      ]
+    },
+    {
+      "id": "s04",
+      "chapter": "c1",
+      "text": "Quand elle relève ses taux, l'argent coûte plus cher aux banques, et ça finit dans ta mensualité.",
+      "camera": {
+        "lon": 5.2,
+        "lat": 49.2,
+        "zoom": 3.2
+      },
+      "move": "pan",
+      "impacts": [
+        1.0
+      ],
+      "items": [
+        {
+          "kind": "burst",
+          "emoji": "📈",
+          "at": [
+            8.68,
+            50.11
+          ],
+          "delay": 1.0
+        },
+        {
+          "kind": "arrow",
+          "from": [
+            8.68,
+            50.11
+          ],
+          "to": [
+            2.35,
+            48.86
+          ],
+          "delay": 2.4,
+          "color": "#ffd60a"
+        },
+        {
+          "kind": "icon",
+          "emoji": "💶",
+          "at": [
+            2.35,
+            48.86
+          ],
+          "dy": -150,
+          "delay": 3.4
+        }
+      ]
+    },
+    {
+      "id": "s05",
+      "chapter": "c1",
+      "text": "Dans cette vidéo, on suit le trajet complet, étape par étape. Reste jusqu'à la fin.",
+      "camera": {
+        "lon": 4,
+        "lat": 49,
+        "zoom": 2.9
+      },
+      "move": "zoomout",
+      "fills": {
+        "FRA": "flag",
+        "DEU": "flag"
+      },
+      "items": [
+        {
+          "kind": "lower",
+          "text": "Francfort → ta mensualité",
+          "sub": "LE TRAJET COMPLET, ÉTAPE PAR ÉTAPE",
+          "delay": 0.4
+        },
+        {
+          "kind": "icon",
+          "emoji": "🎬",
+          "screen": [
+            190,
+            330
+          ],
+          "delay": 1.4
+        }
+      ]
+    }
+  ]
+}
