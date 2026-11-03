@@ -1,0 +1,361 @@
+{
+ "title": "Montage 30 s : de la maison de la famille Martin à Francfort",
+ "theme": "finance",
+ "format": "16:9",
+ "lang": "fr-FR",
+ "voice": "fenrir-lite",
+ "pad": 0.2,
+ "subtitleWords": 3,
+ "cible_s": 30,
+ "faits": [
+  {
+   "id": "f1",
+   "claim": "La Banque centrale européenne a son siège à Francfort-sur-le-Main",
+   "value": "Francfort",
+   "source": "BCE : connaissance générale, page officielle non ouverte (réseau bloqué)",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  }
+ ],
+ "scenes": [
+  {
+   "id": "m-01",
+   "chapter": "c1",
+   "text": "Fin de mois chez les Martin. Claire ouvre l'appli bancaire, et la mensualité a bougé.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "worry",
+      "say": "😟",
+      "sayDelay": 2.4
+     },
+     {
+      "who": "thomas",
+      "x": 1100,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📱",
+      "x": 880,
+      "y": 830,
+      "size": 100,
+      "delay": 0.5
+     }
+    ]
+   },
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Les Martin",
+     "sub": "FIN DE MOIS · LA MENSUALITÉ A BOUGÉ",
+     "delay": 0.4
+    }
+   ],
+   "flash": [
+    0.0
+   ]
+  },
+  {
+   "id": "m-02",
+   "chapter": "c1",
+   "text": "Qui a changé le prix ? Pas la banque. Tout part de Francfort, là où siège la Banque centrale européenne.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "zoomin",
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f1"
+   ],
+   "items": [
+    {
+     "kind": "tag",
+     "text": "QUI A CHANGÉ LE PRIX ?",
+     "delay": 0.4,
+     "size": 36,
+     "screen": [
+      960,
+      150
+     ]
+    },
+    {
+     "kind": "ping",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 3.0,
+     "color": "#ffffff"
+    },
+    {
+     "kind": "tag",
+     "text": "FRANCFORT",
+     "delay": 3.2,
+     "size": 34,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -70
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 3.8,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -190
+    }
+   ]
+  },
+  {
+   "id": "m-03",
+   "chapter": "c1",
+   "text": "Quand elle relève ses taux, l'argent coûte plus cher aux banques, et ça finit dans ta mensualité.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 3.0
+   },
+   "move": "pan",
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "impacts": [
+    0.7
+   ],
+   "items": [
+    {
+     "kind": "burst",
+     "emoji": "📈",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 0.7
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 2.0,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "💶",
+     "delay": 3.6,
+     "at": [
+      2.35,
+      48.86
+     ],
+     "dy": -150
+    },
+    {
+     "kind": "tag",
+     "text": "LA MENSUALITÉ MONTE",
+     "delay": 4.2,
+     "size": 34,
+     "screen": [
+      960,
+      150
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m-04",
+   "chapter": "c1",
+   "text": "Et ce n'est pas tout : les courses, l'énergie, le plein, tout monte en même temps.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "flash": [
+    0.0
+   ],
+   "stage": {
+    "set": "supermarche",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "worry"
+     },
+     {
+      "who": "lea",
+      "x": 1050,
+      "pose": "idle",
+      "say": "🍅",
+      "sayDelay": 2.0
+     },
+     {
+      "who": "hugo",
+      "x": 1250,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🛒",
+      "x": 1650,
+      "y": 990,
+      "size": 250,
+      "delay": 0.5
+     }
+    ]
+   },
+   "items": [
+    {
+     "kind": "tag",
+     "text": "COURSES · ÉNERGIE · CARBURANT",
+     "delay": 2.2,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m-05",
+   "chapter": "c1",
+   "text": "Alors la famille se met d'accord : on fait le point, on agit sur ce qu'on contrôle.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "cheer"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ]
+   },
+   "items": [
+    {
+     "kind": "tag",
+     "text": "ON FAIT LE POINT · ON AGIT",
+     "delay": 1.6,
+     "size": 36,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ]
+  },
+  {
+   "id": "m-06",
+   "chapter": "c1",
+   "text": "Suis le défi, étape par étape, dans la vidéo complète.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "flash": [
+    1.8
+   ],
+   "stage": {
+    "set": "exterieur",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "thomas",
+      "x": 830,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "lea",
+      "x": 1090,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "hugo",
+      "x": 1210,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     }
+    ]
+   },
+   "items": [
+    {
+     "kind": "lower",
+     "text": "La vidéo complète",
+     "sub": "SUIS LE DÉFI, ÉTAPE PAR ÉTAPE",
+     "delay": 0.4
+    },
+    {
+     "kind": "burst",
+     "emoji": "🔔",
+     "screen": [
+      960,
+      420
+     ],
+     "delay": 1.8
+    }
+   ]
+  }
+ ]
+}
