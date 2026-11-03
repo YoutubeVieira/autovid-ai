@@ -210,6 +210,28 @@ export const Arrow: React.FC<{ from: [number, number]; to: [number, number]; del
   );
 };
 
+/* Barres horizontales qui se remplissent l'une après l'autre (budget d'un foyer). */
+const Bars: React.FC<{ it: Extract<Item, { kind: "bars" }>; delay: number }> = ({ it, delay }) => {
+  const f = useCurrentFrame(), { fps } = useVideoConfig();
+  const max = it.max ?? Math.max(...it.rows.map(r => r.value)), W0 = it.w ?? 1100;
+  return (
+    <div style={{ width: W0, background: "#0b0f12ee", border: "5px solid #f0efe8", borderRadius: 22, padding: "18px 26px 20px", boxShadow: "0 14px 30px #000b" }}>
+      {it.title && <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 34, color: "#ffd60a", letterSpacing: 2, textTransform: "uppercase", marginBottom: 12 }}>{it.title}</div>}
+      {it.rows.map((r, i) => {
+        const p = 1 - Math.pow(1 - clamp((f - delay - 6 - i * 7) / (fps * 0.9)), 3);
+        const c = r.color || "#7CFC9A";
+        return (
+          <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, margin: "7px 0" }}>
+            <div style={{ width: 360, fontFamily: FONT, fontWeight: 800, fontSize: 29, color: "#f2f2ec", textTransform: "uppercase", whiteSpace: "nowrap" }}>{r.label}</div>
+            <div style={{ flex: 1, height: 32, background: "#2a3236", borderRadius: 16, overflow: "hidden" }}><div style={{ width: `${(r.value / max) * 100 * p}%`, height: "100%", background: c, borderRadius: 16 }} /></div>
+            <div style={{ width: 150, textAlign: "right", fontFamily: FONT, fontWeight: 900, fontSize: 32, color: c, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>{Math.round(r.value * p).toLocaleString("fr-FR")}{it.unit ?? " €"}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 /* Gros chiffre qui défile (finance) : carte sombre, nombre en police grasse, intitulé dessous. */
 export const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number }> = ({ it, delay }) => {
   const f = useCurrentFrame(), { fps } = useVideoConfig();
@@ -218,7 +240,7 @@ export const Stat: React.FC<{ it: Extract<Item, { kind: "stat" }>; delay: number
   const txt = (it.prefix || "") + v.toLocaleString("fr-FR", { minimumFractionDigits: it.decimals ?? 0, maximumFractionDigits: it.decimals ?? 0 }) + (it.suffix || "");
   const c = it.color || "#ffd60a";
   return (
-    <div style={{ background: "#0b0f12ee", border: `6px solid ${c}`, borderRadius: 28, padding: "22px 44px 26px", textAlign: "center", boxShadow: `0 0 40px ${c}66, 0 10px 24px #000b`, minWidth: 560 }}>
+    <div style={{ background: "#0b0f12ee", border: `6px solid ${c}`, borderRadius: 28, padding: "22px 44px 26px", textAlign: "center", boxShadow: `0 0 40px ${c}66, 0 10px 24px #000b`, minWidth: it.w ?? 560 }}>
       <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 118, color: c, lineHeight: 1, fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap", WebkitTextStroke: "3px #000", paintOrder: "stroke fill" }}>{txt}</div>
       <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 38, color: "#f2f2ec", marginTop: 10, letterSpacing: 1, textTransform: "uppercase" }}>{it.label}</div>
     </div>
@@ -286,6 +308,7 @@ const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({
         <MediaFrame it={it} delay={delay} />
       </Pop>
     );
+    case "bars": return <Pop delay={delay} end={end} rot={rot * 0.15} style={it.at || it.screen ? pos : { left: w / 2, top: h * 0.4 }}><Bars it={it} delay={delay} /></Pop>;
     case "ping": return <Ping at={[left, top]} delay={delay} color={it.color || "#ffd60a"} />;
     case "burst": return <Burst at={[left, top]} delay={delay} emoji={it.emoji || "💥"} />;
     case "arrow": {

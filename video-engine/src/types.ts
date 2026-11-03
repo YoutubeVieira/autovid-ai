@@ -18,7 +18,8 @@ export type Item =
   | (Base & { kind: "burst"; emoji?: string })
   | (Base & { kind: "lower"; text: string; sub?: string })                      // bandeau de chapitre (format long)
   | (Base & { kind: "media"; src: string; credit: string; type?: "image" | "video"; w?: number; h?: number; focus?: [number, number] }) // image ou vidéo déposée dans public/, mention de source obligatoire
-  | (Base & { kind: "stat"; value: number; label: string; prefix?: string; suffix?: string; decimals?: number; from?: number; color?: string }); // gros chiffre qui défile                                // explosion : emoji + onde de choc + étincelles
+  | (Base & { kind: "bars"; title?: string; rows: { label: string; value: number; color?: string }[]; unit?: string; max?: number; w?: number })   // barres horizontales animées (budget)
+  | (Base & { kind: "stat"; value: number; label: string; prefix?: string; suffix?: string; decimals?: number; from?: number; color?: string; w?: number }); // gros chiffre qui défile                                // explosion : emoji + onde de choc + étincelles
 
 export type Subtitle = { text: string; from: number; to: number };
 export type Sfx = { name: "whoosh" | "pop" | "impact" | "ding" | "riser"; at: number; volume?: number };
