@@ -1,0 +1,87 @@
+# Domaines à autoriser dans l'environnement cloud (Edit > Network access > Allowed domains)
+# Un domaine par ligne. Les lignes commençant par # sont des commentaires : ne pas les coller.
+
+# 1. Sources officielles et données (vérification des chiffres)
+www.ecb.europa.eu
+data.ecb.europa.eu
+sdw.ecb.europa.eu
+www.insee.fr
+api.insee.fr
+www.aft.gouv.fr
+www.banque-france.fr
+webstat.banque-france.fr
+www.bundesbank.de
+www.economie.gouv.fr
+www.service-public.fr
+www.legifrance.gouv.fr
+www.amf-france.org
+www.ccomptes.fr
+ec.europa.eu
+www.oecd.org
+data.oecd.org
+www.imf.org
+data.imf.org
+www.bis.org
+api.worldbank.org
+data.worldbank.org
+fred.stlouisfed.org
+
+# 2. Images et vidéos libres
+images-api.nasa.gov
+images-assets.nasa.gov
+www.nasa.gov
+science.nasa.gov
+svs.gsfc.nasa.gov
+eoimages.gsfc.nasa.gov
+visibleearth.nasa.gov
+earthobservatory.nasa.gov
+www.esa.int
+commons.wikimedia.org
+upload.wikimedia.org
+fr.wikipedia.org
+en.wikipedia.org
+www.wikidata.org
+archive.org
+*.archive.org
+www.pexels.com
+images.pexels.com
+videos.pexels.com
+pixabay.com
+cdn.pixabay.com
+unsplash.com
+images.unsplash.com
+mixkit.co
+assets.mixkit.co
+www.europeana.eu
+api.openverse.org
+
+# 3. Veille virale
+www.youtube.com
+m.youtube.com
+youtube.googleapis.com
+www.tiktok.com
+trends.google.com
+www.reddit.com
+old.reddit.com
+
+# 4. Conditions d'utilisation, tarifs et documentation (licences, quotas)
+ai.google.dev
+policies.google.com
+support.google.com
+cloud.google.com
+developers.google.com
+
+# 5. Modèle Chatterbox (seulement si installé dans la session ; sinon sur votre ordinateur)
+huggingface.co
+hf.co
+cdn-lfs.huggingface.co
+cdn-lfs.hf.co
+cdn-lfs-us-1.hf.co
+
+# 6. Déjà accessibles, à garder (aucune action)
+generativelanguage.googleapis.com
+raw.githubusercontent.com
+github.com
+pypi.org
+files.pythonhosted.org
+registry.npmjs.org
