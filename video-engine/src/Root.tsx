@@ -12,7 +12,7 @@ const demo: StoryProps = {
 
 const thumbDefaults = { line1: "TON CRÉDIT", line2: "MONTE ?", stat: { value: 103, prefix: "+", suffix: " €", label: "par mois · exemple" } };
 
-const thumbSpread = { line1: "FRANCE vs", line2: "ALLEMAGNE ?", stat: { value: 10, suffix: " Md€", label: "de plus par an · exemple" }, from: [13.4, 52.5] as [number, number], fromEmoji: "🇩🇪", toEmoji: "😬" };
+const thumbSpread = { line1: "FRANCE vs", line2: "ALLEMAGNE ?", stat: { value: 10, suffix: " Md€", label: "de plus par an · exemple" }, from: [10.3, 51.0] as [number, number], fromEmoji: "🇩🇪", toEmoji: "😬", lonWide: 0.6 };
 
 export const Root: React.FC = () => (
   <>

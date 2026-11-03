@@ -5,19 +5,20 @@ import { Arrow, EMOJI, FONT, Hex, MapLayer, Stat } from "./MapStory";
 import type { Camera, LonLat, Scene } from "./types";
 
 /* Miniature : carte France / Allemagne, flèche d'attaque de Francfort vers la France, gros texte jaune, chiffre d'exemple. */
-export type ThumbProps = { line1: string; line2: string; stat: { value: number; prefix?: string; suffix: string; label: string }; from?: LonLat; fromEmoji?: string; toEmoji?: string; fills?: Record<string, "flag"> };
+export type ThumbProps = { line1: string; line2: string; stat: { value: number; prefix?: string; suffix: string; label: string }; from?: LonLat; fromEmoji?: string; toEmoji?: string; lonWide?: number; fills?: Record<string, "flag"> };
 
 const FRANKFURT: LonLat = [8.68, 50.11], PARIS: LonLat = [2.35, 48.86];
 const scene: Scene = { id: "thumb", text: "", camera: { lon: 0, lat: 0, zoom: 1 }, fills: { FRA: "flag", DEU: "flag" }, durationInFrames: 90, subtitles: [] };
 
 const Outline: React.CSSProperties = { WebkitTextStroke: "16px #000", paintOrder: "stroke fill", textShadow: "0 10px 0 #000", filter: "drop-shadow(0 12px 16px #000b)" };
 
-export const Thumbnail: React.FC<ThumbProps> = ({ line1, line2, stat, from = FRANKFURT, fromEmoji = "🏦", toEmoji = "🏠" }) => {
+export const Thumbnail: React.FC<ThumbProps> = ({ line1, line2, stat, from = FRANKFURT, fromEmoji = "🏦", toEmoji = "🏠", lonWide = -2.2 }) => {
   const { width: w, height: h } = useVideoConfig();
   const wide = w > h;
-  const cam: Camera = wide ? { lon: -2.2, lat: 48.6, zoom: 2.35 } : { lon: 3.2, lat: 48.0, zoom: 2.35 };
+  const cam: Camera = wide ? { lon: lonWide, lat: 48.6, zoom: 2.35 } : { lon: 3.2, lat: 48.0, zoom: 2.35 };
   const fr = toScreen(from, cam, w, h), pa = toScreen(PARIS, cam, w, h);
-  const fs = wide ? 150 : 170;
+  const longest = Math.max(line1.length, line2.length);
+  const fs = Math.min(wide ? 150 : 170, Math.round((wide ? 900 : 1000) / (longest * 0.66)));
   return (
     <AbsoluteFill style={{ background: "#0a1f29" }}>
       <MapLayer scenes={[scene]} i={0} f={99} cam={cam} blur={0} w={w} h={h} />
