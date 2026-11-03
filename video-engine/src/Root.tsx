@@ -14,8 +14,12 @@ const thumbDefaults = { line1: "TON CRÉDIT", line2: "MONTE ?", stat: { value: 1
 
 const thumbSpread = { line1: "FRANCE vs", line2: "ALLEMAGNE ?", stat: { value: 10, suffix: " Md€", label: "de plus par an · exemple" }, from: [10.3, 51.0] as [number, number], fromEmoji: "🇩🇪", toEmoji: "😬", lonWide: 0.6 };
 
+const thumbWar = { line1: "GUERRE :", line2: "TON BUDGET ?", stat: { value: 235, prefix: "−", suffix: " €", label: "par mois · exemple fictif" }, from: [33.0, 54.5] as [number, number], fromEmoji: "🪖", toEmoji: "😬", fills: { FRA: "flag", RUS: "red" } as Record<string, "flag" | "red">, camWide: { lon: 17, lat: 51.0, zoom: 1.3 }, camTall: { lon: 14, lat: 50.5, zoom: 1.1 }, statRight: true, noArrow: true, chip: "SCÉNARIO D'ÉCOLE" };
+
 export const Root: React.FC = () => (
   <>
+    <Composition id="ThumbWarWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbWar} />
+    <Composition id="ThumbWarTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbWar} />
     <Composition id="ThumbSpreadWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
     <Composition id="ThumbSpreadTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
     <Composition

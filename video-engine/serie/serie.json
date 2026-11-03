@@ -39,8 +39,16 @@
       "type": "long",
       "slug": "guerre-russie-pouvoir-achat-long",
       "titre": "Si la France entrait en guerre : ton pouvoir d'achat ?",
+      "statut": "script_valide",
+      "short_lie": "S3"
+    },
+    {
+      "id": "S3",
+      "type": "short",
+      "slug": "guerre-budget-type-60s",
+      "titre": "Guerre : ton budget type (60 s)",
       "statut": "idee",
-      "short_lie": null
+      "long_lie": "L3"
     }
   ]
 }
