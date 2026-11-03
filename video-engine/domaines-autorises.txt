@@ -56,9 +56,6 @@ www.europeana.eu
 api.openverse.org
 
 # 3. Veille virale
-www.youtube.com
-m.youtube.com
-youtube.googleapis.com
 www.tiktok.com
 trends.google.com
 www.reddit.com
