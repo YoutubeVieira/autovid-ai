@@ -44,6 +44,7 @@ www.wikidata.org
 archive.org
 *.archive.org
 www.pexels.com
+api.pexels.com
 images.pexels.com
 videos.pexels.com
 pixabay.com
@@ -67,6 +68,9 @@ policies.google.com
 support.google.com
 cloud.google.com
 developers.google.com
+
+# 4b. API Groq (transcription / alignement des sous-titres)
+api.groq.com
 
 # 5. Modèle Chatterbox (seulement si installé dans la session ; sinon sur votre ordinateur)
 huggingface.co

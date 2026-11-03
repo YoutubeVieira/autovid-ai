@@ -4,6 +4,7 @@ import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
 import { plan } from "./daily-plan.mjs";
+import { parsePexelsPhotos, parsePexelsVideos, parsePixabayPhotos, parsePixabayVideos, mention } from "./media-search.mjs";
 import { summarize } from "./tts-usage.mjs";
 import { root, loadVoice, splitByPauses, wav, readWav, wavSeconds, chunkWords, chunkTimings } from "./lib.mjs";
 
@@ -78,5 +79,21 @@ for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWi
   assert.strictEqual(r.find(x => x.jour_modele === "2026-11-03 | m1").requetes, 3, "02:00Z du 4 = 18:00 PST du 3");
   assert.strictEqual(r.find(x => x.jour_modele === "2026-11-03 | m1").reste_sur_limite, 7);
   assert.strictEqual(r.length, 2);
+}
+{ // analyseurs Pexels / Pixabay : réponses d'exemple (les vrais services n'ont pas pu être appelés)
+  const pv = parsePexelsVideos({ videos: [{ id: 7, url: "https://www.pexels.com/video/7/", duration: 12, user: { name: "A. Dupont" }, video_files: [{ file_type: "video/mp4", width: 640, height: 360, link: "u640" }, { file_type: "video/mp4", width: 1920, height: 1080, link: "u1920" }, { file_type: "video/webm", width: 1920, height: 1080, link: "w" }] }] });
+  assert.strictEqual(pv[0].fichier, "u1920"); assert.strictEqual(mention(pv[0]), "Pexels · A. Dupont");
+  assert.strictEqual(parsePexelsPhotos({ photos: [{ id: 3, url: "p", photographer: "B", width: 10, height: 5, src: { large2x: "L" } }] })[0].fichier, "L");
+  assert.strictEqual(parsePixabayPhotos({ hits: [{ id: 9, pageURL: "pg", user: "C", imageWidth: 4, imageHeight: 3, largeImageURL: "X" }] })[0].fichier, "X");
+  assert.strictEqual(parsePixabayVideos({ hits: [{ id: 1, pageURL: "pg", user: "D", duration: 5, videos: { medium: { url: "M", width: 1280, height: 720 } } }] })[0].fichier, "M");
+  assert.deepStrictEqual(parsePexelsVideos({}), []);
+}
+// médias sous public/media : une entrée du registre (licence + mention) est obligatoire
+{
+  const mf = path.join(root, "media-manifest.json"), reg = fs.existsSync(mf) ? JSON.parse(fs.readFileSync(mf, "utf8")).medias : [];
+  for (const f of fs.readdirSync(path.join(root, "projects")).filter(f => f.endsWith(".json"))) {
+    const p = JSON.parse(fs.readFileSync(path.join(root, "projects", f), "utf8"));
+    for (const s of p.scenes) for (const it of s.items || []) if (it.kind === "media" && it.src.startsWith("media/")) assert.ok(reg.some(x => x.src === it.src && x.licence && x.mention), f + " : média " + it.src + " absent de media-manifest.json (licence et mention)");
+  }
 }
 console.log("Tests OK");
