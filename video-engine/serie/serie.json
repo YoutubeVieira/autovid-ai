@@ -39,7 +39,7 @@
       "type": "long",
       "slug": "guerre-russie-pouvoir-achat-long",
       "titre": "Si la France entrait en guerre : ton pouvoir d'achat ?",
-      "statut": "script_valide",
+      "statut": "rendu",
       "short_lie": "S3"
     },
     {
@@ -49,6 +49,14 @@
       "titre": "Guerre : ton budget type (60 s)",
       "statut": "idee",
       "long_lie": "L3"
+    },
+    {
+      "id": "L4",
+      "type": "long",
+      "slug": "famille-maison-long",
+      "titre": "Une famille face à la hausse des prix : 7 défis à la maison",
+      "statut": "rendu",
+      "short_lie": null
     }
   ]
 }

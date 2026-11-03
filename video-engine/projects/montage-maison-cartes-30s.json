@@ -354,6 +354,26 @@
       420
      ],
      "delay": 1.8
+    },
+    {
+     "kind": "tag",
+     "text": "CONTENU ÉDUCATIF · PAS UN CONSEIL EN INVESTISSEMENT",
+     "screen": [
+      960,
+      960
+     ],
+     "delay": 0.6,
+     "size": 26
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUNE OBLIGATION D'ACHAT",
+     "screen": [
+      960,
+      1020
+     ],
+     "delay": 1.2,
+     "size": 26
     }
    ]
   }
