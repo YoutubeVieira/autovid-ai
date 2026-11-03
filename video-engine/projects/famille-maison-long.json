@@ -761,7 +761,7 @@
     "h2"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
@@ -818,7 +818,7 @@
     "h2"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "claire",
@@ -828,7 +828,8 @@
      {
       "who": "thomas",
       "x": 1500,
-      "pose": "point"
+      "pose": "point",
+      "flip": true
      }
     ],
     "objs": []
@@ -1955,7 +1956,7 @@
     }
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "claire",
@@ -1965,14 +1966,15 @@
      {
       "who": "thomas",
       "x": 1420,
-      "pose": "idle"
+      "pose": "idle",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "🔒",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 150,
       "delay": 3.4,
       "bob": true
@@ -2016,7 +2018,7 @@
     "h12"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
@@ -2026,14 +2028,15 @@
      {
       "who": "thomas",
       "x": 1420,
-      "pose": "talk"
+      "pose": "talk",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "🔓",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 150,
       "delay": 0.8,
       "bob": true
@@ -2064,7 +2067,7 @@
     }
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "claire",
@@ -2074,14 +2077,15 @@
      {
       "who": "thomas",
       "x": 1420,
-      "pose": "think"
+      "pose": "think",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "⏳",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 150,
       "delay": 1.0,
       "bob": true
@@ -2131,7 +2135,7 @@
     7.4
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "thomas",
@@ -2143,14 +2147,15 @@
      {
       "who": "claire",
       "x": 1450,
-      "pose": "think"
+      "pose": "think",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "💳",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 150,
       "delay": 0.8,
       "bob": true
@@ -2200,7 +2205,7 @@
     "h6"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "claire",
@@ -2210,7 +2215,8 @@
      {
       "who": "thomas",
       "x": 1420,
-      "pose": "idle"
+      "pose": "idle",
+      "flip": true
      }
     ],
     "objs": []
@@ -2242,7 +2248,7 @@
     "h12"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
@@ -2602,7 +2608,7 @@
     }
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
@@ -2612,16 +2618,18 @@
      {
       "who": "thomas",
       "x": 1500,
-      "pose": "idle"
+      "pose": "idle",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "📄",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 140,
-      "delay": 3.0
+      "delay": 3.0,
+      "bob": true
      }
     ]
    }
@@ -2682,7 +2690,7 @@
     "h10"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "claire",
@@ -2735,7 +2743,7 @@
     "h10"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
@@ -2745,14 +2753,15 @@
      {
       "who": "thomas",
       "x": 1450,
-      "pose": "talk"
+      "pose": "talk",
+      "flip": true
      }
     ],
     "objs": [
      {
       "emoji": "🔎",
-      "x": 1180,
-      "y": 480,
+      "x": 1040,
+      "y": 520,
       "size": 140,
       "delay": 0.8,
       "bob": true
@@ -2786,7 +2795,7 @@
     "h12"
    ],
    "stage": {
-    "set": "bureau",
+    "set": "salon",
     "cast": [
      {
       "who": "thomas",
@@ -3141,7 +3150,7 @@
     10.4
    ],
    "stage": {
-    "set": "bureau",
+    "set": "cuisine",
     "cast": [
      {
       "who": "claire",
