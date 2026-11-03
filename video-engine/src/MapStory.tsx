@@ -91,7 +91,7 @@ export const MapLayer: React.FC<{ scenes: Scene[]; i: number; f: number; cam: Ca
           const c = cur[x.id] || "land", p = prev[x.id] || "land";
           return (
             <g key={x.id}>
-              {c !== p && <FillLayer f={x} k={p} opacity={1} />}
+              {c !== p && <FillLayer f={x} k={p} opacity={c === "land" ? 1 - a : 1} />}
               <FillLayer f={x} k={c} opacity={c !== p ? a : 1} />
             </g>
           );
@@ -244,7 +244,7 @@ const ItemView: React.FC<{ it: Item; cam: Camera; dur: number; n: number }> = ({
     );
     case "person": return <>{ring}<Pop delay={delay} end={end} rot={rot * 0.5} style={pos}><Person label={it.label} img={it.img} ring={it.ring} /></Pop></>;
     case "bubble": return <Pop delay={delay} end={end} rot={rot * 0.6} style={{ ...pos, transformOrigin: "50% 100%" }}><Bubble text={it.text} emoji={it.emoji} tail={it.tail} /></Pop>;
-    case "tag": return <Pop delay={delay} end={end} rot={rot * 0.3} style={pos}><div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 34, letterSpacing: 3, color: "#f0f0ea", background: "#6b7377dd", padding: "7px 22px", borderRadius: 7, boxShadow: "0 6px 12px #0007" }}>{it.text}</div></Pop>;
+    case "tag": return <Pop delay={delay} end={end} rot={rot * 0.3} style={pos}><div style={{ fontFamily: FONT, fontWeight: 900, fontSize: it.size ?? 34, whiteSpace: "nowrap", letterSpacing: 3, color: "#f0f0ea", background: "#6b7377dd", padding: "7px 22px", borderRadius: 7, boxShadow: "0 6px 12px #0007" }}>{it.text}</div></Pop>;
     case "title": return (
       <Pop delay={delay} end={end} style={{ left: W / 2, top: it.screen ? it.screen[1] : 200 }}>
         <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 64, color: "#fff", textAlign: "center", whiteSpace: "nowrap", WebkitTextStroke: "8px #000", paintOrder: "stroke fill", textShadow: "0 5px 0 #000" }}>{it.text}{it.sub && <div style={{ fontSize: 40, fontWeight: 800, opacity: 0.9 }}>{it.sub}</div>}</div>

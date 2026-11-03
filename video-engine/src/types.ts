@@ -11,7 +11,7 @@ export type Item =
   | (Base & { kind: "person"; label: string; img?: string; ring?: string })    // médaillon + étiquette
   | (Base & { kind: "flagBadge"; flag: "gbr" | "fra" | "deu"; emoji?: string }) // hexagone drapeau
   | (Base & { kind: "bubble"; text?: string; emoji?: string; tail?: "left" | "right" })
-  | (Base & { kind: "tag"; text: string })                                     // pastille grise (nom de pays)
+  | (Base & { kind: "tag"; text: string; size?: number })                                     // pastille grise (nom de pays)
   | (Base & { kind: "title"; text: string; sub?: string })                     // titre en haut
   | (Base & { kind: "ping"; color?: string })                                  // anneaux qui pulsent sur un lieu
   | (Base & { kind: "arrow"; from: LonLat; to: LonLat; color?: string })       // flèche d'attaque qui se dessine

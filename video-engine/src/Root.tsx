@@ -12,8 +12,12 @@ const demo: StoryProps = {
 
 const thumbDefaults = { line1: "TON CRÉDIT", line2: "MONTE ?", stat: { value: 103, prefix: "+", suffix: " €", label: "par mois · exemple" } };
 
+const thumbSpread = { line1: "FRANCE vs", line2: "ALLEMAGNE ?", stat: { value: 10, suffix: " Md€", label: "de plus par an · exemple" }, from: [13.4, 52.5] as [number, number], fromEmoji: "🇩🇪", toEmoji: "😬" };
+
 export const Root: React.FC = () => (
   <>
+    <Composition id="ThumbSpreadWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
+    <Composition id="ThumbSpreadTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbSpread} />
     <Composition id="ThumbWide" component={Thumbnail} width={1280} height={720} fps={FPS} durationInFrames={90} defaultProps={thumbDefaults} />
     <Composition id="ThumbTall" component={Thumbnail} width={1080} height={1920} fps={FPS} durationInFrames={90} defaultProps={thumbDefaults} />
   <Composition
