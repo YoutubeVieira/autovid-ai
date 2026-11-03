@@ -74,3 +74,19 @@ Ajouter un drapeau : `src/flags.tsx`. Ajouter un portrait : déposer l'image dan
 - **Zone libre de la France de 1940** : tracée à la main, approximative.
 - **Fond sonore** et **écran de fin** (logo de chaîne) non inclus.
 - La voix `espeak` ne sert qu'aux essais.
+
+## Outils (tools/)
+
+| Outil | Rôle | État |
+|---|---|---|
+| `make.mjs`, `tts.mjs`, `build-props.mjs`, `render.mjs` | voix → durées → rendu d'un projet (9:16 ou 16:9) | testé |
+| `render-blocks.mjs` | rendu d'une longue vidéo par blocs de 1 min, reprise possible, assemblage | testé (bloc 1 : 400 s pour 1 800 images) |
+| `qa.mjs` | contrôle qualité avant montage final (durée, audio, silences, mentions) | testé |
+| `daily-plan.mjs` + `serie/serie.json` | quoi produire aujourd'hui, long puis short lié | testé |
+| `tts-usage.mjs` | requêtes de voix par jour et par modèle | testé |
+| `analyze-video.mjs` | analyse d'une vidéo de référence | testé |
+| `media-search.mjs` | Pexels / Pixabay + registre de licences | **non testé avec les vrais services** (réseau bloqué) |
+| `chatterbox/generate.py` | voix clonée locale (Chatterbox) | **non testé** (poids du modèle inaccessibles) |
+| `make-basemap.py`, `fetch-assets.mjs`, `make-sfx.mjs` | fond de carte, contours, bruitages | testé |
+
+Clés API : variables d'environnement uniquement (`.env.example` donne les noms) ; jamais dans le dépôt.

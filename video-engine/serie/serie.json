@@ -2,10 +2,45 @@
   "_note": "État de la série. Règle : un jour une vidéo longue, le lendemain un short TOUJOURS lié à une longue (extrait d'un de ses chapitres, avec renvoi vers elle). statut : idee | a_ecrire | script_valide | rendu | publie.",
   "dernier_type": "short",
   "videos": [
-    { "id": "L1", "type": "long", "slug": "credit-bce-long", "titre": "Pourquoi ton crédit coûte plus cher", "statut": "a_ecrire", "short_lie": "S1" },
-    { "id": "S1", "type": "short", "slug": "credit-bce-60s", "titre": "Pourquoi ton crédit coûte plus cher (60 s)", "statut": "rendu", "long_lie": "L1" },
-    { "id": "L2", "type": "long", "slug": "dette-france-allemagne-long", "titre": "La France emprunte plus cher que l'Allemagne : ce que ça change", "statut": "idee", "short_lie": "S2" },
-    { "id": "S2", "type": "short", "slug": "spread-france-allemagne-60s", "titre": "France vs Allemagne : l'écart de taux", "statut": "rendu", "long_lie": "L2" },
-    { "id": "L3", "type": "long", "slug": "guerre-russie-pouvoir-achat-long", "titre": "Si la France entrait en guerre : ton pouvoir d'achat ?", "statut": "idee", "short_lie": null }
+    {
+      "id": "L1",
+      "type": "long",
+      "slug": "credit-bce-long",
+      "titre": "Pourquoi ton crédit coûte plus cher",
+      "statut": "script_valide",
+      "short_lie": "S1"
+    },
+    {
+      "id": "S1",
+      "type": "short",
+      "slug": "credit-bce-60s",
+      "titre": "Pourquoi ton crédit coûte plus cher (60 s)",
+      "statut": "rendu",
+      "long_lie": "L1"
+    },
+    {
+      "id": "L2",
+      "type": "long",
+      "slug": "dette-france-allemagne-long",
+      "titre": "La France emprunte plus cher que l'Allemagne : ce que ça change",
+      "statut": "idee",
+      "short_lie": "S2"
+    },
+    {
+      "id": "S2",
+      "type": "short",
+      "slug": "spread-france-allemagne-60s",
+      "titre": "France vs Allemagne : l'écart de taux",
+      "statut": "rendu",
+      "long_lie": "L2"
+    },
+    {
+      "id": "L3",
+      "type": "long",
+      "slug": "guerre-russie-pouvoir-achat-long",
+      "titre": "Si la France entrait en guerre : ton pouvoir d'achat ?",
+      "statut": "idee",
+      "short_lie": null
+    }
   ]
 }
