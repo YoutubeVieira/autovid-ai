@@ -101,11 +101,14 @@ async function doChapter(ch) {
   const sc = groups[ch], texts = sc.map(x => x.text);
   const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, texts.join("|")].join("|")).digest("hex").slice(0, 10);
   const files = sc.map(x => path.join(outDir, x.id + "." + hash + ".wav"));
+  const raw = path.join(outDir, "chap-" + ch + "." + hash + ".wav");   // audio brut du chapitre : permet de re-découper sans nouvelle requête
+  if (process.argv.includes("--resplit") && fs.existsSync(raw)) for (const f of files) if (fs.existsSync(f)) fs.unlinkSync(f);
   if (!files.every(f => fs.existsSync(f))) {
     const text = texts.join(" ");
-    const buf = provider === "gemini" ? await gemini(text) : espeak(text);
+    const buf = fs.existsSync(raw) ? fs.readFileSync(raw) : (provider === "gemini" ? await gemini(text) : espeak(text));
+    if (!fs.existsSync(raw)) fs.writeFileSync(raw, buf);
     const parts = splitByPauses(buf, texts);
-    sc.forEach((x, i) => { for (const old of fs.readdirSync(outDir)) if (old.startsWith(x.id + ".")) fs.unlinkSync(path.join(outDir, old)); fs.writeFileSync(files[i], parts[i]); });
+    sc.forEach((x, i) => { for (const old of fs.readdirSync(outDir)) if (old.startsWith(x.id + ".") && !old.startsWith("chap-")) fs.unlinkSync(path.join(outDir, old)); fs.writeFileSync(files[i], parts[i]); });
     console.log("  ok chapitre " + ch + " : 1 requête, " + sc.length + " scènes (" + sc.map((x, i) => (readWav(parts[i]).pcm.length / 2 / readWav(parts[i]).rate).toFixed(1) + " s").join(", ") + ")");
   } else console.log("  =  chapitre " + ch + " (déjà produit)");
   sc.forEach((x, i) => { const { pcm, rate } = readWav(fs.readFileSync(files[i])); manifest[x.id] = { file: "projects/" + name + "/audio/" + path.basename(files[i]), seconds: +(pcm.length / 2 / rate).toFixed(3), provider }; });

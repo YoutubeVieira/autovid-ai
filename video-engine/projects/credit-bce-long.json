@@ -1,0 +1,2785 @@
+{
+ "title": "Pourquoi ton crédit coûte plus cher : de Francfort à ta mensualité (10 min)",
+ "theme": "finance",
+ "format": "16:9",
+ "lang": "fr-FR",
+ "voice": "fenrir-lite",
+ "pad": 0.35,
+ "subtitleWords": 3,
+ "cible_s": 600,
+ "faits": [
+  {
+   "id": "f1",
+   "claim": "La Banque centrale européenne a son siège à Francfort-sur-le-Main",
+   "value": "Francfort",
+   "source": "BCE : connaissance générale, page officielle non ouverte (réseau bloqué)",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f2",
+   "claim": "Exemple : emprunt de 200 000 € sur 20 ans à 3 % : mensualité ≈ 1 109,20 €",
+   "value": "1109.20 €/mois",
+   "source": "Calcul : annuité constante M = P·r/(1−(1+r)^−n), r = taux/12, n = 240 ; hors assurance et frais",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f3",
+   "claim": "Même emprunt à 4 % : mensualité ≈ 1 211,96 € ; écart ≈ 102,77 € par mois",
+   "value": "1211.96 ; +102.77",
+   "source": "Calcul : même formule ; hors assurance et frais",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f4",
+   "claim": "Intérêts totaux : ≈ 66 207 € à 3 % ; ≈ 90 871 € à 4 %",
+   "value": "66207 ; 90871",
+   "source": "Calcul : mensualité × 240 − 200 000",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f5",
+   "claim": "Écart de coût total sur 20 ans ≈ 24 664 €",
+   "value": "24663.71 €",
+   "source": "Calcul : écart de mensualité × 240",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f6",
+   "claim": "Exemple : revenu 3 000 €/mois, taux d'effort 35 % → mensualité max. 1 050 € ; capacité 189 326 € à 3 % et 173 273 € à 4 % sur 20 ans (−16 054 €)",
+   "value": "1050 ; 189326 ; 173273",
+   "source": "Calcul : P = M·(1−(1+r)^−n)/r ; le taux d'effort maximal de 35 % (règle du HCSF) est à confirmer à la source",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f7",
+   "claim": "À 4 % sur 25 ans, mensualité 1 050 € → capacité ≈ 198 925 € ; intérêts ≈ 116 075 € contre ≈ 62 674 € à 3 % sur 20 ans (avec 1 050 €)",
+   "value": "198925 ; 116075 ; 62674",
+   "source": "Calcul : 1 050 × 300 − 198 925 et 1 050 × 240 − 189 326",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f8",
+   "claim": "L'objectif d'inflation de la BCE à moyen terme est de 2 %",
+   "value": "2 %",
+   "source": "BCE : connaissance générale, page officielle non ouverte",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f9",
+   "claim": "Les trois principaux taux directeurs de la BCE : taux de dépôt, taux de refinancement, taux de prêt marginal",
+   "value": "3 taux",
+   "source": "BCE : connaissance générale ; recoupé par la presse financière (non primaire)",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f10",
+   "claim": "La BCE est indépendante dans ses décisions de politique monétaire",
+   "value": "indépendance",
+   "source": "Traités européens : connaissance générale, source non ouverte",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f11",
+   "claim": "Le taux de l'OAT à 10 ans sert souvent de repère aux taux de crédit",
+   "value": "repère",
+   "source": "Presse financière (recherche web, non primaire)",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f13",
+   "claim": "Exemple : 180 000 € empruntés à 4 % sur 20 ans → mensualité ≈ 1 090,76 € (121,20 € de moins que pour 200 000 €)",
+   "value": "1090.76 ; −121.20",
+   "source": "Calcul : annuité constante, hors assurance et frais",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "f14",
+   "claim": "Une hausse des taux peut peser sur les prix de l'immobilier en réduisant la capacité d'emprunt (mécanisme, effet variable)",
+   "value": "mécanisme",
+   "source": "Raisonnement économique général ; non vérifié à la source ; effet incertain",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f15",
+   "claim": "Quand les taux montent, certains placements d'épargne rémunèrent mieux, avec retard et de façon inégale",
+   "value": "mécanisme",
+   "source": "Connaissance générale ; non vérifiée à la source",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f16",
+   "claim": "Une part importante du taux d'un crédit vient du coût de l'argent pour la banque ; personne ne sait prévoir la date ni l'ampleur d'une baisse des taux",
+   "value": "mécanisme",
+   "source": "Connaissance générale ; non vérifiée à la source",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "f12",
+   "claim": "Renégocier ou racheter un crédit peut entraîner des frais (dossier, indemnités de remboursement anticipé)",
+   "value": "frais possibles",
+   "source": "Connaissance générale du crédit immobilier en France ; non vérifiée à la source",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  }
+ ],
+ "scenes": [
+  {
+   "id": "c1-01",
+   "chapter": "c1",
+   "text": "Imagine deux personnes qui empruntent la même somme, dans la même banque, sur la même durée, mais à un an d'écart.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Pourquoi ton crédit coûte plus cher",
+     "sub": "6 ÉTAPES POUR TOUT COMPRENDRE",
+     "delay": 0.4
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧑",
+     "delay": 1.6,
+     "screen": [
+      300,
+      400
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧑‍💼",
+     "delay": 3.4,
+     "screen": [
+      1620,
+      400
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "À UN AN D'ÉCART",
+     "delay": 4.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "flash": [
+    0.0
+   ]
+  },
+  {
+   "id": "c1-02",
+   "chapter": "c1",
+   "text": "Rien dans leur dossier n'est différent. Pourtant, l'une paie cent trois euros de plus, chaque mois.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 103,
+     "suffix": " €",
+     "label": "de plus par mois · exemple",
+     "delay": 3.6,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "faits": [
+    "f3"
+   ],
+   "impacts": [
+    3.6
+   ]
+  },
+  {
+   "id": "c1-03",
+   "chapter": "c1",
+   "text": "Cent trois euros, ça peut sembler peu. Sauf que ça dure vingt ans, et que ça se chiffre en dizaines de milliers d'euros.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⏳",
+     "delay": 1.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "SUR 20 ANS",
+     "delay": 2.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 24664,
+     "suffix": " €",
+     "label": "d'écart au total · exemple",
+     "delay": 5.2,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "faits": [
+    "f5"
+   ]
+  },
+  {
+   "id": "c1-04",
+   "chapter": "c1",
+   "text": "Alors, qui a changé le prix ? Pas la banque, pas le vendeur, pas toi. Quelqu'un d'autre, à plusieurs centaines de kilomètres, dans une ville dont on parle rarement : Francfort.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "bubble",
+     "delay": 0.8,
+     "emoji": "🤔",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -90
+    },
+    {
+     "kind": "ping",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 6.2,
+     "color": "#ffffff"
+    },
+    {
+     "kind": "tag",
+     "text": "FRANCFORT",
+     "delay": 6.6,
+     "size": 34,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -70
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c1-05",
+   "chapter": "c1",
+   "text": "Dans cette vidéo, on suit le trajet complet d'un taux, de Francfort jusqu'à ta mensualité, en six étapes simples.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Francfort → ta mensualité",
+     "sub": "LE TRAJET COMPLET, EN 6 ÉTAPES",
+     "delay": 0.4
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 2.4,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 1.4,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -130
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 4.0,
+     "at": [
+      2.35,
+      48.86
+     ],
+     "dy": -130
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c1-06",
+   "chapter": "c1",
+   "text": "Quelques précisions avant de commencer. Les chiffres de cette vidéo sont des exemples calculés, avec des hypothèses affichées à l'écran : ce ne sont pas les taux du jour. Et je ne te dis jamais quoi acheter ni quoi emprunter.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "EXEMPLES CALCULÉS · PAS LES TAUX DU JOUR",
+     "delay": 2.4,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧮",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🚫",
+     "delay": 6.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUN CONSEIL D'ACHAT",
+     "delay": 7.0,
+     "size": 30,
+     "screen": [
+      960,
+      330
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c1-07",
+   "chapter": "c1",
+   "text": "À la fin, je te montre un deuxième chiffre, souvent oublié : ce que ça change à la somme que tu peux emprunter. Et tu verras que ce n'est pas qu'une question de mensualité.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "CE QUE TU PEUX EMPRUNTER",
+     "delay": 1.2,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧮",
+     "delay": 2.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "bubble",
+     "delay": 5.0,
+     "emoji": "😮",
+     "screen": [
+      1500,
+      420
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c2-01",
+   "chapter": "c2",
+   "text": "Première étape : Francfort. C'est là que siège la Banque centrale européenne, la BCE.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 1 · La BCE",
+     "sub": "FRANCFORT, SIÈGE DE LA BANQUE CENTRALE EUROPÉENNE",
+     "delay": 0.3
+    },
+    {
+     "kind": "ping",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 0.6,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 1.4,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -150
+    }
+   ],
+   "fills": {
+    "DEU": "flag"
+   },
+   "faits": [
+    "f1"
+   ]
+  },
+  {
+   "id": "c2-02",
+   "chapter": "c2",
+   "text": "Son rôle, en une phrase : veiller à ce que les prix restent stables dans les pays qui ont l'euro.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "💶",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛒",
+     "delay": 3.4,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "STABILITÉ DES PRIX",
+     "delay": 2.2,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f8"
+   ]
+  },
+  {
+   "id": "c2-03",
+   "chapter": "c2",
+   "text": "Pour cela, elle dispose d'un levier : les taux directeurs. Ce sont les taux auxquels elle prête de l'argent aux banques, ou rémunère l'argent que les banques lui confient.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 1.2,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "⚙️",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX DIRECTEURS",
+     "delay": 3.2,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f9"
+   ]
+  },
+  {
+   "id": "c2-04",
+   "chapter": "c2",
+   "text": "Il y en a trois principaux : le taux de dépôt, le taux de refinancement, et le taux de prêt marginal. Retiens simplement ceci : ce sont les prix de départ de l'argent dans la zone euro.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "TAUX DE DÉPÔT",
+     "delay": 1.6,
+     "size": 34,
+     "screen": [
+      400,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX DE REFINANCEMENT",
+     "delay": 3.4,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX DE PRÊT MARGINAL",
+     "delay": 5.2,
+     "size": 34,
+     "screen": [
+      1500,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔑",
+     "delay": 7.4,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f9"
+   ]
+  },
+  {
+   "id": "c2-05",
+   "chapter": "c2",
+   "text": "Quand ces taux montent, l'argent devient plus cher pour tout le monde en aval. Quand ils baissent, il devient moins cher.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📉",
+     "delay": 4.2,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PLUS CHER ↔ MOINS CHER",
+     "delay": 2.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c2-06",
+   "chapter": "c2",
+   "text": "Ces décisions se prennent lors de réunions régulières, plusieurs fois par an. Chacune est suivie de très près par les marchés, qui anticipent souvent avant même l'annonce. Quand on dit que la BCE a relevé ses taux, ces trois prix ont augmenté, en général par petits paliers.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📅",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "👀",
+     "delay": 4.4,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "LES MARCHÉS ANTICIPENT",
+     "delay": 5.6,
+     "size": 34,
+     "screen": [
+      1500,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 9.0,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -130
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c2-07",
+   "chapter": "c2",
+   "text": "Et la BCE décide en toute indépendance : ni les gouvernements ni les banques ne lui dictent ses décisions.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⚖️",
+     "delay": 1.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "DÉCISION INDÉPENDANTE",
+     "delay": 2.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "burst",
+     "emoji": "🔔",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 4.6
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f10"
+   ],
+   "impacts": [
+    4.6
+   ]
+  },
+  {
+   "id": "c3-01",
+   "chapter": "c3",
+   "text": "Deuxième étape : pourquoi relever ces taux ? Parce que la BCE surveille un chiffre précis : l'inflation, c'est-à-dire la hausse générale des prix.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 2 · L'inflation",
+     "sub": "POURQUOI RELEVER LES TAUX ?",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛒",
+     "delay": 3.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔥",
+     "delay": 5.6,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c3-02",
+   "chapter": "c3",
+   "text": "Son objectif de long terme est d'environ deux pour cent par an. Plus haut, ton argent perd en pouvoir d'achat plus vite ; plus bas, l'économie peut s'enliser.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 2,
+     "suffix": " %",
+     "label": "objectif d'inflation, long terme",
+     "delay": 1.4,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "icon",
+     "emoji": "💰",
+     "delay": 4.8,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f8"
+   ]
+  },
+  {
+   "id": "c3-03",
+   "chapter": "c3",
+   "text": "Quand les prix montent trop vite, elle peut relever ses taux. L'idée : si emprunter coûte plus cher, on emprunte et on dépense un peu moins, et la pression sur les prix retombe.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "burst",
+     "emoji": "📈",
+     "at": [
+      8.68,
+      50.11
+     ],
+     "delay": 2.0
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 3.8,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 5.4,
+     "at": [
+      2.35,
+      48.86
+     ],
+     "dy": -130
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "impacts": [
+    2.0
+   ]
+  },
+  {
+   "id": "c3-04",
+   "chapter": "c3",
+   "text": "C'est un peu comme freiner dans une descente : ça ne se fait pas sans effet secondaire. Le frein sur les prix passe par un frein sur le crédit.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🚗",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛑",
+     "delay": 3.4,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "FREIN SUR LES PRIX = FREIN SUR LE CRÉDIT",
+     "delay": 5.4,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c3-05",
+   "chapter": "c3",
+   "text": "Il y a un décalage : un changement de taux met du temps à produire tous ses effets sur les prix, souvent plusieurs mois. C'est ce qui rend la décision difficile, et ce qui explique que les banques centrales se trompent parfois.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⏳",
+     "delay": 1.2,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EFFET RETARDÉ",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🎯",
+     "delay": 7.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "DÉCISION DIFFICILE",
+     "delay": 8.0,
+     "size": 30,
+     "screen": [
+      960,
+      330
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c3-06",
+   "chapter": "c3",
+   "text": "Et c'est exactement ce que tu ressens quand ton prêt coûte plus cher : tu es l'un des maillons du freinage. Ce n'est pas une punition : c'est un outil pour protéger le pouvoir d'achat de tous, avec un coût pour certains.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "bubble",
+     "delay": 1.6,
+     "emoji": "😬",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -90
+    },
+    {
+     "kind": "icon",
+     "emoji": "🛡️",
+     "delay": 6.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "UN COÛT POUR CERTAINS",
+     "delay": 8.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-01",
+   "chapter": "c4",
+   "text": "Troisième étape : les banques. Pour te prêter de l'argent, une banque doit d'abord s'en procurer : avec les dépôts de ses clients, en empruntant à d'autres banques, ou en émettant des obligations.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 3 · Les banques",
+     "sub": "D'OÙ VIENT L'ARGENT QU'ELLES TE PRÊTENT ?",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "DÉPÔTS",
+     "delay": 4.4,
+     "size": 34,
+     "screen": [
+      700,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EMPRUNTS ENTRE BANQUES",
+     "delay": 6.4,
+     "size": 30,
+     "screen": [
+      1100,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "OBLIGATIONS",
+     "delay": 8.6,
+     "size": 34,
+     "screen": [
+      1560,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c4-02",
+   "chapter": "c4",
+   "text": "Quand les taux directeurs montent, ce coût d'approvisionnement monte aussi, avec un décalage qui varie d'une banque à l'autre.",
+   "camera": {
+    "lon": 7.5,
+    "lat": 49.8,
+    "zoom": 4.1
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 1.0,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "📈",
+     "delay": 3.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "COÛT DE FINANCEMENT ↑",
+     "delay": 4.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c4-03",
+   "chapter": "c4",
+   "text": "Résultat : elle ajuste le taux qu'elle propose pour les nouveaux crédits. Elle n'a pas le choix si elle veut garder une marge.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 1.0,
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -100
+    },
+    {
+     "kind": "bubble",
+     "delay": 2.4,
+     "text": "NOUVEAUX CRÉDITS",
+     "screen": [
+      1500,
+      420
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-04",
+   "chapter": "c4",
+   "text": "Mais elle ne répercute pas tout, ni tout de suite : la concurrence entre banques, la qualité de ton dossier, ta durée, ton apport, tout cela joue.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🤝",
+     "delay": 3.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "CONCURRENCE",
+     "delay": 1.2,
+     "size": 34,
+     "screen": [
+      700,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TON DOSSIER",
+     "delay": 4.2,
+     "size": 34,
+     "screen": [
+      1100,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "DURÉE · APPORT",
+     "delay": 6.2,
+     "size": 34,
+     "screen": [
+      1500,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-05",
+   "chapter": "c4",
+   "text": "Une banque doit aussi couvrir le risque que tu ne la rembourses pas, ses frais de fonctionnement, et dégager un bénéfice. Ces éléments s'ajoutent au coût de l'argent pour former le taux qu'on te propose.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "COÛT DE L'ARGENT",
+     "delay": 3.8,
+     "size": 34,
+     "screen": [
+      500,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RISQUE",
+     "delay": 5.6,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "FRAIS + MARGE",
+     "delay": 7.4,
+     "size": 34,
+     "screen": [
+      1420,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧱",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c4-06",
+   "chapter": "c4",
+   "text": "Autre repère important : les taux auxquels les États empruntent, comme l'OAT à dix ans en France. Ils servent souvent de référence aux taux de crédit.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "flagBadge",
+     "flag": "fra",
+     "emoji": "📊",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 2.6
+    },
+    {
+     "kind": "tag",
+     "text": "OAT 10 ANS = REPÈRE",
+     "delay": 4.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧭",
+     "delay": 6.6,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "faits": [
+    "f11"
+   ]
+  },
+  {
+   "id": "c4-07",
+   "chapter": "c4",
+   "text": "Voilà pourquoi deux banques peuvent te proposer des taux différents le même jour, et pourquoi comparer reste ton meilleur réflexe.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 2.0,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "COMPARER",
+     "delay": 4.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c5-01",
+   "chapter": "c5",
+   "text": "Quatrième étape : le calcul. Prenons un emprunt de deux cent mille euros sur vingt ans, hors assurance et frais.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 4 · Le calcul",
+     "sub": "EXEMPLE : 200 000 € SUR 20 ANS",
+     "delay": 0.3
+    },
+    {
+     "kind": "stat",
+     "value": 200000,
+     "suffix": " €",
+     "label": "emprunt sur 20 ans · exemple",
+     "delay": 3.0,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "tag",
+     "text": "HORS ASSURANCE ET FRAIS",
+     "delay": 5.2,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f2"
+   ]
+  },
+  {
+   "id": "c5-02",
+   "chapter": "c5",
+   "text": "À trois pour cent, la mensualité est d'environ mille cent neuf euros.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 1109,
+     "suffix": " €",
+     "label": "par mois à 3 %",
+     "delay": 1.6,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧮",
+     "delay": 0.6,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f2"
+   ]
+  },
+  {
+   "id": "c5-03",
+   "chapter": "c5",
+   "text": "À quatre pour cent, elle monte à environ mille deux cent douze euros. Soit cent trois euros de plus, chaque mois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 1212,
+     "suffix": " €",
+     "label": "par mois à 4 %",
+     "delay": 1.4,
+     "screen": [
+      1420,
+      300
+     ],
+     "color": "#ffb347"
+    },
+    {
+     "kind": "stat",
+     "value": 103,
+     "suffix": " €",
+     "label": "de plus chaque mois",
+     "delay": 5.4,
+     "screen": [
+      1420,
+      620
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f3"
+   ],
+   "impacts": [
+    5.4
+   ]
+  },
+  {
+   "id": "c5-04",
+   "chapter": "c5",
+   "text": "Sur vingt ans, tu as payé deux cent quarante fois cette différence : plus de vingt-quatre mille euros d'écart au total.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "⏳",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 24664,
+     "suffix": " €",
+     "label": "d'écart sur 20 ans",
+     "delay": 4.6,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f5"
+   ],
+   "impacts": [
+    4.6
+   ]
+  },
+  {
+   "id": "c5-05",
+   "chapter": "c5",
+   "text": "Regarde les intérêts : environ soixante-six mille euros à trois pour cent, contre environ quatre-vingt-onze mille à quatre pour cent.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 66207,
+     "suffix": " €",
+     "label": "d'intérêts à 3 %",
+     "delay": 1.6,
+     "screen": [
+      640,
+      340
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "stat",
+     "value": 90871,
+     "suffix": " €",
+     "label": "d'intérêts à 4 %",
+     "delay": 5.2,
+     "screen": [
+      1280,
+      340
+     ],
+     "color": "#ffb347"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f4"
+   ]
+  },
+  {
+   "id": "c5-06",
+   "chapter": "c5",
+   "text": "Et si tu apportes davantage de ta poche ? Avec vingt mille euros d'apport en plus, tu empruntes cent quatre-vingt mille au lieu de deux cent mille. À quatre pour cent sur vingt ans, la mensualité passe d'environ mille deux cent douze à environ mille quatre-vingt-onze euros : cent vingt et un euros de moins.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 20000,
+     "suffix": " €",
+     "label": "d'apport en plus · exemple",
+     "delay": 2.4,
+     "screen": [
+      640,
+      340
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 1091,
+     "suffix": " €",
+     "label": "par mois au lieu de 1 212 €",
+     "delay": 8.6,
+     "screen": [
+      1280,
+      340
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🐖",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f13"
+   ]
+  },
+  {
+   "id": "c5-07",
+   "chapter": "c5",
+   "text": "Un seul point de taux. C'est ça, l'effet de la durée : un petit écart, répété deux cent quarante fois.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🔁",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "1 POINT × 240 MOIS",
+     "delay": 2.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f5"
+   ]
+  },
+  {
+   "id": "c6-01",
+   "chapter": "c6",
+   "text": "Cinquième étape, celle qu'on oublie : ce que ça change à ce que tu peux emprunter.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 5 · Ce que tu peux emprunter",
+     "sub": "L'EFFET CACHÉ",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧮",
+     "delay": 2.0,
+     "screen": [
+      300,
+      400
+     ]
+    },
+    {
+     "kind": "bubble",
+     "delay": 3.8,
+     "emoji": "😮",
+     "screen": [
+      1500,
+      420
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c6-02",
+   "chapter": "c6",
+   "text": "En France, les banques sont tenues de respecter un taux d'effort maximal, d'environ trente-cinq pour cent des revenus, assurance comprise.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 35,
+     "suffix": " %",
+     "label": "% des revenus : taux d'effort max.",
+     "delay": 2.4,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "icon",
+     "emoji": "⚖️",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f6"
+   ]
+  },
+  {
+   "id": "c6-03",
+   "chapter": "c6",
+   "text": "Prenons un revenu de trois mille euros par mois : la mensualité maximale est donc de mille cinquante euros.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 3000,
+     "suffix": " €",
+     "label": "revenu mensuel · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      340
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 1050,
+     "suffix": " €",
+     "label": "mensualité maximale",
+     "delay": 5.6,
+     "screen": [
+      1280,
+      340
+     ],
+     "color": "#ffd60a"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f6"
+   ]
+  },
+  {
+   "id": "c6-04",
+   "chapter": "c6",
+   "text": "À trois pour cent sur vingt ans, cette mensualité permet d'emprunter environ cent quatre-vingt-neuf mille euros.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 189326,
+     "suffix": " €",
+     "label": "empruntable à 3 % · 20 ans",
+     "delay": 2.6,
+     "screen": [
+      1420,
+      340
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏠",
+     "delay": 0.8,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f6"
+   ]
+  },
+  {
+   "id": "c6-05",
+   "chapter": "c6",
+   "text": "À quatre pour cent, seulement environ cent soixante-treize mille : seize mille euros de moins pour acheter.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 173273,
+     "suffix": " €",
+     "label": "empruntable à 4 % · 20 ans",
+     "delay": 1.8,
+     "screen": [
+      640,
+      340
+     ],
+     "color": "#ffb347"
+    },
+    {
+     "kind": "stat",
+     "value": 16054,
+     "suffix": " €",
+     "label": "de moins pour acheter",
+     "delay": 5.2,
+     "screen": [
+      1280,
+      340
+     ],
+     "color": "#ff4d4d",
+     "prefix": "−"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f6"
+   ],
+   "impacts": [
+    5.2
+   ]
+  },
+  {
+   "id": "c6-06",
+   "chapter": "c6",
+   "text": "Le même revenu, la même banque, mais un budget d'achat plus petit. Voilà l'effet caché.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "bubble",
+     "delay": 1.6,
+     "emoji": "😬",
+     "screen": [
+      1500,
+      420
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "MÊME REVENU · BUDGET RÉDUIT",
+     "delay": 2.4,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f6"
+   ]
+  },
+  {
+   "id": "c6-07",
+   "chapter": "c6",
+   "text": "C'est aussi pour cela qu'une hausse des taux peut peser sur les prix de l'immobilier : si les acheteurs peuvent emprunter moins, certains vendeurs doivent parfois ajuster leur prix. Pas partout, pas tout de suite, et pas toujours.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🏘️",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏷️",
+     "delay": 5.6,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PAS PARTOUT · PAS TOUJOURS",
+     "delay": 7.6,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f14"
+   ]
+  },
+  {
+   "id": "c6-08",
+   "chapter": "c6",
+   "text": "On peut allonger la durée pour compenser : à vingt-cinq ans, la même mensualité permet d'emprunter environ cent quatre-vingt-dix-neuf mille euros. Mais les intérêts passent d'environ soixante-trois mille à environ cent seize mille. C'est un arbitrage, pas une solution magique.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 198925,
+     "suffix": " €",
+     "label": "empruntable à 4 % · 25 ans",
+     "delay": 3.4,
+     "screen": [
+      640,
+      340
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 116075,
+     "suffix": " €",
+     "label": "d'intérêts à 25 ans",
+     "delay": 9.0,
+     "screen": [
+      1280,
+      340
+     ],
+     "color": "#ff4d4d"
+    },
+    {
+     "kind": "tag",
+     "text": "ARBITRAGE : DURÉE ↔ COÛT TOTAL",
+     "delay": 6.4,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f7"
+   ]
+  },
+  {
+   "id": "c7-01",
+   "chapter": "c7",
+   "text": "Sixième étape : et si tu as déjà un crédit ? Bonne nouvelle, si ton taux est fixe.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 6 · Ton crédit en cours",
+     "sub": "TAUX FIXE OU VARIABLE ?",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔒",
+     "delay": 4.2,
+     "screen": [
+      300,
+      400
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c7-02",
+   "chapter": "c7",
+   "text": "Un taux fixe est inscrit dans ton contrat : la mensualité ne bouge pas, quoi que décide la BCE.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "flagBadge",
+     "flag": "fra",
+     "emoji": "🔒",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 1.6
+    },
+    {
+     "kind": "bubble",
+     "delay": 3.4,
+     "emoji": "😌",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "dy": -150
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX FIXE = MENSUALITÉ STABLE",
+     "delay": 4.8,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c7-03",
+   "chapter": "c7",
+   "text": "Un taux variable, lui, peut évoluer selon les conditions du contrat, souvent avec un plafond de variation.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🔓",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "↕️",
+     "delay": 3.4,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PLAFOND DE VARIATION",
+     "delay": 5.4,
+     "size": 34,
+     "screen": [
+      1500,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c7-04",
+   "chapter": "c7",
+   "text": "Et si les taux baissent un jour ? Tu peux demander à renégocier ou à racheter ton crédit, mais ça a un coût : frais de dossier, éventuelles indemnités de remboursement anticipé.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "📉",
+     "delay": 1.6,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🧾",
+     "delay": 4.8,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RENÉGOCIER A UN COÛT",
+     "delay": 6.6,
+     "size": 34,
+     "screen": [
+      1500,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f12"
+   ]
+  },
+  {
+   "id": "c7-05",
+   "chapter": "c7",
+   "text": "Pas de panique, donc : une hausse de taux touche surtout ceux qui s'apprêtent à emprunter, et les emprunteurs à taux variable.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "SURTOUT : NOUVEAUX EMPRUNTEURS",
+     "delay": 2.0,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "ET TAUX VARIABLE",
+     "delay": 5.2,
+     "size": 32,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c7-06",
+   "chapter": "c7",
+   "text": "Pour l'épargnant, c'est l'inverse : quand les taux montent, certains placements rémunèrent mieux, avec du retard et pas tous de la même manière. Ce que l'un paie en intérêts, un autre peut le toucher.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🐷",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "↔️",
+     "delay": 4.6,
+     "screen": [
+      960,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "💰",
+     "delay": 6.4,
+     "screen": [
+      1620,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "EMPRUNTEUR ↔ ÉPARGNANT",
+     "delay": 5.0,
+     "size": 30,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f15"
+   ]
+  },
+  {
+   "id": "c7-07",
+   "chapter": "c7",
+   "text": "Et personne ne sait dire si, quand, ni de combien les taux vont bouger. Les prévisions se trompent souvent.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "icon",
+     "emoji": "🔮",
+     "delay": 1.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "bubble",
+     "delay": 3.2,
+     "emoji": "🤷",
+     "screen": [
+      1500,
+      420
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PRÉVISIONS ≠ CERTITUDES",
+     "delay": 4.2,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-01",
+   "chapter": "c8",
+   "text": "Pour finir : ce qu'il faut retenir.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Pour finir · À retenir",
+     "sub": "3 IDÉES ET 2 IDÉES REÇUES",
+     "delay": 0.3
+    },
+    {
+     "kind": "icon",
+     "emoji": "📝",
+     "delay": 1.0,
+     "screen": [
+      300,
+      400
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-02",
+   "chapter": "c8",
+   "text": "Un : le taux de ton crédit n'est pas décidé que par ta banque. Il vient de plus loin, de Francfort et des marchés.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "1 · LE TAUX VIENT DE PLUS LOIN",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      8.68,
+      50.11
+     ],
+     "to": [
+      2.35,
+      48.86
+     ],
+     "delay": 2.8,
+     "color": "#ffd60a"
+    },
+    {
+     "kind": "icon",
+     "emoji": "🏦",
+     "delay": 1.6,
+     "at": [
+      8.68,
+      50.11
+     ],
+     "dy": -130
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   }
+  },
+  {
+   "id": "c8-03",
+   "chapter": "c8",
+   "text": "Deux : un point de taux change tes mensualités, ton coût total, et surtout la somme que tu peux emprunter.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "2 · UN POINT DE TAUX CHANGE TOUT",
+     "delay": 0.8,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 103,
+     "suffix": " €",
+     "label": "par mois · exemple",
+     "delay": 3.0,
+     "screen": [
+      640,
+      420
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 16054,
+     "suffix": " €",
+     "label": "empruntables en moins · exemple",
+     "delay": 5.6,
+     "screen": [
+      1280,
+      420
+     ],
+     "color": "#ffb347",
+     "prefix": "−"
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f3",
+    "f6"
+   ]
+  },
+  {
+   "id": "c8-04",
+   "chapter": "c8",
+   "text": "Trois : ce que tu peux contrôler. Comparer les offres, regarder le taux annuel effectif global, le TAEG, le coût de l'assurance, la durée, ton apport.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "3 · CE QUE TU CONTRÔLES",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "🔍",
+     "delay": 2.0,
+     "screen": [
+      300,
+      400
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "TAEG",
+     "delay": 5.0,
+     "size": 34,
+     "screen": [
+      960,
+      330
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "ASSURANCE · DURÉE · APPORT",
+     "delay": 7.0,
+     "size": 30,
+     "screen": [
+      960,
+      400
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-05",
+   "chapter": "c8",
+   "text": "Deux idées reçues pour finir. Non, la banque ne se sert pas seule : une part importante du taux vient du coût de l'argent. Et non, attendre la baisse n'est pas une stratégie sûre : personne ne sait quand elle viendra.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "IDÉE REÇUE 1 · LA BANQUE SE SERT SEULE",
+     "delay": 1.6,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "❌",
+     "delay": 2.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "IDÉE REÇUE 2 · ATTENDRE LA BAISSE",
+     "delay": 6.2,
+     "size": 30,
+     "screen": [
+      960,
+      330
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "❌",
+     "delay": 7.0,
+     "screen": [
+      1620,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   },
+   "faits": [
+    "f16"
+   ]
+  },
+  {
+   "id": "c8-06",
+   "chapter": "c8",
+   "text": "Rien de tout cela n'est un conseil personnalisé : cette vidéo est un contenu éducatif, sans aucune obligation d'achat ni de souscription, et ne constitue pas un conseil en investissement ni en crédit.",
+   "camera": {
+    "lon": 2.5,
+    "lat": 47.0,
+    "zoom": 3.2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "CONTENU ÉDUCATIF · PAS UN CONSEIL EN INVESTISSEMENT NI EN CRÉDIT",
+     "delay": 0.6,
+     "size": 28,
+     "screen": [
+      960,
+      960
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUNE OBLIGATION D'ACHAT OU DE SOUSCRIPTION",
+     "delay": 1.4,
+     "size": 28,
+     "screen": [
+      960,
+      1020
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "⚠️",
+     "delay": 1.0,
+     "screen": [
+      300,
+      380
+     ]
+    }
+   ],
+   "fills": {
+    "FRA": "flag"
+   }
+  },
+  {
+   "id": "c8-07",
+   "chapter": "c8",
+   "text": "Si cette vidéo t'a servi, abonne-toi. Un short résume l'essentiel, et la prochaine vidéo traite d'une question liée : pourquoi la France emprunte plus cher que l'Allemagne.",
+   "camera": {
+    "lon": 5.0,
+    "lat": 49.0,
+    "zoom": 2.9
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "burst",
+     "emoji": "🔔",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 1.6
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "fra",
+     "emoji": "❓",
+     "at": [
+      2.3,
+      47.0
+     ],
+     "delay": 5.0
+    },
+    {
+     "kind": "flagBadge",
+     "flag": "deu",
+     "emoji": "❓",
+     "at": [
+      10.3,
+      51.0
+     ],
+     "delay": 5.6
+    },
+    {
+     "kind": "arrow",
+     "from": [
+      10.3,
+      51.0
+     ],
+     "to": [
+      2.3,
+      47.0
+     ],
+     "delay": 6.4,
+     "color": "#ff3b30"
+    }
+   ],
+   "fills": {
+    "FRA": "flag",
+    "DEU": "flag"
+   },
+   "flash": [
+    1.6
+   ]
+  }
+ ]
+}

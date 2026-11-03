@@ -82,18 +82,29 @@ export function splitByPauses(buf, texts) {
   for (let i = 0; i + win <= n; i += win) { let s = 0; for (let j = 0; j < win; j++) { const v = pcm.readInt16LE((i + j) * 2); s += v * v; } env.push(Math.sqrt(s / win)); }
   const thr = Math.max(...env) * 0.04, sil = [];
   for (let i = 0; i < env.length;) {
-    if (env[i] < thr) { let j = i; while (j < env.length && env[j] < thr) j++; const a = i * 0.01, b = j * 0.01; if (b - a >= 0.15 && a > 0.2 && b < total - 0.2) sil.push({ a, b, c: (a + b) / 2, d: b - a }); i = j; } else i++;
+    if (env[i] < thr) { let j = i; while (j < env.length && env[j] < thr) j++; const a = i * 0.01, b = j * 0.01; if (b - a >= 0.12 && a > 0.2 && b < total - 0.2) sil.push({ c: (a + b) / 2, d: b - a }); i = j; } else i++;
   }
-  const w = texts.map(t => Math.max(1, t.replace(/[^\p{L}\p{N}]/gu, "").length));
-  const sum = w.reduce((x, y) => x + y, 0);
-  const cuts = []; let acc = 0, prev = 0;
-  for (let k = 0; k < texts.length - 1; k++) {
-    acc += w[k]; const want = total * acc / sum;
-    let best = null, bc = Infinity;
-    for (const s of sil) { if (s.c < prev + 0.5) continue; const cost = ((s.c - want) / (0.12 * total)) ** 2 - Math.min(s.d, 0.8) / 0.3; if (cost < bc) { bc = cost; best = s; } }
-    const t = best ? best.c : Math.max(prev + 0.5, want);
-    cuts.push(t); prev = t;
+  // poids de chaque scène : lettres + pauses de ponctuation (. ! ? : ; pèsent plus que la virgule)
+  const w = texts.map(t => Math.max(1, t.replace(/[^\p{L}\p{N}]/gu, "").length) + 7 * (t.match(/[.!?…]/g) || []).length + 4 * (t.match(/[:;]/g) || []).length + 2 * (t.match(/,/g) || []).length);
+  const sum = w.reduce((x, y) => x + y, 0), N = texts.length;
+  const exp = w.map(x => total * x / sum);
+  const M = sil.length;
+  // programmation dynamique : N-1 coupures parmi les silences ; coût = écart relatif des durées de scène - bonus de pause longue
+  const INF = 1e18, best = Array.from({ length: N }, () => new Array(M + 1).fill(INF)), from = Array.from({ length: N }, () => new Array(M + 1).fill(-1));
+  const seg = (t0, t1, k) => ((t1 - t0 - exp[k]) / exp[k]) ** 2;
+  const bonus = d => 0.35 * Math.min(d, 0.8) / 0.8;
+  for (let j = 0; j < M; j++) best[0][j] = seg(0, sil[j].c, 0) - bonus(sil[j].d);
+  for (let k = 1; k < N - 1; k++) for (let j = 0; j < M; j++) for (let i = 0; i < j; i++) {
+    if (best[k - 1][i] >= INF) continue;
+    const c = best[k - 1][i] + seg(sil[i].c, sil[j].c, k) - bonus(sil[j].d);
+    if (c < best[k][j]) { best[k][j] = c; from[k][j] = i; }
   }
+  const cuts = [];
+  if (N > 1 && M >= N - 1) {
+    let bj = -1, bc = INF;
+    for (let j = 0; j < M; j++) { const c = best[N - 2][j] + seg(sil[j].c, total, N - 1); if (c < bc) { bc = c; bj = j; } }
+    for (let k = N - 2, j = bj; k >= 0; k--) { cuts.unshift(sil[j].c); j = from[k][j]; }
+  } else { let acc = 0; for (let k = 0; k < N - 1; k++) { acc += exp[k]; cuts.push(acc); } }
   const edges = [0, ...cuts.map(t => Math.round(t * rate)), n];
   return edges.slice(0, -1).map((a, i) => wav(pcm.subarray(a * 2, edges[i + 1] * 2), rate));
 }
