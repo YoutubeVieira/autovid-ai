@@ -37,6 +37,6 @@ const list = path.join(dir, "liste.txt");
 fs.writeFileSync(list, files.map(f => "file '" + f.replace(/\\/g, "/") + "'").join("\n"));
 const out = path.join(root, "out", name + "-final.mp4");
 /* Le mixage voix + bruitages + nappe peut toucher 0 dB : on normalise le volume (−16 LUFS) et on plafonne le pic à −2 dB. */
-const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-c:v", "libx264", "-crf", opt("--crf", "23"), "-preset", "medium", "-af", "loudnorm=I=-16:TP=-2.0:LRA=11", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out], { stdio: "inherit" });
+const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", list, "-c:v", "libx264", "-crf", opt("--crf", "23"), "-preset", "medium", "-af", "loudnorm=I=-16:TP=-2.0:LRA=11,alimiter=limit=0.78:level=false", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out], { stdio: "inherit" });
 if (r.status !== 0) process.exit(1);
 console.log("Terminé : " + out);
