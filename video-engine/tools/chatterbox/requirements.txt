@@ -1,0 +1,2 @@
+# Python 3.10 ou 3.11 (3.12 et plus : non pris en charge par certains paquets)
+chatterbox-tts==0.1.7

@@ -34,5 +34,10 @@
     "model": "gemini-3.8-flash-lite-tts",
     "styleMode": "metadata",
     "style": "Dis ce texte en français, comme un narrateur de vidéo éducative dynamique : énergique, rythme soutenu, ton direct et complice, avec de petites pauses entre les phrases."
+  },
+  "fenrir-chatterbox": {
+    "label": "Fenrir cloné avec Chatterbox (local, sans API ni quota) : audios produits par tools/chatterbox/generate.py",
+    "provider": "fichier",
+    "dossier": "voix-externe"
   }
 }

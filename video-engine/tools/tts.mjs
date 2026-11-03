@@ -63,6 +63,17 @@ async function gemini(text) {
   }
 }
 
+/* Audios produits ailleurs (par exemple Chatterbox sur votre machine) : un WAV par scène dans public/projects/<projet>/<dossier>/<id>.wav.
+   Normalisés en mono 16 bits 24 kHz avec ffmpeg. */
+function fichier(id) {
+  const src = path.join(root, "public", "projects", name, V.dossier || "voix-externe", id + ".wav");
+  if (!fs.existsSync(src)) throw new Error("Audio manquant : " + src + " (voir tools/chatterbox/README.md)");
+  const tmp = path.join(root, ".cache", "ext-" + process.pid + ".wav");
+  const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-i", src, "-ac", "1", "-ar", "24000", "-sample_fmt", "s16", tmp]);
+  if (r.status !== 0) throw new Error("ffmpeg n'a pas pu lire " + src + " : " + r.stderr);
+  const b = fs.readFileSync(tmp); fs.unlinkSync(tmp); return b;
+}
+
 function espeak(text) {
   const tmp = path.join(root, ".cache", "espeak-" + process.pid + ".wav");
   fs.mkdirSync(path.dirname(tmp), { recursive: true });
@@ -100,7 +111,7 @@ async function doChapter(ch) {
   sc.forEach((x, i) => { const { pcm, rate } = readWav(fs.readFileSync(files[i])); manifest[x.id] = { file: "projects/" + name + "/audio/" + path.basename(files[i]), seconds: +(pcm.length / 2 / rate).toFixed(3), provider }; });
 }
 for (const s of project.scenes) {
-  if (s.chapter && groups[s.chapter].length > 1) { if (!doneChapters.has(s.chapter)) { doneChapters.add(s.chapter); await doChapter(s.chapter); } continue; }
+  if (s.chapter && groups[s.chapter].length > 1 && provider !== "fichier") { if (!doneChapters.has(s.chapter)) { doneChapters.add(s.chapter); await doChapter(s.chapter); } continue; }
   if (ONLY && !ONLY.includes(s.id)) {
     const keep = fs.readdirSync(outDir).find(x => x.startsWith(s.id + "."));
     if (!keep) throw new Error("Scène " + s.id + " sans audio : lancez sans --only.");
@@ -108,13 +119,14 @@ for (const s of project.scenes) {
     manifest[s.id] = { file: "projects/" + name + "/audio/" + keep, seconds: +(pcm.length / 2 / rate).toFixed(3), provider };
     console.log("  =  " + s.id + " (conservé)"); continue;
   }
-  const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, s.text].join("|")).digest("hex").slice(0, 10);
+  const extSig = provider === "fichier" ? String(fs.existsSync(path.join(root, "public", "projects", name, V.dossier || "voix-externe", s.id + ".wav")) ? fs.statSync(path.join(root, "public", "projects", name, V.dossier || "voix-externe", s.id + ".wav")).mtimeMs : 0) : "";
+  const hash = crypto.createHash("sha1").update([provider, MODEL, voiceId, JSON.stringify(V), LANG, s.text, extSig].join("|")).digest("hex").slice(0, 10);
   const file = path.join(outDir, s.id + "." + hash + ".wav");
   let buf;
   if (fs.existsSync(file)) { buf = fs.readFileSync(file); console.log("  =  " + s.id + " (déjà produit)"); }
   else {
     for (const old of fs.readdirSync(outDir)) if (old.startsWith(s.id + ".")) fs.unlinkSync(path.join(outDir, old));
-    buf = provider === "gemini" ? await gemini(s.text) : espeak(s.text);
+    buf = provider === "gemini" ? await gemini(s.text) : provider === "fichier" ? fichier(s.id) : espeak(s.text);
     fs.writeFileSync(file, buf); console.log("  ok " + s.id);
   }
   const { pcm, rate } = readWav(buf);
