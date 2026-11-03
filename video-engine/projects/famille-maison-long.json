@@ -1,0 +1,3337 @@
+{
+ "title": "Une famille face à la hausse des prix : 7 défis à la maison (la famille Martin)",
+ "theme": "finance",
+ "format": "16:9",
+ "lang": "fr-FR",
+ "voice": "fenrir",
+ "pad": 0.35,
+ "subtitleWords": 3,
+ "cible_s": 600,
+ "faits": [
+  {
+   "id": "h1",
+   "claim": "Budget type de la famille Martin (fictive) : 1 000 + 170 + 450 + 150 + 200 + 300 + 200 + 80 + 150 + 300 = 3 000 €/mois",
+   "value": "3000",
+   "source": "Calcul sur hypothèses illustratives",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h2",
+   "claim": "Fixe 1 200 € (40 %) ; semi-fixe 250 € (8,3 %) ; variable 1 400 € (46,7 %) ; épargne 150 € (5 %)",
+   "value": "1200 ; 250 ; 1400 ; 150",
+   "source": "Calcul sur le budget type",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h3",
+   "claim": "Choc de prix hypothétique : courses +10 % (+45 €), énergie +25 % (+42,50 €), carburant +30 % (+45 €) = +132,50 €/mois = 4,4 % de 3 000 €",
+   "value": "132.5 ; 4.4 %",
+   "source": "Calcul sur hypothèses illustratives",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h4",
+   "claim": "Courses après hausse : 495 € ; −10 % ≈ −49,50 €/mois",
+   "value": "495 ; 49.5",
+   "source": "Calcul ; le 10 % d'économie est une hypothèse",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h5",
+   "claim": "Énergie après hausse : 212,50 € ; −1 °C de chauffage ≈ −7 % (conseil ADEME) ≈ −14,90 €/mois",
+   "value": "212.5 ; 7 % ; 14.9",
+   "source": "Calcul ; règle des 7 % par degré attribuée à l'ADEME, page non ouverte (réseau bloqué)",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "h6",
+   "claim": "Carburant après hausse : 195 € ; −10 % ≈ −19,50 €/mois",
+   "value": "195 ; 19.5",
+   "source": "Calcul ; le 10 % d'économie est une hypothèse",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h7",
+   "claim": "1 000 € empruntés à 20 % sur 12 mois (annuité constante) : ≈ 111,60 € d'intérêts",
+   "value": "111.6",
+   "source": "Calcul ; taux hypothétique",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h8",
+   "claim": "Dépenses essentielles 2 050 €/mois ; 3 mois = 6 150 € ; 41 mois à 150 €/mois ; ≈ 26 mois à ≈ 234 €/mois",
+   "value": "2050 ; 6150 ; 41 ; 26",
+   "source": "Calcul ; la « règle des trois mois » est une convention courante à confirmer",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "h9",
+   "claim": "Gestes cumulés ≈ 83,90 €/mois (49,50 + 14,90 + 19,50) ; reste de la hausse ≈ 48,60 €/mois ≈ 1,6 % du revenu",
+   "value": "83.9 ; 48.6 ; 1.6 %",
+   "source": "Calcul sur hypothèses",
+   "statut": "calcul",
+   "date": "2026-11"
+  },
+  {
+   "id": "h10",
+   "claim": "Des aides existent selon la situation (chèque énergie, prestations familiales, aides au logement, aides locales) ; à vérifier sur service-public.fr",
+   "value": "qualitatif",
+   "source": "Connaissance générale, site officiel non ouvert",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "h11",
+   "claim": "Les crédits à la consommation, notamment renouvelables, ont un coût élevé",
+   "value": "qualitatif",
+   "source": "Connaissance générale, non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  },
+  {
+   "id": "h12",
+   "claim": "Un échéancier est souvent possible avec un fournisseur d'énergie, un bailleur ou une banque en cas de difficulté de paiement",
+   "value": "qualitatif",
+   "source": "Connaissance générale, non vérifiée",
+   "statut": "a_confirmer",
+   "date": "2026-11"
+  }
+ ],
+ "scenes": [
+  {
+   "id": "c1-01",
+   "chapter": "c1",
+   "text": "Fin de mois chez la famille Martin. Claire et Thomas ouvrent leur appli bancaire, et quelque chose les chagrine : les courses coûtent plus cher, la facture d'énergie aussi, et le plein de la voiture fait mal.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Une famille face à la hausse des prix",
+     "sub": "COMMENT FAIRE ? 7 ÉTAPES CONCRÈTES",
+     "delay": 0.4
+    }
+   ],
+   "flash": [
+    0.0
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "worry",
+      "say": "💸",
+      "sayDelay": 4.0
+     },
+     {
+      "who": "thomas",
+      "x": 1000,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📱",
+      "x": 830,
+      "y": 830,
+      "size": 100,
+      "delay": 0.5
+     },
+     {
+      "emoji": "🧾",
+      "x": 1330,
+      "y": 820,
+      "size": 100,
+      "delay": 3.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "c1-02",
+   "chapter": "c1",
+   "text": "Ils sont une famille fictive, avec deux enfants, Léa et Hugo, et trois mille euros de revenu net par mois. Mais leur question, tu la connais peut-être : comment faire quand tout augmente en même temps ?",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "LA FAMILLE MARTIN · FICTIVE",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 3000,
+     "suffix": " €",
+     "label": "revenu net par mois · exemple",
+     "delay": 5.0,
+     "screen": [
+      1420,
+      310
+     ],
+     "color": "#f0efe8"
+    }
+   ],
+   "faits": [
+    "h1"
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "idle"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "idle"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "happy"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c1-03",
+   "chapter": "c1",
+   "text": "Dans cette vidéo, on ne cherche pas un coupable, et on ne cède pas à la panique. On cherche des gestes concrets, mesurables, qu'une famille peut mettre en place sans changer de vie.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "NI COUPABLE · NI PANIQUE",
+     "delay": 2.2,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "DES GESTES CONCRETS ET MESURABLES",
+     "delay": 6.0,
+     "size": 30,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1100,
+      "pose": "think"
+     },
+     {
+      "who": "lea",
+      "x": 1450,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c1-04",
+   "chapter": "c1",
+   "text": "On va suivre la famille Martin en sept étapes : la photo du budget, ce qui peut bouger, les courses, l'énergie et les trajets, le crédit, l'épargne de précaution, puis les aides.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "7 étapes",
+     "sub": "BUDGET · CHOC · COURSES · ÉNERGIE · CRÉDIT · ÉPARGNE · AIDES",
+     "delay": 0.4
+    },
+    {
+     "kind": "icon",
+     "emoji": "1️⃣",
+     "delay": 3.4,
+     "screen": [
+      300,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "2️⃣",
+     "delay": 4.8,
+     "screen": [
+      560,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "3️⃣",
+     "delay": 6.2,
+     "screen": [
+      820,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "4️⃣",
+     "delay": 7.6,
+     "screen": [
+      1080,
+      300
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "5️⃣",
+     "delay": 9.0,
+     "screen": [
+      1340,
+      380
+     ]
+    },
+    {
+     "kind": "icon",
+     "emoji": "6️⃣",
+     "delay": 10.4,
+     "screen": [
+      1600,
+      300
+     ]
+    }
+   ],
+   "stage": {
+    "set": "exterieur",
+    "cast": [],
+    "objs": []
+   }
+  },
+  {
+   "id": "c1-05",
+   "chapter": "c1",
+   "text": "Précision importante : tous les chiffres sont des exemples calculés, avec leurs hypothèses affichées. Ce n'est pas un conseil personnalisé, et je ne te dis jamais quoi acheter ni où placer ton argent.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "EXEMPLES CALCULÉS · HYPOTHÈSES AFFICHÉES",
+     "delay": 2.0,
+     "size": 30,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PAS UN CONSEIL PERSONNALISÉ",
+     "delay": 6.6,
+     "size": 32,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1450,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c1-06",
+   "chapter": "c1",
+   "text": "À la fin, tu auras une méthode en cinq gestes, à refaire avec tes propres chiffres. Prends un stylo ou un tableur, on commence.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "5 GESTES · TES PROPRES CHIFFRES",
+     "delay": 4.0,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 1050,
+      "pose": "happy"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📝",
+      "x": 930,
+      "y": 830,
+      "size": 100,
+      "delay": 1.0
+     },
+     {
+      "emoji": "🖊️",
+      "x": 1180,
+      "y": 830,
+      "size": 90,
+      "delay": 1.6
+     }
+    ]
+   }
+  },
+  {
+   "id": "c2-01",
+   "chapter": "c2",
+   "text": "Première étape : la photo du budget. Avant de vouloir économiser, il faut savoir où part l'argent. Claire et Thomas listent tout, sur un mois ordinaire.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 1 · La photo du budget",
+     "sub": "DÉFI : FAIRE LA PHOTO DE SON BUDGET",
+     "delay": 0.3
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1500,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🧾",
+      "x": 640,
+      "y": 700,
+      "size": 100,
+      "delay": 1.0,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c2-02",
+   "chapter": "c2",
+   "text": "Voici leur budget, avec des chiffres choisis pour l'exemple : mille euros pour le logement, cent soixante-dix pour l'énergie, quatre cent cinquante pour les courses, cent cinquante pour le carburant et les transports.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "bars",
+     "rows": [
+      {
+       "label": "Logement",
+       "value": 1000,
+       "color": "#ff4d4d"
+      },
+      {
+       "label": "Énergie",
+       "value": 170,
+       "color": "#ffb347"
+      },
+      {
+       "label": "Courses",
+       "value": 450,
+       "color": "#7CFC9A"
+      },
+      {
+       "label": "Carburant, transport",
+       "value": 150,
+       "color": "#7CFC9A"
+      }
+     ],
+     "delay": 1.0,
+     "w": 1100,
+     "unit": " €",
+     "title": "Budget de la famille Martin · exemple",
+     "max": 1000
+    }
+   ],
+   "faits": [
+    "h1"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "idle",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c2-03",
+   "chapter": "c2",
+   "text": "Puis deux cents euros pour les assurances, le téléphone et internet, trois cents pour les enfants, deux cents pour les loisirs, quatre-vingts pour la santé non remboursée, cent cinquante d'épargne, et trois cents pour le divers et les imprévus. Total : trois mille euros.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "bars",
+     "rows": [
+      {
+       "label": "Assurances, tél.",
+       "value": 200,
+       "color": "#ff4d4d"
+      },
+      {
+       "label": "Enfants",
+       "value": 300,
+       "color": "#7CFC9A"
+      },
+      {
+       "label": "Loisirs",
+       "value": 200,
+       "color": "#7CFC9A"
+      },
+      {
+       "label": "Santé hors remb.",
+       "value": 80,
+       "color": "#ffb347"
+      },
+      {
+       "label": "Épargne",
+       "value": 150,
+       "color": "#5aa9ff"
+      },
+      {
+       "label": "Divers, imprévus",
+       "value": 300,
+       "color": "#7CFC9A"
+      }
+     ],
+     "delay": 0.8,
+     "w": 1100,
+     "unit": " €",
+     "title": "Suite du budget · exemple",
+     "max": 300
+    },
+    {
+     "kind": "stat",
+     "value": 3000,
+     "suffix": " €",
+     "label": "total par mois · exemple",
+     "delay": 11.4,
+     "screen": [
+      1560,
+      880
+     ],
+     "color": "#f0efe8"
+    }
+   ],
+   "faits": [
+    "h1"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "idle"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "talk",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c2-04",
+   "chapter": "c2",
+   "text": "Ensuite, ils classent chaque ligne : fixe, semi-fixe, ou variable. Le fixe, c'est le logement, les assurances, le téléphone : mille deux cents euros, que l'on ne change pas du jour au lendemain.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "bars",
+     "rows": [
+      {
+       "label": "Fixe",
+       "value": 1200,
+       "color": "#ff4d4d"
+      }
+     ],
+     "delay": 3.0,
+     "w": 760,
+     "unit": " €",
+     "title": "Les dépenses fixes",
+     "max": 1400
+    },
+    {
+     "kind": "tag",
+     "text": "LOGEMENT · ASSURANCES · TÉLÉPHONE",
+     "delay": 5.0,
+     "size": 30,
+     "screen": [
+      960,
+      150
+     ]
+    }
+   ],
+   "faits": [
+    "h2"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "point"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "think",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c2-05",
+   "chapter": "c2",
+   "text": "Le semi-fixe, c'est l'énergie et la santé : deux cent cinquante euros, sur lesquels on peut agir un peu. Et le variable, c'est les courses, le carburant, les enfants, les loisirs et le divers : mille quatre cents euros.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "bars",
+     "rows": [
+      {
+       "label": "Fixe",
+       "value": 1200,
+       "color": "#ff4d4d"
+      },
+      {
+       "label": "Semi-fixe",
+       "value": 250,
+       "color": "#ffb347"
+      },
+      {
+       "label": "Variable",
+       "value": 1400,
+       "color": "#7CFC9A"
+      },
+      {
+       "label": "Épargne",
+       "value": 150,
+       "color": "#5aa9ff"
+      }
+     ],
+     "delay": 3.4,
+     "w": 1100,
+     "unit": " €",
+     "title": "Fixe, semi-fixe, variable · exemple",
+     "max": 1400
+    }
+   ],
+   "faits": [
+    "h2"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "idle",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c2-06",
+   "chapter": "c2",
+   "text": "C'est là que se trouve la marge de manœuvre : près de la moitié du budget est variable. Plus la part du fixe est grande, moins on a de souplesse en cas de choc.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 47,
+     "suffix": " %",
+     "label": "du budget est variable · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "stat",
+     "value": 40,
+     "suffix": " %",
+     "label": "du budget est fixe · exemple",
+     "delay": 5.6,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#ff4d4d"
+    }
+   ],
+   "faits": [
+    "h2"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 500,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1500,
+      "pose": "point"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c3-01",
+   "chapter": "c3",
+   "text": "Deuxième étape : repérer ce qui peut bouger. Imaginons un choc de prix, quelle qu'en soit la cause : tensions sur l'énergie, mauvaise récolte, transport plus cher.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 2 · Ce qui peut bouger",
+     "sub": "DÉFI : COMPRENDRE CE QUI PEUT BOUGER",
+     "delay": 0.3
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "worry"
+     },
+     {
+      "who": "thomas",
+      "x": 1000,
+      "pose": "think",
+      "say": "📰",
+      "sayDelay": 1.2
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🥛",
+      "x": 1100,
+      "y": 520,
+      "size": 90,
+      "delay": 1.0
+     },
+     {
+      "emoji": "🥖",
+      "x": 880,
+      "y": 830,
+      "size": 90,
+      "delay": 1.4
+     }
+    ]
+   }
+  },
+  {
+   "id": "c3-02",
+   "chapter": "c3",
+   "text": "Hypothèses, que je montre à l'écran : les courses augmentent de dix pour cent, l'énergie à domicile de vingt-cinq pour cent, le carburant de trente pour cent.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "COURSES +10 %",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      500,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "ÉNERGIE +25 %",
+     "delay": 5.0,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "CARBURANT +30 %",
+     "delay": 7.0,
+     "size": 34,
+     "screen": [
+      1420,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "HYPOTHÈSES, PAS PRÉVISIONS",
+     "delay": 8.4,
+     "size": 28,
+     "screen": [
+      960,
+      160
+     ]
+    }
+   ],
+   "faits": [
+    "h3"
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "worry"
+     },
+     {
+      "who": "thomas",
+      "x": 900,
+      "pose": "point"
+     },
+     {
+      "who": "hugo",
+      "x": 1300,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📰",
+      "x": 1490,
+      "y": 400,
+      "size": 150,
+      "delay": 0.8,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c3-03",
+   "chapter": "c3",
+   "text": "Pour la famille Martin, ça fait quarante-cinq euros de plus sur les courses, quarante-deux euros cinquante sur l'énergie, quarante-cinq euros sur le carburant.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 45,
+     "suffix": " €",
+     "label": "courses · par mois",
+     "delay": 1.0,
+     "screen": [
+      380,
+      310
+     ],
+     "color": "#ff4d4d",
+     "w": 440,
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 42.5,
+     "suffix": " €",
+     "label": "énergie · par mois",
+     "delay": 4.4,
+     "screen": [
+      960,
+      310
+     ],
+     "color": "#ff4d4d",
+     "w": 440,
+     "prefix": "+",
+     "decimals": 1
+    },
+    {
+     "kind": "stat",
+     "value": 45,
+     "suffix": " €",
+     "label": "carburant · par mois",
+     "delay": 7.0,
+     "screen": [
+      1540,
+      310
+     ],
+     "color": "#ff4d4d",
+     "w": 440,
+     "prefix": "+"
+    }
+   ],
+   "faits": [
+    "h3"
+   ],
+   "impacts": [
+    7.0
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 500,
+      "pose": "worry"
+     },
+     {
+      "who": "thomas",
+      "x": 1420,
+      "pose": "think",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c3-04",
+   "chapter": "c3",
+   "text": "Au total, environ cent trente-trois euros de plus par mois, soit plus de quatre pour cent du revenu. Ce n'est pas une catastrophe, mais sur un budget serré, ça se sent.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 133,
+     "suffix": " €",
+     "label": "de plus par mois · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ff4d4d",
+     "prefix": "+"
+    },
+    {
+     "kind": "stat",
+     "value": 4.4,
+     "suffix": " %",
+     "label": "du revenu net · exemple",
+     "delay": 5.8,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#ff4d4d",
+     "decimals": 1
+    }
+   ],
+   "faits": [
+    "h3"
+   ],
+   "impacts": [
+    1.6
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 600,
+      "pose": "worry"
+     },
+     {
+      "who": "thomas",
+      "x": 1500,
+      "pose": "think"
+     }
+    ],
+    "objs": []
+   },
+   "hud": {
+    "label": "Défi : absorber la hausse",
+    "goal": 133,
+    "value": 0
+   }
+  },
+  {
+   "id": "c3-05",
+   "chapter": "c3",
+   "text": "Notez bien : ces trois postes ne bougent pas à la même vitesse. Le carburant réagit vite, les courses avec retard, l'énergie dépend de ton contrat.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "RAPIDE",
+     "delay": 2.6,
+     "size": 28,
+     "screen": [
+      300,
+      470
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AVEC RETARD",
+     "delay": 5.0,
+     "size": 28,
+     "screen": [
+      960,
+      390
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "SELON TON CONTRAT",
+     "delay": 7.6,
+     "size": 28,
+     "screen": [
+      1620,
+      470
+     ]
+    }
+   ],
+   "stage": {
+    "set": "route",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 1250,
+      "pose": "point"
+     },
+     {
+      "who": "claire",
+      "x": 1000,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🚗",
+      "x": 520,
+      "y": 900,
+      "size": 380,
+      "delay": 0.5
+     },
+     {
+      "emoji": "⛽",
+      "x": 1640,
+      "y": 770,
+      "size": 160,
+      "delay": 0.8
+     }
+    ]
+   }
+  },
+  {
+   "id": "c3-06",
+   "chapter": "c3",
+   "text": "Voilà la bonne nouvelle : plus on comprend ce qui bouge, plus on sait où agir en premier. Et c'est ce qu'on va faire.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "COMPRENDRE → AGIR EN PREMIER",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    }
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "happy"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c4-01",
+   "chapter": "c4",
+   "text": "Troisième étape : les courses, le plus gros poste variable. Premier geste : regarder le prix au kilo ou au litre, pas le prix de l'étiquette. À quantité égale, l'écart peut surprendre.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 3 · Les courses",
+     "sub": "DÉFI : GAGNER SUR LES COURSES",
+     "delay": 0.3
+    },
+    {
+     "kind": "tag",
+     "text": "1 · PRIX AU KILO OU AU LITRE",
+     "delay": 5.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "faits": [
+    "h4"
+   ],
+   "stage": {
+    "set": "supermarche",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 620,
+      "pose": "talk"
+     },
+     {
+      "who": "lea",
+      "x": 1000,
+      "pose": "idle"
+     },
+     {
+      "who": "hugo",
+      "x": 1230,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🛒",
+      "x": 1650,
+      "y": 990,
+      "size": 250,
+      "delay": 0.6
+     }
+    ]
+   }
+  },
+  {
+   "id": "c4-02",
+   "chapter": "c4",
+   "text": "Deuxième geste : comparer les marques, y compris les marques de distributeur, souvent moins chères pour une composition proche. À toi de goûter, et de garder ce que ta famille aime.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "2 · COMPARER LES MARQUES",
+     "delay": 1.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "supermarche",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "point"
+     },
+     {
+      "who": "lea",
+      "x": 1100,
+      "pose": "think",
+      "say": "🤔",
+      "sayDelay": 2.0
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🏷️",
+      "x": 1000,
+      "y": 360,
+      "size": 120,
+      "delay": 1.0,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c4-03",
+   "chapter": "c4",
+   "text": "Troisième geste : planifier les repas de la semaine et faire une liste. On achète moins d'impulsion, et on jette moins. Les enfants peuvent même choisir un repas : ça les implique.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "3 · PLANIFIER · FAIRE UNE LISTE",
+     "delay": 1.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "talk"
+     },
+     {
+      "who": "lea",
+      "x": 1050,
+      "pose": "point"
+     },
+     {
+      "who": "hugo",
+      "x": 1350,
+      "pose": "cheer"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📝",
+      "x": 1105,
+      "y": 420,
+      "size": 110,
+      "delay": 1.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "c4-04",
+   "chapter": "c4",
+   "text": "Quatrième geste : privilégier les produits de saison, et regarder les promotions seulement sur ce que tu achètes déjà. Une promotion n'est une économie que si tu en avais besoin.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "4 · SAISON · PROMOS UTILES SEULEMENT",
+     "delay": 1.0,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "supermarche",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1100,
+      "pose": "happy",
+      "say": "🍅",
+      "sayDelay": 1.4
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🍅",
+      "x": 1500,
+      "y": 790,
+      "size": 100,
+      "delay": 1.0
+     },
+     {
+      "emoji": "🥕",
+      "x": 1620,
+      "y": 790,
+      "size": 100,
+      "delay": 1.4
+     },
+     {
+      "emoji": "🍎",
+      "x": 1740,
+      "y": 790,
+      "size": 100,
+      "delay": 1.8
+     }
+    ]
+   }
+  },
+  {
+   "id": "c4-05",
+   "chapter": "c4",
+   "text": "Exemple calculé : après la hausse de dix pour cent, les courses de la famille passent de quatre cent cinquante à quatre cent quatre-vingt-quinze euros. Si ces gestes font économiser dix pour cent, ça représente environ cinquante euros par mois.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 495,
+     "suffix": " €",
+     "label": "courses après hausse · exemple",
+     "delay": 3.0,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ffb347"
+    },
+    {
+     "kind": "stat",
+     "value": 50,
+     "suffix": " €",
+     "label": "économisés par mois si −10 % · hypothèse",
+     "delay": 11.4,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A",
+     "prefix": "−"
+    }
+   ],
+   "faits": [
+    "h4"
+   ],
+   "impacts": [
+    11.4
+   ],
+   "stage": {
+    "set": "supermarche",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 950,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🛒",
+      "x": 1650,
+      "y": 990,
+      "size": 230,
+      "delay": 0.5
+     }
+    ]
+   }
+  },
+  {
+   "id": "c4-06",
+   "chapter": "c4",
+   "text": "Dix pour cent est une hypothèse, pas une promesse : certaines familles économiseront moins, d'autres plus. L'important est de mesurer, mois après mois, avec son propre ticket de caisse.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "UNE HYPOTHÈSE, PAS UNE PROMESSE",
+     "delay": 1.6,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 660,
+      "pose": "idle"
+     },
+     {
+      "who": "thomas",
+      "x": 1200,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🧾",
+      "x": 930,
+      "y": 820,
+      "size": 100,
+      "delay": 1.0
+     }
+    ]
+   },
+   "hud": {
+    "label": "Défi : absorber la hausse",
+    "goal": 133,
+    "value": 50
+   }
+  },
+  {
+   "id": "c5-01",
+   "chapter": "c5",
+   "text": "Quatrième étape : l'énergie et les trajets. Pour l'énergie, commence par comparer : ton contrat, ton fournisseur, ton tarif. Un simple coup d'œil à la facture suffit souvent pour repérer une option mieux adaptée.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 4 · Énergie et trajets",
+     "sub": "DÉFI : GAGNER SUR L'ÉNERGIE ET LES TRAJETS",
+     "delay": 0.3
+    },
+    {
+     "kind": "tag",
+     "text": "COMPARER CONTRAT · FOURNISSEUR · TARIF",
+     "delay": 5.0,
+     "size": 28,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1480,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🧾",
+      "x": 780,
+      "y": 690,
+      "size": 100,
+      "delay": 0.8
+     },
+     {
+      "emoji": "⚡",
+      "x": 1180,
+      "y": 470,
+      "size": 130,
+      "delay": 1.6,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c5-02",
+   "chapter": "c5",
+   "text": "Ensuite, les gestes du quotidien : baisser un peu le chauffage, éteindre les veilles, laver à basse température. Selon les conseils de l'ADEME, réduire la température d'un degré fait baisser la consommation de chauffage d'environ sept pour cent.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 7,
+     "suffix": " %",
+     "label": "de chauffage en moins pour −1 °C · conseil ADEME",
+     "delay": 9.4,
+     "screen": [
+      1400,
+      640
+     ],
+     "color": "#7CFC9A"
+    }
+   ],
+   "faits": [
+    "h5"
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 880,
+      "pose": "point"
+     },
+     {
+      "who": "claire",
+      "x": 540,
+      "pose": "talk"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "happy"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🧣",
+      "x": 1450,
+      "y": 720,
+      "size": 90,
+      "delay": 3.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "c5-03",
+   "chapter": "c5",
+   "text": "Sur une facture d'énergie qui est passée à deux cent douze euros cinquante dans notre scénario, sept pour cent représentent environ quinze euros par mois, simplement en baissant d'un degré.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 212.5,
+     "suffix": " €",
+     "label": "énergie après hausse · exemple",
+     "delay": 1.2,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ffb347",
+     "decimals": 1
+    },
+    {
+     "kind": "stat",
+     "value": 15,
+     "suffix": " €",
+     "label": "économisés par mois pour −1 °C · hypothèse",
+     "delay": 6.4,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A",
+     "prefix": "−"
+    }
+   ],
+   "faits": [
+    "h5"
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 520,
+      "pose": "idle"
+     },
+     {
+      "who": "lea",
+      "x": 1500,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c5-04",
+   "chapter": "c5",
+   "text": "Pour les trajets, regroupe les déplacements, vérifie la pression de tes pneus, adopte une conduite souple, et pense au covoiturage ou au vélo pour les petits trajets, quand c'est possible.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [],
+   "stage": {
+    "set": "route",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 820,
+      "pose": "talk"
+     },
+     {
+      "who": "lea",
+      "x": 1120,
+      "pose": "happy"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🚗",
+      "x": 420,
+      "y": 910,
+      "size": 330,
+      "delay": 0.4
+     },
+     {
+      "emoji": "🚲",
+      "x": 1500,
+      "y": 950,
+      "size": 260,
+      "delay": 1.4
+     }
+    ]
+   },
+   "hud": {
+    "label": "Défi : absorber la hausse",
+    "goal": 133,
+    "value": 65
+   }
+  },
+  {
+   "id": "c5-05",
+   "chapter": "c5",
+   "text": "Si la famille réduit son carburant de dix pour cent, sur cent quatre-vingt-quinze euros après la hausse, elle gagne environ vingt euros par mois.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 195,
+     "suffix": " €",
+     "label": "carburant après hausse · exemple",
+     "delay": 1.0,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ffb347"
+    },
+    {
+     "kind": "stat",
+     "value": 20,
+     "suffix": " €",
+     "label": "économisés par mois si −10 % · hypothèse",
+     "delay": 4.8,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A",
+     "prefix": "−"
+    }
+   ],
+   "faits": [
+    "h6"
+   ],
+   "stage": {
+    "set": "route",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 1250,
+      "pose": "happy"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🚗",
+      "x": 520,
+      "y": 900,
+      "size": 360,
+      "delay": 0.4
+     },
+     {
+      "emoji": "⛽",
+      "x": 1640,
+      "y": 770,
+      "size": 160,
+      "delay": 0.6
+     }
+    ]
+   }
+  },
+  {
+   "id": "c5-06",
+   "chapter": "c5",
+   "text": "Ce n'est jamais spectaculaire d'un seul coup. C'est la somme de petits gestes, répétés, qui change le budget d'un foyer.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "PETITS GESTES · RÉPÉTÉS",
+     "delay": 2.4,
+     "size": 36,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "cheer"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "cheer"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ],
+    "objs": []
+   },
+   "hud": {
+    "label": "Défi : absorber la hausse",
+    "goal": 133,
+    "value": 84
+   }
+  },
+  {
+   "id": "c6-01",
+   "chapter": "c6",
+   "text": "Cinquième étape : le crédit. Commence par une question simple : ton taux est-il fixe ou variable ? Si ton crédit est à taux fixe et déjà signé, ta mensualité ne bouge pas, et ce n'est pas là qu'est le problème.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 5 · Le crédit",
+     "sub": "DÉFI : GARDER LE CRÉDIT SOUS CONTRÔLE",
+     "delay": 0.3
+    },
+    {
+     "kind": "tag",
+     "text": "FIXE ET SIGNÉ = MENSUALITÉ STABLE",
+     "delay": 7.0,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1420,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🔒",
+      "x": 1180,
+      "y": 480,
+      "size": 150,
+      "delay": 3.4,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c6-02",
+   "chapter": "c6",
+   "text": "Si ton taux est variable, regarde les conditions de ton contrat : y a-t-il un plafond de variation ? Et si ton taux est élevé par rapport à ce qu'on te proposerait aujourd'hui, renégocier ou racheter ton crédit peut valoir le coup, mais attention aux frais.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "PLAFOND DE VARIATION ?",
+     "delay": 3.8,
+     "size": 32,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "RENÉGOCIER : ATTENTION AUX FRAIS",
+     "delay": 10.0,
+     "size": 30,
+     "screen": [
+      960,
+      330
+     ]
+    }
+   ],
+   "faits": [
+    "h12"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1420,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🔓",
+      "x": 1180,
+      "y": 480,
+      "size": 150,
+      "delay": 0.8,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c6-03",
+   "chapter": "c6",
+   "text": "Dans tous les cas, compare le coût total, pas seulement la mensualité. Un crédit qui allonge la durée baisse la mensualité, mais augmente le coût total, comme on l'a vu dans la vidéo sur les taux.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "COÛT TOTAL > MENSUALITÉ",
+     "delay": 1.2,
+     "size": 36,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "point"
+     },
+     {
+      "who": "thomas",
+      "x": 1420,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "⏳",
+      "x": 1180,
+      "y": 480,
+      "size": 150,
+      "delay": 1.0,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c6-04",
+   "chapter": "c6",
+   "text": "Surtout, méfie-toi des crédits à la consommation, notamment renouvelables, pour boucher les trous. Ils coûtent cher. Exemple calculé : mille euros empruntés à vingt pour cent sur douze mois coûtent environ cent douze euros d'intérêts.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 112,
+     "suffix": " €",
+     "label": "d'intérêts pour 1 000 € à 20 % sur 12 mois · exemple",
+     "delay": 7.4,
+     "screen": [
+      1380,
+      310
+     ],
+     "color": "#ff4d4d"
+    },
+    {
+     "kind": "tag",
+     "text": "TAUX HYPOTHÉTIQUE",
+     "delay": 8.0,
+     "size": 28,
+     "screen": [
+      960,
+      150
+     ]
+    }
+   ],
+   "faits": [
+    "h7",
+    "h11"
+   ],
+   "impacts": [
+    7.4
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 700,
+      "pose": "worry",
+      "say": "⚠️",
+      "sayDelay": 1.0
+     },
+     {
+      "who": "claire",
+      "x": 1450,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "💳",
+      "x": 1180,
+      "y": 480,
+      "size": 150,
+      "delay": 0.8,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c6-05",
+   "chapter": "c6",
+   "text": "Cent douze euros, c'est plus de trois fois ce que les gestes sur l'énergie et le carburant rapportent en un mois. Mieux vaut chercher d'abord où ajuster le budget, puis, si besoin, en parler à sa banque.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 112,
+     "suffix": " €",
+     "label": "intérêts · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ff4d4d"
+    },
+    {
+     "kind": "stat",
+     "value": 35,
+     "suffix": " €",
+     "label": "gestes énergie + carburant, par mois",
+     "delay": 5.0,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A"
+    }
+   ],
+   "faits": [
+    "h7",
+    "h5",
+    "h6"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 520,
+      "pose": "idle"
+     },
+     {
+      "who": "thomas",
+      "x": 1420,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c6-06",
+   "chapter": "c6",
+   "text": "Et si tu es en difficulté, n'attends pas : parle-en à ton conseiller, ou à un service de médiation ou d'aide, avant que la situation ne se dégrade.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "N'ATTENDS PAS : EN PARLER TÔT",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "faits": [
+    "h12"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 900,
+      "pose": "talk",
+      "say": "📞",
+      "sayDelay": 1.0
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c7-01",
+   "chapter": "c7",
+   "text": "Sixième étape : l'épargne de précaution. C'est la somme qui te permet de traverser un imprévu sans t'endetter : une panne de voiture, une facture, une baisse de revenu.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 6 · L'épargne de précaution",
+     "sub": "DÉFI : CONSTRUIRE SON MATELAS",
+     "delay": 0.3
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 620,
+      "pose": "talk"
+     },
+     {
+      "who": "hugo",
+      "x": 1300,
+      "pose": "happy",
+      "say": "🐷",
+      "sayDelay": 2.0
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🐷",
+      "x": 960,
+      "y": 810,
+      "size": 150,
+      "delay": 0.8,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c7-02",
+   "chapter": "c7",
+   "text": "Une règle courante, sans valeur absolue : viser l'équivalent de trois mois de dépenses essentielles. Pour la famille Martin, les dépenses essentielles sont le logement, l'énergie, les courses, les transports, les assurances et la santé.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "RÈGLE COURANTE : 3 MOIS DE DÉPENSES ESSENTIELLES",
+     "delay": 1.4,
+     "size": 28,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "faits": [
+    "h8"
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1250,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🐷",
+      "x": 960,
+      "y": 810,
+      "size": 130,
+      "delay": 0.2
+     }
+    ]
+   }
+  },
+  {
+   "id": "c7-03",
+   "chapter": "c7",
+   "text": "Ça fait environ deux mille cinquante euros par mois. Trois mois, c'est donc environ six mille cent cinquante euros.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 2050,
+     "suffix": " €",
+     "label": "dépenses essentielles par mois · exemple",
+     "delay": 1.4,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#f0efe8"
+    },
+    {
+     "kind": "stat",
+     "value": 6150,
+     "suffix": " €",
+     "label": "= 3 mois de dépenses essentielles",
+     "delay": 4.2,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#5aa9ff"
+    }
+   ],
+   "faits": [
+    "h8"
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "idle"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "talk",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c7-04",
+   "chapter": "c7",
+   "text": "S'ils mettent cent cinquante euros de côté chaque mois, il leur faut quarante et un mois, soit un peu plus de trois ans, pour y arriver. C'est long, mais chaque mois compte.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 150,
+     "suffix": " €",
+     "label": "mis de côté par mois · exemple",
+     "delay": 1.4,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#5aa9ff"
+    },
+    {
+     "kind": "stat",
+     "value": 41,
+     "suffix": " mois",
+     "label": "mois pour atteindre l'objectif",
+     "delay": 6.4,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#ffb347"
+    }
+   ],
+   "faits": [
+    "h8"
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "think",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c7-05",
+   "chapter": "c7",
+   "text": "Si les gestes des étapes précédentes dégagent environ quatre-vingt-quatre euros de plus par mois, et qu'ils les épargnent, ils passent à environ deux cent trente-quatre euros par mois, et mettent environ vingt-six mois.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 234,
+     "suffix": " €",
+     "label": "épargnés par mois avec les gestes · exemple",
+     "delay": 3.4,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#5aa9ff"
+    },
+    {
+     "kind": "stat",
+     "value": 26,
+     "suffix": " mois",
+     "label": "mois pour atteindre l'objectif",
+     "delay": 10.4,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A"
+    }
+   ],
+   "faits": [
+    "h8",
+    "h9"
+   ],
+   "impacts": [
+    10.4
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "happy",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c7-06",
+   "chapter": "c7",
+   "text": "Où placer cet argent ? Je ne te dis pas : choisis un support disponible à tout moment, sans risque de perdre ton capital, et compare ce que ta banque et les autres proposent. C'est ton choix, et ça dépend de ta situation.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "DISPONIBLE · SANS RISQUE · À COMPARER",
+     "delay": 4.0,
+     "size": 30,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "CE N'EST PAS UN CONSEIL PERSONNALISÉ",
+     "delay": 9.0,
+     "size": 28,
+     "screen": [
+      960,
+      330
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 620,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1260,
+      "pose": "think"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🐷",
+      "x": 960,
+      "y": 810,
+      "size": 130,
+      "delay": 0.3
+     }
+    ]
+   }
+  },
+  {
+   "id": "c8-01",
+   "chapter": "c8",
+   "text": "Septième étape : les aides et les droits. Beaucoup de familles passent à côté de ce qui existe, par manque d'information ou par gêne. Il n'y a pas de honte à demander ce qui est prévu.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Étape 7 · Les aides et les droits",
+     "sub": "DÉFI : TROUVER LES AIDES ET EN PARLER",
+     "delay": 0.3
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 640,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1500,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📄",
+      "x": 1180,
+      "y": 480,
+      "size": 140,
+      "delay": 3.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "c8-02",
+   "chapter": "c8",
+   "text": "Selon ta situation, des aides peuvent exister : le chèque énergie, des prestations familiales, des aides au logement, des aides locales de ta commune ou de ton département.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "CHÈQUE ÉNERGIE",
+     "delay": 2.4,
+     "size": 32,
+     "screen": [
+      500,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "PRESTATIONS FAMILIALES",
+     "delay": 4.2,
+     "size": 30,
+     "screen": [
+      1000,
+      320
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AIDES AU LOGEMENT",
+     "delay": 6.0,
+     "size": 32,
+     "screen": [
+      1440,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AIDES LOCALES",
+     "delay": 8.0,
+     "size": 32,
+     "screen": [
+      960,
+      390
+     ]
+    }
+   ],
+   "faits": [
+    "h10"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "point"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "idle",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c8-03",
+   "chapter": "c8",
+   "text": "Je ne peux pas te dire lesquelles te concernent : cela dépend de tes revenus, de ta composition familiale, de ton lieu de vie. Le bon réflexe, c'est de vérifier sur le site officiel service-public point fr, ou auprès de ta mairie.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "DÉPEND DE TA SITUATION",
+     "delay": 3.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "VÉRIFIER : SERVICE-PUBLIC.FR OU MAIRIE",
+     "delay": 9.0,
+     "size": 30,
+     "screen": [
+      960,
+      330
+     ]
+    }
+   ],
+   "faits": [
+    "h10"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "think"
+     },
+     {
+      "who": "thomas",
+      "x": 1450,
+      "pose": "talk"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🔎",
+      "x": 1180,
+      "y": 480,
+      "size": 140,
+      "delay": 0.8,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c8-04",
+   "chapter": "c8",
+   "text": "Autre droit à connaître : en cas de difficulté de paiement, tu peux contacter ton fournisseur d'énergie, ton bailleur ou ta banque pour discuter d'un échéancier. Ils préfèrent souvent un arrangement à un impayé.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "ÉCHÉANCIER POSSIBLE",
+     "delay": 3.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "faits": [
+    "h12"
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 900,
+      "pose": "talk",
+      "say": "📞",
+      "sayDelay": 1.0
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c8-05",
+   "chapter": "c8",
+   "text": "Et parle d'argent à la maison, y compris aux enfants, à leur niveau. Expliquer pourquoi on choisit une marque, pourquoi on éteint la lumière, c'est de l'éducation financière dès le plus jeune âge.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "PARLER D'ARGENT EN FAMILLE",
+     "delay": 2.8,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 560,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "idle"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "think",
+      "say": "🤔",
+      "sayDelay": 2.0
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "happy"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c8-06",
+   "chapter": "c8",
+   "text": "La famille Martin décide de faire un point budget tous les mois, vingt minutes, avec un thé, tous ensemble. Ce rendez-vous change tout : on décide au lieu de subir.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 20,
+     "suffix": " min",
+     "label": "minutes par mois : le point budget",
+     "delay": 4.0,
+     "screen": [
+      1400,
+      310
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "tag",
+     "text": "ON DÉCIDE AU LIEU DE SUBIR",
+     "delay": 7.0,
+     "size": 34,
+     "screen": [
+      960,
+      250
+     ]
+    }
+   ],
+   "faits": [
+    "h10"
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 620,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1200,
+      "pose": "cheer"
+     },
+     {
+      "who": "hugo",
+      "x": 1400,
+      "pose": "cheer"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "🫖",
+      "x": 960,
+      "y": 815,
+      "size": 130,
+      "delay": 1.0,
+      "bob": true
+     }
+    ]
+   }
+  },
+  {
+   "id": "c9-01",
+   "chapter": "c9",
+   "text": "Pour finir, résumons : cinq gestes à refaire avec tes propres chiffres.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomin",
+   "items": [
+    {
+     "kind": "lower",
+     "text": "Pour finir · 5 gestes",
+     "sub": "À REFAIRE AVEC TES PROPRES CHIFFRES",
+     "delay": 0.3
+    }
+   ],
+   "stage": {
+    "set": "exterieur",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "thomas",
+      "x": 830,
+      "pose": "happy",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "lea",
+      "x": 1090,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "hugo",
+      "x": 1210,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c9-02",
+   "chapter": "c9",
+   "text": "Un : fais la photo de ton budget, avec le fixe, le semi-fixe et le variable. Deux : repère les trois postes qui peuvent bouger, courses, énergie, carburant.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "1 · LA PHOTO DU BUDGET",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "2 · LES POSTES QUI BOUGENT",
+     "delay": 5.0,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "stage": {
+    "set": "cuisine",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 760,
+      "pose": "point"
+     },
+     {
+      "who": "thomas",
+      "x": 1250,
+      "pose": "idle"
+     }
+    ],
+    "objs": [
+     {
+      "emoji": "📸",
+      "x": 420,
+      "y": 820,
+      "size": 110,
+      "delay": 1.0
+     }
+    ]
+   }
+  },
+  {
+   "id": "c9-03",
+   "chapter": "c9",
+   "text": "Trois : agis d'abord là où c'est simple, les courses, l'énergie, les trajets. Quatre : vérifie ton crédit et méfie-toi du crédit à la consommation pour boucher les trous.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "3 · AGIR LÀ OÙ C'EST SIMPLE",
+     "delay": 0.8,
+     "size": 34,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "4 · VÉRIFIER SON CRÉDIT",
+     "delay": 5.4,
+     "size": 34,
+     "screen": [
+      960,
+      320
+     ]
+    }
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "thomas",
+      "x": 800,
+      "pose": "point"
+     },
+     {
+      "who": "claire",
+      "x": 1200,
+      "pose": "happy"
+     },
+     {
+      "who": "hugo",
+      "x": 1450,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c9-04",
+   "chapter": "c9",
+   "text": "Cinq : constitue petit à petit une épargne de précaution, et vérifie les aides auxquelles tu as droit. Dans notre exemple, ces gestes compensent environ quatre-vingt-quatre euros sur les cent trente-trois euros de hausse.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "5 · ÉPARGNE DE PRÉCAUTION ET AIDES",
+     "delay": 0.8,
+     "size": 32,
+     "screen": [
+      960,
+      230
+     ]
+    },
+    {
+     "kind": "stat",
+     "value": 84,
+     "suffix": " €",
+     "label": "compensés par mois · exemple",
+     "delay": 7.0,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#7CFC9A"
+    },
+    {
+     "kind": "stat",
+     "value": 133,
+     "suffix": " €",
+     "label": "de hausse par mois · exemple",
+     "delay": 10.4,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#ff4d4d"
+    }
+   ],
+   "faits": [
+    "h9",
+    "h3"
+   ],
+   "impacts": [
+    10.4
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 230,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 1690,
+      "pose": "happy",
+      "flip": true
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c9-05",
+   "chapter": "c9",
+   "text": "Il reste donc environ quarante-neuf euros par mois à absorber, soit un peu moins de deux pour cent du revenu, au lieu de plus de quatre pour cent. Ce n'est pas magique, mais c'est mesurable.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "stat",
+     "value": 49,
+     "suffix": " €",
+     "label": "reste à absorber par mois · exemple",
+     "delay": 1.6,
+     "screen": [
+      640,
+      310
+     ],
+     "color": "#ffb347"
+    },
+    {
+     "kind": "stat",
+     "value": 1.6,
+     "suffix": " %",
+     "label": "du revenu au lieu de 4,4 %",
+     "delay": 6.0,
+     "screen": [
+      1280,
+      310
+     ],
+     "color": "#7CFC9A",
+     "decimals": 1
+    }
+   ],
+   "faits": [
+    "h9"
+   ],
+   "stage": {
+    "set": "salon",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 520,
+      "pose": "happy"
+     },
+     {
+      "who": "thomas",
+      "x": 860,
+      "pose": "happy"
+     },
+     {
+      "who": "lea",
+      "x": 1500,
+      "pose": "cheer"
+     },
+     {
+      "who": "hugo",
+      "x": 1700,
+      "pose": "cheer"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c9-06",
+   "chapter": "c9",
+   "text": "Cette vidéo est un contenu éducatif : aucune obligation d'achat ni de souscription, et pas un conseil en investissement ni en crédit. Les chiffres sont des exemples calculés ou des faits à confirmer à la source.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "pan",
+   "items": [
+    {
+     "kind": "tag",
+     "text": "CONTENU ÉDUCATIF · PAS UN CONSEIL EN INVESTISSEMENT NI EN CRÉDIT",
+     "delay": 0.6,
+     "size": 28,
+     "screen": [
+      960,
+      960
+     ]
+    },
+    {
+     "kind": "tag",
+     "text": "AUCUNE OBLIGATION D'ACHAT OU DE SOUSCRIPTION",
+     "delay": 1.4,
+     "size": 28,
+     "screen": [
+      960,
+      1020
+     ]
+    }
+   ],
+   "stage": {
+    "set": "bureau",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 650,
+      "pose": "talk"
+     },
+     {
+      "who": "thomas",
+      "x": 1450,
+      "pose": "idle"
+     }
+    ],
+    "objs": []
+   }
+  },
+  {
+   "id": "c9-07",
+   "chapter": "c9",
+   "text": "Si ça t'a aidé, abonne-toi. Un short résume les cinq gestes, et la prochaine vidéo répond à une question liée : pourquoi la France emprunte plus cher que l'Allemagne.",
+   "camera": {
+    "lon": 2,
+    "lat": 47,
+    "zoom": 2
+   },
+   "move": "zoomout",
+   "items": [
+    {
+     "kind": "burst",
+     "emoji": "🔔",
+     "delay": 1.6,
+     "screen": [
+      960,
+      420
+     ]
+    }
+   ],
+   "flash": [
+    1.6
+   ],
+   "stage": {
+    "set": "exterieur",
+    "cast": [
+     {
+      "who": "claire",
+      "x": 700,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "thomas",
+      "x": 830,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "lea",
+      "x": 1090,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     },
+     {
+      "who": "hugo",
+      "x": 1210,
+      "pose": "cheer",
+      "scale": 0.55,
+      "y": 1070
+     }
+    ],
+    "objs": []
+   }
+  }
+ ]
+}

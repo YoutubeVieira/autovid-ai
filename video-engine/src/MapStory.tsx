@@ -2,6 +2,7 @@ import React, { createContext, useContext } from "react";
 import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import { FREE_ZONE, H, W, cameraTransform, features, polygonPath, project, toScreen } from "./geo";
 import { FLAGS, Flag } from "./flags";
+import { HudView, StageView } from "./Stage";
 import basemap from "../public/geo/basemap.json";
 import type { Camera, FillKey, Item, LonLat, Scene, StoryProps } from "./types";
 
@@ -382,11 +383,12 @@ export const MapStory: React.FC<StoryProps> = ({ scenes, bg }) => {
     <Size.Provider value={{ w, h }}><UI.Provider value={wide ? 0.8 : 1}>
     <AbsoluteFill style={{ background: bg || "#0a1f29" }}>
       <AbsoluteFill style={{ transform: `translate(${shake[0]}px, ${shake[1]}px)` }}>
-        <MapLayer scenes={scenes} i={idx} f={f} cam={cam} blur={blur} w={w} h={h} />
+        {scene.stage ? <StageView stage={scene.stage} f={f} dur={scene.durationInFrames} w={w} h={h} /> : <MapLayer scenes={scenes} i={idx} f={f} cam={cam} blur={blur} w={w} h={h} />}
         <Sequence from={starts[idx]} durationInFrames={scene.durationInFrames} layout="none">
           {(scene.items || []).map((it, n) => <ItemView key={idx + "-" + n} it={it} cam={cam} dur={scene.durationInFrames} n={n + idx * 10} />)}
         </Sequence>
       </AbsoluteFill>
+      {(() => { let hud: Scene["hud"] = null; let prev = 0; for (let k = 0; k <= idx; k++) { if (scenes[k].hud !== undefined) { if (k < idx && scenes[k].hud) prev = scenes[k].hud!.value; hud = scenes[k].hud; } } if (!hud) return null; const t = interpolate(f, [0, 24], [0, 1], { extrapolateRight: "clamp" }); const target = scene.hud ? scene.hud.value : hud.value; const base = scene.hud ? prev : hud.value; return <HudView label={hud.label} goal={hud.goal} value={base + (target - base) * t} unit={hud.unit ?? " €"} color={hud.color ?? "#7CFC9A"} w={w} />; })()}
       <Subtitles scene={scene} f={f} />
       {/* grain de pellicule + vignette + flash */}
       <svg width={w + 200} height={h + 200} style={{ position: "absolute", left: -grainShift[0], top: -grainShift[1], opacity: 0.2, mixBlendMode: "overlay", pointerEvents: "none" }}>

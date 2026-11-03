@@ -21,10 +21,20 @@ export type Item =
   | (Base & { kind: "bars"; title?: string; rows: { label: string; value: number; color?: string }[]; unit?: string; max?: number; w?: number })   // barres horizontales animées (budget)
   | (Base & { kind: "stat"; value: number; label: string; prefix?: string; suffix?: string; decimals?: number; from?: number; color?: string; w?: number }); // gros chiffre qui défile                                // explosion : emoji + onde de choc + étincelles
 
+export type Who = "claire" | "thomas" | "lea" | "hugo";
+export type Pose = "idle" | "worry" | "happy" | "point" | "think" | "talk" | "cheer";
+export type CastMember = { who: Who; x: number; y?: number; pose?: Pose; flip?: boolean; say?: string; sayDelay?: number; scale?: number };
+export type StageObj = { emoji: string; x: number; y: number; size?: number; delay?: number; bob?: boolean };
+export type SetId = "exterieur" | "cuisine" | "salon" | "supermarche" | "route" | "bureau";
+export type Stage = { set: SetId; cast?: CastMember[]; objs?: StageObj[] };
+export type Hud = { label: string; goal: number; value: number; unit?: string; color?: string } | null;
+
 export type Subtitle = { text: string; from: number; to: number };
 export type Sfx = { name: "whoosh" | "pop" | "impact" | "ding" | "riser"; at: number; volume?: number };
 export type Scene = {
   id: string;
+  stage?: Stage;        // décor illustré (maison, supermarché…) à la place de la carte
+  hud?: Hud;            // jauge de défi persistante (cumulative d'une scène à l'autre) ; null la masque
   text: string;
   camera: Camera;
   /* pan : glisse depuis la caméra précédente ; zoomin / zoomout : coup de zoom avec rebond ; cut : sans mouvement */
