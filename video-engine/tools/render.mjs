@@ -12,11 +12,12 @@ if (!fs.existsSync(props)) { console.log("Lancez d'abord : node tools/build-prop
 fs.mkdirSync(path.join(root, "out"), { recursive: true });
 const fi = process.argv.indexOf("--frame");
 const comp = JSON.parse(fs.readFileSync(props, "utf8")).format === "16:9" ? "MapStoryWide" : "MapStory";
-const bin = path.join(root, "node_modules/.bin/remotion");
+const win = process.platform === "win32";
+const bin = path.join(root, "node_modules", ".bin", win ? "remotion.cmd" : "remotion");
 const common = ["--props=" + props, "--gl=angle", "--concurrency=" + (process.env.CONCURRENCY || "2")];
 if (fs.existsSync("/opt/pw-browsers/chromium")) common.push("--browser-executable=/opt/pw-browsers/chromium");
 const args = fi > 0
   ? ["still", "src/index.ts", comp, path.join(root, "out", name + "-f" + process.argv[fi + 1] + ".png"), "--frame=" + process.argv[fi + 1], ...common]
   : ["render", "src/index.ts", comp, path.join(root, "out", name + ".mp4"), "--codec=h264", ...common];
-const r = spawnSync(bin, args, { cwd: root, stdio: "inherit" });
+const r = spawnSync(bin, args, { cwd: root, stdio: "inherit", shell: win });
 process.exit(r.status ?? 1);
