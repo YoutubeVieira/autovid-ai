@@ -14,7 +14,7 @@
 [hidden]{display:none!important}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;overflow:hidden;background:var(--night);color:var(--ink);font-family:var(--body);-webkit-user-select:none;user-select:none}
-#game{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#game,#game3d{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .hud{position:fixed;pointer-events:none;z-index:5}
 body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #hudL{top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:5px}
@@ -159,6 +159,7 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
 </style>
 
 <canvas id="game"></canvas>
+<canvas id="game3d" style="display:none"></canvas>
 <canvas id="mini" width="164" height="164"></canvas>
 
 <div class="hud" id="hudL">
@@ -189,5 +190,6 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
 
 <div id="screen"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="js/data.js"></script>
 <script src="js/engine.js"></script>
