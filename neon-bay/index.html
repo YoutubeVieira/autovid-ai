@@ -140,6 +140,21 @@ body.touch .keys{display:none}
 input{font:inherit;font-size:16px;background:#0d0a1d;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 12px;flex:1;min-width:0;letter-spacing:.06em;text-transform:uppercase}
 .note{font-size:14px;color:var(--muted);margin:0}.note.ok{color:var(--lime)}.note.bad{color:var(--danger)}
 .flash{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--danger);color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;z-index:20}
+/* téléphone */
+html,body{touch-action:manipulation;overscroll-behavior:none}
+@media (max-width:560px){.top h2{font-size:16px;flex-basis:100%;order:-1}}
+@media (max-height:500px) and (orientation:landscape){
+  #mini{width:84px;height:84px;top:calc(8px + env(safe-area-inset-top,0px))}
+  #hudL{top:calc(8px + env(safe-area-inset-top,0px));gap:3px}
+  #money{font-size:18px}#stars{font-size:15px}.barw{width:110px;height:6px}#wep{font-size:10px}#inv{display:none}
+  #step{top:calc(6px + env(safe-area-inset-top,0px));bottom:auto;width:min(340px,calc(100vw - 330px));min-width:0;padding:4px 10px 6px}
+  #lvlName{display:none}#sN{font-size:11px}#sD{font-size:12px}#sC{font-size:14px}#dots{margin-top:3px}
+  #vipBar{top:calc(98px + env(safe-area-inset-top,0px));width:84px}#vipBar .barw{width:84px}
+  #toast{top:26%;font-size:15px}
+  body.touch #prompt{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  #stickBase{width:104px;height:104px}#stickKnob{left:26px;top:26px}
+  .logo{font-size:52px}.home{gap:10px;padding-top:0}
+}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 

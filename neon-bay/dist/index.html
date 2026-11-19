@@ -145,6 +145,21 @@ body.touch .keys{display:none}
 input{font:inherit;font-size:16px;background:#0d0a1d;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:11px 12px;flex:1;min-width:0;letter-spacing:.06em;text-transform:uppercase}
 .note{font-size:14px;color:var(--muted);margin:0}.note.ok{color:var(--lime)}.note.bad{color:var(--danger)}
 .flash{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:var(--danger);color:#fff;padding:8px 14px;border-radius:8px;font-weight:700;z-index:20}
+/* téléphone */
+html,body{touch-action:manipulation;overscroll-behavior:none}
+@media (max-width:560px){.top h2{font-size:16px;flex-basis:100%;order:-1}}
+@media (max-height:500px) and (orientation:landscape){
+  #mini{width:84px;height:84px;top:calc(8px + env(safe-area-inset-top,0px))}
+  #hudL{top:calc(8px + env(safe-area-inset-top,0px));gap:3px}
+  #money{font-size:18px}#stars{font-size:15px}.barw{width:110px;height:6px}#wep{font-size:10px}#inv{display:none}
+  #step{top:calc(6px + env(safe-area-inset-top,0px));bottom:auto;width:min(340px,calc(100vw - 330px));min-width:0;padding:4px 10px 6px}
+  #lvlName{display:none}#sN{font-size:11px}#sD{font-size:12px}#sC{font-size:14px}#dots{margin-top:3px}
+  #vipBar{top:calc(98px + env(safe-area-inset-top,0px));width:84px}#vipBar .barw{width:84px}
+  #toast{top:26%;font-size:15px}
+  body.touch #prompt{bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+  #stickBase{width:104px;height:104px}#stickKnob{left:26px;top:26px}
+  .logo{font-size:52px}.home{gap:10px;padding-top:0}
+}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -692,7 +707,7 @@ function fire() {
   if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
   else if (!touch.on || touch.autoAim) { // visée auto vers l'ennemi le plus proche devant
     let best = null, bd = 520;
-    for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < .9 && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
+    for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < (touch.on ? 1.9 : .9) && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
     if (best) a = Math.atan2(best.y - P.y, best.x - P.x);
   }
   for (let k = 0; k < w.pellets; k++) {
@@ -1279,6 +1294,7 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet · ${D.SHOP_CONFIG.price}</button>`}
+        ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div>
       <div class="stats"><span>${done}/30 niveaux</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -1340,7 +1356,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}</div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -1374,6 +1390,15 @@ const SCREENS = {
     </div>`;
   },
 };
+function canFull() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
+function toggleFull() {
+  try {
+    const d = document, el = d.documentElement;
+    if (d.fullscreenElement || d.webkitFullscreenElement) { (d.exitFullscreen || d.webkitExitFullscreen).call(d); return; }
+    const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+    if (r && r.then) r.then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => flashNote('Plein écran indisponible ici'));
+  } catch (e) { flashNote('Plein écran indisponible ici'); }
+}
 let shopState = { inGame: false, tab: 'w', ret: 'home' };
 function openShop(inGame, ret) { shopState = { inGame, tab: 'w', ret: ret || (S.screen || 'home') }; if (inGame) { S.mode = 'shop'; if (L) L.bought = true; } showScreen('shop', shopState); }
 function buy(id) {
@@ -1405,6 +1430,7 @@ screenEl.addEventListener('click', e => {
   if (ds.buy) { buy(ds.buy); return; }
   if (ds.equip) { save.weapon = ds.equip; persist(); showScreen('shop', shopState); return; }
   if (ds.back) { if (shopState.inGame) { resumeGame(); return; } const r = shopState.ret || 'home'; if (r.startsWith('brief:')) showScreen('brief', { n: +r.split(':')[1] }); else showScreen(r === 'shop' ? 'home' : r); return; }
+  if (ds.full) { toggleFull(); return; }
   if (ds.resume) { resumeGame(); return; }
   if (ds.quit) { S.mode = 'menu'; L = null; showScreen('map'); return; }
   if (ds.code) {

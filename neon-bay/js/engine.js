@@ -383,7 +383,7 @@ function fire() {
   if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
   else if (!touch.on || touch.autoAim) { // visée auto vers l'ennemi le plus proche devant
     let best = null, bd = 520;
-    for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < .9 && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
+    for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < (touch.on ? 1.9 : .9) && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
     if (best) a = Math.atan2(best.y - P.y, best.x - P.x);
   }
   for (let k = 0; k < w.pellets; k++) {
@@ -970,6 +970,7 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet · ${D.SHOP_CONFIG.price}</button>`}
+        ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div>
       <div class="stats"><span>${done}/30 niveaux</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -1031,7 +1032,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}</div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -1065,6 +1066,15 @@ const SCREENS = {
     </div>`;
   },
 };
+function canFull() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
+function toggleFull() {
+  try {
+    const d = document, el = d.documentElement;
+    if (d.fullscreenElement || d.webkitFullscreenElement) { (d.exitFullscreen || d.webkitExitFullscreen).call(d); return; }
+    const r = (el.requestFullscreen || el.webkitRequestFullscreen).call(el);
+    if (r && r.then) r.then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => flashNote('Plein écran indisponible ici'));
+  } catch (e) { flashNote('Plein écran indisponible ici'); }
+}
 let shopState = { inGame: false, tab: 'w', ret: 'home' };
 function openShop(inGame, ret) { shopState = { inGame, tab: 'w', ret: ret || (S.screen || 'home') }; if (inGame) { S.mode = 'shop'; if (L) L.bought = true; } showScreen('shop', shopState); }
 function buy(id) {
@@ -1096,6 +1106,7 @@ screenEl.addEventListener('click', e => {
   if (ds.buy) { buy(ds.buy); return; }
   if (ds.equip) { save.weapon = ds.equip; persist(); showScreen('shop', shopState); return; }
   if (ds.back) { if (shopState.inGame) { resumeGame(); return; } const r = shopState.ret || 'home'; if (r.startsWith('brief:')) showScreen('brief', { n: +r.split(':')[1] }); else showScreen(r === 'shop' ? 'home' : r); return; }
+  if (ds.full) { toggleFull(); return; }
   if (ds.resume) { resumeGame(); return; }
   if (ds.quit) { S.mode = 'menu'; L = null; showScreen('map'); return; }
   if (ds.code) {
