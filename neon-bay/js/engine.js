@@ -13,6 +13,9 @@ const hash = (x, y) => (((x * 73856093) ^ (y * 19349663)) >>> 0) % 1000;
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
 const fmt = n => Math.round(n).toLocaleString('fr-FR') + ' $';
+const AU = window.NB_AUDIO || null;
+const au = (fn, ...a) => { try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
+const spatial = (x, y) => { const d = Math.hypot(x - P.x, y - P.y); return [Math.max(-1, Math.min(1, (x - P.x) / 600)), Math.max(0, 1 - d / 1000)]; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- codes de déblocage ----------
@@ -174,12 +177,12 @@ function moveCar(c, dt) {
   const hard = Math.abs(c.v) > 170;
   if (!hard && !carHits(nx, c.y, c.a)) { c.x = nx; c.v *= .95; return; }
   if (!hard && !carHits(c.x, ny, c.a)) { c.y = ny; c.v *= .95; return; }
-  if (Math.abs(c.v) > 130) { damageCar(c, Math.abs(c.v) * .05); sparks(c.x + Math.cos(c.a) * 20, c.y + Math.sin(c.a) * 20, 8); if (c === P.car) shake = Math.min(12, Math.abs(c.v) / 40); }
+  if (Math.abs(c.v) > 130) { { const [pn, vl] = spatial(c.x, c.y); if (vl > .1) au('crash', vl * Math.min(1, Math.abs(c.v) / 300), pn); } damageCar(c, Math.abs(c.v) * .05); sparks(c.x + Math.cos(c.a) * 20, c.y + Math.sin(c.a) * 20, 8); if (c === P.car) shake = Math.min(12, Math.abs(c.v) / 40); }
   c.v = -c.v * .3;
 }
 function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) explode(c); }
 function explosionAt(x, y, r, dmg, byPlayer) {
-  shake = Math.max(shake, 14);
+  shake = Math.max(shake, 14); { const [pn, vl] = spatial(x, y); if (vl > 0) au('boom', pn, vl); }
   for (let i = 0; i < 34; i++) parts.push({ x, y, vx: rnd(-260, 260), vy: rnd(-260, 260), life: rnd(.4, 1), max: 1, r: rnd(4, 12), col: pick(['#ffb627', '#ff6b3d', '#ff2e93', '#fff2a8']) });
   for (let i = 0; i < 10; i++) puff(x + rnd(-20, 20), y + rnd(-20, 20), '#3b3550', 1.6);
   for (const p of peds) if (p.state !== 'ko' && dist(p.x, p.y, x, y) < r) koPed(p, byPlayer);
@@ -246,7 +249,7 @@ function updPolice(c, dt) {
 // ---------- piétons ----------
 function koPed(p, byPlayer) {
   if (p.state === 'ko') return;
-  p.state = 'ko'; p.ko = 9;
+  p.state = 'ko'; p.ko = 9; { const [pn, vl] = spatial(p.x, p.y); if (vl > .2) au('ko', pn); }
   for (let i = 0; i < 6; i++) parts.push({ x: p.x, y: p.y, vx: rnd(-90, 90), vy: rnd(-90, 90), life: .5, max: .5, r: 3, col: '#fff2a8' });
   if (p.cash) picks.push({ x: p.x + rnd(-8, 8), y: p.y + rnd(-8, 8), amt: p.cash, t: 30 });
   if (byPlayer) addHeat(.6);
@@ -276,7 +279,7 @@ function mkEnemy(x, y, faction, boss, group) {
 }
 function hitEnemy(e, dmg) {
   if (e.hp <= 0) return;
-  e.hp -= dmg; e.alert = true;
+  e.hp -= dmg; e.alert = true; au('hit', spatial(e.x, e.y)[0]);
   for (let i = 0; i < 4; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-80, 80), vy: rnd(-80, 80), life: .3, max: .3, r: 2.5, col: '#ff4d5e' });
   if (e.hp <= 0) {
     for (const o of enemies) if (o.group === e.group && dist(o.x, o.y, e.x, e.y) < 600) o.alert = true;
@@ -306,6 +309,7 @@ function updEnemy(e, dt) {
     const spread = Math.max(.05, .32 - n * .009), a = e.a + rnd(-spread, spread);
     const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1);
     const shots = e.boss && n >= 15 ? 3 : 1;
+    { const [pn, vl] = spatial(e.x, e.y); if (vl > .05) au('shot', 'enemy', pn, vl * .8); }
     for (let k = 0; k < shots; k++) { const aa = a + (k - (shots - 1) / 2) * .12; bullets.push({ x: e.x + Math.cos(aa) * 12, y: e.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 560, vy: Math.sin(aa) * 560, life: 1, dmg, from: 'enemy' }); }
     e.cd = Math.max(.8, 2.4 - n * .04) * rnd(.75, 1.35) * (e.boss ? .6 : 1);
   }
@@ -316,7 +320,7 @@ function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.
 function hurt(n) {
   if (S.dead > 0 || S.mode !== 'play') return;
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
-  S.hp -= n; shake = Math.max(shake, 5);
+  S.hp -= n; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
 }
 function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n; if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
@@ -329,7 +333,7 @@ function bribePolice() {
   if (!nearCop()) { msg('Approche-toi d’une voiture de police pour la soudoyer'); return; }
   const c = bribeCost();
   if (save.money < c) { msg('Il te faut ' + fmt(c) + ' pour soudoyer les agents'); return; }
-  save.money -= c; S.heat = 0; S.unseen = 0; policeLeave(); toast('Agents soudoyés (−' + fmt(c) + ')');
+  au('cash'); save.money -= c; S.heat = 0; S.unseen = 0; policeLeave(); toast('Agents soudoyés (−' + fmt(c) + ')');
 }
 function contextAction() {
   if (S.mode !== 'play' || S.dead > 0) return;
@@ -342,6 +346,7 @@ function contextAction() {
 }
 function payAgent() {
   const c = agent.cost;
+  au('cash');
   if (save.money >= c) { save.money -= c; toast('L’agent empoche ' + fmt(c) + ' et te donne le tuyau'); }
   else { toast('Pas assez d’argent : l’agent prend ' + fmt(save.money) + ' et te balance !'); save.money = 0; addHeat(2); }
   agent.paid = true; if (L) L.bribed = true;
@@ -349,7 +354,7 @@ function payAgent() {
 function takeTunnel() {
   const here = world.tunnels.find(u => dist(u.x, u.y, P.x, P.y) < 48);
   if (!here) return;
-  S.tunnelCd = 3; fade('Tunnel souterrain…');
+  S.tunnelCd = 3; fade('Tunnel souterrain…'); au('whoosh');
   setTimeout(() => {
     const to = here.to;
     if (P.car) { const c = P.car; c.x = to.x; c.y = to.y; c.v = 0; for (const a of DIRA) if (!carHits(to.x, to.y, a)) { c.a = a; break; } P.x = c.x; P.y = c.y; }
@@ -366,7 +371,7 @@ function toggleCar() {
     const c = P.car, px = -Math.sin(c.a), py = Math.cos(c.a);
     const opts = [[px * -30, py * -30], [px * 30, py * 30], [-Math.cos(c.a) * 36, -Math.sin(c.a) * 36], [Math.cos(c.a) * 36, Math.sin(c.a) * 36]];
     for (const [ox, oy] of opts) { if (!solid(c.x + ox, c.y + oy)) { P.x = c.x + ox; P.y = c.y + oy; break; } }
-    c.ai = null; P.car = null;
+    c.ai = null; P.car = null; au('door');
     if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x - (P.x - c.x); vip.y = c.y - (P.y - c.y); if (solid(vip.x, vip.y)) { vip.x = P.x + 12; vip.y = P.y; } }
     return;
   }
@@ -375,7 +380,7 @@ function toggleCar() {
   if (!best) { msg('Aucune voiture à portée'); return; }
   if (best.ai === 'traffic' || best.ai === 'convoy') { const d = mkPed(best.x - Math.sin(best.a) * 24, best.y + Math.cos(best.a) * 24); d.state = 'flee'; d.t = 6; peds.push(d); if (Math.random() < .3) addHeat(.4); }
   if (best.kind === 'police') { S.heat = Math.max(S.heat, 2); S.unseen = 0; toast('Voiture de police volée !'); }
-  best.ai = null; best.v = Math.min(best.v, 40); P.car = best;
+  best.ai = null; best.v = Math.min(best.v, 40); P.car = best; au('door');
 }
 function fire() {
   const w = wepDef(save.weapon);
@@ -391,7 +396,7 @@ function fire() {
     bullets.push({ x: P.x + Math.cos(aa) * 12, y: P.y + Math.sin(aa) * 12, vx: Math.cos(aa) * w.speed, vy: Math.sin(aa) * w.speed, life: w.life, dmg: w.dmg, from: 'player', explosive: w.explosive });
   }
   parts.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14, vx: 0, vy: 0, life: .06, max: .06, r: w.explosive ? 10 : 7, col: '#fff2a8' });
-  P.cd = w.rate; panic(P.x, P.y, 380);
+  P.cd = w.rate; panic(P.x, P.y, 380); au('shot', w.id, 0, 1);
 }
 function cycleWeapon(dir = 1) {
   const owned = D.WEAPONS.filter(w => save.owned[w.id]);
@@ -516,7 +521,7 @@ const levelBonus = n => 1000 + n * 800;
 function regionOf(n) { return D.REGIONS.find(r => n >= r.from && n <= r.to); }
 function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium); }
 function startLevel(n) {
-  const region = regionOf(n);
+  const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
   cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
   S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = 100; S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
@@ -533,7 +538,7 @@ function startLevel(n) {
   nextStep();
 }
 function nextStep() {
-  if (L.step) { const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
+  if (L.step) { if (L.idx < 9) au('step'); const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
   L.idx++;
   if (L.idx >= 10) { completeLevel(); return; }
   if (agent && agent.paid) agent = null;
@@ -554,7 +559,7 @@ function updLevel(dt) {
 }
 function completeLevel() {
   const n = L.n, bonus = levelBonus(n);
-  save.money += bonus; L.earned += bonus;
+  save.money += bonus; L.earned += bonus; au('win'); au('setMusic', 'menu');
   const first = !save.done[n];
   save.done[n] = true; save.maxLevel = Math.max(save.maxLevel, Math.min(30, n + 1)); persist();
   S.mode = 'result';
@@ -563,7 +568,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
-  S.mode = 'result'; persist();
+  S.mode = 'result'; persist(); au('fail'); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
 }
@@ -605,6 +610,7 @@ const touchEl = $('touch'), zone = $('stickZone'), base = $('stickBase'), knob =
 function enableTouch() { if (touch.on) return; touch.on = true; touchEl.hidden = S.mode !== 'play'; document.body.classList.add('touch'); }
 if (matchMedia('(pointer:coarse)').matches) enableTouch();
 addEventListener('touchstart', enableTouch, { passive: true });
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, () => { if (AU) { AU.init(); if (S.mode === 'menu' && !L) au('setMusic', 'menu'); } }, { passive: true }));
 let stickId = null, sc = { x: 0, y: 0 };
 zone.addEventListener('pointerdown', e => {
   stickId = e.pointerId; zone.setPointerCapture(e.pointerId);
@@ -710,7 +716,7 @@ function update(dt) {
       if (!b.wreck && !carHits(b.x + nx * push, b.y + ny * push, b.a)) { b.x += nx * push; b.y += ny * push; }
       const rel = Math.hypot(Math.cos(a.a) * a.v - Math.cos(b.a) * b.v, Math.sin(a.a) * a.v - Math.sin(b.a) * b.v);
       if (rel > 110) {
-        damageCar(a, rel * .045); damageCar(b, rel * .045); sparks((a.x + b.x) / 2, (a.y + b.y) / 2, 6);
+        { const [pn, vl] = spatial(a.x, a.y); if (vl > .1) au('crash', vl * Math.min(1, rel / 300), pn); } damageCar(a, rel * .045); damageCar(b, rel * .045); sparks((a.x + b.x) / 2, (a.y + b.y) / 2, 6);
         if (a === P.car || b === P.car) { shake = Math.min(10, rel / 40); const o = a === P.car ? b : a; if (o.kind === 'police' && o.ai) addHeat(.15); if (o.ai === 'traffic' || o.ai === 'convoy') o.panic = 3; }
       }
       a.v *= .7; b.v *= .7;
@@ -748,9 +754,9 @@ function update(dt) {
     }
   }
   bullets = bullets.filter(b => b.life > 0);
-  for (const k of picks) { k.t -= dt; if (dist(P.x, P.y, k.x, k.y) < 30) { save.money += k.amt; if (L) L.earned += k.amt; msg('+' + fmt(k.amt)); k.t = 0; } }
+  for (const k of picks) { k.t -= dt; if (dist(P.x, P.y, k.x, k.y) < 30) { save.money += k.amt; if (L) L.earned += k.amt; au('cash'); msg('+' + fmt(k.amt)); k.t = 0; } }
   picks = picks.filter(k => k.t > 0);
-  for (const c of cases) if (!c.got && dist(P.x, P.y, c.x, c.y) < 32) { c.got = true; msg('Valise récupérée'); sparks(c.x, c.y, 10); }
+  for (const c of cases) if (!c.got && dist(P.x, P.y, c.x, c.y) < 32) { c.got = true; au('pickup'); msg('Valise récupérée'); sparks(c.x, c.y, 10); }
   // atelier de peinture
   if (P.car && tileAt(P.car.x, P.car.y) === PAD && stars() > 0 && !(L && L.step && L.step.lock)) {
     const cost = 200 + lvl() * 60;
@@ -1235,6 +1241,7 @@ const SCREENS = {
         <button class="btn" data-go="shop">Boutique</button>
         ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet · ${D.SHOP_CONFIG.price}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}
       </div>
       <div class="stats"><span>${done}/30 niveaux</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -1296,7 +1303,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}</div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}</div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -1343,7 +1350,8 @@ let shopState = { inGame: false, tab: 'w', ret: 'home' };
 function openShop(inGame, ret) { shopState = { inGame, tab: 'w', ret: ret || (S.screen || 'home') }; if (inGame) { S.mode = 'shop'; if (L) L.bought = true; } showScreen('shop', shopState); }
 function buy(id) {
   const w = D.WEAPONS.find(x => x.id === id), g = D.GEAR.find(x => x.id === id), it = w || g;
-  if (!it || save.money < it.price) { flashNote('Pas assez d’argent'); return; }
+  if (!it || save.money < it.price) { au('deny'); flashNote('Pas assez d’argent'); return; }
+  au('buy');
   if (g && g.kind === 'medkit' && save.medkits >= g.max) return;
   if (g && g.kind === 'nitro' && save.nitro >= g.max) return;
   save.money -= it.price;
@@ -1356,14 +1364,16 @@ function buy(id) {
   persist(); showScreen('shop', shopState);
 }
 function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = t; screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
-function pauseGame() { if (S.mode !== 'play') return; S.mode = 'pause'; showScreen('pause'); }
-function resumeGame() { S.mode = 'play'; showScreen(null); lastT = performance.now(); }
+function pauseGame() { if (S.mode !== 'play') return; S.mode = 'pause'; au('duck', true); showScreen('pause'); }
+function resumeGame() { S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
 function goLevel(n) { if (n > 1 && !save.premium) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
 screenEl.addEventListener('click', e => {
   const b = e.target.closest('button,a'); if (!b) return;
   const ds = b.dataset;
+  if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
+  if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
-  if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; } showScreen(ds.go); return; }
+  if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
   if (ds.start) { const n = +ds.start; if (canPlay(n)) startLevel(n); else goLevel(n); return; }
   if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); return; }
@@ -1372,7 +1382,7 @@ screenEl.addEventListener('click', e => {
   if (ds.back) { if (shopState.inGame) { resumeGame(); return; } const r = shopState.ret || 'home'; if (r.startsWith('brief:')) showScreen('brief', { n: +r.split(':')[1] }); else showScreen(r === 'shop' ? 'home' : r); return; }
   if (ds.full) { toggleFull(); return; }
   if (ds.resume) { resumeGame(); return; }
-  if (ds.quit) { S.mode = 'menu'; L = null; showScreen('map'); return; }
+  if (ds.quit) { S.mode = 'menu'; L = null; au('duck', false); au('setMusic', 'menu'); showScreen('map'); return; }
   if (ds.code) {
     const v = $('code').value;
     if (validCode(v)) { save.premium = true; persist(); showScreen('unlock', { msg: { ok: true, t: 'Code accepté : les 30 niveaux sont débloqués !' } }); setTimeout(() => { if (S.screen === 'unlock') showScreen('map'); }, 1400); }
@@ -1386,6 +1396,7 @@ let lastT = performance.now();
 function frame(t) {
   const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
   if (S.mode === 'play') { update(dt); updHud(dt); }
+  if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd }, dt); }
   else if (S.mode === 'result') { for (const p of parts) { p.life -= dt; } }
   render(dt);
   requestAnimationFrame(frame);

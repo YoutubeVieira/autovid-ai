@@ -118,5 +118,16 @@ window.NB_DATA = (() => {
     { id: 'contacts', name: 'Carnet de contacts', price: 12000, lvl: 12, kind: 'perk', desc: 'Soudoyer les agents coûte 40 % de moins.' },
   ];
 
-  return { SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR };
+  // ---------- SONS EN FICHIERS (facultatif) ----------
+  // Par défaut, tous les sons et musiques sont générés par le jeu (js/audio.js).
+  // Pour utiliser tes propres fichiers, mets-les dans le dossier audio/ et indique leur chemin ici.
+  // Clés possibles : music_menu, music_usa, music_ita, music_col, music_bra,
+  // shot (tous les tirs), shot_pistol, shot_uzi, shot_shotgun, shot_rifle, shot_sniper, shot_rocket, shot_minigun, shot_enemy,
+  // explosion, crash, cash, win, fail. Voir AUDIO.md pour trouver des sons gratuits.
+  const AUDIO_FILES = {
+    // music_usa: 'audio/music-usa.mp3',
+    // explosion: 'audio/explosion.ogg',
+  };
+
+  return { SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES };
 })();
