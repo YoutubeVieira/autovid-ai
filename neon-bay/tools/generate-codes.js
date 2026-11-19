@@ -3,7 +3,7 @@
 // Usage : node tools/generate-codes.js 50 > codes.txt
 // IMPORTANT : SALT doit être identique à SHOP_CONFIG.salt dans js/data.js
 const crypto = require('crypto');
-const SALT = 'neonbay-2026-';
+const SALT = 'nb-27359c4a7da65190-';
 const ALPH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 function fnv(s) { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193); } return h >>> 0; }
 function check(body) { let h = fnv(SALT + body), o = ''; for (let i = 0; i < 4; i++) { o += ALPH[h % 32]; h = Math.floor(h / 32); } return o; }

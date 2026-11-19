@@ -6,7 +6,7 @@ window.NB_DATA = (() => {
   const SHOP_CONFIG = {
     buyUrl: '',            // ex: 'https://buy.stripe.com/xxxx'
     price: '4,99 €',
-    salt: 'neonbay-2026-', // change-le AVANT de vendre, et garde le même dans tools/generate-codes.js
+    salt: 'nb-27359c4a7da65190-', // change-le AVANT de vendre, et garde le même dans tools/generate-codes.js
   };
 
   const REGIONS = [
