@@ -16,6 +16,9 @@ const fmt = n => Math.round(n).toLocaleString('fr-FR') + ' $';
 const AU = window.NB_AUDIO || null;
 const au = (fn, ...a) => { try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
 const spatial = (x, y) => { const d = Math.hypot(x - P.x, y - P.y); return [Math.max(-1, Math.min(1, (x - P.x) / 600)), Math.max(0, 1 - d / 1000)]; };
+const ST = window.NB_STORE || null;
+const isPlay = () => !!(ST && ST.isPlay);
+const priceLabel = () => isPlay() ? (ST.state.price || '') : D.SHOP_CONFIG.price;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 // ---------- codes de déblocage ----------
@@ -1239,7 +1242,7 @@ const SCREENS = {
       <div class="row center">
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
-        ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet · ${D.SHOP_CONFIG.price}</button>`}
+        ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}
       </div>
@@ -1329,8 +1332,13 @@ const SCREENS = {
       <div class="top"><button class="btn small" data-go="map">← Carte</button></div>
       <p class="eyebrow">Version complète</p><h2 class="title">Débloque les 29 niveaux</h2>
       <ul class="feat"><li>Italie, Colombie et favelas du Brésil</li><li>290 étapes de plus et 7 chefs de gang</li><li>Lance-roquettes, minigun, armure tactique</li><li>Paiement unique, sans abonnement</li></ul>
+      ${isPlay() ? `
+      ${ST.state.price ? `<div class="price">${esc(ST.state.price)}</div>` : ''}
+      <button class="btn primary" data-playbuy="1">Acheter le jeu complet</button>
+      <button class="btn small" data-restore="1">Restaurer mes achats</button>
+      ${ST.state.error ? `<p class="note bad">${esc(ST.state.error)}</p>` : ''}` : `
       <div class="price">${D.SHOP_CONFIG.price}</div>
-      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).</p>`}
+      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).</p>`}`}
       <label class="lab" for="code">Tu as déjà un code ?</label>
       <div class="row"><input id="code" placeholder="NBAY-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"><button class="btn" data-code="1">Valider</button></div>
       ${m ? `<p class="note ${m.ok ? 'ok' : 'bad'}">${esc(m.t)}</p>` : ''}
@@ -1383,6 +1391,21 @@ screenEl.addEventListener('click', e => {
   if (ds.full) { toggleFull(); return; }
   if (ds.resume) { resumeGame(); return; }
   if (ds.quit) { S.mode = 'menu'; L = null; au('duck', false); au('setMusic', 'menu'); showScreen('map'); return; }
+  if (ds.playbuy) {
+    b.disabled = true;
+    ST.buy().then(r => {
+      if (r.ok) { save.premium = true; persist(); au('win'); showScreen('unlock', { msg: { ok: true, t: 'Merci ! Les 30 niveaux sont débloqués.' } }); setTimeout(() => { if (S.screen === 'unlock') showScreen('map'); }, 1400); }
+      else showScreen('unlock', r.cancelled ? {} : { msg: { ok: false, t: 'Achat non abouti : ' + (r.error || 'erreur inconnue') } });
+    });
+    return;
+  }
+  if (ds.restore) {
+    ST.restore().then(ok => {
+      if (ok) { save.premium = true; persist(); showScreen('unlock', { msg: { ok: true, t: 'Achat retrouvé : les 30 niveaux sont débloqués.' } }); setTimeout(() => { if (S.screen === 'unlock') showScreen('map'); }, 1400); }
+      else showScreen('unlock', { msg: { ok: false, t: 'Aucun achat trouvé sur ce compte Google.' } });
+    });
+    return;
+  }
   if (ds.code) {
     const v = $('code').value;
     if (validCode(v)) { save.premium = true; persist(); showScreen('unlock', { msg: { ok: true, t: 'Code accepté : les 30 niveaux sont débloqués !' } }); setTimeout(() => { if (S.screen === 'unlock') showScreen('map'); }, 1400); }
@@ -1405,6 +1428,7 @@ function frame(t) {
 world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
 init3D();
+if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
 window.__nb = { S, P, save, toggleCar, contextAction, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };

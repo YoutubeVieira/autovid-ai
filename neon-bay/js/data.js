@@ -7,6 +7,8 @@ window.NB_DATA = (() => {
     buyUrl: '',            // ex: 'https://buy.stripe.com/xxxx'
     price: '4,99 €',
     salt: 'nb-27359c4a7da65190-', // change-le AVANT de vendre, et garde le même dans tools/generate-codes.js
+    playSku: 'full_game',  // identifiant du produit « Jeu complet » créé dans la Play Console
+    verifyUrl: '',         // (recommandé) adresse d'un petit serveur qui vérifie l'achat et en accuse réception, voir ANDROID.md
   };
 
   const REGIONS = [

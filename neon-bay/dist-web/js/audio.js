@@ -1,0 +1,218 @@
+/* Néon Bay : sons et musiques.
+   Tout est synthétisé en direct (Web Audio) : aucun fichier, aucun droit d'auteur.
+   On peut remplacer n'importe quel son par un fichier : voir NB_DATA.AUDIO_FILES dans js/data.js. */
+window.NB_AUDIO = (() => {
+  'use strict';
+  let ctx = null, master, sfxBus, musBus, comp, noiseBuf;
+  const prefs = (() => { try { return Object.assign({ sfx: true, music: true }, JSON.parse(localStorage.getItem('neonbay.audio') || '{}')); } catch (e) { return { sfx: true, music: true }; } })();
+  const savePrefs = () => { try { localStorage.setItem('neonbay.audio', JSON.stringify(prefs)); } catch (e) {} };
+  const files = {}; // buffers chargés depuis des fichiers
+  const now = () => ctx.currentTime;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+
+  function init() {
+    if (ctx) { if (ctx.state === 'suspended') ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    ctx = new AC();
+    comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = .9; master.connect(comp);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = prefs.sfx ? .8 : 0; sfxBus.connect(master);
+    musBus = ctx.createGain(); musBus.gain.value = prefs.music ? .42 : 0; musBus.connect(master);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    loadFiles();
+  }
+  async function loadFiles() {
+    const cfg = (window.NB_DATA && window.NB_DATA.AUDIO_FILES) || {};
+    for (const [k, url] of Object.entries(cfg)) {
+      if (!url) continue;
+      try { const r = await fetch(url); if (!r.ok) continue; files[k] = await ctx.decodeAudioData(await r.arrayBuffer()); } catch (e) {}
+    }
+  }
+  // ---------- briques ----------
+  function out(bus, pan = 0, vol = 1) {
+    const g = ctx.createGain(); g.gain.value = vol;
+    if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = Math.max(-1, Math.min(1, pan)); g.connect(p); p.connect(bus); } else g.connect(bus);
+    return g;
+  }
+  function env(g, t, a, peak, dec, sus = 0, rel = 0) {
+    g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(peak, .0002), t + a);
+    g.gain.exponentialRampToValueAtTime(Math.max(sus, .0001), t + a + dec);
+    if (rel) g.gain.exponentialRampToValueAtTime(.0001, t + a + dec + rel);
+  }
+  function noise(dest, t, dur, type, freq, q = 1, peak = 1, a = .002, sweepTo) {
+    const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true;
+    const f = ctx.createBiquadFilter(); f.type = type; f.frequency.setValueAtTime(freq, t); f.Q.value = q;
+    if (sweepTo) f.frequency.exponentialRampToValueAtTime(sweepTo, t + dur);
+    const g = ctx.createGain(); s.connect(f); f.connect(g); g.connect(dest);
+    env(g, t, a, peak, dur); s.start(t, Math.random()); s.stop(t + dur + .05);
+  }
+  function tone(dest, t, type, f0, f1, dur, peak = .5, a = .003) {
+    const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t);
+    if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = ctx.createGain(); o.connect(g); g.connect(dest); env(g, t, a, peak, dur); o.start(t); o.stop(t + dur + .05);
+  }
+  function playFile(key, bus, pan, vol, rate = 1) {
+    const b = files[key]; if (!b) return false;
+    const s = ctx.createBufferSource(); s.buffer = b; s.playbackRate.value = rate; s.connect(out(bus, pan, vol)); s.start(); return true;
+  }
+  // ---------- effets ----------
+  const SHOTS = {
+    pistol: d => { noise(d, now(), .12, 'bandpass', 1800, .8, .9); tone(d, now(), 'sine', 180, 50, .1, .7); },
+    uzi: d => { noise(d, now(), .06, 'bandpass', 2400, 1, .7); tone(d, now(), 'square', 140, 60, .05, .25); },
+    shotgun: d => { noise(d, now(), .35, 'lowpass', 2600, .7, 1, .002, 300); tone(d, now(), 'sine', 120, 35, .25, .9); },
+    rifle: d => { noise(d, now(), .1, 'bandpass', 2900, 1.2, .9); noise(d, now(), .25, 'lowpass', 900, .5, .3); tone(d, now(), 'sine', 160, 45, .09, .6); },
+    sniper: d => { noise(d, now(), .5, 'lowpass', 3500, .6, 1, .001, 400); tone(d, now(), 'sine', 220, 30, .4, .9); },
+    rocket: d => { noise(d, now(), .7, 'bandpass', 500, .8, .7, .02, 2600); tone(d, now(), 'sawtooth', 90, 200, .5, .2); },
+    minigun: d => { noise(d, now(), .045, 'bandpass', 2600, 1, .55); },
+    enemy: d => { noise(d, now(), .12, 'bandpass', 1300, .8, .7); tone(d, now(), 'sine', 150, 50, .08, .4); },
+  };
+  let lastShot = 0;
+  function shot(kind, pan = 0, vol = 1) {
+    if (!ctx || !prefs.sfx) return;
+    if (kind === 'minigun' || kind === 'uzi') { if (now() - lastShot < .04) return; }
+    lastShot = now();
+    if (playFile('shot_' + kind, sfxBus, pan, vol, rnd(.95, 1.05)) || playFile('shot', sfxBus, pan, vol, rnd(.95, 1.05))) return;
+    (SHOTS[kind] || SHOTS.pistol)(out(sfxBus, pan, vol * rnd(.85, 1)));
+  }
+  function boom(pan = 0, vol = 1) {
+    if (!ctx || !prefs.sfx) return;
+    if (playFile('explosion', sfxBus, pan, vol)) return;
+    const d = out(sfxBus, pan, vol);
+    noise(d, now(), 1.4, 'lowpass', 2400, .7, 1.2, .005, 120);
+    tone(d, now(), 'sine', 110, 28, 1.1, 1.1);
+    noise(d, now() + .05, .9, 'bandpass', 700, .6, .4, .05, 200);
+  }
+  function crash(vol = 1, pan = 0) {
+    if (!ctx || !prefs.sfx) return;
+    if (playFile('crash', sfxBus, pan, vol)) return;
+    const d = out(sfxBus, pan, Math.min(1, vol));
+    noise(d, now(), .3, 'lowpass', 1800, .8, .9, .002, 200);
+    [430, 710, 1150].forEach(f => tone(d, now(), 'triangle', f, f * .7, .35, .12));
+  }
+  function hit(pan = 0) { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, pan, .6); noise(d, now(), .08, 'lowpass', 900, 1, .8); tone(d, now(), 'sine', 220, 90, .08, .5); }
+  function hurt() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .6); tone(d, now(), 'sawtooth', 160, 70, .18, .35); noise(d, now(), .12, 'lowpass', 600, 1, .5); }
+  function ko(pan = 0) { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, pan, .45); tone(d, now(), 'square', 520, 140, .16, .25); }
+  function blips(notes, type = 'square', step = .07, vol = .3, len = .09) {
+    if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, vol);
+    notes.forEach((f, i) => tone(d, now() + i * step, type, f, f, len, .6));
+  }
+  const cash = () => { if (!playFile('cash', sfxBus, 0, .7)) blips([988, 1319], 'square', .06, .55, .1); };
+  const pickup = () => blips([660, 880, 1175], 'triangle', .05, .6);
+  const step = () => blips([523, 659, 784, 1047], 'triangle', .08, .6, .14);
+  const win = () => { if (!playFile('win', sfxBus, 0, .8)) blips([523, 659, 784, 1047, 784, 1047, 1319], 'square', .11, .3, .2); };
+  const fail = () => { if (!playFile('fail', sfxBus, 0, .8)) blips([392, 330, 262, 196], 'sawtooth', .16, .3, .25); };
+  const buy = () => blips([784, 1175, 1568], 'square', .05, .25, .1);
+  const click = () => blips([1200], 'square', .01, .12, .03);
+  const deny = () => blips([220, 180], 'square', .08, .2, .09);
+  function whoosh() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .7); noise(d, now(), 1, 'bandpass', 300, .7, .8, .3, 3000); }
+  function door() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .5); noise(d, now(), .08, 'lowpass', 700, 1, .7); tone(d, now() + .06, 'sine', 140, 90, .08, .4); }
+
+  // ---------- sons continus : moteur, crissement, sirène ----------
+  let engine = null, screech = null, siren = null;
+  function loops() {
+    if (engine) return;
+    const mk = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.start(); return o; };
+    const eg = ctx.createGain(); eg.gain.value = 0; const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600;
+    const o1 = mk('sawtooth', 50), o2 = mk('square', 25.5); const g2 = ctx.createGain(); g2.gain.value = .5;
+    o1.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(eg); eg.connect(sfxBus);
+    engine = { eg, lp, o1, o2 };
+    const sg = ctx.createGain(); sg.gain.value = 0; const sn = ctx.createBufferSource(); sn.buffer = noiseBuf; sn.loop = true;
+    const sf = ctx.createBiquadFilter(); sf.type = 'bandpass'; sf.frequency.value = 2200; sf.Q.value = 6; sn.connect(sf); sf.connect(sg); sg.connect(sfxBus); sn.start();
+    screech = { sg };
+    const rg = ctx.createGain(); rg.gain.value = 0; const ro = mk('sawtooth', 700); const rf = ctx.createBiquadFilter(); rf.type = 'lowpass'; rf.frequency.value = 1800;
+    ro.connect(rf); rf.connect(rg); rg.connect(sfxBus);
+    siren = { rg, ro, t: 0 };
+  }
+  function update(st, dt) {
+    if (!ctx) return;
+    loops();
+    const t = now(), on = prefs.sfx && st.playing;
+    const sp = Math.min(1, Math.abs(st.speed || 0) / 520);
+    const ev = on && st.inCar ? .22 + sp * .2 : 0;
+    engine.eg.gain.setTargetAtTime(ev, t, .08);
+    engine.o1.frequency.setTargetAtTime(45 + sp * 140 + (st.nitro ? 40 : 0), t, .1);
+    engine.o2.frequency.setTargetAtTime(22.5 + sp * 70, t, .1);
+    engine.lp.frequency.setTargetAtTime(350 + sp * 1600, t, .1);
+    screech.sg.gain.setTargetAtTime(on && st.inCar && st.drift && Math.abs(st.speed) > 160 ? .1 : 0, t, .05);
+    siren.t += dt;
+    const sv = on && st.sirenDist < 900 ? (1 - st.sirenDist / 900) * .16 : 0;
+    siren.rg.gain.setTargetAtTime(sv, t, .2);
+    siren.ro.frequency.setTargetAtTime(750 + 420 * (.5 + .5 * Math.sin(siren.t * 2.6)), t, .05);
+  }
+
+  // ---------- musique (générée, originale) ----------
+  const N2F = n => 440 * Math.pow(2, (n - 69) / 12);
+  // chaque style : tempo, accords (notes MIDI de la basse), gamme pour la mélodie, motif de batterie (16 pas)
+  const STYLES = {
+    menu: { bpm: 84, chords: [45, 41, 48, 43], minor: true, kick: 'x...............', snare: '................', hat: '..x...x...x...x.', lead: 'pad', arp: '0 - - - 7 - - - 12 - - - 7 - - -' },
+    usa: { bpm: 100, chords: [45, 41, 48, 43], minor: true, kick: 'x...x...x...x...', snare: '....x.......x...', hat: 'x.x.x.x.x.x.x.x.', lead: 'synth', arp: '0 - 4 - 7 - 4 - 0 - 4 - 7 - 9 -' },
+    ita: { bpm: 92, chords: [50, 46, 41, 45], minor: true, kick: 'x.....x.x.......', snare: '....x.......x..x', hat: '..x...x...x...x.', lead: 'pluck', arp: '0 - 2 - 4 - 5 - 7 - 5 - 4 - 2 -' },
+    col: { bpm: 96, chords: [43, 48, 50, 43], minor: false, kick: 'x...x...x...x...', snare: '..x...x...x...x.', hat: 'xx.xxx.xxx.xxx.x', lead: 'marimba', arp: '0 4 7 - 12 - 7 4 0 - 4 7 - 4 - -' },
+    bra: { bpm: 128, chords: [40, 40, 43, 38], minor: true, kick: 'x..x..x...x..x..', snare: '....x..x....x...', hat: 'x.xxx.xxx.xxx.xx', lead: 'synth', arp: '0 - - 4 - - 7 - - 10 - - 7 - 4 -' },
+  };
+  let mus = { style: null, timer: null, step: 0, next: 0, intensity: 0 };
+  function setMusic(style) {
+    if (!ctx) return;
+    if (mus.style === style) return;
+    mus.style = style; mus.step = 0; mus.next = now() + .1;
+    if (mus.fileSrc) { try { mus.fileSrc.stop(); } catch (e) {} mus.fileSrc = null; }
+    if (!style) return;
+    const fb = files['music_' + style];
+    if (fb) { const s = ctx.createBufferSource(); s.buffer = fb; s.loop = true; s.connect(musBus); s.start(); mus.fileSrc = s; return; }
+    if (!mus.timer) mus.timer = setInterval(schedule, 25);
+  }
+  function setIntensity(v) { mus.intensity = v; }
+  function schedule() {
+    if (!ctx || !mus.style || mus.fileSrc) return;
+    const s = STYLES[mus.style], spb = 60 / s.bpm / 4; // durée d'un 16e
+    while (mus.next < now() + .12) { playStep(s, mus.step, mus.next, spb); mus.step++; mus.next += spb; }
+  }
+  function playStep(s, i, t, spb) {
+    const p = i % 16, bar = Math.floor(i / 16) % s.chords.length, root = s.chords[bar];
+    const third = s.minor ? 3 : 4;
+    const hot = mus.intensity > 0;
+    if (s.kick[p] === 'x' || (hot && p % 4 === 0)) { const g = ctx.createGain(); g.connect(musBus); const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + .14); o.connect(g); env(g, t, .002, 1, .22); o.start(t); o.stop(t + .3); }
+    if (s.snare[p] === 'x') { noise(musBus, t, .14, 'bandpass', 1900, .7, .55); tone(musBus, t, 'triangle', 220, 160, .07, .2); }
+    if (s.hat[p] === 'x' || (hot && p % 2 === 1)) noise(musBus, t, .035, 'highpass', 8000, .7, hot ? .22 : .16);
+    // basse
+    if (p % 4 === 0 || (mus.style === 'bra' && p % 4 === 3)) {
+      const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = N2F(root - 12 + (p === 12 && s.minor ? 7 : 0));
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.setValueAtTime(900, t); f.frequency.exponentialRampToValueAtTime(180, t + spb * 3);
+      const g = ctx.createGain(); o.connect(f); f.connect(g); g.connect(musBus); env(g, t, .005, .32, spb * 3.2); o.start(t); o.stop(t + spb * 4);
+    }
+    // nappe sur chaque mesure
+    if (p === 0) {
+      [0, third, 7, 12].forEach((iv, k) => {
+        const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = N2F(root + 12 + iv); o.detune.value = (k - 1.5) * 7;
+        const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = mus.style === 'menu' ? 900 : 1300;
+        const g = ctx.createGain(); o.connect(f); f.connect(g); g.connect(musBus);
+        const len = spb * 16; g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(.045, t + len * .25); g.gain.linearRampToValueAtTime(.0001, t + len);
+        o.start(t); o.stop(t + len + .05);
+      });
+    }
+    // arpège / mélodie
+    const tok = s.arp.split(' ')[p], has = tok && tok !== '-';
+    if (has && s.lead !== 'pad') {
+      const n = root + 24 + (+tok === 3 || +tok === 4 ? third : +tok);
+      const type = s.lead === 'marimba' ? 'sine' : s.lead === 'pluck' ? 'triangle' : 'square';
+      const o = ctx.createOscillator(); o.type = type; o.frequency.value = N2F(n);
+      const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = s.lead === 'synth' ? 2200 : 3200;
+      const g = ctx.createGain(); o.connect(f); f.connect(g); g.connect(musBus);
+      env(g, t, .003, s.lead === 'synth' ? .08 : .12, s.lead === 'marimba' ? .25 : spb * 1.8); o.start(t); o.stop(t + .4);
+      if (s.lead === 'pluck' && p % 4 === 0) { const o2 = ctx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = N2F(n + 12); const g2 = ctx.createGain(); o2.connect(g2); g2.connect(musBus); env(g2, t + spb / 2, .002, .05, .12); o2.start(t + spb / 2); o2.stop(t + .4); }
+    }
+    if (s.lead === 'pad' && has) {
+      const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = N2F(root + 24 + (+tok === 4 ? third : +tok));
+      const g = ctx.createGain(); o.connect(g); g.connect(musBus); env(g, t, .01, .05, .5); o.start(t); o.stop(t + .6);
+    }
+  }
+  function duck(on) { if (!ctx) return; musBus.gain.setTargetAtTime(prefs.music ? (on ? .15 : .42) : 0, now(), .2); }
+  function toggle(kind) {
+    prefs[kind] = !prefs[kind]; savePrefs();
+    if (ctx) { if (kind === 'sfx') sfxBus.gain.setTargetAtTime(prefs.sfx ? .8 : 0, now(), .05); else musBus.gain.setTargetAtTime(prefs.music ? .42 : 0, now(), .1); }
+    return prefs[kind];
+  }
+  return { init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+})();
