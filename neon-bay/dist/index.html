@@ -210,6 +210,12 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
 #step{padding:5px 12px 6px;background:rgba(10,8,22,.62)}#sD{font-size:13px}#sN{font-size:12px}
 @media (max-width:760px){#step{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:auto;right:calc(112px + env(safe-area-inset-right,0px));transform:none;width:auto;max-width:calc(100vw - 290px);min-width:150px;text-align:left;padding:4px 8px 5px}#lvlName,#dots{display:none}#sN{font-size:10px}#sD{font-size:11px;line-height:1.25}#sC{font-size:13px}}
 @media (max-width:460px){#step{max-width:calc(100vw - 250px)}#hudL{transform:scale(.88);transform-origin:top left}}
+#rotate{position:fixed;inset:0;z-index:30;background:rgba(9,7,20,.94);display:grid;place-items:center;text-align:center;padding:24px}
+#rotate .rc{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:320px}
+#rotate b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--cyan)}#rotate span{color:var(--muted);font-size:15px;line-height:1.4}
+#rotate .ph{width:54px;height:92px;border:4px solid var(--ink);border-radius:12px;position:relative;animation:rot 2.2s ease-in-out infinite}
+#rotate .ph::after{content:'';position:absolute;bottom:6px;left:50%;width:10px;height:3px;margin-left:-5px;background:var(--ink);border-radius:2px}
+@keyframes rot{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -251,6 +257,7 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
   <div class="tbtn sh" id="bPause">II</div>
 </div>
 
+<div id="rotate" hidden><div class="rc"><div class="ph"></div><b>Tourne ton téléphone</b><span>Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.</span><button class="btn small" id="portraitOk">Jouer en vertical quand même</button></div></div>
 <div id="screen"></div>
 
 <script>
@@ -889,6 +896,9 @@ window.NB_I18N = (() => {
     'DESCENDRE': { en: 'EXIT', es: 'BAJAR', pt: 'SAIR' }, 'MONTER': { en: 'ENTER', es: 'SUBIR', pt: 'ENTRAR' }, 'PAYER': { en: 'PAY', es: 'PAGAR', pt: 'PAGAR' },
     'PAYER FLICS': { en: 'PAY COPS', es: 'PAGAR POLIS', pt: 'PAGAR POLÍCIA' },
     'Manette connectée': { en: 'Controller connected', es: 'Mando conectado', pt: 'Controle conectado' },
+    'Tourne ton téléphone': { en: 'Turn your phone', es: 'Gira tu teléfono', pt: 'Gire o celular' },
+    "Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.": { en: 'Néon Bay is played in landscape, one thumb on each side.', es: 'Néon Bay se juega en horizontal, con un pulgar a cada lado.', pt: 'Néon Bay se joga na horizontal, com um polegar de cada lado.' },
+    'Jouer en vertical quand même': { en: 'Play in portrait anyway', es: 'Jugar en vertical de todos modos', pt: 'Jogar na vertical mesmo assim' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -962,6 +972,7 @@ window.NB_I18N = (() => {
     [/^(.+)\. L'argent gagné pendant la tentative est conservé \((.+)\)\.$/, { en: '$1. The money earned during this attempt is kept ($2).', es: '$1. Conservas el dinero ganado en este intento ($2).', pt: '$1. O dinheiro ganho nesta tentativa fica com você ($2).' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
+    [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],
     [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
     [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
   ];
@@ -1424,7 +1435,7 @@ function validCode(raw) {
 
 // ---------- sauvegarde ----------
 const SAVE_KEY = 'neonbay.save.v2';
-const fresh = () => ({ money: 500, owned: { pistol: true }, weapon: 'pistol', armor: 0, medkits: 1, nitro: 0, perks: {}, done: {}, maxLevel: 1, premium: false });
+const fresh = () => ({ money: 500, owned: { pistol: true }, weapon: 'pistol', armor: 0, medkits: 2, nitro: 0, perks: {}, done: {}, maxLevel: 1, premium: false });
 let save = (() => { try { const s = JSON.parse(lsGet(SAVE_KEY)); if (s && s.owned) return Object.assign(fresh(), s); } catch (e) {} return fresh(); })();
 save.owned.fists = true;
 save.outfit = Object.assign({ jacket: 'neon', shirt: 'white', pants: 'dark', hat: 'none', hair: 'short', hairColor: 'black', skin: 't2', shoes: 'white', chain: 'none' }, save.outfit || {});
@@ -1544,6 +1555,8 @@ const CIV = ['#ff5d8f', '#ffd23f', '#3ee0c5', '#8b7bff', '#ff8a3d', '#e7e3f5', '
 const PEDC = ['#ffcf99', '#e0a070', '#8d5a3b', '#f2d3b3', '#5c3a24', '#c68b59'];
 const SHIRT = ['#ff2e93', '#21e6ff', '#ffb627', '#a6ff4d', '#ffffff', '#9d7bff', '#ff6b3d'];
 const lvl = () => L ? L.n : 1;
+// facilité des premiers niveaux : 0,5 au niveau 1, puis on remonte jusqu'à 1 au niveau 11
+const ez = () => { const n = lvl(); return n >= 11 ? 1 : .5 + .05 * (n - 1); };
 // qualité graphique : auto (selon les images par seconde), haute, moyenne, basse
 const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, label: 'Haute' }, medium: { pr: 1.25, peds: 24, traffic: 13, lod: 600, fx: true, label: 'Moyenne' }, low: { pr: 1, peds: 14, traffic: 8, lod: 350, fx: false, label: 'Basse' } };
 const QORDER = ['high', 'medium', 'low'];
@@ -1803,7 +1816,7 @@ function updPed(p, dt) {
 // ---------- ennemis ----------
 function mkEnemy(x, y, faction, boss, group) {
   const n = lvl();
-  const hp = boss ? 380 + n * 55 : 38 + n * 5;
+  const hp = (boss ? 380 + n * 55 : 38 + n * 5) * (.6 + .4 * ez());
   return { look: faction.look || null, x, y, a: rnd(TAU), hp, max: hp, color: faction.color, boss: boss || null, group, alert: false, cd: rnd(1, 2), strafe: Math.random() < .5 ? 1 : -1, step: 0, st: rnd(2) };
 }
 function hitEnemy(e, dmg) {
@@ -1824,7 +1837,7 @@ function updEnemy(e, dt) {
   let tx = P.x, ty = P.y;
   if (vip && vip.hp > 0 && !vip.inCar && dist(e.x, e.y, vip.x, vip.y) < dist(e.x, e.y, P.x, P.y) * .8) { tx = vip.x; ty = vip.y; }
   const d = dist(e.x, e.y, tx, ty);
-  if (!e.alert && d < 460 && los(e.x, e.y, tx, ty)) e.alert = true;
+  if (!e.alert && d < 300 + 160 * ez() && los(e.x, e.y, tx, ty)) e.alert = true;
   if (!e.alert) { e.st -= dt; if (e.st < 0) { e.a = rnd(TAU); e.st = rnd(1, 3); } moveBody(e, Math.cos(e.a) * 25 * dt, Math.sin(e.a) * 25 * dt); return; }
   e.a = Math.atan2(ty - e.y, tx - e.x);
   const sp = (e.boss ? 70 : 95) + n * 1.5;
@@ -1837,13 +1850,18 @@ function updEnemy(e, dt) {
   e.cd -= dt;
   if (e.cd <= 0 && d < 520 && shootersNow < 4 && los(e.x, e.y, tx, ty)) {
     shootersNow++;
-    const spread = Math.max(.05, .32 - n * .009), a = e.a + rnd(-spread, spread);
-    const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist());
+    const spread = Math.max(.05, .32 - n * .009) + (1 - ez()) * .35, a = e.a + rnd(-spread, spread);
+    const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist()) * ez();
     const shots = e.boss && n >= 15 ? 3 : 1;
     { const [pn, vl] = spatial(e.x, e.y); if (vl > .05) au('shot', 'enemy', pn, vl * .8); }
     for (let k = 0; k < shots; k++) { const aa = a + (k - (shots - 1) / 2) * .12; bullets.push({ x: e.x + Math.cos(aa) * 12, y: e.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 560, vy: Math.sin(aa) * 560, life: 1, dmg, from: 'enemy' }); }
-    e.cd = Math.max(.8, 2.4 - n * .04) * rnd(.75, 1.35) * (e.boss ? .6 : 1);
+    e.cd = Math.max(.8, 2.4 - n * .04) * rnd(.75, 1.35) * (e.boss ? .6 : 1) / ez();
   }
+}
+function movePlayer(vx, vy) {
+  if (save.ghost === false) return moveBody(P, vx, vy);
+  const ok = (x, y) => { const t = tileAt(x, y); return t !== WATER && x > 6 && y > 6 && x < W - 6 && y < W - 6; };
+  if (ok(P.x + vx, P.y)) P.x += vx; if (ok(P.x, P.y + vy)) P.y += vy;
 }
 function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.x += vx; if (!solid(o.x, o.y + vy + Math.sign(vy) * 8)) o.y += vy; }
 
@@ -2008,14 +2026,14 @@ function makeStep(type, n, idx) {
     case 'collect': {
       const c = randWalk(900, 1900, P.x, P.y), count = Math.min(8, 3 + Math.floor(n / 6));
       st.items = []; for (let k = 0; k < count; k++) { const p = freeNear(c.x, c.y, 330); const it = { x: p.x, y: p.y, got: false }; cases.push(it); st.items.push(it); }
-      const guards = Math.floor(n / 4); if (guards) spawnGroup(c.x, c.y, guards, f, g);
+      const guards = n < 6 ? 0 : Math.floor(n / 4); if (guards) spawnGroup(c.x, c.y, guards, f, g);
       st.desc = () => 'Récupère les valises près de ' + st.pl + ' (' + st.items.filter(i => i.got).length + '/' + count + ')'; st.pl = place();
       st.dyn = () => { const r = st.items.filter(i => !i.got); return r.length ? nearestOf(r) : null; };
       st.check = () => st.items.every(i => i.got); break;
     }
     case 'elim': case 'boss': {
       const c = randWalk(1000, 1900, P.x, P.y);
-      const count = type === 'boss' ? Math.min(10, 2 + Math.floor(n / 3)) : Math.min(14, 3 + Math.floor(n / 2.5));
+      const count = Math.max(2, Math.round((type === 'boss' ? Math.min(10, 2 + Math.floor(n / 3)) : Math.min(14, 3 + Math.floor(n / 2.5))) * (.6 + .4 * ez())));
       const boss = spawnGroup(c.x, c.y, count, f, g, type === 'boss' ? (L.def.boss || 'le chef') : null);
       if (n >= 4) for (let k = 0; k < 1 + Math.floor(n / 12); k++) spawnGangCar(c.x, c.y, f, g);
       st.center = c; st.boss = boss;
@@ -2024,12 +2042,12 @@ function makeStep(type, n, idx) {
       st.check = () => type === 'boss' ? boss.hp <= 0 : !enemies.some(e => e.group === g && e.hp > 0); break;
     }
     case 'escape': {
-      S.heat = Math.max(S.heat, Math.min(5, 2 + Math.floor(n / 8))); S.unseen = 0; st.time = 150; st.grace = 2;
+      S.heat = Math.max(S.heat, Math.min(5, (n < 4 ? 1 : 2) + Math.floor(n / 8))); S.unseen = 0; st.time = 150; st.grace = 2;
       st.desc = 'La police te traque : sème-la (tunnel, atelier de peinture ou pot-de-vin)';
       st.check = dt => { st.grace -= dt; return st.grace <= 0 && stars() === 0; }; break;
     }
     case 'survive': {
-      S.heat = Math.max(S.heat, Math.min(5, 3 + Math.floor(n / 10))); S.unseen = 0; st.time = 30 + Math.round(n * 1.2); st.survive = true; st.lock = true;
+      S.heat = Math.max(S.heat, Math.min(5, (n < 6 ? 2 : 3) + Math.floor(n / 10))); S.unseen = 0; st.time = 30 + Math.round(n * 1.2); st.survive = true; st.lock = true;
       st.desc = 'Survis jusqu’à la fin du chrono'; st.check = () => false; break;
     }
     case 'tunnel': { L.tunneled = false; st.target = nearestOf(world.tunnels); st.desc = 'Prends le tunnel souterrain (E sur la bouche T)'; st.check = () => L.tunneled; break; }
@@ -2105,6 +2123,7 @@ function startLevel(n) {
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
+  try { if (touch.on && screen.orientation && screen.orientation.lock && (document.fullscreenElement || document.webkitFullscreenElement)) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   nextStep();
 }
@@ -2121,7 +2140,7 @@ function nextStep() {
 function updLevel(dt) {
   const st = L.step; if (!st) return;
   L.time += dt;
-  if (st.time !== null && !st.assisted) { st.assisted = true; if (assist() && !st.survive) st.time = Math.round(st.time * (1 + .2 * assist())); }
+  if (st.time !== null && !st.assisted) { st.assisted = true; if (!st.survive) st.time = Math.round(st.time * (1 + .2 * assist()) * (2 - ez())); else st.time = Math.round(st.time * (.6 + .4 * ez())); }
   if (st.time !== null) {
     st.time -= dt;
     if (st.time <= 0) { if (st.survive) { nextStep(); return; } failLevel('Temps écoulé'); return; }
@@ -2315,6 +2334,7 @@ const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDef
     if (m > 12 && !P.car) { touch.aiming = true; touch.aimA = Math.atan2(dy, dx) + camRot(); fb.classList.add('aiming'); const k = Math.min(1, 40 / m); knob2.style.transform = `translate(${dx * k}px,${dy * k}px)`; } });
   const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
   fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
+$('portraitOk').addEventListener('click', () => { save.portraitOk = true; persist(); $('rotate').hidden = true; S.rot = false; });
 tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
@@ -2372,7 +2392,7 @@ function update(dt) {
   if (P.nitro > 0) P.nitro -= dt;
   if (peds.length < Q.peds && Math.random() < .5) spawnPed();
   if (cars.filter(c => c.ai === 'traffic').length < Q.traffic && Math.random() < .3) spawnTraffic();
-  const want = Math.round(PCOUNT[stars()] * (save.perks.radio ? .6 : 1) + (stars() >= 3 ? Math.floor(lvl() / 12) : 0));
+  const want = Math.max(stars() ? 1 : 0, Math.round(PCOUNT[stars()] * (save.perks.radio ? .6 : 1) * (.5 + .5 * ez()) + (stars() >= 3 ? Math.floor(lvl() / 12) : 0)));
   const cops = cars.filter(c => c.kind === 'police' && c.ai === 'police');
   S.spawnPol -= dt; if (cops.length < want && S.spawnPol <= 0) { spawnPolice(); S.spawnPol = save.perks.radio ? 2 : 1.2; }
   const Lk = keys.KeyA || keys.ArrowLeft, Rk = keys.KeyD || keys.ArrowRight, U = keys.KeyW || keys.ArrowUp, Dn = keys.KeyS || keys.ArrowDown;
@@ -2392,7 +2412,7 @@ function update(dt) {
       if (touch.mag > .15) { mx = touch.jx; my = touch.jy; }
       if (pad.lmag > .2) { mx = pad.lx; my = pad.ly; }
       const m = Math.hypot(mx, my);
-      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; moveBody(P, Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
       if (pad.rmag > .3) { touch.aiming = true; touch.aimA = Math.atan2(pad.ry, pad.rx) + camRot(); S.padAim = true; } else if (S.padAim) { S.padAim = false; if (!touch.shoot) touch.aiming = false; }
       if (touch.aiming) P.a = touch.aimA;
       P.cd -= dt; if (act && P.cd <= 0) fire();
@@ -2469,12 +2489,12 @@ function update(dt) {
   const s = stars();
   if (s > 0) {
     if (cars.some(c => c.kind === 'police' && (c.ai === 'police' || c.ai === 'block') && dist(c.x, c.y, P.x, P.y) < 430) || (heli && !heli.leave && dist(heli.x, heli.y, P.x, P.y) < 600)) S.unseen = 0; else S.unseen += dt;
-    const lose = (save.perks.radio ? 5 : 7) + lvl() * .04;
+    const lose = ((save.perks.radio ? 5 : 7) + lvl() * .04) * (.55 + .45 * ez());
     if (S.unseen > lose && !(L && L.step && L.step.lock)) { S.heat = Math.max(0, s - 1); S.unseen = 0; if (S.heat < 1) { S.heat = 0; msg('Police semée'); policeLeave(); track('escapes'); } }
     let near = false; for (const c of cars) if (c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, P.x, P.y) < (P.car ? 62 : 56) && Math.abs(c.v) < 90) { near = true; break; }
     if (near && (!P.car || Math.abs(P.car.v) < 30)) S.bust += dt * (P.car ? .6 : 1); else S.bust = Math.max(0, S.bust - dt);
-    if (S.bust > 1.6) failLevel('Arrêté par la police');
-  } else { S.bust = 0; if (S.hp < 100) S.hp = Math.min(100, S.hp + dt * 1.5); }
+    if (S.bust > 1.6 + (1 - ez()) * 3) failLevel('Arrêté par la police');
+  } else { S.bust = 0; if (S.hp < 100) S.hp = Math.min(100, S.hp + dt * (1.5 + (1 - ez()) * 6)); }
   // nettoyage
   for (const c of cars) if (c.ai === 'block') { c.ttl -= dt; if (c.ttl <= 0 || stars() === 0) c.ai = 'leave'; }
   cars = cars.filter(c => { if (c === P.car || c.keep) return true; const d = dist(c.x, c.y, P.x, P.y); if (c.ai === 'leave' && d > 800) return false; return d < (c.ai ? 1700 : 2600); });
@@ -2766,7 +2786,7 @@ function build3DWorld() {
     im.setColorAt(i, c);
   });
   R3.s.set(1, 1, 1);
-  g.add(im);
+  g.add(im); R3.bldMesh = im;
   // néons sur les toits (bordures lumineuses autour des blocs)
   const LK = world.region.look || {};
   const neonTiles = (LK.roof === 'tile' ? [] : tiles).filter(([tx, ty]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => world.map[(ty + dy) * N + tx + dx] !== BLD));
@@ -3173,6 +3193,19 @@ function cineCamera(playing) {
   }
   cam3.position.copy(pos.lerp(normPos, e)); cam3.lookAt(tgt.lerp(normTgt, e));
 }
+// le joueur reste visible à travers les immeubles
+function xray(m) {
+  R3.xf = (R3.xf || 0) + 1;
+  if (R3.xf % 5 === 0 && R3.bldMesh) {
+    const tgt = new THREE.Vector3(P.x, 30, P.y), from = R3.cam.position.clone(), dir = tgt.clone().sub(from), len = dir.length();
+    R3.ray.set(from, dir.normalize()); R3.ray.far = len - 8;
+    let hid = false; try { hid = R3.ray.intersectObject(R3.bldMesh, false).length > 0; } catch (e) {}
+    const inside = tileAt(P.x, P.y) === BLD; R3.ray.far = Infinity;
+    R3.hidden = hid || inside;
+  }
+  const h = !!R3.hidden;
+  if (m.userData.xr !== h) { m.userData.xr = h; m.traverse(o => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) { o.material.depthTest = !h; o.material.transparent = h; o.material.opacity = h ? .85 : 1; o.renderOrder = h ? 20 : 0; o.material.needsUpdate = true; } }); }
+}
 function hpBar(parent, y, w) {
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(w, 3.5), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .6, depthTest: false }));
   const fg = new THREE.Mesh(new THREE.PlaneGeometry(w, 3.5), new THREE.MeshBasicMaterial({ color: 0xffffff, depthTest: false }));
@@ -3239,7 +3272,7 @@ function render3D(dt) {
     (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar({ shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
-  if (playing && !P.car) sync(P, () => makeChar(playerLook()), m => { const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2)); });
+  if (playing && !P.car) sync(P, () => { const m = makeChar(playerLook()); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2)); });
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
   for (const c of cases) if (!c.got && near(c.x, c.y)) sync(c, () => makeProp('case'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time; });
@@ -3269,7 +3302,7 @@ function render3D(dt) {
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
-  R3.me.visible = !!playing && mode === 'top'; if (playing) R3.me.position.set(P.x, 1, P.y);
+  R3.me.visible = !!playing && (mode === 'top' || R3.hidden); if (playing) R3.me.position.set(P.x, 1, P.y);
   // visée souris : on projette le pointeur sur le sol
   R3.ndc.set(mouse.sx / VW * 2 - 1, -(mouse.sy / VH) * 2 + 1); R3.ray.setFromCamera(R3.ndc, R3.cam);
   if (R3.ray.ray.intersectPlane(R3.plane, R3.hit)) { mouse.wx = R3.hit.x; mouse.wy = R3.hit.z; }
@@ -3307,7 +3340,7 @@ const SCREENS = {
         <button class="btn" data-go="trophies">Succès</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button>
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -3380,7 +3413,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -3481,7 +3514,7 @@ function buy(id) {
   persist(); showScreen('shop', shopState);
 }
 function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = TR(t); screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
-function pauseGame() { if (S.mode !== 'play') return; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
+function pauseGame() { if (S.mode !== 'play') return; $('rotate').hidden = true; S.rot = false; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
 function resumeGame() { if (PORTAL) PORTAL.start(); S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
 function goLevel(n) { if (n > 1 && !save.premium && !PORTAL) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
 screenEl.addEventListener('click', e => {
@@ -3489,6 +3522,7 @@ screenEl.addEventListener('click', e => {
   const ds = b.dataset;
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
   if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
+  if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
@@ -3546,6 +3580,8 @@ function tick(dt) {
     let gdt = dt;
     if (S.cine) { S.cine.t = S.cine.start ? (performance.now() - S.cine.start) / 1000 : (S.cine.start = performance.now(), 0); gdt = S.cine.type === 'intro' ? 0 : dt * .18; if (S.cine.t >= S.cine.dur) { S.cine = null; hideCine(); } }
     S.tod = ((S.tod || 0) + gdt / 480) % 1;
+    const rot = touch.on && innerHeight > innerWidth && !save.portraitOk; if (!!S.rot !== rot) { S.rot = rot; $('rotate').hidden = !rot; if (rot && save.cam) {} }
+    if (rot) gdt = 0;
     if (gdt > 0) update(gdt); updHud(dt); updTips(gdt); monitorFps(dt);
   }
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); var hd = heli ? dist(heli.x, heli.y, P.x, P.y) : 1e9; au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd, heliDist: hd, rain: !!S.rain }, dt); }
@@ -3555,7 +3591,7 @@ function tick(dt) {
 // décor du menu : la ville du premier pays
 world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
-if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); }
+if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); I18.dom(document.getElementById('rotate')); }
 init3D();
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();

@@ -27,6 +27,9 @@ window.NB_I18N = (() => {
     'DESCENDRE': { en: 'EXIT', es: 'BAJAR', pt: 'SAIR' }, 'MONTER': { en: 'ENTER', es: 'SUBIR', pt: 'ENTRAR' }, 'PAYER': { en: 'PAY', es: 'PAGAR', pt: 'PAGAR' },
     'PAYER FLICS': { en: 'PAY COPS', es: 'PAGAR POLIS', pt: 'PAGAR POLÍCIA' },
     'Manette connectée': { en: 'Controller connected', es: 'Mando conectado', pt: 'Controle conectado' },
+    'Tourne ton téléphone': { en: 'Turn your phone', es: 'Gira tu teléfono', pt: 'Gire o celular' },
+    "Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.": { en: 'Néon Bay is played in landscape, one thumb on each side.', es: 'Néon Bay se juega en horizontal, con un pulgar a cada lado.', pt: 'Néon Bay se joga na horizontal, com um polegar de cada lado.' },
+    'Jouer en vertical quand même': { en: 'Play in portrait anyway', es: 'Jugar en vertical de todos modos', pt: 'Jogar na vertical mesmo assim' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -100,6 +103,7 @@ window.NB_I18N = (() => {
     [/^(.+)\. L'argent gagné pendant la tentative est conservé \((.+)\)\.$/, { en: '$1. The money earned during this attempt is kept ($2).', es: '$1. Conservas el dinero ganado en este intento ($2).', pt: '$1. O dinheiro ganho nesta tentativa fica com você ($2).' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
+    [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],
     [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
     [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
   ];

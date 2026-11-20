@@ -4,7 +4,7 @@
   "name": "Néon Bay",
   "launcherName": "Néon Bay",
   "display": "fullscreen",
-  "orientation": "default",
+  "orientation": "landscape",
   "themeColor": "#0D0B1A",
   "navigationColor": "#0D0B1A",
   "backgroundColor": "#0D0B1A",

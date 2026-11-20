@@ -210,6 +210,12 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
 #step{padding:5px 12px 6px;background:rgba(10,8,22,.62)}#sD{font-size:13px}#sN{font-size:12px}
 @media (max-width:760px){#step{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:auto;right:calc(112px + env(safe-area-inset-right,0px));transform:none;width:auto;max-width:calc(100vw - 290px);min-width:150px;text-align:left;padding:4px 8px 5px}#lvlName,#dots{display:none}#sN{font-size:10px}#sD{font-size:11px;line-height:1.25}#sC{font-size:13px}}
 @media (max-width:460px){#step{max-width:calc(100vw - 250px)}#hudL{transform:scale(.88);transform-origin:top left}}
+#rotate{position:fixed;inset:0;z-index:30;background:rgba(9,7,20,.94);display:grid;place-items:center;text-align:center;padding:24px}
+#rotate .rc{display:flex;flex-direction:column;align-items:center;gap:12px;max-width:320px}
+#rotate b{font-family:var(--display);font-weight:400;font-size:22px;color:var(--cyan)}#rotate span{color:var(--muted);font-size:15px;line-height:1.4}
+#rotate .ph{width:54px;height:92px;border:4px solid var(--ink);border-radius:12px;position:relative;animation:rot 2.2s ease-in-out infinite}
+#rotate .ph::after{content:'';position:absolute;bottom:6px;left:50%;width:10px;height:3px;margin-left:-5px;background:var(--ink);border-radius:2px}
+@keyframes rot{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -251,6 +257,7 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
   <div class="tbtn sh" id="bPause">II</div>
 </div>
 
+<div id="rotate" hidden><div class="rc"><div class="ph"></div><b>Tourne ton téléphone</b><span>Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.</span><button class="btn small" id="portraitOk">Jouer en vertical quand même</button></div></div>
 <div id="screen"></div>
 
 <script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
