@@ -21,6 +21,12 @@ window.NB_I18N = (() => {
     'Aide activée : plus de temps et ennemis moins dangereux': { en: 'Assist on: more time and weaker enemies', es: 'Ayuda activada: más tiempo y enemigos menos peligrosos', pt: 'Ajuda ativada: mais tempo e inimigos menos perigosos' },
     'Qualité graphique réduite pour plus de fluidité': { en: 'Graphics quality lowered for smoother play', es: 'Calidad gráfica reducida para más fluidez', pt: 'Qualidade gráfica reduzida para mais fluidez' },
     'Haute': { en: 'High', es: 'Alta', pt: 'Alta' }, 'Moyenne': { en: 'Medium', es: 'Media', pt: 'Média' }, 'Basse': { en: 'Low', es: 'Baja', pt: 'Baixa' },
+    'glisse pour viser': { en: 'slide to aim', es: 'desliza para apuntar', pt: 'deslize para mirar' },
+    'frein à main': { en: 'handbrake', es: 'freno de mano', pt: 'freio de mão' },
+    'FREIN': { en: 'BRAKE', es: 'FRENO', pt: 'FREIO' }, 'RECHARGE': { en: 'RELOAD', es: 'RECARGA', pt: 'RECARGA' },
+    'DESCENDRE': { en: 'EXIT', es: 'BAJAR', pt: 'SAIR' }, 'MONTER': { en: 'ENTER', es: 'SUBIR', pt: 'ENTRAR' }, 'PAYER': { en: 'PAY', es: 'PAGAR', pt: 'PAGAR' },
+    'PAYER FLICS': { en: 'PAY COPS', es: 'PAGAR POLIS', pt: 'PAGAR POLÍCIA' },
+    'Manette connectée': { en: 'Controller connected', es: 'Mando conectado', pt: 'Controle conectado' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour

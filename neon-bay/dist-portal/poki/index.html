@@ -46,7 +46,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #dots i.d{background:var(--lime)}#dots i.c{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
 #vipBar{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:150px;font-size:11px;color:var(--gold);font-family:var(--display);letter-spacing:.04em}
 #vipBar .barw{width:150px;margin-top:3px}#vipHp{height:100%;background:var(--gold)}
-#toast{top:34%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(15px,2.6vw,22px);text-align:center;text-shadow:0 0 14px var(--magenta),0 2px 0 #000;opacity:0;transition:opacity .25s;max-width:90vw}
+#toast{top:22%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(13px,2vw,18px);text-align:center;text-shadow:0 0 14px var(--magenta),0 2px 0 #000;opacity:0;transition:opacity .25s;max-width:90vw}
 #banner{top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(44px,10vw,96px);color:var(--magenta);text-shadow:0 0 30px var(--magenta),0 4px 0 #000;opacity:0;transition:opacity .3s;white-space:nowrap;z-index:12}
 #prompt{bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);font-size:15px;font-weight:600;background:rgba(0,0,0,.65);border:1px solid var(--line);padding:6px 12px;border-radius:8px;white-space:nowrap;color:var(--amber)}
 #fade{position:fixed;inset:0;z-index:8;background:#000;display:grid;place-items:center;font-family:var(--display);color:var(--amber);font-size:22px;opacity:0;transition:opacity .45s;pointer-events:none}
@@ -56,7 +56,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
   #step{top:auto;bottom:calc(160px + env(safe-area-inset-bottom,0px));width:calc(100vw - 32px);min-width:0;padding:6px 10px 8px}
   #sD{font-size:13px}
   .barw{width:120px}
-  body.touch #prompt{bottom:calc(350px + env(safe-area-inset-bottom,0px))}
+  body.touch #prompt{bottom:auto;top:calc(150px + env(safe-area-inset-top,0px));font-size:12px}
   body.touch #step{bottom:calc(238px + env(safe-area-inset-bottom,0px))}
 }
 /* commandes tactiles */
@@ -65,14 +65,21 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #stickBase{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(33,230,255,.45);background:rgba(33,230,255,.07);left:calc(26px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
 #stickKnob{position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(33,230,255,.55);left:34px;top:34px;box-shadow:0 0 16px rgba(33,230,255,.6)}
 .tbtn{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid;font-family:var(--display);font-size:10px;display:grid;place-items:center;color:var(--ink);background:rgba(0,0,0,.4);text-align:center;line-height:1.1}
-#bShoot{width:80px;height:80px;right:calc(22px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));border-color:var(--magenta);box-shadow:0 0 14px rgba(255,46,147,.4)}
-#bAct{width:62px;height:62px;right:calc(112px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));border-color:var(--amber)}
-#bWep{width:52px;height:52px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(122px + env(safe-area-inset-bottom,0px));border-color:var(--cyan)}
-#bMed{width:48px;height:48px;right:calc(98px + env(safe-area-inset-right,0px));bottom:calc(100px + env(safe-area-inset-bottom,0px));border-color:var(--lime)}
-#bNitro{width:52px;height:52px;right:calc(158px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));border-color:#9d7bff}
-#bBribe{width:58px;height:58px;right:calc(186px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));border-color:var(--gold);color:var(--gold)}
-#bCam{width:42px;height:42px;right:calc(80px + env(safe-area-inset-right,0px));bottom:calc(186px + env(safe-area-inset-bottom,0px));border-color:var(--cyan);font-size:10px}
-#bPause{width:42px;height:42px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(186px + env(safe-area-inset-bottom,0px));border-color:var(--line);font-size:14px}
+#bShoot{width:104px;height:104px;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));border-color:var(--magenta);background:radial-gradient(circle,rgba(255,46,147,.35),rgba(0,0,0,.45) 70%);box-shadow:0 0 18px rgba(255,46,147,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px}
+#bShoot small{font-family:var(--body);font-size:9px;color:rgba(255,255,255,.65);letter-spacing:0}
+#fireKnob{position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.7);left:calc(50% - 15px);top:calc(50% - 15px);pointer-events:none;opacity:0;transition:opacity .15s}
+#bShoot.aiming #fireKnob{opacity:1}
+.tbtn.pad{width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:rgba(0,0,0,.45)}
+.tbtn.pad b{font-family:var(--display);font-weight:400;font-size:18px;line-height:1}.tbtn.pad small{font-family:var(--body);font-weight:700;font-size:8px;letter-spacing:.02em;line-height:1.1;max-width:52px;overflow:hidden;white-space:nowrap}
+.tbtn.a{border-color:#3ecf6e;color:#3ecf6e;right:calc(132px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.tbtn.x{border-color:#3a8bff;color:#3a8bff;right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+.tbtn.y{border-color:#ffd23f;color:#ffd23f;right:calc(98px + env(safe-area-inset-right,0px));bottom:calc(136px + env(safe-area-inset-bottom,0px))}
+.tbtn.b{border-color:#ff4d5e;color:#ff4d5e;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+.tbtn.sh{border-radius:10px;width:auto;height:30px;padding:0 10px;font-size:10px;border-color:var(--line);background:rgba(0,0,0,.5)}
+#bCam{right:calc(80px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
+#bPause{right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
+#bNitro{right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(244px + env(safe-area-inset-bottom,0px));border-color:#9d7bff;color:#c9b8ff}
+#bBribe{right:calc(110px + env(safe-area-inset-right,0px));bottom:calc(244px + env(safe-area-inset-bottom,0px));border-color:var(--gold);color:var(--gold)}
 .tbtn:active{background:rgba(255,255,255,.18)}
 /* écrans */
 #screen{position:fixed;inset:0;z-index:10;overflow:auto;background:radial-gradient(ellipse at 50% 120%,rgba(255,46,147,.28),transparent 60%),rgba(9,7,20,.9);padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-user-select:text;user-select:text}
@@ -161,8 +168,8 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
   #stickBase{width:104px;height:104px}#stickKnob{left:26px;top:26px}
   .logo{font-size:52px}.home{gap:10px;padding-top:0}
 }
-#tip{bottom:calc(64px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));background:rgba(33,230,255,.14);border:1px solid rgba(33,230,255,.6);box-shadow:0 0 18px rgba(33,230,255,.3);color:var(--ink);font-size:15px;line-height:1.4;padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(4px)}
-body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
+#tip{top:calc(92px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:min(420px,calc(100vw - 340px));background:rgba(10,8,22,.72);border:1px solid rgba(33,230,255,.45);color:var(--ink);font-size:13px;line-height:1.35;padding:6px 12px;border-radius:10px;text-align:center}
+@media (max-width:760px){#tip{top:calc(118px + env(safe-area-inset-top,0px));max-width:calc(100vw - 140px);font-size:12px}}
 #reward{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-20px);opacity:0;transition:transform .35s,opacity .35s;z-index:15;background:linear-gradient(180deg,#2a1f00,#140f00);border:1px solid var(--gold);border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 0 26px rgba(255,215,0,.35);pointer-events:none;text-align:center}
 #reward.in{opacity:1;transform:translate(-50%,0)}
 #reward b{font-family:var(--display);font-weight:400;font-size:12px;color:var(--gold);letter-spacing:.06em}#reward span{font-size:16px;font-weight:700}#reward i{font-style:normal;color:var(--lime);font-weight:700}
@@ -190,14 +197,19 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 #clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 #cine{position:fixed;inset:0;z-index:9;pointer-events:none}
 #cine .bar{position:absolute;left:0;right:0;height:0;background:#000;transition:height .4s}#cine .bar.t{top:0}#cine .bar.b{bottom:0}
-#cine.on .bar{height:12vh}
-#cine .ct{position:absolute;left:0;right:0;bottom:calc(14vh + 10px);text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s .2s,transform .5s .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+#cine.on .bar{height:8vh}
+#cine .ct{position:absolute;left:0;right:0;bottom:calc(9vh + 6px);text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s .2s,transform .5s .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
 #cine.on .ct{opacity:1;transform:none}
 #cine small{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
-#cine b{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,58px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
+#cine b{font-family:var(--display);font-weight:400;font-size:clamp(20px,4.5vw,40px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
 #cine em{font-style:normal;font-size:11px;color:var(--muted)}
 .langs .btn.on{border-color:var(--cyan);color:var(--cyan)}
 .info .assist{color:var(--lime)}
+body.pad #touch{display:none!important}
+body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!important}
+#step{padding:5px 12px 6px;background:rgba(10,8,22,.62)}#sD{font-size:13px}#sN{font-size:12px}
+@media (max-width:760px){#step{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:auto;right:calc(112px + env(safe-area-inset-right,0px));transform:none;width:auto;max-width:calc(100vw - 290px);min-width:150px;text-align:left;padding:4px 8px 5px}#lvlName,#dots{display:none}#sN{font-size:10px}#sD{font-size:11px;line-height:1.25}#sC{font-size:13px}}
+@media (max-width:460px){#step{max-width:calc(100vw - 250px)}#hudL{transform:scale(.88);transform-origin:top left}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -228,14 +240,15 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 
 <div id="touch" hidden>
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
-  <div class="tbtn" id="bShoot">TIRER</div>
-  <div class="tbtn" id="bAct">ACTION</div>
-  <div class="tbtn" id="bWep">ARME</div>
-  <div class="tbtn" id="bMed">SOIN</div>
-  <div class="tbtn" id="bNitro" hidden>NITRO</div>
-  <div class="tbtn" id="bBribe" hidden>PAYER<br>FLICS</div>
-  <div class="tbtn" id="bPause">II</div>
-  <div class="tbtn" id="bCam">CAM</div>
+  <div class="tbtn fire" id="bShoot"><i id="fireKnob"></i><span id="fireLbl">TIRER</span><small>glisse pour viser</small></div>
+  <div class="tbtn pad a" id="bAct"><b>A</b><small id="lblA">ACTION</small></div>
+  <div class="tbtn pad b" id="bMed"><b>B</b><small id="lblB">SOIN</small></div>
+  <div class="tbtn pad x" id="bRel"><b>X</b><small id="lblX">RECHARGE</small></div>
+  <div class="tbtn pad y" id="bWep"><b>Y</b><small>ARME</small></div>
+  <div class="tbtn sh" id="bNitro" hidden>NITRO</div>
+  <div class="tbtn sh gold" id="bBribe" hidden>PAYER FLICS</div>
+  <div class="tbtn sh" id="bCam">CAM</div>
+  <div class="tbtn sh" id="bPause">II</div>
 </div>
 
 <div id="screen"></div>

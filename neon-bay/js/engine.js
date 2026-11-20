@@ -555,8 +555,9 @@ function fire() {
   if (am && am.mag <= 0) { startReload(); if (am.res <= 0) { const alt = D.WEAPONS.find(x => save.owned[x.id] && x.id === 'pistol'); if (alt) save.weapon = 'pistol'; } return; }
   if (am) { am.mag--; if (am.mag <= 0 && am.res > 0) setTimeout(startReload, 150); }
   let a = P.a;
-  if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
-  else if (!touch.on || touch.autoAim) { // visée auto vers l'ennemi le plus proche devant
+  if (touch.aiming) { a = touch.aimA; P.a = a; }
+  else if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
+  if (!touch.aiming && mouse.aim <= 0 && (!touch.on || touch.autoAim)) { // visée auto vers l'ennemi le plus proche devant
     let best = null, bd = 520;
     for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < (touch.on ? 1.9 : .9) && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
     if (best) a = Math.atan2(best.y - P.y, best.x - P.x);
@@ -717,7 +718,6 @@ function startLevel(n) {
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
-  toast('Niveau ' + n + ' : ' + L.def.t);
   nextStep();
 }
 function nearestFreeCar() { let b = null, bd = 400; for (const c of cars) { if (c.wreck || c.ai) continue; const d = dist(c.x, c.y, P.x, P.y); if (d < bd) { bd = d; b = c; } } return b; }
@@ -820,9 +820,9 @@ function showReward() {
 function tip(id, kb, tc) {
   save.tips = save.tips || {};
   if (save.tips[id] || S.mode !== 'play') return;
-  if (S.tipT > 0) return;
+  if (S.tipT > 0 || S.cine || (L && L.time < 2.5)) return;
   save.tips[id] = 1; persist();
-  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 6;
+  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 4.5;
 }
 function updTips(dt) {
   if (S.tipT > 0) { S.tipT -= dt; if (S.tipT <= 0) $('tip').hidden = true; }
@@ -894,10 +894,40 @@ zone.addEventListener('pointermove', e => { if (e.pointerId === stickId) moveSti
 const endStick = e => { if (e.pointerId !== stickId) return; stickId = null; touch.jx = touch.jy = touch.mag = 0; knob.style.transform = ''; };
 zone.addEventListener('pointerup', endStick); zone.addEventListener('pointercancel', endStick);
 function moveStick(e) { let dx = e.clientX - sc.x, dy = e.clientY - sc.y; const m = Math.hypot(dx, dy), mx = 50; if (m > mx) { dx *= mx / m; dy *= mx / m; } knob.style.transform = `translate(${dx}px,${dy}px)`; touch.mag = Math.min(1, m / mx); touch.jx = dx / mx; touch.jy = dy / mx; }
+// ---------- manette (Xbox, PlayStation, Bluetooth) ----------
+const pad = { on: false, lx: 0, ly: 0, lmag: 0, rx: 0, ry: 0, rmag: 0, rt: 0, lt: 0, hb: false, prev: [] };
+addEventListener('gamepadconnected', () => { pad.on = true; document.body.classList.add('pad'); toast('Manette connectée'); });
+addEventListener('gamepaddisconnected', () => { pad.on = false; document.body.classList.remove('pad'); });
+function pollPad() {
+  if (!navigator.getGamepads) return;
+  const gp = [...navigator.getGamepads()].find(g => g && g.connected); if (!gp) { pad.on = false; return; }
+  pad.on = true;
+  const dz = v => Math.abs(v) < .15 ? 0 : v, ax = gp.axes;
+  pad.lx = dz(ax[0] || 0); pad.ly = dz(ax[1] || 0); pad.lmag = Math.min(1, Math.hypot(pad.lx, pad.ly));
+  pad.rx = dz(ax[2] || 0); pad.ry = dz(ax[3] || 0); pad.rmag = Math.min(1, Math.hypot(pad.rx, pad.ry));
+  const bv = i => gp.buttons[i] ? (gp.buttons[i].value || (gp.buttons[i].pressed ? 1 : 0)) : 0;
+  pad.rt = bv(7); pad.lt = bv(6); pad.hb = bv(1) > .5 && !!P.car;
+  const press = i => bv(i) > .5 && !pad.prev[i];
+  if (S.mode === 'play') {
+    if (press(0)) contextAction();                       // A : action / voiture
+    if (press(1) && !P.car) useMedkit();                 // B : soin (frein à main en voiture)
+    if (press(2)) P.car ? useNitro() : startReload();    // X : recharger / nitro
+    if (press(3) || press(5)) cycleWeapon(1);            // Y / RB : arme suivante
+    if (press(4)) cycleCam();                            // LB : caméra
+    if (press(8)) bribePolice();                         // Select : soudoyer
+    if (press(12)) useMedkit();                          // croix haut : soin
+    if (press(9)) pauseGame();                           // Start : pause
+  } else if (S.mode === 'pause' && press(9)) resumeGame();
+  pad.prev = gp.buttons.map(b => b.pressed);
+}
 const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
-$('bShoot').addEventListener('pointerdown', e => { e.preventDefault(); touch.shoot = true; });
-['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('bShoot').addEventListener(t, () => { touch.shoot = false; }));
-tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', useMedkit); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+{ const fb = $('bShoot'), knob2 = $('fireKnob'); let fid = null, fx0 = 0, fy0 = 0;
+  fb.addEventListener('pointerdown', e => { e.preventDefault(); fid = e.pointerId; try { fb.setPointerCapture(e.pointerId); } catch (er) {} fx0 = e.clientX; fy0 = e.clientY; touch.shoot = true; touch.aiming = false; vib(8); });
+  fb.addEventListener('pointermove', e => { if (e.pointerId !== fid) return; let dx = e.clientX - fx0, dy = e.clientY - fy0; const m = Math.hypot(dx, dy);
+    if (m > 12 && !P.car) { touch.aiming = true; touch.aimA = Math.atan2(dy, dx) + camRot(); fb.classList.add('aiming'); const k = Math.min(1, 40 / m); knob2.style.transform = `translate(${dx * k}px,${dy * k}px)`; } });
+  const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
+  fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
+tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -941,7 +971,9 @@ function updHud(dt) {
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) hud.prompt.hidden = true; }
   else { hud.prompt.hidden = !hint; if (hint) setText(hud.prompt, 'hint', hint); }
   const bb = $('bBribe'), bn = $('bNitro'); const showB = s > 0 && nearCop(); if (last.bb !== showB) { last.bb = showB; bb.hidden = !showB; }
-  const showN = !!P.car; if (last.bn !== showN) { last.bn = showN; bn.hidden = !showN; $('bShoot').textContent = showN ? 'FREIN' : 'TIRER'; }
+  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = true; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
+  { let la = 'ACTION'; if (P.car) la = 'DESCENDRE'; else if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) la = 'PAYER'; else if (tileAt(P.x, P.y) === TUNNEL) la = 'TUNNEL'; else if (tileAt(P.x, P.y) === SHOP) la = 'BOUTIQUE'; else if (cars.some(c => !c.wreck && dist(c.x, c.y, P.x, P.y) < 48)) la = 'MONTER';
+    if (last.la !== la) { last.la = la; $('lblA').textContent = TR(la); } }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) hud.toast.style.opacity = 0; }
 }
 
@@ -956,20 +988,25 @@ function update(dt) {
   const cops = cars.filter(c => c.kind === 'police' && c.ai === 'police');
   S.spawnPol -= dt; if (cops.length < want && S.spawnPol <= 0) { spawnPolice(); S.spawnPol = save.perks.radio ? 2 : 1.2; }
   const Lk = keys.KeyA || keys.ArrowLeft, Rk = keys.KeyD || keys.ArrowRight, U = keys.KeyW || keys.ArrowUp, Dn = keys.KeyS || keys.ArrowDown;
-  const act = keys.Space || mouse.down || touch.shoot;
+  pollPad();
+  const act = keys.Space || mouse.down || touch.shoot || pad.rt > .3;
   if (S.dead <= 0) {
     if (P.car) {
       const c = P.car; let thr = (U ? 1 : 0) - (Dn ? 1 : 0), st = (Rk ? 1 : 0) - (Lk ? 1 : 0);
+      if (pad.on) { if (pad.rt > .05 || pad.lt > .05) thr = pad.rt - pad.lt; if (Math.abs(pad.lx) > .15) st = pad.lx; }
       if (touch.mag > .2) { const ja = Math.atan2(touch.jy, touch.jx) + camRot(), d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
       if ((keys.ShiftLeft || keys.ShiftRight) && P.nitro <= 0 && save.nitro > 0 && thr > 0 && !last.shiftN) { useNitro(); }
       last.shiftN = keys.ShiftLeft || keys.ShiftRight;
-      drive(c, dt, thr, st, act);
+      drive(c, dt, thr, st, (keys.Space || mouse.down || touch.shoot || pad.hb || S.hbTouch > 0) && true); if (S.hbTouch > 0) S.hbTouch -= dt * 3;
       P.x = c.x; P.y = c.y; P.a = c.a;
     } else {
       let mx = (Rk ? 1 : 0) - (Lk ? 1 : 0), my = (Dn ? 1 : 0) - (U ? 1 : 0);
       if (touch.mag > .15) { mx = touch.jx; my = touch.jy; }
+      if (pad.lmag > .2) { mx = pad.lx; my = pad.ly; }
       const m = Math.hypot(mx, my);
-      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 ? 230 : 150) * Math.min(1, m); P.a = Math.atan2(my, mx) + camRot(); moveBody(P, Math.cos(P.a) * sp * dt, Math.sin(P.a) * sp * dt); P.step += sp * dt * .25; }
+      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; moveBody(P, Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+      if (pad.rmag > .3) { touch.aiming = true; touch.aimA = Math.atan2(pad.ry, pad.rx) + camRot(); S.padAim = true; } else if (S.padAim) { S.padAim = false; if (!touch.shoot) touch.aiming = false; }
+      if (touch.aiming) P.a = touch.aimA;
       P.cd -= dt; if (act && P.cd <= 0) fire();
     }
   }
@@ -1696,8 +1733,8 @@ function poseHeli(m, h) {
   u.rotor.rotation.y = S.time * 28; u.tail.rotation.z = S.time * 40; u.red.visible = Math.sin(S.time * 8) > 0;
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
-function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
-function hideCine() { const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
+function showCine(sub, title) { document.body.classList.add('cine'); const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+function hideCine() { document.body.classList.remove('cine'); const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
 function envFx(dt, playing) {
@@ -1840,7 +1877,7 @@ function render3D(dt) {
   envFx(dt, playing);
   // cible de mission
   const st = playing && L.step, target = st ? stepTarget(st) : null;
-  R3.ring.visible = R3.beam.visible = !!target;
+  R3.ring.visible = R3.beam.visible = !!target; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }

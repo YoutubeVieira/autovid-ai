@@ -46,7 +46,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #dots i.d{background:var(--lime)}#dots i.c{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
 #vipBar{top:calc(170px + env(safe-area-inset-top,0px));right:calc(12px + env(safe-area-inset-right,0px));width:150px;font-size:11px;color:var(--gold);font-family:var(--display);letter-spacing:.04em}
 #vipBar .barw{width:150px;margin-top:3px}#vipHp{height:100%;background:var(--gold)}
-#toast{top:34%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(15px,2.6vw,22px);text-align:center;text-shadow:0 0 14px var(--magenta),0 2px 0 #000;opacity:0;transition:opacity .25s;max-width:90vw}
+#toast{top:22%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(13px,2vw,18px);text-align:center;text-shadow:0 0 14px var(--magenta),0 2px 0 #000;opacity:0;transition:opacity .25s;max-width:90vw}
 #banner{top:50%;left:50%;transform:translate(-50%,-50%);font-family:var(--display);font-size:clamp(44px,10vw,96px);color:var(--magenta);text-shadow:0 0 30px var(--magenta),0 4px 0 #000;opacity:0;transition:opacity .3s;white-space:nowrap;z-index:12}
 #prompt{bottom:calc(18px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);font-size:15px;font-weight:600;background:rgba(0,0,0,.65);border:1px solid var(--line);padding:6px 12px;border-radius:8px;white-space:nowrap;color:var(--amber)}
 #fade{position:fixed;inset:0;z-index:8;background:#000;display:grid;place-items:center;font-family:var(--display);color:var(--amber);font-size:22px;opacity:0;transition:opacity .45s;pointer-events:none}
@@ -56,7 +56,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
   #step{top:auto;bottom:calc(160px + env(safe-area-inset-bottom,0px));width:calc(100vw - 32px);min-width:0;padding:6px 10px 8px}
   #sD{font-size:13px}
   .barw{width:120px}
-  body.touch #prompt{bottom:calc(350px + env(safe-area-inset-bottom,0px))}
+  body.touch #prompt{bottom:auto;top:calc(150px + env(safe-area-inset-top,0px));font-size:12px}
   body.touch #step{bottom:calc(238px + env(safe-area-inset-bottom,0px))}
 }
 /* commandes tactiles */
@@ -65,14 +65,21 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #stickBase{position:absolute;width:120px;height:120px;border-radius:50%;border:2px solid rgba(33,230,255,.45);background:rgba(33,230,255,.07);left:calc(26px + env(safe-area-inset-left,0px));bottom:calc(26px + env(safe-area-inset-bottom,0px))}
 #stickKnob{position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(33,230,255,.55);left:34px;top:34px;box-shadow:0 0 16px rgba(33,230,255,.6)}
 .tbtn{position:absolute;pointer-events:auto;touch-action:none;border-radius:50%;border:2px solid;font-family:var(--display);font-size:10px;display:grid;place-items:center;color:var(--ink);background:rgba(0,0,0,.4);text-align:center;line-height:1.1}
-#bShoot{width:80px;height:80px;right:calc(22px + env(safe-area-inset-right,0px));bottom:calc(30px + env(safe-area-inset-bottom,0px));border-color:var(--magenta);box-shadow:0 0 14px rgba(255,46,147,.4)}
-#bAct{width:62px;height:62px;right:calc(112px + env(safe-area-inset-right,0px));bottom:calc(22px + env(safe-area-inset-bottom,0px));border-color:var(--amber)}
-#bWep{width:52px;height:52px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(122px + env(safe-area-inset-bottom,0px));border-color:var(--cyan)}
-#bMed{width:48px;height:48px;right:calc(98px + env(safe-area-inset-right,0px));bottom:calc(100px + env(safe-area-inset-bottom,0px));border-color:var(--lime)}
-#bNitro{width:52px;height:52px;right:calc(158px + env(safe-area-inset-right,0px));bottom:calc(86px + env(safe-area-inset-bottom,0px));border-color:#9d7bff}
-#bBribe{width:58px;height:58px;right:calc(186px + env(safe-area-inset-right,0px));bottom:calc(20px + env(safe-area-inset-bottom,0px));border-color:var(--gold);color:var(--gold)}
-#bCam{width:42px;height:42px;right:calc(80px + env(safe-area-inset-right,0px));bottom:calc(186px + env(safe-area-inset-bottom,0px));border-color:var(--cyan);font-size:10px}
-#bPause{width:42px;height:42px;right:calc(30px + env(safe-area-inset-right,0px));bottom:calc(186px + env(safe-area-inset-bottom,0px));border-color:var(--line);font-size:14px}
+#bShoot{width:104px;height:104px;right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));border-color:var(--magenta);background:radial-gradient(circle,rgba(255,46,147,.35),rgba(0,0,0,.45) 70%);box-shadow:0 0 18px rgba(255,46,147,.45);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px}
+#bShoot small{font-family:var(--body);font-size:9px;color:rgba(255,255,255,.65);letter-spacing:0}
+#fireKnob{position:absolute;width:30px;height:30px;border-radius:50%;border:2px solid rgba(255,255,255,.7);left:calc(50% - 15px);top:calc(50% - 15px);pointer-events:none;opacity:0;transition:opacity .15s}
+#bShoot.aiming #fireKnob{opacity:1}
+.tbtn.pad{width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;background:rgba(0,0,0,.45)}
+.tbtn.pad b{font-family:var(--display);font-weight:400;font-size:18px;line-height:1}.tbtn.pad small{font-family:var(--body);font-weight:700;font-size:8px;letter-spacing:.02em;line-height:1.1;max-width:52px;overflow:hidden;white-space:nowrap}
+.tbtn.a{border-color:#3ecf6e;color:#3ecf6e;right:calc(132px + env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.tbtn.x{border-color:#3a8bff;color:#3a8bff;right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+.tbtn.y{border-color:#ffd23f;color:#ffd23f;right:calc(98px + env(safe-area-inset-right,0px));bottom:calc(136px + env(safe-area-inset-bottom,0px))}
+.tbtn.b{border-color:#ff4d5e;color:#ff4d5e;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+.tbtn.sh{border-radius:10px;width:auto;height:30px;padding:0 10px;font-size:10px;border-color:var(--line);background:rgba(0,0,0,.5)}
+#bCam{right:calc(80px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
+#bPause{right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
+#bNitro{right:calc(18px + env(safe-area-inset-right,0px));bottom:calc(244px + env(safe-area-inset-bottom,0px));border-color:#9d7bff;color:#c9b8ff}
+#bBribe{right:calc(110px + env(safe-area-inset-right,0px));bottom:calc(244px + env(safe-area-inset-bottom,0px));border-color:var(--gold);color:var(--gold)}
 .tbtn:active{background:rgba(255,255,255,.18)}
 /* écrans */
 #screen{position:fixed;inset:0;z-index:10;overflow:auto;background:radial-gradient(ellipse at 50% 120%,rgba(255,46,147,.28),transparent 60%),rgba(9,7,20,.9);padding-block:calc(20px + env(safe-area-inset-top,0px)) calc(28px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));-webkit-user-select:text;user-select:text}
@@ -161,8 +168,8 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
   #stickBase{width:104px;height:104px}#stickKnob{left:26px;top:26px}
   .logo{font-size:52px}.home{gap:10px;padding-top:0}
 }
-#tip{bottom:calc(64px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));background:rgba(33,230,255,.14);border:1px solid rgba(33,230,255,.6);box-shadow:0 0 18px rgba(33,230,255,.3);color:var(--ink);font-size:15px;line-height:1.4;padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(4px)}
-body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
+#tip{top:calc(92px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);max-width:min(420px,calc(100vw - 340px));background:rgba(10,8,22,.72);border:1px solid rgba(33,230,255,.45);color:var(--ink);font-size:13px;line-height:1.35;padding:6px 12px;border-radius:10px;text-align:center}
+@media (max-width:760px){#tip{top:calc(118px + env(safe-area-inset-top,0px));max-width:calc(100vw - 140px);font-size:12px}}
 #reward{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-20px);opacity:0;transition:transform .35s,opacity .35s;z-index:15;background:linear-gradient(180deg,#2a1f00,#140f00);border:1px solid var(--gold);border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 0 26px rgba(255,215,0,.35);pointer-events:none;text-align:center}
 #reward.in{opacity:1;transform:translate(-50%,0)}
 #reward b{font-family:var(--display);font-weight:400;font-size:12px;color:var(--gold);letter-spacing:.06em}#reward span{font-size:16px;font-weight:700}#reward i{font-style:normal;color:var(--lime);font-weight:700}
@@ -190,14 +197,19 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 #clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 #cine{position:fixed;inset:0;z-index:9;pointer-events:none}
 #cine .bar{position:absolute;left:0;right:0;height:0;background:#000;transition:height .4s}#cine .bar.t{top:0}#cine .bar.b{bottom:0}
-#cine.on .bar{height:12vh}
-#cine .ct{position:absolute;left:0;right:0;bottom:calc(14vh + 10px);text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s .2s,transform .5s .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+#cine.on .bar{height:8vh}
+#cine .ct{position:absolute;left:0;right:0;bottom:calc(9vh + 6px);text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s .2s,transform .5s .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
 #cine.on .ct{opacity:1;transform:none}
 #cine small{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
-#cine b{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,58px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
+#cine b{font-family:var(--display);font-weight:400;font-size:clamp(20px,4.5vw,40px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
 #cine em{font-style:normal;font-size:11px;color:var(--muted)}
 .langs .btn.on{border-color:var(--cyan);color:var(--cyan)}
 .info .assist{color:var(--lime)}
+body.pad #touch{display:none!important}
+body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!important}
+#step{padding:5px 12px 6px;background:rgba(10,8,22,.62)}#sD{font-size:13px}#sN{font-size:12px}
+@media (max-width:760px){#step{top:calc(8px + env(safe-area-inset-top,0px))!important;bottom:auto!important;left:auto;right:calc(112px + env(safe-area-inset-right,0px));transform:none;width:auto;max-width:calc(100vw - 290px);min-width:150px;text-align:left;padding:4px 8px 5px}#lvlName,#dots{display:none}#sN{font-size:10px}#sD{font-size:11px;line-height:1.25}#sC{font-size:13px}}
+@media (max-width:460px){#step{max-width:calc(100vw - 250px)}#hudL{transform:scale(.88);transform-origin:top left}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -228,14 +240,15 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 
 <div id="touch" hidden>
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
-  <div class="tbtn" id="bShoot">TIRER</div>
-  <div class="tbtn" id="bAct">ACTION</div>
-  <div class="tbtn" id="bWep">ARME</div>
-  <div class="tbtn" id="bMed">SOIN</div>
-  <div class="tbtn" id="bNitro" hidden>NITRO</div>
-  <div class="tbtn" id="bBribe" hidden>PAYER<br>FLICS</div>
-  <div class="tbtn" id="bPause">II</div>
-  <div class="tbtn" id="bCam">CAM</div>
+  <div class="tbtn fire" id="bShoot"><i id="fireKnob"></i><span id="fireLbl">TIRER</span><small>glisse pour viser</small></div>
+  <div class="tbtn pad a" id="bAct"><b>A</b><small id="lblA">ACTION</small></div>
+  <div class="tbtn pad b" id="bMed"><b>B</b><small id="lblB">SOIN</small></div>
+  <div class="tbtn pad x" id="bRel"><b>X</b><small id="lblX">RECHARGE</small></div>
+  <div class="tbtn pad y" id="bWep"><b>Y</b><small>ARME</small></div>
+  <div class="tbtn sh" id="bNitro" hidden>NITRO</div>
+  <div class="tbtn sh gold" id="bBribe" hidden>PAYER FLICS</div>
+  <div class="tbtn sh" id="bCam">CAM</div>
+  <div class="tbtn sh" id="bPause">II</div>
 </div>
 
 <div id="screen"></div>
@@ -870,6 +883,12 @@ window.NB_I18N = (() => {
     'Aide activée : plus de temps et ennemis moins dangereux': { en: 'Assist on: more time and weaker enemies', es: 'Ayuda activada: más tiempo y enemigos menos peligrosos', pt: 'Ajuda ativada: mais tempo e inimigos menos perigosos' },
     'Qualité graphique réduite pour plus de fluidité': { en: 'Graphics quality lowered for smoother play', es: 'Calidad gráfica reducida para más fluidez', pt: 'Qualidade gráfica reduzida para mais fluidez' },
     'Haute': { en: 'High', es: 'Alta', pt: 'Alta' }, 'Moyenne': { en: 'Medium', es: 'Media', pt: 'Média' }, 'Basse': { en: 'Low', es: 'Baja', pt: 'Baixa' },
+    'glisse pour viser': { en: 'slide to aim', es: 'desliza para apuntar', pt: 'deslize para mirar' },
+    'frein à main': { en: 'handbrake', es: 'freno de mano', pt: 'freio de mão' },
+    'FREIN': { en: 'BRAKE', es: 'FRENO', pt: 'FREIO' }, 'RECHARGE': { en: 'RELOAD', es: 'RECARGA', pt: 'RECARGA' },
+    'DESCENDRE': { en: 'EXIT', es: 'BAJAR', pt: 'SAIR' }, 'MONTER': { en: 'ENTER', es: 'SUBIR', pt: 'ENTRAR' }, 'PAYER': { en: 'PAY', es: 'PAGAR', pt: 'PAGAR' },
+    'PAYER FLICS': { en: 'PAY COPS', es: 'PAGAR POLIS', pt: 'PAGAR POLÍCIA' },
+    'Manette connectée': { en: 'Controller connected', es: 'Mando conectado', pt: 'Controle conectado' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -1924,8 +1943,9 @@ function fire() {
   if (am && am.mag <= 0) { startReload(); if (am.res <= 0) { const alt = D.WEAPONS.find(x => save.owned[x.id] && x.id === 'pistol'); if (alt) save.weapon = 'pistol'; } return; }
   if (am) { am.mag--; if (am.mag <= 0 && am.res > 0) setTimeout(startReload, 150); }
   let a = P.a;
-  if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
-  else if (!touch.on || touch.autoAim) { // visée auto vers l'ennemi le plus proche devant
+  if (touch.aiming) { a = touch.aimA; P.a = a; }
+  else if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
+  if (!touch.aiming && mouse.aim <= 0 && (!touch.on || touch.autoAim)) { // visée auto vers l'ennemi le plus proche devant
     let best = null, bd = 520;
     for (const e of enemies) { if (e.hp <= 0) continue; const d = dist(P.x, P.y, e.x, e.y); if (d < bd && Math.abs(angDiff(Math.atan2(e.y - P.y, e.x - P.x), P.a)) < (touch.on ? 1.9 : .9) && los(P.x, P.y, e.x, e.y)) { bd = d; best = e; } }
     if (best) a = Math.atan2(best.y - P.y, best.x - P.x);
@@ -2086,7 +2106,6 @@ function startLevel(n) {
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
-  toast('Niveau ' + n + ' : ' + L.def.t);
   nextStep();
 }
 function nearestFreeCar() { let b = null, bd = 400; for (const c of cars) { if (c.wreck || c.ai) continue; const d = dist(c.x, c.y, P.x, P.y); if (d < bd) { bd = d; b = c; } } return b; }
@@ -2189,9 +2208,9 @@ function showReward() {
 function tip(id, kb, tc) {
   save.tips = save.tips || {};
   if (save.tips[id] || S.mode !== 'play') return;
-  if (S.tipT > 0) return;
+  if (S.tipT > 0 || S.cine || (L && L.time < 2.5)) return;
   save.tips[id] = 1; persist();
-  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 6;
+  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 4.5;
 }
 function updTips(dt) {
   if (S.tipT > 0) { S.tipT -= dt; if (S.tipT <= 0) $('tip').hidden = true; }
@@ -2263,10 +2282,40 @@ zone.addEventListener('pointermove', e => { if (e.pointerId === stickId) moveSti
 const endStick = e => { if (e.pointerId !== stickId) return; stickId = null; touch.jx = touch.jy = touch.mag = 0; knob.style.transform = ''; };
 zone.addEventListener('pointerup', endStick); zone.addEventListener('pointercancel', endStick);
 function moveStick(e) { let dx = e.clientX - sc.x, dy = e.clientY - sc.y; const m = Math.hypot(dx, dy), mx = 50; if (m > mx) { dx *= mx / m; dy *= mx / m; } knob.style.transform = `translate(${dx}px,${dy}px)`; touch.mag = Math.min(1, m / mx); touch.jx = dx / mx; touch.jy = dy / mx; }
+// ---------- manette (Xbox, PlayStation, Bluetooth) ----------
+const pad = { on: false, lx: 0, ly: 0, lmag: 0, rx: 0, ry: 0, rmag: 0, rt: 0, lt: 0, hb: false, prev: [] };
+addEventListener('gamepadconnected', () => { pad.on = true; document.body.classList.add('pad'); toast('Manette connectée'); });
+addEventListener('gamepaddisconnected', () => { pad.on = false; document.body.classList.remove('pad'); });
+function pollPad() {
+  if (!navigator.getGamepads) return;
+  const gp = [...navigator.getGamepads()].find(g => g && g.connected); if (!gp) { pad.on = false; return; }
+  pad.on = true;
+  const dz = v => Math.abs(v) < .15 ? 0 : v, ax = gp.axes;
+  pad.lx = dz(ax[0] || 0); pad.ly = dz(ax[1] || 0); pad.lmag = Math.min(1, Math.hypot(pad.lx, pad.ly));
+  pad.rx = dz(ax[2] || 0); pad.ry = dz(ax[3] || 0); pad.rmag = Math.min(1, Math.hypot(pad.rx, pad.ry));
+  const bv = i => gp.buttons[i] ? (gp.buttons[i].value || (gp.buttons[i].pressed ? 1 : 0)) : 0;
+  pad.rt = bv(7); pad.lt = bv(6); pad.hb = bv(1) > .5 && !!P.car;
+  const press = i => bv(i) > .5 && !pad.prev[i];
+  if (S.mode === 'play') {
+    if (press(0)) contextAction();                       // A : action / voiture
+    if (press(1) && !P.car) useMedkit();                 // B : soin (frein à main en voiture)
+    if (press(2)) P.car ? useNitro() : startReload();    // X : recharger / nitro
+    if (press(3) || press(5)) cycleWeapon(1);            // Y / RB : arme suivante
+    if (press(4)) cycleCam();                            // LB : caméra
+    if (press(8)) bribePolice();                         // Select : soudoyer
+    if (press(12)) useMedkit();                          // croix haut : soin
+    if (press(9)) pauseGame();                           // Start : pause
+  } else if (S.mode === 'pause' && press(9)) resumeGame();
+  pad.prev = gp.buttons.map(b => b.pressed);
+}
 const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
-$('bShoot').addEventListener('pointerdown', e => { e.preventDefault(); touch.shoot = true; });
-['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('bShoot').addEventListener(t, () => { touch.shoot = false; }));
-tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', useMedkit); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+{ const fb = $('bShoot'), knob2 = $('fireKnob'); let fid = null, fx0 = 0, fy0 = 0;
+  fb.addEventListener('pointerdown', e => { e.preventDefault(); fid = e.pointerId; try { fb.setPointerCapture(e.pointerId); } catch (er) {} fx0 = e.clientX; fy0 = e.clientY; touch.shoot = true; touch.aiming = false; vib(8); });
+  fb.addEventListener('pointermove', e => { if (e.pointerId !== fid) return; let dx = e.clientX - fx0, dy = e.clientY - fy0; const m = Math.hypot(dx, dy);
+    if (m > 12 && !P.car) { touch.aiming = true; touch.aimA = Math.atan2(dy, dx) + camRot(); fb.classList.add('aiming'); const k = Math.min(1, 40 / m); knob2.style.transform = `translate(${dx * k}px,${dy * k}px)`; } });
+  const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
+  fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
+tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -2310,7 +2359,9 @@ function updHud(dt) {
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) hud.prompt.hidden = true; }
   else { hud.prompt.hidden = !hint; if (hint) setText(hud.prompt, 'hint', hint); }
   const bb = $('bBribe'), bn = $('bNitro'); const showB = s > 0 && nearCop(); if (last.bb !== showB) { last.bb = showB; bb.hidden = !showB; }
-  const showN = !!P.car; if (last.bn !== showN) { last.bn = showN; bn.hidden = !showN; $('bShoot').textContent = showN ? 'FREIN' : 'TIRER'; }
+  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = true; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
+  { let la = 'ACTION'; if (P.car) la = 'DESCENDRE'; else if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) la = 'PAYER'; else if (tileAt(P.x, P.y) === TUNNEL) la = 'TUNNEL'; else if (tileAt(P.x, P.y) === SHOP) la = 'BOUTIQUE'; else if (cars.some(c => !c.wreck && dist(c.x, c.y, P.x, P.y) < 48)) la = 'MONTER';
+    if (last.la !== la) { last.la = la; $('lblA').textContent = TR(la); } }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) hud.toast.style.opacity = 0; }
 }
 
@@ -2325,20 +2376,25 @@ function update(dt) {
   const cops = cars.filter(c => c.kind === 'police' && c.ai === 'police');
   S.spawnPol -= dt; if (cops.length < want && S.spawnPol <= 0) { spawnPolice(); S.spawnPol = save.perks.radio ? 2 : 1.2; }
   const Lk = keys.KeyA || keys.ArrowLeft, Rk = keys.KeyD || keys.ArrowRight, U = keys.KeyW || keys.ArrowUp, Dn = keys.KeyS || keys.ArrowDown;
-  const act = keys.Space || mouse.down || touch.shoot;
+  pollPad();
+  const act = keys.Space || mouse.down || touch.shoot || pad.rt > .3;
   if (S.dead <= 0) {
     if (P.car) {
       const c = P.car; let thr = (U ? 1 : 0) - (Dn ? 1 : 0), st = (Rk ? 1 : 0) - (Lk ? 1 : 0);
+      if (pad.on) { if (pad.rt > .05 || pad.lt > .05) thr = pad.rt - pad.lt; if (Math.abs(pad.lx) > .15) st = pad.lx; }
       if (touch.mag > .2) { const ja = Math.atan2(touch.jy, touch.jx) + camRot(), d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
       if ((keys.ShiftLeft || keys.ShiftRight) && P.nitro <= 0 && save.nitro > 0 && thr > 0 && !last.shiftN) { useNitro(); }
       last.shiftN = keys.ShiftLeft || keys.ShiftRight;
-      drive(c, dt, thr, st, act);
+      drive(c, dt, thr, st, (keys.Space || mouse.down || touch.shoot || pad.hb || S.hbTouch > 0) && true); if (S.hbTouch > 0) S.hbTouch -= dt * 3;
       P.x = c.x; P.y = c.y; P.a = c.a;
     } else {
       let mx = (Rk ? 1 : 0) - (Lk ? 1 : 0), my = (Dn ? 1 : 0) - (U ? 1 : 0);
       if (touch.mag > .15) { mx = touch.jx; my = touch.jy; }
+      if (pad.lmag > .2) { mx = pad.lx; my = pad.ly; }
       const m = Math.hypot(mx, my);
-      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 ? 230 : 150) * Math.min(1, m); P.a = Math.atan2(my, mx) + camRot(); moveBody(P, Math.cos(P.a) * sp * dt, Math.sin(P.a) * sp * dt); P.step += sp * dt * .25; }
+      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; moveBody(P, Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+      if (pad.rmag > .3) { touch.aiming = true; touch.aimA = Math.atan2(pad.ry, pad.rx) + camRot(); S.padAim = true; } else if (S.padAim) { S.padAim = false; if (!touch.shoot) touch.aiming = false; }
+      if (touch.aiming) P.a = touch.aimA;
       P.cd -= dt; if (act && P.cd <= 0) fire();
     }
   }
@@ -3065,8 +3121,8 @@ function poseHeli(m, h) {
   u.rotor.rotation.y = S.time * 28; u.tail.rotation.z = S.time * 40; u.red.visible = Math.sin(S.time * 8) > 0;
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
-function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
-function hideCine() { const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
+function showCine(sub, title) { document.body.classList.add('cine'); const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+function hideCine() { document.body.classList.remove('cine'); const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
 function envFx(dt, playing) {
@@ -3209,7 +3265,7 @@ function render3D(dt) {
   envFx(dt, playing);
   // cible de mission
   const st = playing && L.step, target = st ? stepTarget(st) : null;
-  R3.ring.visible = R3.beam.visible = !!target;
+  R3.ring.visible = R3.beam.visible = !!target; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
