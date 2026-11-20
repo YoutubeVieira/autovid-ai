@@ -130,6 +130,7 @@ const CIV = ['#ff5d8f', '#ffd23f', '#3ee0c5', '#8b7bff', '#ff8a3d', '#e7e3f5', '
 const PEDC = ['#ffcf99', '#e0a070', '#8d5a3b', '#f2d3b3', '#5c3a24', '#c68b59'];
 const SHIRT = ['#ff2e93', '#21e6ff', '#ffb627', '#a6ff4d', '#ffffff', '#9d7bff', '#ff6b3d'];
 const lvl = () => L ? L.n : 1;
+const camRot = () => (R3.ok && save.cam && save.cam !== 'top' && R3.yaw !== undefined) ? R3.yaw + PI / 2 : 0;
 const stars = () => Math.floor(S.heat);
 const wepDef = id => D.WEAPONS.find(w => w.id === id) || D.WEAPONS[0];
 const armorMax = () => save.armor || 0;
@@ -180,12 +181,12 @@ function moveCar(c, dt) {
   const hard = Math.abs(c.v) > 170;
   if (!hard && !carHits(nx, c.y, c.a)) { c.x = nx; c.v *= .95; return; }
   if (!hard && !carHits(c.x, ny, c.a)) { c.y = ny; c.v *= .95; return; }
-  if (Math.abs(c.v) > 130) { { const [pn, vl] = spatial(c.x, c.y); if (vl > .1) au('crash', vl * Math.min(1, Math.abs(c.v) / 300), pn); } damageCar(c, Math.abs(c.v) * .05); sparks(c.x + Math.cos(c.a) * 20, c.y + Math.sin(c.a) * 20, 8); if (c === P.car) shake = Math.min(12, Math.abs(c.v) / 40); }
+  if (Math.abs(c.v) > 130) { { const [pn, vl] = spatial(c.x, c.y); if (vl > .1) au('crash', vl * Math.min(1, Math.abs(c.v) / 300), pn); } damageCar(c, Math.abs(c.v) * .05); sparks(c.x + Math.cos(c.a) * 20, c.y + Math.sin(c.a) * 20, 8); if (c === P.car) { shake = Math.min(12, Math.abs(c.v) / 40); vib(Math.min(120, Math.abs(c.v) / 4)); } }
   c.v = -c.v * .3;
 }
 function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) explode(c); }
 function explosionAt(x, y, r, dmg, byPlayer) {
-  shake = Math.max(shake, 14); { const [pn, vl] = spatial(x, y); if (vl > 0) au('boom', pn, vl); }
+  shake = Math.max(shake, 14); { const [pn, vl] = spatial(x, y); if (vl > 0) au('boom', pn, vl); if (vl > .35) vib(Math.round(80 + vl * 160)); }
   for (let i = 0; i < 34; i++) parts.push({ x, y, vx: rnd(-260, 260), vy: rnd(-260, 260), life: rnd(.4, 1), max: 1, r: rnd(4, 12), col: pick(['#ffb627', '#ff6b3d', '#ff2e93', '#fff2a8']) });
   for (let i = 0; i < 10; i++) puff(x + rnd(-20, 20), y + rnd(-20, 20), '#3b3550', 1.6);
   for (const p of peds) if (p.state !== 'ko' && dist(p.x, p.y, x, y) < r) koPed(p, byPlayer);
@@ -323,7 +324,7 @@ function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.
 function hurt(n) {
   if (S.dead > 0 || S.mode !== 'play') return;
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
-  S.hp -= n; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); S.hurtSnd = S.time + .35; }
+  S.hp -= n; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
 }
 function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n; if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
@@ -399,8 +400,12 @@ function fire() {
     bullets.push({ x: P.x + Math.cos(aa) * 12, y: P.y + Math.sin(aa) * 12, vx: Math.cos(aa) * w.speed, vy: Math.sin(aa) * w.speed, life: w.life, dmg: w.dmg, from: 'player', explosive: w.explosive });
   }
   parts.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14, vx: 0, vy: 0, life: .06, max: .06, r: w.explosive ? 10 : 7, col: '#fff2a8' });
-  P.cd = w.rate; panic(P.x, P.y, 380); au('shot', w.id, 0, 1);
+  P.cd = w.rate; P.lastShot = S.time; panic(P.x, P.y, 380); au('shot', w.id, 0, 1); if (touch.on) vib({ shotgun: 35, sniper: 50, rocket: 70, rifle: 12, minigun: 6, uzi: 6 }[w.id] || 10);
 }
+const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['car', 'Caméra embarquée']];
+function cycleCam() { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); toast(CAMS.find(c => c[0] === save.cam)[1]); }
+const canVib = () => typeof navigator !== 'undefined' && 'vibrate' in navigator;
+function vib(p) { if (save.vib === false || !canVib()) return; try { navigator.vibrate(p); } catch (e) {} }
 function cycleWeapon(dir = 1) {
   const owned = D.WEAPONS.filter(w => save.owned[w.id]);
   const i = owned.findIndex(w => w.id === save.weapon);
@@ -541,7 +546,7 @@ function startLevel(n) {
   nextStep();
 }
 function nextStep() {
-  if (L.step) { if (L.idx < 9) au('step'); const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
+  if (L.step) { if (L.idx < 9) { au('step'); vib([30, 50, 30]); } const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
   L.idx++;
   if (L.idx >= 10) { completeLevel(); return; }
   if (agent && agent.paid) agent = null;
@@ -562,7 +567,7 @@ function updLevel(dt) {
 }
 function completeLevel() {
   const n = L.n, bonus = levelBonus(n);
-  save.money += bonus; L.earned += bonus; au('win'); au('setMusic', 'menu');
+  save.money += bonus; L.earned += bonus; au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
   const first = !save.done[n];
   save.done[n] = true; save.maxLevel = Math.max(save.maxLevel, Math.min(30, n + 1)); persist();
   S.mode = 'result';
@@ -571,7 +576,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
-  S.mode = 'result'; persist(); au('fail'); au('setMusic', null);
+  S.mode = 'result'; persist(); au('fail'); vib(300); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
 }
@@ -595,6 +600,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyQ') cycleWeapon(1);
     else if (e.code === 'KeyH') useMedkit();
     else if (e.code === 'KeyN') useNitro();
+    else if (e.code === 'KeyC') cycleCam();
     else if (/^Digit[1-7]$/.test(e.code)) { const w = D.WEAPONS[+e.code.slice(5) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
     else if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
   } else if (S.mode === 'pause' && (e.code === 'Escape' || e.code === 'KeyP')) resumeGame();
@@ -628,7 +634,7 @@ function moveStick(e) { let dx = e.clientX - sc.x, dy = e.clientY - sc.y; const 
 const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
 $('bShoot').addEventListener('pointerdown', e => { e.preventDefault(); touch.shoot = true; });
 ['pointerup', 'pointercancel', 'pointerleave'].forEach(t => $('bShoot').addEventListener(t, () => { touch.shoot = false; }));
-tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', useMedkit); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', useMedkit); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -690,7 +696,7 @@ function update(dt) {
   if (S.dead <= 0) {
     if (P.car) {
       const c = P.car; let thr = (U ? 1 : 0) - (Dn ? 1 : 0), st = (Rk ? 1 : 0) - (Lk ? 1 : 0);
-      if (touch.mag > .2) { const ja = Math.atan2(touch.jy, touch.jx), d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
+      if (touch.mag > .2) { const ja = Math.atan2(touch.jy, touch.jx) + camRot(), d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
       if ((keys.ShiftLeft || keys.ShiftRight) && P.nitro <= 0 && save.nitro > 0 && thr > 0 && !last.shiftN) { useNitro(); }
       last.shiftN = keys.ShiftLeft || keys.ShiftRight;
       drive(c, dt, thr, st, act);
@@ -699,7 +705,7 @@ function update(dt) {
       let mx = (Rk ? 1 : 0) - (Lk ? 1 : 0), my = (Dn ? 1 : 0) - (U ? 1 : 0);
       if (touch.mag > .15) { mx = touch.jx; my = touch.jy; }
       const m = Math.hypot(mx, my);
-      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 ? 230 : 150) * Math.min(1, m); P.a = Math.atan2(my, mx); moveBody(P, Math.cos(P.a) * sp * dt, Math.sin(P.a) * sp * dt); P.step += sp * dt * .25; }
+      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 ? 230 : 150) * Math.min(1, m); P.a = Math.atan2(my, mx) + camRot(); moveBody(P, Math.cos(P.a) * sp * dt, Math.sin(P.a) * sp * dt); P.step += sp * dt * .25; }
       P.cd -= dt; if (act && P.cd <= 0) fire();
     }
   }
@@ -720,7 +726,7 @@ function update(dt) {
       const rel = Math.hypot(Math.cos(a.a) * a.v - Math.cos(b.a) * b.v, Math.sin(a.a) * a.v - Math.sin(b.a) * b.v);
       if (rel > 110) {
         { const [pn, vl] = spatial(a.x, a.y); if (vl > .1) au('crash', vl * Math.min(1, rel / 300), pn); } damageCar(a, rel * .045); damageCar(b, rel * .045); sparks((a.x + b.x) / 2, (a.y + b.y) / 2, 6);
-        if (a === P.car || b === P.car) { shake = Math.min(10, rel / 40); const o = a === P.car ? b : a; if (o.kind === 'police' && o.ai) addHeat(.15); if (o.ai === 'traffic' || o.ai === 'convoy') o.panic = 3; }
+        if (a === P.car || b === P.car) { vib(Math.min(120, rel / 4)); shake = Math.min(10, rel / 40); const o = a === P.car ? b : a; if (o.kind === 'police' && o.ai) addHeat(.15); if (o.ai === 'traffic' || o.ai === 'convoy') o.panic = 3; }
       }
       a.v *= .7; b.v *= .7;
     }
@@ -1073,40 +1079,96 @@ function build3DWorld() {
   sc.add(g);
 }
 // ---- personnages en blocs
+function cyl(rt, rb, h, seg = 7) { const k = 'c' + rt + '|' + rb + '|' + h + '|' + seg; return geoCache[k] || (geoCache[k] = new THREE.CylinderGeometry(rt, rb, h, seg)); }
+function sph(r, ws = 9, hs = 7, half) { const k = 's' + r + '|' + ws + '|' + hs + '|' + (half || 0); return geoCache[k] || (geoCache[k] = half ? new THREE.SphereGeometry(r, ws, hs, 0, PI * 2, 0, PI / 2) : new THREE.SphereGeometry(r, ws, hs)); }
+// Personnage humain low-poly : hanches, genoux, épaules, coudes, cou, visage. Face au +x.
 function makeChar(o) {
-  const g = new THREE.Group();
+  const g = new THREE.Group(), F = !!o.female, detail = [];
   const add = (geo, m, x, y, z, parent = g) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); parent.add(me); return me; };
-  const limb = (x, y, z) => { const p = new THREE.Group(); p.position.set(x, y, z); g.add(p); return p; };
-  const hipL = limb(0, 13, -3.2), hipR = limb(0, 13, 3.2);
-  add(bx(5, 13, 5), mat(o.pants || '#1d1a2e'), 0, -6.5, 0, hipL); add(bx(5, 13, 5), mat(o.pants || '#1d1a2e'), 0, -6.5, 0, hipR);
-  add(bx(6, 2, 5.4), mat(o.shoes || '#0c0b12'), .8, -12.5, 0, hipL); add(bx(6, 2, 5.4), mat(o.shoes || '#0c0b12'), .8, -12.5, 0, hipR);
-  add(bx(7, 13, 12), mat(o.shirt), 0, 19.5, 0);
-  const armL = limb(0, 25, -8), armR = limb(0, 25, 8);
-  add(bx(4, 12, 4), mat(o.sleeve || o.shirt), 0, -5.5, 0, armL); add(bx(4, 12, 4), mat(o.sleeve || o.shirt), 0, -5.5, 0, armR);
-  add(bx(4, 3, 4), mat(o.skin), 0, -12.5, 0, armL); add(bx(4, 3, 4), mat(o.skin), 0, -12.5, 0, armR);
-  add(bx(9, 9, 9), mat(o.skin), 0, 30.5, 0);
-  add(bx(.8, 2, 1.6), mat('#0b0a12'), 4.6, 31.5, -2); add(bx(.8, 2, 1.6), mat('#0b0a12'), 4.6, 31.5, 2);
-  add(bx(.6, 1, 4), mat('#5a2f2f'), 4.6, 28, 0);
-  if (o.hair) add(bx(9.6, 3, 9.6), mat(o.hair), -.4, 35.6, 0);
-  if (o.hat) { add(bx(10, 3.4, 10), mat(o.hat), 0, 36.2, 0); add(bx(5, 1.2, 9), mat(o.hat), 6.5, 35, 0); }
-  if (o.chain) add(bx(7.4, 2, 8), mat('#ffd700', '#7a5a00'), .4, 24, 0);
-  if (o.bandana) add(bx(9.4, 2.4, 9.4), mat(o.bandana, o.bandana), 0, 33.5, 0);
-  if (o.gun) add(bx(12, 3, 3), mat('#101014'), 5, -12, 0, armR);
+  const joint = (parent, x, y, z) => { const p = new THREE.Group(); p.position.set(x, y, z); parent.add(p); return p; };
+  const pants = mat(o.pants || '#1d1a2e'), shirt = mat(o.shirt), sleeve = mat(o.sleeve || o.shirt), skin = mat(o.skin), shoes = mat(o.shoes || '#0c0b12');
+  const body = joint(g, 0, 0, 0); // tout le haut du corps (pour la respiration)
+  // jambes : cuisse + genou + mollet + chaussure
+  const legs = [];
+  for (const side of [-1, 1]) {
+    const hip = joint(g, 0, 15.5, side * (F ? 2.3 : 2.5));
+    add(cyl(F ? 2.5 : 2.6, 2.1, 8), pants, 0, -4, 0, hip);
+    const knee = joint(hip, 0, -8, 0);
+    add(cyl(2.05, 1.6, 7.2), o.skirt ? skin : pants, 0, -3.6, 0, knee);
+    add(bx(5.2, 1.8, 3.4), shoes, 1.1, -7.6, 0, knee);
+    legs.push({ hip, knee });
+  }
+  // bassin et torse
+  add(cyl(F ? 4.6 : 4.3, F ? 4.9 : 4.4, 3.2, 8), pants, 0, 16.4, 0, body).scale.set(.75, 1, 1);
+  if (o.skirt) add(cyl(4.6, 6.4, 6, 8), mat(o.skirt), 0, 13.6, 0, body).scale.set(.85, 1, 1);
+  const torso = add(cyl(F ? 4.7 : 5.4, F ? 3.9 : 4.3, 11, 8), shirt, 0, 23.4, 0, body); torso.scale.set(.66, 1, 1);
+  if (F) { add(sph(1.9, 7, 5), shirt, 2.2, 25.2, -1.7, body); add(sph(1.9, 7, 5), shirt, 2.2, 25.2, 1.7, body); }
+  if (o.jacket) { const j = add(cyl(F ? 5 : 5.7, F ? 4.3 : 4.7, 10.6, 8), mat(o.jacket), -.35, 23.6, 0, body); j.scale.set(.68, 1, 1.02); }
+  add(cyl(1.5, 1.7, 2.4, 6), skin, 0, 30, 0, body);
+  // tête
+  const headJ = joint(body, 0, 31, 0);
+  const head = add(sph(4.1, 10, 8), skin, 0, 3.6, 0, headJ); head.scale.set(.95, 1.08, .9);
+  const eyeW = mat('#f4f1ea'), eyeP = mat('#17110c');
+  for (const s of [-1, 1]) {
+    detail.push(add(sph(.85, 6, 4), eyeW, 3.35, 4.1, s * 1.45, headJ));
+    detail.push(add(sph(.48, 5, 4), eyeP, 4.05, 4.1, s * 1.45, headJ));
+    detail.push(add(bx(.5, .45, 1.7), mat(o.hair || '#2a1d14'), 3.7, 5.3, s * 1.5, headJ));
+  }
+  detail.push(add(bx(1.1, 1.4, .9), skin, 4, 3.1, 0, headJ));
+  detail.push(add(bx(.4, .45, 2), mat('#7a3a3a'), 3.75, 1.6, 0, headJ));
+  // cheveux
+  const hs = o.hairStyle || (o.hair ? (F ? 'long' : 'short') : 'none');
+  if (o.hair && hs !== 'none' && !o.hat) {
+    const hm = mat(o.hair);
+    const cap = add(sph(4.45, 10, 6, true), hm, -.35, 4.4, 0, headJ); cap.scale.set(1, 1.05, .95);
+    if (hs === 'long') { add(bx(2.6, 7.5, 8), hm, -3.2, 1.2, 0, headJ); }
+    else if (hs === 'ponytail') { add(sph(1.8, 6, 5), hm, -4.6, 3.8, 0, headJ); add(cyl(1.2, .7, 5, 5), hm, -5.2, 1.4, 0, headJ); }
+    else if (hs === 'afro') { const a = add(sph(5.3, 9, 7), hm, -.6, 5.2, 0, headJ); a.scale.set(1, .95, 1); }
+  }
+  if (o.hat) { add(cyl(4.5, 4.6, 2.6, 10), mat(o.hat), -.3, 7.6, 0, headJ); add(bx(4.5, .8, 7.5), mat(o.hat), 3.6, 6.5, 0, headJ); }
+  if (o.bandana) add(cyl(4.35, 4.35, 1.8, 10), mat(o.bandana, o.bandana), 0, 5.6, 0, headJ);
+  if (o.chain) { const c = add(new THREE.TorusGeometry(3.3, .45, 5, 12), mat('#ffd700', '#7a5a00'), 1.2, 27.6, 0, body); c.rotation.y = PI / 2; c.rotation.x = .25; }
+  // bras : épaule + coude + main
+  const arms = [];
+  for (const side of [-1, 1]) {
+    const sh = joint(body, 0, 27.6, side * (F ? 5 : 5.8));
+    add(cyl(1.65, 1.4, 6.6), sleeve, 0, -3.3, 0, sh);
+    const el = joint(sh, 0, -6.6, 0);
+    add(cyl(1.35, 1.15, 6), o.longSleeve === false ? skin : sleeve, 0, -3, 0, el);
+    detail.push(add(sph(1.4, 6, 5), skin, .3, -6.6, 0, el));
+    arms.push({ sh, el });
+  }
+  if (o.gun) add(bx(10, 2.6, 2.2), mat('#101014'), 4.5, -6.8, 0, arms[1].el);
   if (o.glow) { const r = new THREE.Mesh(new THREE.RingGeometry(10, 12.5, 20), bmat(o.glow, .75, true)); r.rotation.x = -PI / 2; r.position.y = .6; g.add(r); }
-  const sh = new THREE.Mesh(new THREE.CircleGeometry(9, 14), bmat('#000000', .35)); sh.rotation.x = -PI / 2; sh.position.y = .3; g.add(sh);
-  g.scale.setScalar((o.scale || 1) * 1.5);
-  g.userData = { hipL, hipR, armL, armR, gun: !!o.gun, ls: -1 };
+  const shd = new THREE.Mesh(new THREE.CircleGeometry(9, 14), bmat('#000000', .35)); shd.rotation.x = -PI / 2; shd.position.y = .3; g.add(shd);
+  const s = (o.scale || 1) * 1.5 * (o.height || 1);
+  g.scale.setScalar(s);
+  g.userData = { legs, arms, body, headJ, detail, gun: !!o.gun, ls: -1, ph: Math.random() * 6, bob: 0 };
   return g;
 }
 function poseChar(m, x, y, a, step, ko, aim) {
   const u = m.userData;
   m.position.set(x, ko ? 4 : 0, y); m.rotation.set(0, -a, ko ? -PI / 2 : 0);
   const moving = step !== u.ls; u.ls = step;
-  u.sw = (u.sw || 0) * .8 + (moving ? Math.sin(step * 1.1) * .8 : 0) * .2 + (moving ? 0 : 0);
-  const sw = moving ? Math.sin(step * 1.1) * .75 : 0;
-  u.hipL.rotation.z = sw; u.hipR.rotation.z = -sw;
-  if (u.gun && aim) { u.armR.rotation.z = PI / 2; u.armL.rotation.z = PI / 2.4; u.armL.rotation.x = .5; }
-  else { u.armL.rotation.z = -sw * .9; u.armR.rotation.z = sw * .9; u.armL.rotation.x = 0; }
+  u.amt = (u.amt || 0) + ((moving ? 1 : 0) - (u.amt || 0)) * .25; // transition douce marche / arrêt
+  const t = step * 1.1, A = u.amt;
+  const sw = Math.sin(t) * .62 * A;
+  const [L, R] = u.legs;
+  L.hip.rotation.z = sw; R.hip.rotation.z = -sw;
+  L.knee.rotation.z = -Math.max(0, -Math.sin(t)) * 1.0 * A - .05; R.knee.rotation.z = -Math.max(0, Math.sin(t)) * 1.0 * A - .05;
+  u.body.position.y = Math.abs(Math.sin(t)) * .7 * A;
+  const breath = Math.sin(S.time * 2.2 + u.ph) * .012;
+  u.body.scale.set(1, 1 + breath, 1);
+  u.headJ.rotation.y = A < .3 ? Math.sin(S.time * .5 + u.ph) * .35 : 0;
+  const [aL, aR] = u.arms;
+  if (u.gun && aim) {
+    aR.sh.rotation.set(0, 0, PI / 2); aR.el.rotation.z = .08;
+    aL.sh.rotation.set(-.55, 0, PI / 2.25); aL.el.rotation.z = .35;
+  } else {
+    aL.sh.rotation.set(-.08, 0, -sw * .85); aR.sh.rotation.set(.08, 0, sw * .85);
+    aL.el.rotation.z = .25 + Math.max(0, sw) * .5; aR.el.rotation.z = .25 + Math.max(0, -sw) * .5;
+  }
+  if (u.detail.length) { const far = Math.abs(x - cam.x) + Math.abs(y - cam.y) > 900; if (far !== u.far) { u.far = far; for (const d of u.detail) d.visible = !far; } }
 }
 // ---- voitures
 function makeCar3(c) {
@@ -1167,24 +1229,54 @@ function render3D(dt) {
   if (R3.world !== world) build3DWorld();
   resize3D();
   const playing = S.mode !== 'menu' && L;
-  let tx, ty;
-  if (!playing) { R3.orbit = (R3.orbit || 0) + dt * .04; tx = W / 2 + Math.cos(R3.orbit) * 1100; ty = W / 2 + Math.sin(R3.orbit) * 1100; }
-  else { tx = P.car ? P.car.x + Math.cos(P.car.a) * P.car.v * .3 : P.x; ty = P.car ? P.car.y + Math.sin(P.car.a) * P.car.v * .3 : P.y; }
-  const k = Math.min(1, dt * 4); cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+  const mode = playing ? (save.cam || 'top') : 'top';
+  const head = P.car ? P.car.a : P.a;
+  if (mode === 'top') R3.yaw = -PI / 2;
+  else { if (R3.mode !== mode || R3.yaw === undefined) R3.yaw = head; R3.yaw += angDiff(head, R3.yaw) * Math.min(1, dt * (P.car ? 3.2 : 1.7)); }
+  if (R3.mode !== mode) { R3.mode = mode; R3.cam.fov = mode === 'top' ? 46 : mode === 'chase' ? 62 : 72; R3.cam.updateProjectionMatrix(); R3.cp = null; }
+  const fogN = mode === 'top' ? 1150 : 520, fogF = mode === 'top' ? 2700 : 1750;
+  if (R3.scene.fog) { R3.scene.fog.near = fogN; R3.scene.fog.far = fogF; }
   const sp = P.car && playing ? Math.abs(P.car.v) : 0;
-  let d = 350 + sp * .3; if (VW < VH) d *= 1.35; if (!playing) d = 760;
-  cam.z += (d - cam.z) * Math.min(1, dt * 2); if (cam.z < 100) cam.z = d;
   const sx = shake ? rnd(-shake, shake) : 0, sy = shake ? rnd(-shake, shake) : 0; shake = Math.max(0, shake - dt * 30);
-  R3.cam.position.set(cam.x + sx, cam.z, cam.y + cam.z * (playing ? .3 : .5) + sy); R3.cam.lookAt(cam.x, 0, cam.y);
-  const near = (x, y) => Math.abs(x - cam.x) < 1250 && Math.abs(y - cam.y) < 1250;
+  let ccx, ccz;
+  if (mode === 'top') {
+    let tx, ty;
+    if (!playing) { R3.orbit = (R3.orbit || 0) + dt * .04; tx = W / 2 + Math.cos(R3.orbit) * 1100; ty = W / 2 + Math.sin(R3.orbit) * 1100; }
+    else { tx = P.car ? P.car.x + Math.cos(P.car.a) * P.car.v * .3 : P.x; ty = P.car ? P.car.y + Math.sin(P.car.a) * P.car.v * .3 : P.y; }
+    const k = Math.min(1, dt * 4); cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
+    let d = 350 + sp * .3; if (VW < VH) d *= 1.35; if (!playing) d = 760;
+    cam.z += (d - cam.z) * Math.min(1, dt * 2); if (cam.z < 100) cam.z = d;
+    R3.cam.position.set(cam.x + sx, cam.z, cam.y + cam.z * (playing ? .3 : .5) + sy); R3.cam.lookAt(cam.x, 0, cam.y);
+    ccx = cam.x; ccz = cam.y;
+  } else {
+    const fx = Math.cos(R3.yaw), fz = Math.sin(R3.yaw), rx = -fz, rz = fx;
+    const px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y;
+    let back, h, look, lh, side = 0;
+    if (mode === 'chase') { back = P.car ? 150 + sp * .1 : 110; h = P.car ? 82 : 72; look = P.car ? 140 : 80; lh = P.car ? 14 : 30; }
+    else if (P.car) { back = -16; h = 22; look = 320; lh = 16; }
+    else { back = 50; h = 54; look = 140; lh = 42; side = 16; }
+    if (VW < VH && mode === 'chase') { back *= 1.15; h *= 1.1; }
+    let b = back;
+    for (let k = 0; k < 8 && b > 12; k++) { if (!solid(px - fx * b + rx * side, pz - fz * b + rz * side)) break; b *= .7; }
+    const tx = px - fx * b + rx * side, tz = pz - fz * b + rz * side;
+    const attached = mode === 'car' && P.car;
+    if (!R3.cp || attached) R3.cp = { x: tx, z: tz, h };
+    else { const kk = Math.min(1, dt * 9); R3.cp.x += (tx - R3.cp.x) * kk; R3.cp.z += (tz - R3.cp.z) * kk; R3.cp.h += (h - R3.cp.h) * kk; }
+    R3.cam.position.set(R3.cp.x + sx * .4, R3.cp.h, R3.cp.z + sy * .4);
+    R3.cam.lookAt(px + fx * look + rx * side * .4, lh, pz + fz * look + rz * side * .4);
+    cam.x = px; cam.y = pz; cam.z = 400;
+    ccx = px + fx * 420; ccz = pz + fz * 420;
+  }
+  const near = (x, y) => Math.abs(x - ccx) < 1150 && Math.abs(y - ccz) < 1150;
+  const hideOwn = mode === 'car' && P.car;
   R3.seen.clear();
-  for (const c of cars) if (near(c.x, c.y)) sync(c, makeCar3, poseCar);
-  for (const p of peds) if (near(p.x, p.y)) sync(p, e => makeChar({ shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e']) }), (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
+  for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
+  for (const p of peds) if (near(p.x, p.y)) sync(p, e => { const f = Math.random() < .5; return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
   for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const m = makeChar({ shirt: '#17131f', sleeve: '#17131f', skin: pick(['#c68b59', '#8d5a3b', '#e0a070']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, gun: true, glow: e2.color, scale: e2.boss ? 1.45 : 1 }); m.userData.bar = hpBar(m, 30, 16); return m; },
     (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar({ shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
-  if (playing && !P.car) sync(P, () => makeChar({ shirt: '#21e6ff', sleeve: '#0f6f86', pants: '#1a1530', skin: '#f2d3b3', hair: '#1a120c', gun: true, shoes: '#ffffff' }), m => poseChar(m, P.x, P.y, P.a, P.step, false, true));
+  if (playing && !P.car) sync(P, () => makeChar({ shirt: '#ffffff', jacket: '#21e6ff', sleeve: '#21e6ff', pants: '#1a1530', skin: '#e0b48c', hair: '#1a120c', hairStyle: 'short', gun: true, shoes: '#ffffff' }), m => poseChar(m, P.x, P.y, P.a, P.step, false, S.time - (P.lastShot || -9) < 1.2));
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp('cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   for (const c of cases) if (!c.got && near(c.x, c.y)) sync(c, () => makeProp('case'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time; });
   for (const m of R3.dyn.children.slice()) if (!R3.seen.has(m)) R3.dyn.remove(m);
@@ -1209,7 +1301,7 @@ function render3D(dt) {
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
-  R3.me.visible = !!playing; if (playing) R3.me.position.set(P.x, 1, P.y);
+  R3.me.visible = !!playing && mode === 'top'; if (playing) R3.me.position.set(P.x, 1, P.y);
   // visée souris : on projette le pointeur sur le sol
   R3.ndc.set(mouse.sx / VW * 2 - 1, -(mouse.sy / VH) * 2 + 1); R3.ray.setFromCamera(R3.ndc, R3.cam);
   if (R3.ray.ray.intersectPlane(R3.plane, R3.hit)) { mouse.wx = R3.hit.x; mouse.wy = R3.hit.z; }
@@ -1244,7 +1336,7 @@ const SCREENS = {
         <button class="btn" data-go="shop">Boutique</button>
         ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}
       </div>
       <div class="stats"><span>${done}/30 niveaux</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -1254,6 +1346,7 @@ const SCREENS = {
         <b>Q / molette / 1-7</b><span>Changer d'arme</span>
         <b>B</b><span>Soudoyer la police</span>
         <b>H · N / Maj</b><span>Trousse de soins · nitro</span>
+        <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
       </div>
       <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
     </div>`;
@@ -1306,7 +1399,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}</div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}</div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -1379,6 +1472,8 @@ screenEl.addEventListener('click', e => {
   const b = e.target.closest('button,a'); if (!b) return;
   const ds = b.dataset;
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
+  if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
+  if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
