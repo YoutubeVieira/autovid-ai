@@ -100,13 +100,14 @@ window.NB_DATA = (() => {
   };
 
   const WEAPONS = [
-    { id: 'pistol', name: 'Pistolet', price: 0, lvl: 1, rate: .28, dmg: 18, spread: .04, pellets: 1, speed: 760, life: .6, desc: 'Fiable, tir semi-auto.' },
-    { id: 'uzi', name: 'Mitraillette', price: 1500, lvl: 2, rate: .08, dmg: 10, spread: .12, pellets: 1, speed: 760, life: .55, desc: 'Cadence très rapide, peu précise.' },
-    { id: 'shotgun', name: 'Fusil à pompe', price: 4000, lvl: 4, rate: .7, dmg: 14, spread: .36, pellets: 7, speed: 700, life: .32, desc: 'Dévastateur au contact.' },
-    { id: 'rifle', name: "Fusil d'assaut", price: 9000, lvl: 8, rate: .11, dmg: 20, spread: .05, pellets: 1, speed: 900, life: .8, desc: 'Précis et rapide, longue portée.' },
-    { id: 'sniper', name: 'Fusil de précision', price: 15000, lvl: 11, rate: 1.1, dmg: 130, spread: 0, pellets: 1, speed: 1400, life: 1.1, desc: 'Une balle, un ennemi.' },
-    { id: 'rocket', name: 'Lance-roquettes', price: 30000, lvl: 15, rate: 1.2, dmg: 90, spread: 0, pellets: 1, speed: 520, life: 1.3, explosive: true, desc: 'Explose voitures et groupes.' },
-    { id: 'minigun', name: 'Minigun', price: 70000, lvl: 24, rate: .045, dmg: 14, spread: .15, pellets: 1, speed: 820, life: .7, desc: 'Un mur de balles.' },
+    { id: 'fists', name: 'Poings', price: 0, lvl: 1, rate: .38, dmg: 30, melee: true, pellets: 1, spread: 0, desc: 'Silencieux et toujours là. Mets K.O. au contact.' },
+    { id: 'pistol', name: 'Pistolet', price: 0, lvl: 1, rate: .28, dmg: 18, spread: .04, pellets: 1, speed: 760, life: .6, mag: 12, reload: 1, reserve: Infinity, desc: 'Fiable, tir semi-auto, munitions illimitées.' },
+    { id: 'uzi', name: 'Mitraillette', price: 1500, lvl: 2, rate: .08, dmg: 10, spread: .12, pellets: 1, speed: 760, life: .55, mag: 30, reload: 1.4, reserve: 240, desc: 'Cadence très rapide, peu précise.' },
+    { id: 'shotgun', name: 'Fusil à pompe', price: 4000, lvl: 4, rate: .7, dmg: 14, spread: .36, pellets: 7, speed: 700, life: .32, mag: 6, reload: 1.8, reserve: 48, desc: 'Dévastateur au contact.' },
+    { id: 'rifle', name: "Fusil d'assaut", price: 9000, lvl: 8, rate: .11, dmg: 20, spread: .05, pellets: 1, speed: 900, life: .8, mag: 30, reload: 1.6, reserve: 240, desc: 'Précis et rapide, longue portée.' },
+    { id: 'sniper', name: 'Fusil de précision', price: 15000, lvl: 11, rate: 1.1, dmg: 130, spread: 0, pellets: 1, speed: 1400, life: 1.1, mag: 5, reload: 2.0, reserve: 30, desc: 'Une balle, un ennemi.' },
+    { id: 'rocket', name: 'Lance-roquettes', price: 30000, lvl: 15, rate: 1.2, dmg: 90, spread: 0, pellets: 1, speed: 520, life: 1.3, explosive: true, mag: 1, reload: 2.2, reserve: 8, desc: 'Explose voitures et groupes.' },
+    { id: 'minigun', name: 'Minigun', price: 70000, lvl: 24, rate: .045, dmg: 14, spread: .15, pellets: 1, speed: 820, life: .7, mag: 150, reload: 3.0, reserve: 600, desc: 'Un mur de balles.' },
   ];
 
   const GEAR = [
@@ -120,6 +121,19 @@ window.NB_DATA = (() => {
     { id: 'contacts', name: 'Carnet de contacts', price: 12000, lvl: 12, kind: 'perk', desc: 'Soudoyer les agents coûte 40 % de moins.' },
   ];
 
+  // ---------- TENUES (payées avec l'argent du jeu) ----------
+  const OUTFITS = {
+    jacket: { label: 'Veste', items: [['none', 'Sans veste', 0, null], ['neon', 'Veste néon', 0, '#21e6ff'], ['black', 'Blouson noir', 800, '#16141c'], ['red', 'Bomber rouge', 1500, '#c8102e'], ['camo', 'Veste kaki', 2500, '#4b5320'], ['purple', 'Veste violette', 3500, '#6a2bd1'], ['gold', 'Veste dorée', 9000, '#d4a017']] },
+    shirt: { label: 'T-shirt', items: [['white', 'Blanc', 0, '#f2f2f2'], ['black', 'Noir', 300, '#121218'], ['pink', 'Rose néon', 600, '#ff2e93'], ['yellow', 'Jaune', 600, '#ffd23f'], ['green', 'Vert', 600, '#3ecf6e'], ['blue', 'Bleu roi', 600, '#2e6bff']] },
+    pants: { label: 'Pantalon', items: [['dark', 'Noir', 0, '#1a1530'], ['jean', 'Jean', 400, '#2f4f86'], ['beige', 'Beige', 600, '#c2a878'], ['white', 'Blanc', 900, '#e8e8ee'], ['red', 'Rouge', 1200, '#a3122a']] },
+    hat: { label: 'Casquette', items: [['none', 'Aucune', 0, null], ['black', 'Noire', 500, '#111118'], ['red', 'Rouge', 700, '#c8102e'], ['white', 'Blanche', 700, '#f2f2f2'], ['gold', 'Dorée', 4000, '#d4a017']] },
+    hair: { label: 'Coiffure', items: [['short', 'Courte', 0, 'short'], ['afro', 'Afro', 500, 'afro'], ['long', 'Longue', 500, 'long'], ['ponytail', 'Queue de cheval', 500, 'ponytail'], ['none', 'Rasée', 300, 'none']] },
+    hairColor: { label: 'Couleur des cheveux', items: [['black', 'Noir', 0, '#1a120c'], ['brown', 'Châtain', 200, '#5a3a22'], ['blond', 'Blond', 400, '#d8b46a'], ['red', 'Roux', 400, '#9a3b1c'], ['pink', 'Rose', 1500, '#ff5fb0'], ['blue', 'Bleu', 1500, '#3aa0ff']] },
+    skin: { label: 'Teint', items: [['t1', 'Clair', 0, '#f2d3b3'], ['t2', 'Mat', 0, '#e0b48c'], ['t3', 'Hâlé', 0, '#c68b59'], ['t4', 'Brun', 0, '#8d5a3b'], ['t5', 'Foncé', 0, '#5c3a24']] },
+    shoes: { label: 'Baskets', items: [['white', 'Blanches', 0, '#ffffff'], ['black', 'Noires', 300, '#0c0b12'], ['red', 'Rouges', 800, '#c8102e'], ['gold', 'Dorées', 5000, '#d4a017']] },
+    chain: { label: 'Chaîne', items: [['none', 'Aucune', 0, false], ['gold', 'Chaîne en or', 6000, true]] },
+  };
+
   // ---------- SONS EN FICHIERS (facultatif) ----------
   // Par défaut, tous les sons et musiques sont générés par le jeu (js/audio.js).
   // Pour utiliser tes propres fichiers, mets-les dans le dossier audio/ et indique leur chemin ici.
@@ -131,5 +145,5 @@ window.NB_DATA = (() => {
     // explosion: 'audio/explosion.ogg',
   };
 
-  return { SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES };
+  return { SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();

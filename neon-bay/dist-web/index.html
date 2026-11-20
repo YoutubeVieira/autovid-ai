@@ -183,6 +183,14 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 .ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
 .ach .a{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.ach .a>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .ach .a b{font-size:14px}.ach .a span{font-size:12px;color:var(--muted)}.ach .a em{font-style:normal;font-size:12px;color:var(--amber);white-space:nowrap}.ach .a.ok{border-color:rgba(166,255,77,.5)}.ach .a.ok em{color:var(--lime);font-size:16px}
+.wardrobe{display:grid;grid-template-columns:200px 1fr;gap:16px;align-items:start}
+#outfitPrev{background:radial-gradient(circle at 50% 40%,rgba(33,230,255,.18),transparent 70%),var(--panel2);border:1px solid var(--line);border-radius:14px;width:180px;height:250px;position:sticky;top:0}
+.cats{display:flex;flex-direction:column;gap:12px;min-width:0}.cat b{display:block;font-family:var(--display);font-weight:400;font-size:12px;color:var(--cyan);margin-bottom:6px;letter-spacing:.04em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--ink);font:inherit;font-size:13px;cursor:pointer}
+.chip i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.4);display:inline-block}
+.chip small{color:var(--amber);font-size:11px}.chip.on{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(33,230,255,.35)}
+@media (max-width:560px){.wardrobe{grid-template-columns:1fr;justify-items:center}#outfitPrev{position:static}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
