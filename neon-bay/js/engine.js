@@ -12,12 +12,15 @@ function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Ma
 const hash = (x, y) => (((x * 73856093) ^ (y * 19349663)) >>> 0) % 1000;
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-const fmt = n => Math.round(n).toLocaleString('fr-FR') + ' $';
+const I18 = window.NB_I18N || null;
+const TR = v => I18 ? I18.t(v) : v;
+const fmt = n => { const l = I18 ? I18.lang : 'fr'; return l === 'en' ? '$' + Math.round(n).toLocaleString('en-US') : Math.round(n).toLocaleString(l === 'fr' ? 'fr-FR' : l) + ' $'; };
 const AU = window.NB_AUDIO || null;
 const au = (fn, ...a) => { try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
 const spatial = (x, y) => { const d = Math.hypot(x - P.x, y - P.y); return [Math.max(-1, Math.min(1, (x - P.x) / 600)), Math.max(0, 1 - d / 1000)]; };
 const ST = window.NB_STORE || null;
 const isPlay = () => !!(ST && ST.isPlay);
+const PORTAL = window.NB_PORTAL_API && window.NB_PORTAL_API.active ? window.NB_PORTAL_API : null;
 const priceLabel = () => isPlay() ? (ST.state.price || '') : D.SHOP_CONFIG.price;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -646,7 +649,7 @@ const levelBonus = n => 1000 + n * 800;
 
 // ---------- niveaux ----------
 function regionOf(n) { return D.REGIONS.find(r => n >= r.from && n <= r.to); }
-function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium); }
+function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium || !!PORTAL); }
 function startLevel(n) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
@@ -668,7 +671,7 @@ function startLevel(n) {
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
-  S.mode = 'play'; showScreen(null);
+  S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   toast('Niveau ' + n + ' : ' + L.def.t);
   nextStep();
 }
@@ -702,13 +705,13 @@ function completeLevel() {
   if (first) track('levelsDone'); track('levelsPlayed');
   if (sc.stars === 3 && prevStars < 3) track('threeStars');
   save.done[n] = true; save.maxLevel = Math.max(save.maxLevel, Math.min(30, n + 1)); persist();
-  S.mode = 'result';
+  S.mode = 'result'; if (PORTAL) PORTAL.stop();
   const unlockW = D.WEAPONS.filter(w => w.lvl === n + 1).concat(D.GEAR.filter(g => g.lvl === n + 1));
   showScreen('result', { ok: true, n, earned: L.earned, bonus, time: L.time, first, unlocks: unlockW, sc, kos: L.kos || 0 });
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
-  S.mode = 'result'; persist(); au('fail'); vib(300); au('setMusic', null);
+  S.mode = 'result'; if (PORTAL) PORTAL.stop(); persist(); au('fail'); vib(300); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
 }
@@ -762,7 +765,7 @@ let rewardQ = [];
 function reward(title, name, r) { rewardQ.push({ title, name, r }); if (rewardQ.length === 1) showReward(); }
 function showReward() {
   const it = rewardQ[0]; if (!it) return;
-  const el = $('reward'); el.innerHTML = `<b>${esc(it.title)}</b><span>${esc(it.name)}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  const el = $('reward'); el.innerHTML = `<b>${esc(TR(it.title))}</b><span>${esc(TR(it.name))}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
   au('win'); vib([40, 30, 40]);
   setTimeout(() => { el.classList.remove('in'); setTimeout(() => { el.hidden = true; rewardQ.shift(); showReward(); }, 350); }, 2600);
 }
@@ -772,7 +775,7 @@ function tip(id, kb, tc) {
   if (save.tips[id] || S.mode !== 'play') return;
   if (S.tipT > 0) return;
   save.tips[id] = 1; persist();
-  const el = $('tip'); el.textContent = touch.on ? (tc || kb) : kb; el.hidden = false; S.tipT = 6;
+  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 6;
 }
 function updTips(dt) {
   if (S.tipT > 0) { S.tipT -= dt; if (S.tipT <= 0) $('tip').hidden = true; }
@@ -854,11 +857,11 @@ const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor
 const starEls = [...hud.stars.children];
 const last = {};
 let toastT = 0, msgT = 0;
-function toast(t) { hud.toast.textContent = t; hud.toast.style.opacity = 1; toastT = 2.4; }
-function msg(t) { if (S.msgCd > 0 && last.msg === t) return; last.msg = t; S.msgCd = 1.5; hud.prompt.textContent = t; hud.prompt.hidden = false; msgT = 1.6; }
-function showBanner(t) { hud.banner.textContent = t; hud.banner.style.opacity = 1; setTimeout(() => { hud.banner.style.opacity = 0; }, 1500); }
-function fade(t) { hud.fade.textContent = t; hud.fade.style.opacity = 1; setTimeout(() => { hud.fade.style.opacity = 0; }, 1300); }
-function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = v; } }
+function toast(t) { t = TR(t); hud.toast.textContent = t; hud.toast.style.opacity = 1; toastT = 2.4; }
+function msg(t) { if (S.msgCd > 0 && last.msg === t) return; last.msg = t; S.msgCd = 1.5; hud.prompt.textContent = TR(t); hud.prompt.hidden = false; msgT = 1.6; }
+function showBanner(t) { hud.banner.textContent = TR(t); hud.banner.style.opacity = 1; setTimeout(() => { hud.banner.style.opacity = 0; }, 1500); }
+function fade(t) { hud.fade.textContent = TR(t); hud.fade.style.opacity = 1; setTimeout(() => { hud.fade.style.opacity = 0; }, 1300); }
+function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = TR(v); } }
 function setW(el, k, v) { if (last[k] !== v) { last[k] = v; el.style.width = v + '%'; } }
 function updHud(dt) {
   setText(hud.money, 'm', fmt(save.money));
@@ -1081,13 +1084,13 @@ function drawTile(tx, ty) {
   if (tileAt(x - 1, y + 1) === ROAD) ctx.fillRect(x, y, 3, T); if (tileAt(x + T + 1, y + 1) === ROAD) ctx.fillRect(x + T - 3, y, 3, T);
   if (tileAt(x + 1, y - 1) === ROAD) ctx.fillRect(x, y, T, 3); if (tileAt(x + 1, y + T + 1) === ROAD) ctx.fillRect(x, y + T - 3, T, 3);
   const pad = (col, a, b) => { ctx.fillStyle = col + '33'; ctx.fillRect(x + 4, y + 4, T - 8, T - 8); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.strokeRect(x + 5, y + 5, T - 10, T - 10); ctx.fillStyle = col; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(a, x + T / 2, y + T / 2 + 2); if (b) ctx.fillText(b, x + T / 2, y + T / 2 + 14); };
-  if (t === PAD) pad('#ff2e93', 'PEINTURE', fmt(200 + lvl() * 60));
-  else if (t === SHOP) { pad('#a6ff4d', 'BOUTIQUE', 'armes'); }
-  else if (t === GARAGE) { pad('#3ee0c5', 'GARAGE', ''); }
+  if (t === PAD) pad('#ff2e93', TR('PEINTURE'), fmt(200 + lvl() * 60));
+  else if (t === SHOP) { pad('#a6ff4d', TR('BOUTIQUE'), TR('armes')); }
+  else if (t === GARAGE) { pad('#3ee0c5', TR('GARAGE'), ''); }
   else if (t === TUNNEL) {
     ctx.fillStyle = '#05040a'; ctx.beginPath(); ctx.arc(x + T / 2, y + T / 2, 22, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#ffb627'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x + T / 2, y + T / 2, 22, 0, TAU); ctx.stroke();
-    ctx.fillStyle = '#ffb627'; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText('TUNNEL', x + T / 2, y + T / 2 + 4);
+    ctx.fillStyle = '#ffb627'; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(TR('TUNNEL'), x + T / 2, y + T / 2 + 4);
   }
 }
 function tileIsFavela(tx, ty) { const bx = Math.floor(tx / B), by = Math.floor(ty / B); const k = world.favCache || (world.favCache = {}); const key = bx + ',' + by; if (k[key] === undefined) { let w = 0; for (let ly = 3; ly < 7; ly++) for (let lx = 3; lx < 7; lx++) if (world.map[(by * B + ly) * N + bx * B + lx] === WALK) w++; k[key] = w > 0 && w < 10 && !(w === 4); } return k[key]; }
@@ -1465,7 +1468,7 @@ function poseHeli(m, h) {
   u.rotor.rotation.y = S.time * 28; u.tail.rotation.z = S.time * 40; u.red.visible = Math.sin(S.time * 8) > 0;
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
-function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = sub; el.querySelector('b').textContent = title; el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
 function hideCine() { const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
@@ -1631,6 +1634,7 @@ function showScreen(name, data) {
   if (!name) { screenEl.hidden = true; screenEl.innerHTML = ''; return; }
   screenEl.hidden = false;
   screenEl.innerHTML = SCREENS[name](data || {});
+  if (I18) I18.dom(screenEl);
   screenEl.scrollTop = 0;
   const f = screenEl.querySelector('[autofocus],.btn.primary'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
   void hudOn;
@@ -1646,10 +1650,11 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         <button class="btn" data-go="trophies">Succès</button>
-        ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
+        ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}
       </div>
+      <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
       <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -1669,7 +1674,7 @@ const SCREENS = {
       <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Carte des niveaux</h2><div class="row">${money()}<button class="btn small" data-go="shop">Boutique</button></div></div>
       ${D.REGIONS.map(r => `<section class="region" style="--acc:${r.accent}">
         <div class="rhead"><h3>${r.name}</h3><span>${r.country} · niveaux ${r.from}–${r.to}</span><p>${r.tagline}</p></div>
-        <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium;
+        <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium && !PORTAL;
           const cls = ok ? 'done' : open ? (paid ? 'paid' : 'open') : 'locked';
           const tag = ok ? '✓ Terminé' : paid ? 'Version complète' : open ? 'Disponible' : 'Verrouillé';
           return `<button class="lvl ${cls}" data-lvl="${n}"><span class="num">${n}</span><span class="lt">${esc(l.t)}</span><span class="tag">${tag}</span><span class="st">${save.stars && save.stars[n] ? starStr(save.stars[n]) : ''}</span><span class="rw">+${fmt(levelBonus(n) + stepReward(n) * 10)}</span></button>`; }).join('')}</div>
@@ -1731,7 +1736,8 @@ const SCREENS = {
         <div class="bigstars" aria-label="${d.sc.stars} étoiles sur 3">${starStr(d.sc.stars)}</div>
         <ul class="crit"><li class="${'ok'}">Mission accomplie</li><li class="${d.sc.fast ? 'ok' : ''}">Rapide : moins de ${Math.floor(parTime(d.n) / 60)} min ${String(parTime(d.n) % 60).padStart(2, '0')}</li><li class="${d.sc.clean ? 'ok' : ''}">Propre : santé ≥ 60 % et 3 passants K.O. maximum (${d.kos})</li></ul>
         <div class="info"><span>Bonus de fin : <b>${fmt(d.bonus)}</b></span><span>Total gagné : <b>${fmt(d.earned)}</b></span><span>Temps : <b>${Math.floor(d.time / 60)} min ${String(Math.floor(d.time % 60)).padStart(2, '0')}</b></span></div>
-        ${!save.premium && d.n === 1 ? `<div class="offer"><b>Tu as aimé ? La suite t'attend.</b><span>29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.</span><button class="btn gold" data-go="unlock">Débloquer le jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button></div>` : ''}
+        ${PORTAL ? `<button class="btn gold" data-rewarded="${d.bonus}">Doubler le bonus (vidéo) · +${fmt(d.bonus)}</button>` : ''}
+        ${!save.premium && !PORTAL && d.n === 1 ? `<div class="offer"><b>Tu as aimé ? La suite t'attend.</b><span>29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.</span><button class="btn gold" data-go="unlock">Débloquer le jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button></div>` : ''}
         ${d.unlocks.length ? `<p class="lead">Nouveau dans la boutique : ${d.unlocks.map(u => u.name).join(', ')}</p>` : ''}
         ${next > 30 ? '<p class="lead">Tu as terminé les 30 niveaux. Morro Azul est à toi.</p>' : ''}
         <div class="col">${next <= 30 ? `<button class="btn primary" data-lvl="${next}">Niveau suivant</button>` : ''}<button class="btn" data-go="shop" data-ret="map">Boutique</button><button class="btn" data-go="map">Carte</button></div>
@@ -1819,21 +1825,23 @@ function buy(id) {
   if (L && S.mode === 'shop') L.bought = true;
   persist(); showScreen('shop', shopState);
 }
-function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = t; screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
-function pauseGame() { if (S.mode !== 'play') return; S.mode = 'pause'; au('duck', true); showScreen('pause'); }
-function resumeGame() { S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
-function goLevel(n) { if (n > 1 && !save.premium) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
+function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = TR(t); screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
+function pauseGame() { if (S.mode !== 'play') return; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
+function resumeGame() { if (PORTAL) PORTAL.start(); S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
+function goLevel(n) { if (n > 1 && !save.premium && !PORTAL) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
 screenEl.addEventListener('click', e => {
   const b = e.target.closest('button,a'); if (!b) return;
   const ds = b.dataset;
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
+  if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
-  if (ds.start) { const n = +ds.start; if (canPlay(n)) startLevel(n); else goLevel(n); return; }
+  if (ds.start) { const n = +ds.start; if (canPlay(n)) { if (PORTAL && S.levelsStarted) PORTAL.breakAd().then(() => startLevel(n)); else startLevel(n); } else goLevel(n); return; }
+  if (ds.rewarded) { b.disabled = true; PORTAL.rewarded().then(ok => { if (ok) { save.money += +ds.rewarded; persist(); au('cash'); flashNote('+' + fmt(+ds.rewarded)); b.remove(); } else b.disabled = false; }); return; }
   if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); if (ds.tab === 'o') drawOutfitPreview(); return; }
   if (ds.outfit) {
     const [cat, id] = ds.outfit.split(':'), it = D.OUTFITS[cat].items.find(i => i[0] === id), price = it[2];
@@ -1872,7 +1880,12 @@ screenEl.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id
 // ---------- boucle ----------
 let lastT = performance.now();
 function frame(t) {
+  if (S.manual) { lastT = t; requestAnimationFrame(frame); return; }
   const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  tick(dt);
+  requestAnimationFrame(frame);
+}
+function tick(dt) {
   if (S.mode === 'play') {
     let gdt = dt;
     if (S.cine) { S.cine.t = S.cine.start ? (performance.now() - S.cine.start) / 1000 : (S.cine.start = performance.now(), 0); gdt = S.cine.type === 'intro' ? 0 : dt * .18; if (S.cine.t >= S.cine.dur) { S.cine = null; hideCine(); } }
@@ -1882,14 +1895,15 @@ function frame(t) {
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); var hd = heli ? dist(heli.x, heli.y, P.x, P.y) : 1e9; au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd, heliDist: hd, rain: !!S.rain }, dt); }
   else if (S.mode === 'result') { for (const p of parts) { p.life -= dt; } }
   render(dt);
-  requestAnimationFrame(frame);
 }
 // décor du menu : la ville du premier pays
 world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
+if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); }
 init3D();
+if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

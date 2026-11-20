@@ -196,6 +196,7 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 #cine small{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
 #cine b{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,58px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
 #cine em{font-style:normal;font-size:11px;color:var(--muted)}
+.langs .btn.on{border-color:var(--cyan);color:var(--cyan)}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -400,6 +401,546 @@ window.NB_DATA = (() => {
 
 </script>
 <script>
+window.NB_DICT = {
+  "(monte dans une voiture : E)": {"en": "(get in a car: E)", "es": "(sube a un coche: E)", "pt": "(entre num carro: E)"},
+  "/30 niveaux": {"en": "/30 levels", "es": "/30 niveles", "pt": "/30 níveis"},
+  "100 points d’armure.": {"en": "100 armor points.", "es": "100 puntos de armadura.", "pt": "100 pontos de armadura."},
+  "150 points d’armure.": {"en": "150 armor points.", "es": "150 puntos de armadura.", "pt": "150 pontos de armadura."},
+  "29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.": {"en": "29 more levels in Italy, Colombia and Brazil, 7 gang bosses, the rocket launcher and the minigun.", "es": "29 niveles más en Italia, Colombia y Brasil, 7 jefes de pandilla, el lanzacohetes y la minigun.", "pt": "Mais 29 níveis na Itália, na Colômbia e no Brasil, 7 chefões de gangue, o lança-foguetes e a minigun."},
+  "290 étapes de plus et 7 chefs de gang": {"en": "290 more steps and 7 gang bosses", "es": "290 etapas más y 7 jefes de pandilla", "pt": "Mais 290 etapas e 7 chefões de gangue"},
+  "50 points d’armure au début de chaque niveau.": {"en": "50 armor points at the start of every level.", "es": "50 puntos de armadura al empezar cada nivel.", "pt": "50 pontos de armadura no início de cada nível."},
+  "<button class=\"btn\" data-full=\"1\">Plein écran</button>": {"en": "<button class=\"btn\" data-full=\"1\">Fullscreen</button>", "es": "<button class=\"btn\" data-full=\"1\">Pantalla completa</button>", "pt": "<button class=\"btn\" data-full=\"1\">Tela cheia</button>"},
+  "<p class=\"lead\">Tu as terminé les 30 niveaux. Morro Azul est à toi.</p>": {"en": "<p class=\"lead\">You've beaten all 30 levels. Morro Azul is yours.</p>", "es": "<p class=\"lead\">Completaste los 30 niveles. Morro Azul es tuyo.</p>", "pt": "<p class=\"lead\">Você zerou os 30 níveis. O Morro Azul é seu.</p>"},
+  "ACTION": {"en": "ACTION", "es": "ACCIÓN", "pt": "AÇÃO"},
+  "AGENT $": {"en": "COP $", "es": "AGENTE $", "pt": "POLICIAL $"},
+  "ARME": {"en": "WEAPON", "es": "ARMA", "pt": "ARMA"},
+  "ARRÊTÉ": {"en": "BUSTED", "es": "ARRESTADO", "pt": "PRESO"},
+  "Achat non abouti :": {"en": "Purchase failed:", "es": "Compra fallida:", "pt": "Compra não concluída:"},
+  "Achat retrouvé : les 30 niveaux sont débloqués.": {"en": "Purchase restored: all 30 levels unlocked.", "es": "Compra restaurada: los 30 niveles están desbloqueados.", "pt": "Compra restaurada: os 30 níveis estão liberados."},
+  "Acheter le jeu complet": {"en": "Buy the full game", "es": "Comprar el juego completo", "pt": "Comprar o jogo completo"},
+  "Acheté": {"en": "Owned", "es": "Comprado", "pt": "Comprado"},
+  "Afro": {"en": "Afro", "es": "Afro", "pt": "Black power"},
+  "Agents soudoyés (−": {"en": "Cops bribed (−", "es": "Agentes sobornados (−", "pt": "Policiais subornados (−"},
+  "Approche-toi d’une voiture de police pour la soudoyer": {"en": "Get close to a police car to bribe it", "es": "Acércate a una patrulla para sobornarla", "pt": "Chegue perto de uma viatura para subornar"},
+  "Appuie sur E pour voler cette voiture.": {"en": "Press E to steal this car.", "es": "Pulsa E para robar este coche.", "pt": "Aperte E para roubar este carro."},
+  "Arial Black": {"en": "Arial Black", "es": "Arial Black", "pt": "Arial Black"},
+  "Armes": {"en": "Weapons", "es": "Armas", "pt": "Armas"},
+  "Armure tactique": {"en": "Tactical Armor", "es": "Armadura táctica", "pt": "Armadura tática"},
+  "Arrêté": {"en": "Busted", "es": "Arrestado", "pt": "Preso"},
+  "Arrêté par la police": {"en": "Busted by the cops", "es": "Arrestado por la policía", "pt": "Preso pela polícia"},
+  "Atterrissage forcé": {"en": "Crash Landing", "es": "Aterrizaje forzoso", "pt": "Pouso forçado"},
+  "Aucun achat trouvé sur ce compte Google.": {"en": "No purchase found on this Google account.", "es": "No se encontró ninguna compra en esta cuenta de Google.", "pt": "Nenhuma compra encontrada nesta conta Google."},
+  "Aucune": {"en": "None", "es": "Ninguna", "pt": "Nenhum"},
+  "Aucune voiture à portée": {"en": "No car in range", "es": "Ningún coche cerca", "pt": "Nenhum carro por perto"},
+  "BAY": {"en": "BAY", "es": "BAY", "pt": "BAY"},
+  "Barrage de police devant !": {"en": "Police roadblock ahead!", "es": "¡Control policial adelante!", "pt": "Blitz da polícia à frente!"},
+  "Baskets": {"en": "Sneakers", "es": "Zapatillas", "pt": "Tênis"},
+  "Beige": {"en": "Beige", "es": "Beige", "pt": "Bege"},
+  "Benvenuti a Porto Lumi": {"en": "Benvenuti a Porto Lumi", "es": "Benvenuti a Porto Lumi", "pt": "Benvenuti a Porto Lumi"},
+  "Bienvenue au morro": {"en": "Welcome to the morro", "es": "Bienvenido al morro", "pt": "Bem-vindo ao morro"},
+  "Big Marlow, le patron du Crew du Port, t'attend sur les quais. Après lui, Néon Bay est à toi.": {"en": "Big Marlow, boss of the Port Crew, is waiting for you on the docks. Take him down and Néon Bay is yours.", "es": "Big Marlow, el jefe de la Crew del Puerto, te espera en los muelles. Después de él, Néon Bay es tuya.", "pt": "Big Marlow, o chefe da Crew do Porto, está te esperando no cais. Depois dele, Néon Bay é sua."},
+  "Blanc": {"en": "White", "es": "Blanco", "pt": "Branco"},
+  "Blanche": {"en": "White", "es": "Blanca", "pt": "Branco"},
+  "Blanches": {"en": "White", "es": "Blancas", "pt": "Brancos"},
+  "Bleu": {"en": "Blue", "es": "Azul", "pt": "Azul"},
+  "Bleu roi": {"en": "Royal Blue", "es": "Azul rey", "pt": "Azul royal"},
+  "Blindage de voiture": {"en": "Car Armor", "es": "Blindaje de coche", "pt": "Blindagem do carro"},
+  "Blond": {"en": "Blond", "es": "Rubio", "pt": "Loiro"},
+  "Blouson noir": {"en": "Black Jacket", "es": "Chaqueta negra", "pt": "Jaqueta preta"},
+  "Bomber rouge": {"en": "Red Bomber", "es": "Bomber roja", "pt": "Bomber vermelha"},
+  "Bon payeur": {"en": "Good Payer", "es": "Buen pagador", "pt": "Bom pagador"},
+  "Bonus de fin :": {"en": "End bonus:", "es": "Bono final:", "pt": "Bônus final:"},
+  "Boost en voiture (touche N). Max 9.": {"en": "Car boost (N key). Max 9.", "es": "Turbo para el coche (tecla N). Máx. 9.", "pt": "Turbo no carro (tecla N). Máx. 9."},
+  "Boutique": {"en": "Shop", "es": "Tienda", "pt": "Loja"},
+  "Boutique : E pour acheter armes, armure et nitro avec l’argent gagné.": {"en": "Shop: E to buy weapons, armor and nitro with the cash you've earned.", "es": "Tienda: E para comprar armas, armadura y nitro con el dinero que ganaste.", "pt": "Loja: E para comprar armas, armadura e nitro com a grana que você ganhou."},
+  "Boutique : touche ACTION pour acheter armes et équipement.": {"en": "Shop: ACTION button to buy weapons and gear.", "es": "Tienda: botón ACCIÓN para comprar armas y equipo.", "pt": "Loja: botão AÇÃO para comprar armas e equipamento."},
+  "Brouilleur radio": {"en": "Radio Jammer", "es": "Inhibidor de radio", "pt": "Bloqueador de rádio"},
+  "Brun": {"en": "Brown", "es": "Morena", "pt": "Morena"},
+  "Brésil": {"en": "Brazil", "es": "Brasil", "pt": "Brasil"},
+  "CAM": {"en": "CAM", "es": "CÁM", "pt": "CÂM"},
+  "Cadence": {"en": "Fire rate", "es": "Cadencia", "pt": "Cadência"},
+  "Cadence très rapide, peu précise.": {"en": "Very fast fire rate, not very accurate.", "es": "Cadencia muy alta, poca precisión.", "pt": "Cadência muito alta, pouca precisão."},
+  "Caméra :": {"en": "Camera:", "es": "Cámara:", "pt": "Câmera:"},
+  "Caméra embarquée": {"en": "In-car Camera", "es": "Cámara interior", "pt": "Câmera interna"},
+  "Carnet de contacts": {"en": "Contact Book", "es": "Agenda de contactos", "pt": "Agenda de contatos"},
+  "Carte": {"en": "Map", "es": "Mapa", "pt": "Mapa"},
+  "Carte des niveaux": {"en": "Level Map", "es": "Mapa de niveles", "pt": "Mapa de níveis"},
+  "Casquette": {"en": "Cap", "es": "Gorra", "pt": "Boné"},
+  "Ce code n’est pas valide. Vérifie les lettres et les tirets.": {"en": "This code isn't valid. Check the letters and dashes.", "es": "Este código no es válido. Revisa las letras y los guiones.", "pt": "Esse código não é válido. Confira as letras e os hifens."},
+  "Chakra Petch": {"en": "Chakra Petch", "es": "Chakra Petch", "pt": "Chakra Petch"},
+  "Changer d'arme · recharger": {"en": "Switch weapon · reload", "es": "Cambiar de arma · recargar", "pt": "Trocar de arma · recarregar"},
+  "Changer de caméra (dessus, poursuite, embarquée)": {"en": "Switch camera (top, chase, in-car)", "es": "Cambiar de cámara (cenital, persecución, interior)", "pt": "Trocar de câmera (de cima, perseguição, interna)"},
+  "Chaîne": {"en": "Chain", "es": "Cadena", "pt": "Corrente"},
+  "Chaîne en or": {"en": "Gold Chain", "es": "Cadena de oro", "pt": "Corrente de ouro"},
+  "Checkpoint": {"en": "Checkpoint", "es": "Control", "pt": "Checkpoint"},
+  "Chef de gang": {"en": "Gang Boss", "es": "Jefe de pandilla", "pt": "Chefão de gangue"},
+  "Chef à abattre :": {"en": "Boss to take down:", "es": "Jefe a abatir:", "pt": "Chefão a derrubar:"},
+  "Châtain": {"en": "Chestnut", "es": "Castaño", "pt": "Castanho"},
+  "Clair": {"en": "Light", "es": "Clara", "pt": "Clara"},
+  "Clip sous haute tension": {"en": "High-Voltage Video Shoot", "es": "Videoclip de alto voltaje", "pt": "Clipe de alta tensão"},
+  "Code accepté : les 30 niveaux sont débloqués !": {"en": "Code accepted: all 30 levels unlocked!", "es": "Código aceptado: ¡los 30 niveles están desbloqueados!", "pt": "Código aceito: os 30 níveis estão liberados!"},
+  "Coiffure": {"en": "Hairstyle", "es": "Peinado", "pt": "Cabelo"},
+  "Colombie": {"en": "Colombia", "es": "Colombia", "pt": "Colômbia"},
+  "Commencer": {"en": "Start", "es": "Empezar", "pt": "Começar"},
+  "Convoi": {"en": "Convoy", "es": "Convoy", "pt": "Comboio"},
+  "Corruption": {"en": "Corruption", "es": "Corrupción", "pt": "Corrupção"},
+  "Couleur des cheveux": {"en": "Hair Color", "es": "Color de pelo", "pt": "Cor do cabelo"},
+  "Course": {"en": "Race", "es": "Carrera", "pt": "Corrida"},
+  "Courte": {"en": "Short", "es": "Corto", "pt": "Curto"},
+  "DJ Favelinha": {"en": "DJ Favelinha", "es": "DJ Favelinha", "pt": "DJ Favelinha"},
+  "DJ Favelinha organise le plus gros baile de l'année, mais le Bonde do Trovão veut tout arrêter.": {"en": "DJ Favelinha is throwing the biggest baile of the year, but the Bonde do Trovão wants to shut it all down.", "es": "DJ Favelinha organiza el baile más grande del año, pero el Bonde do Trovão quiere pararlo todo.", "pt": "O DJ Favelinha vai fazer o maior baile do ano, mas o Bonde do Trovão quer acabar com tudo."},
+  "De Néon Bay aux favelas de Morro Azul : 30 niveaux, 4 pays, 300 étapes. Monte ton équipement, soudoie les agents, passe par les tunnels et fais tomber les chefs des gangs.": {"en": "From Néon Bay to the favelas of Morro Azul: 30 levels, 4 countries, 300 steps. Gear up, bribe the cops, slip through the tunnels and bring down the gang bosses.", "es": "De Néon Bay a las favelas de Morro Azul: 30 niveles, 4 países, 300 etapas. Equípate, soborna a los agentes, usa los túneles y derriba a los jefes de las pandillas.", "pt": "De Néon Bay às favelas do Morro Azul: 30 níveis, 4 países, 300 etapas. Monte seu arsenal, suborne os policiais, passe pelos túneis e derrube os chefões das gangues."},
+  "Des ennemis ! Garde TIRER appuyé, la visée est automatique. ARME = changer d’arme.": {"en": "Enemies! Hold SHOOT, aiming is automatic. WEAPON = switch weapon.", "es": "¡Enemigos! Mantén DISPARAR, la puntería es automática. ARMA = cambiar de arma.", "pt": "Inimigos! Segure ATIRAR, a mira é automática. ARMA = trocar de arma."},
+  "Des ennemis ! Tire avec Espace ou clic gauche. La visée aide automatiquement. Q = changer d’arme.": {"en": "Enemies! Shoot with Space or left click. Aim assist kicks in automatically. Q = switch weapon.", "es": "¡Enemigos! Dispara con Espacio o clic izquierdo. La puntería te ayuda sola. Q = cambiar de arma.", "pt": "Inimigos! Atire com Espaço ou clique esquerdo. A mira ajuda automaticamente. Q = trocar de arma."},
+  "Docks en feu": {"en": "Docks on Fire", "es": "Muelles en llamas", "pt": "Cais em chamas"},
+  "Don Varga t'invite à dîner. C'est un piège, et tout le monde le sait.": {"en": "Don Varga invites you to dinner. It's a trap, and everyone knows it.", "es": "Don Varga te invita a cenar. Es una trampa, y todo el mundo lo sabe.", "pt": "Don Varga te chamou pra jantar. É uma armadilha, e todo mundo sabe."},
+  "Dorée": {"en": "Gold", "es": "Dorada", "pt": "Dourado"},
+  "Dorées": {"en": "Gold", "es": "Doradas", "pt": "Dourados"},
+  "Débloque les 29 niveaux": {"en": "Unlock all 29 levels", "es": "Desbloquea los 29 niveles", "pt": "Libere os 29 níveis"},
+  "Défi du jour réussi": {"en": "Daily challenge complete", "es": "Desafío diario superado", "pt": "Desafio diário concluído"},
+  "Défis du jour": {"en": "Daily Challenges", "es": "Desafíos diarios", "pt": "Desafios diários"},
+  "Dégâts": {"en": "Damage", "es": "Daño", "pt": "Dano"},
+  "Dépose la voiture au garage (G vert)": {"en": "Drop the car at the garage (green G)", "es": "Deja el coche en el taller (G verde)", "pt": "Deixe o carro na garagem (G verde)"},
+  "Détruis le convoi de": {"en": "Destroy the convoy of", "es": "Destruye el convoy de", "pt": "Destrua o comboio de"},
+  "Dévastateur au contact.": {"en": "Devastating up close.", "es": "Devastadora a corta distancia.", "pt": "Devastadora de perto."},
+  "E : ouvrir la boutique": {"en": "E: open the shop", "es": "E: abrir la tienda", "pt": "E: abrir a loja"},
+  "E : prendre le tunnel": {"en": "E: take the tunnel", "es": "E: entrar al túnel", "pt": "E: entrar no túnel"},
+  "El Lobo se cache dans son hacienda, protégé par ses hommes et par un colonel bien payé.": {"en": "El Lobo is holed up in his hacienda, guarded by his men and a well-paid colonel.", "es": "El Lobo se esconde en su hacienda, protegido por sus hombres y por un coronel bien pagado.", "pt": "El Lobo está escondido na sua hacienda, protegido pelos seus homens e por um coronel bem pago."},
+  "Emmène": {"en": "Take", "es": "Lleva a", "pt": "Leve"},
+  "Escorte": {"en": "Escort", "es": "Escolta", "pt": "Escolta"},
+  "Espace / clic": {"en": "Space / click", "es": "Espacio / clic", "pt": "Espaço / clique"},
+  "Espace = frein à main pour tourner sec. C = changer de caméra. N = nitro.": {"en": "Space = handbrake for sharp turns. C = switch camera. N = nitro.", "es": "Espacio = freno de mano para girar en seco. C = cambiar de cámara. N = nitro.", "pt": "Espaço = freio de mão para curvas fechadas. C = trocar de câmera. N = nitro."},
+  "Explose voitures et groupes.": {"en": "Blows up cars and crowds.", "es": "Revienta coches y grupos.", "pt": "Explode carros e grupos."},
+  "FLICS": {"en": "COPS", "es": "POLIS", "pt": "POLÍCIA"},
+  "FREIN = frein à main pour tourner sec. CAM = changer de caméra.": {"en": "BRAKE = handbrake for sharp turns. CAM = switch camera.", "es": "FRENO = freno de mano para girar en seco. CÁM = cambiar de cámara.", "pt": "FREIO = freio de mão para curvas fechadas. CÂM = trocar de câmera."},
+  "Fantôme": {"en": "Ghost", "es": "Fantasma", "pt": "Fantasma"},
+  "Fiable, tir semi-auto, munitions illimitées.": {"en": "Reliable, semi-auto, unlimited ammo.", "es": "Fiable, semiautomática, munición ilimitada.", "pt": "Confiável, semiautomática, munição infinita."},
+  "Foncé": {"en": "Dark", "es": "Oscura", "pt": "Escura"},
+  "Fuite": {"en": "Getaway", "es": "Fuga", "pt": "Fuga"},
+  "Fuite par la jungle": {"en": "Jungle Getaway", "es": "Fuga por la selva", "pt": "Fuga pela selva"},
+  "Fusil d'assaut": {"en": "Assault Rifle", "es": "Fusil de asalto", "pt": "Fuzil de assalto"},
+  "Fusil de précision": {"en": "Sniper Rifle", "es": "Rifle de francotirador", "pt": "Rifle de precisão"},
+  "Fusil à pompe": {"en": "Shotgun", "es": "Escopeta", "pt": "Espingarda"},
+  "Fusillade": {"en": "Shootout", "es": "Tiroteo", "pt": "Tiroteio"},
+  "Gangs de rue, rappeurs et docks en feu.": {"en": "Street gangs, rappers and docks on fire.", "es": "Pandillas callejeras, raperos y muelles en llamas.", "pt": "Gangues de rua, rappers e cais em chamas."},
+  "Garage": {"en": "Garage", "es": "Taller", "pt": "Garagem"},
+  "Gilet pare-balles": {"en": "Bulletproof Vest", "es": "Chaleco antibalas", "pt": "Colete à prova de balas"},
+  "Gilet renforcé": {"en": "Reinforced Vest", "es": "Chaleco reforzado", "pt": "Colete reforçado"},
+  "Grand voleur": {"en": "Grand Thief", "es": "Gran ladrón", "pt": "Grande ladrão"},
+  "Guerre de territoire": {"en": "Turf War", "es": "Guerra territorial", "pt": "Guerra de território"},
+  "Guerre des bondes": {"en": "Bonde War", "es": "Guerra de bondes", "pt": "Guerra dos bondes"},
+  "H · N / Maj": {"en": "H · N / Shift", "es": "H · N / Mayús", "pt": "H · N / Shift"},
+  "Hâlé": {"en": "Tan", "es": "Bronceada", "pt": "Bronzeada"},
+  "Hélicoptère abattu !": {"en": "Chopper down!", "es": "¡Helicóptero derribado!", "pt": "Helicóptero abatido!"},
+  "Hélicoptère de police !": {"en": "Police chopper!", "es": "¡Helicóptero policial!", "pt": "Helicóptero da polícia!"},
+  "II": {"en": "II", "es": "II", "pt": "II"},
+  "Il faut": {"en": "You need", "es": "Necesitas", "pt": "Você precisa de"},
+  "Il faut arriver en voiture": {"en": "You need to arrive by car", "es": "Tienes que llegar en coche", "pt": "Você precisa chegar de carro"},
+  "Il ne reste qu'un homme entre toi et le contrôle de Porto Lumi : Don Moretti.": {"en": "Only one man stands between you and control of Porto Lumi: Don Moretti.", "es": "Solo queda un hombre entre tú y el control de Porto Lumi: Don Moretti.", "pt": "Só resta um homem entre você e o controle de Porto Lumi: Don Moretti."},
+  "Il pleut : la route glisse": {"en": "It's raining: the road is slippery", "es": "Está lloviendo: la carretera resbala", "pt": "Está chovendo: a pista está escorregadia"},
+  "Il te faut": {"en": "You need", "es": "Necesitas", "pt": "Você precisa de"},
+  "Italie": {"en": "Italy", "es": "Italia", "pt": "Itália"},
+  "Italie, Colombie et favelas du Brésil": {"en": "Italy, Colombia and Brazil's favelas", "es": "Italia, Colombia y las favelas de Brasil", "pt": "Itália, Colômbia e as favelas do Brasil"},
+  "Jaune": {"en": "Yellow", "es": "Amarillo", "pt": "Amarelo"},
+  "Jean": {"en": "Denim", "es": "Denim", "pt": "Jeans"},
+  "Jeu original. Lieux, gangs et personnages sont inventés.": {"en": "Original game. All places, gangs and characters are made up.", "es": "Juego original. Los lugares, pandillas y personajes son inventados.", "pt": "Jogo original. Lugares, gangues e personagens são fictícios."},
+  "Jungle, pistes clandestines et cartels.": {"en": "Jungle, secret airstrips and cartels.", "es": "Selva, pistas clandestinas y carteles.", "pt": "Selva, pistas clandestinas e cartéis."},
+  "L'hacienda": {"en": "The Hacienda", "es": "La hacienda", "pt": "A hacienda"},
+  "L'inspecteur Kowalski vend des infos à tout le monde. Paie-le, utilise-le, puis débarrasse-toi de ceux qui l'ont acheté avant toi.": {"en": "Inspector Kowalski sells intel to everyone. Pay him, use him, then get rid of everyone who bought him before you.", "es": "El inspector Kowalski le vende información a todo el mundo. Págale, úsalo y luego quítate de encima a los que lo compraron antes que tú.", "pt": "O inspetor Kowalski vende informação pra todo mundo. Pague, use e depois se livre de quem comprou ele antes de você."},
+  "La plage": {"en": "The Beach", "es": "La playa", "pt": "A praia"},
+  "La plantation": {"en": "The Plantation", "es": "La plantación", "pt": "A plantação"},
+  "La police te traque : sème-la (tunnel, atelier de peinture ou pot-de-vin)": {"en": "The cops are after you: lose them (tunnel, paint shop or bribe)", "es": "La policía te persigue: piérdela (túnel, taller de pintura o soborno)", "pt": "A polícia está atrás de você: despiste (túnel, oficina de pintura ou suborno)"},
+  "La taupe": {"en": "The Mole", "es": "El topo", "pt": "O X-9"},
+  "La trattoria": {"en": "The Trattoria", "es": "La trattoria", "pt": "A trattoria"},
+  "La voiture dorée a été détruite": {"en": "The gold car was destroyed", "es": "El coche dorado fue destruido", "pt": "O carro dourado foi destruído"},
+  "Lance-roquettes": {"en": "Rocket Launcher", "es": "Lanzacohetes", "pt": "Lança-foguetes"},
+  "Lance-roquettes, minigun, armure tactique": {"en": "Rocket launcher, minigun, tactical armor", "es": "Lanzacohetes, minigun, armadura táctica", "pt": "Lança-foguetes, minigun, armadura tática"},
+  "Le Cartel del Cóndor a un repaire sous la jungle. On y entre par les tunnels.": {"en": "The Cartel del Cóndor has a hideout under the jungle. The way in is through the tunnels.", "es": "El Cartel del Cóndor tiene una guarida bajo la selva. Se entra por los túneles.", "pt": "O Cartel del Cóndor tem um esconderijo debaixo da selva. A entrada é pelos túneis."},
+  "Le Consigliere": {"en": "The Consigliere", "es": "El Consigliere", "pt": "O Consigliere"},
+  "Le Crew du Port contrôle tout ce qui entre par la mer. Il est temps de leur montrer qui commande.": {"en": "The Port Crew controls everything that comes in by sea. Time to show them who's boss.", "es": "La Crew del Puerto controla todo lo que entra por mar. Es hora de enseñarles quién manda.", "pt": "A Crew do Porto controla tudo o que chega pelo mar. Hora de mostrar quem manda."},
+  "Le Cóndor": {"en": "El Cóndor", "es": "El Cóndor", "pt": "El Cóndor"},
+  "Le Cóndor a mis ta tête à prix. Rosa doit rejoindre son avion avant l'aube.": {"en": "El Cóndor put a price on your head. Rosa has to reach her plane before dawn.", "es": "El Cóndor puso precio a tu cabeza. Rosa tiene que llegar a su avión antes del amanecer.", "pt": "El Cóndor botou sua cabeça a prêmio. Rosa precisa chegar ao avião antes do amanhecer."},
+  "Le Parrain": {"en": "The Godfather", "es": "El Padrino", "pt": "O Padrinho"},
+  "Le baile funk": {"en": "The Baile Funk", "es": "El baile funk", "pt": "O baile funk"},
+  "Le casino Lumi": {"en": "The Lumi Casino", "es": "El casino Lumi", "pt": "O cassino Lumi"},
+  "Le chef du cartel t'attend. Après ça, tu quittes la Colombie, ou tu la diriges.": {"en": "The cartel boss is waiting. After this, you leave Colombia, or you run it.", "es": "El jefe del cartel te espera. Después de esto, o te vas de Colombia, o la gobiernas.", "pt": "O chefe do cartel está te esperando. Depois disso, ou você sai da Colômbia, ou manda nela."},
+  "Le coffre du casino Moretti est plein. Le préfet de police aussi aime l'argent.": {"en": "The Moretti casino vault is full. And the police chief loves money too.", "es": "La bóveda del casino Moretti está llena. Y al jefe de policía también le gusta el dinero.", "pt": "O cofre do cassino Moretti está cheio. E o chefe de polícia também gosta de dinheiro."},
+  "Le conseiller des Moretti veut changer de camp. Fais-le traverser la ville vivant.": {"en": "The Moretti consigliere wants to switch sides. Get him across town alive.", "es": "El consejero de los Moretti quiere cambiar de bando. Llévalo vivo al otro lado de la ciudad.", "pt": "O conselheiro dos Moretti quer mudar de lado. Leve ele vivo até o outro lado da cidade."},
+  "Le convoi des Vipères": {"en": "The Vipers' Convoy", "es": "El convoy de las Víboras", "pt": "O comboio das Víboras"},
+  "Le dernier coup": {"en": "The Last Job", "es": "El último golpe", "pt": "O último golpe"},
+  "Le flic corrompu": {"en": "The Dirty Cop", "es": "El poli corrupto", "pt": "O policial corrupto"},
+  "Le laboratoire caché": {"en": "The Hidden Lab", "es": "El laboratorio oculto", "pt": "O laboratório escondido"},
+  "Le pont de la rivière": {"en": "The River Bridge", "es": "El puente del río", "pt": "A ponte do rio"},
+  "Le rappeur": {"en": "The Rapper", "es": "El rapero", "pt": "O rapper"},
+  "Le roi du port": {"en": "King of the Port", "es": "El rey del puerto", "pt": "O rei do porto"},
+  "Le seul pont de la vallée sert de péage aux Lobos. Coupe leur route.": {"en": "The valley's only bridge is a Lobos toll booth. Cut off their route.", "es": "El único puente del valle es el peaje de los Lobos. Córtales el paso.", "pt": "A única ponte do vale virou pedágio dos Lobos. Corte o caminho deles."},
+  "Le tournage du clip d'Ozone tourne mal : des tireurs, des flics, et un réalisateur qui ne veut pas arrêter.": {"en": "Ozone's video shoot goes sideways: shooters, cops, and a director who won't stop rolling.", "es": "El rodaje del videoclip de Ozone se complica: tiradores, polis y un director que no quiere parar.", "pt": "A gravação do clipe do Ozone dá errado: atiradores, polícia e um diretor que não quer parar."},
+  "Le téléphérique": {"en": "The Cable Car", "es": "El teleférico", "pt": "O teleférico"},
+  "Le téléphérique relie le morro à la ville. Le Trovão y fait passer ses affaires.": {"en": "The cable car links the morro to the city. The Trovão runs its business through it.", "es": "El teleférico une el morro con la ciudad. El Trovão mueve sus negocios por ahí.", "pt": "O teleférico liga o morro à cidade. O Trovão passa os negócios dele por lá."},
+  "Le vin de la Famiglia": {"en": "The Famiglia's Wine", "es": "El vino de la Famiglia", "pt": "O vinho da Famiglia"},
+  "Les Varga cachent leurs affaires dans des caisses de vin. Intercepte la livraison.": {"en": "The Vargas hide their business in wine crates. Intercept the delivery.", "es": "Los Varga esconden sus negocios en cajas de vino. Intercepta la entrega.", "pt": "Os Varga escondem os negócios em caixas de vinho. Intercepte a entrega."},
+  "Les Vipères débordent sur le quartier de Dre. Reprends les coins de rue un par un.": {"en": "The Vipers are spilling into Dre's neighborhood. Take back the street corners one by one.", "es": "Las Víboras se están metiendo en el barrio de Dre. Recupera las esquinas una por una.", "pt": "As Víboras estão invadindo o bairro do Dre. Retome as esquinas uma por uma."},
+  "Les canaux": {"en": "The Canals", "es": "Los canales", "pt": "Os canais"},
+  "Les deux gangs du morro se font la guerre. Frappe le Trovão à la tête.": {"en": "The morro's two gangs are at war. Hit the Trovão where it hurts.", "es": "Las dos pandillas del morro están en guerra. Golpea al Trovão en la cabeza.", "pt": "As duas gangues do morro estão em guerra. Acerte o Trovão na cabeça."},
+  "Les familles mafieuses règnent sur les canaux.": {"en": "Mafia families rule the canals.", "es": "Las familias mafiosas dominan los canales.", "pt": "As famílias mafiosas mandam nos canais."},
+  "Les favelas colorées, le baile funk et la guerre des bondes.": {"en": "Colorful favelas, baile funk and the bonde wars.", "es": "Favelas coloridas, baile funk y la guerra de bondes.", "pt": "Favelas coloridas, baile funk e a guerra dos bondes."},
+  "Les poches pleines": {"en": "Deep Pockets", "es": "Bolsillos llenos", "pt": "Bolsos cheios"},
+  "Livraison": {"en": "Delivery", "es": "Entrega", "pt": "Entrega"},
+  "Livre la marchandise à": {"en": "Deliver the goods to", "es": "Entrega la mercancía en", "pt": "Entregue a mercadoria em"},
+  "Longue": {"en": "Long", "es": "Largo", "pt": "Longo"},
+  "Los Lobos": {"en": "Los Lobos", "es": "Los Lobos", "pt": "Los Lobos"},
+  "Los Lobos ont pris la plantation de café de la famille de Rosa. Reprends-la.": {"en": "Los Lobos took over Rosa's family coffee plantation. Take it back.", "es": "Los Lobos tomaron la plantación de café de la familia de Rosa. Recupérala.", "pt": "Los Lobos tomaram a plantação de café da família da Rosa. Retome ela."},
+  "Légende de Morro Azul": {"en": "Legend of Morro Azul", "es": "Leyenda de Morro Azul", "pt": "Lenda do Morro Azul"},
+  "L’agent empoche": {"en": "The cop pockets", "es": "El agente se embolsa", "pt": "O policial embolsa"},
+  "MC Ozone": {"en": "MC Ozone", "es": "MC Ozone", "pt": "MC Ozone"},
+  "MC Ozone sort son album demain et les Vipères veulent l'empêcher d'arriver au studio. Il te faut le protéger.": {"en": "MC Ozone drops his album tomorrow and the Vipers want to stop him from reaching the studio. You've got to protect him.", "es": "MC Ozone saca su disco mañana y las Víboras quieren impedir que llegue al estudio. Tienes que protegerlo.", "pt": "O MC Ozone lança o álbum amanhã e as Víboras querem impedir que ele chegue ao estúdio. Você tem que proteger ele."},
+  "MC Ozone, le rappeur": {"en": "MC Ozone, the rapper", "es": "MC Ozone, el rapero", "pt": "MC Ozone, o rapper"},
+  "MISSION RÉUSSIE": {"en": "MISSION PASSED", "es": "MISIÓN CUMPLIDA", "pt": "MISSÃO CUMPRIDA"},
+  "Marcher, conduire": {"en": "Walk, drive", "es": "Caminar, conducir", "pt": "Andar, dirigir"},
+  "Mat": {"en": "Olive", "es": "Trigueña", "pt": "Morena clara"},
+  "Maître de Sierra Verde": {"en": "Master of Sierra Verde", "es": "Amo de Sierra Verde", "pt": "Dono de Sierra Verde"},
+  "Merci ! Les 30 niveaux sont débloqués.": {"en": "Thanks! All 30 levels unlocked.", "es": "¡Gracias! Los 30 niveles están desbloqueados.", "pt": "Valeu! Os 30 níveis estão liberados."},
+  "Minigun": {"en": "Minigun", "es": "Minigun", "pt": "Minigun"},
+  "Mission accomplie": {"en": "Mission complete", "es": "Misión cumplida", "pt": "Missão cumprida"},
+  "Mitraillette": {"en": "SMG", "es": "Subfusil", "pt": "Submetralhadora"},
+  "Moins de renforts et la police te perd plus vite.": {"en": "Fewer reinforcements and the cops lose you faster.", "es": "Menos refuerzos y la policía te pierde antes.", "pt": "Menos reforços e a polícia te perde mais rápido."},
+  "Morro Azul": {"en": "Morro Azul", "es": "Morro Azul", "pt": "Morro Azul"},
+  "NITRO": {"en": "NITRO", "es": "NITRO", "pt": "NITRO"},
+  "Neutralise": {"en": "Take out", "es": "Neutraliza a", "pt": "Neutralize"},
+  "Nitro x3": {"en": "Nitro x3", "es": "Nitro x3", "pt": "Nitro x3"},
+  "Niveau": {"en": "Level", "es": "Nivel", "pt": "Nível"},
+  "Niveau 1 gratuit": {"en": "Level 1 free", "es": "Nivel 1 gratis", "pt": "Nível 1 grátis"},
+  "Niveau suivant": {"en": "Next level", "es": "Siguiente nivel", "pt": "Próximo nível"},
+  "Noir": {"en": "Black", "es": "Negro", "pt": "Preto"},
+  "Noire": {"en": "Black", "es": "Negra", "pt": "Preto"},
+  "Noires": {"en": "Black", "es": "Negras", "pt": "Pretos"},
+  "Nonna Lia refuse de payer la protection des Varga. Ses lasagnes valent bien un coup de main.": {"en": "Nonna Lia won't pay the Vargas for protection. Her lasagna is worth a helping hand.", "es": "Nonna Lia se niega a pagarle protección a los Varga. Sus lasañas bien valen una mano.", "pt": "A Nonna Lia se recusa a pagar proteção aos Varga. A lasanha dela vale uma ajudinha."},
+  "Nouveau en ville": {"en": "New in Town", "es": "Nuevo en la ciudad", "pt": "Novato na cidade"},
+  "NÉON": {"en": "NÉON", "es": "NÉON", "pt": "NÉON"},
+  "Néon Bay": {"en": "Néon Bay", "es": "Néon Bay", "pt": "Néon Bay"},
+  "PAYER": {"en": "PAY", "es": "PAGAR", "pt": "PAGAR"},
+  "Paiement unique, sans abonnement": {"en": "One-time payment, no subscription", "es": "Pago único, sin suscripción", "pt": "Pagamento único, sem assinatura"},
+  "Pantalon": {"en": "Pants", "es": "Pantalón", "pt": "Calça"},
+  "Parrain de Porto Lumi": {"en": "Godfather of Porto Lumi", "es": "Padrino de Porto Lumi", "pt": "Padrinho de Porto Lumi"},
+  "Pas assez d’argent": {"en": "Not enough cash", "es": "No te alcanza el dinero", "pt": "Grana insuficiente"},
+  "Pas assez d’argent : l’agent prend": {"en": "Not enough cash: the cop takes", "es": "No te alcanza: el agente se queda", "pt": "Grana insuficiente: o policial pega"},
+  "Passe à la boutique (case verte) pour t’équiper : E pour entrer": {"en": "Hit the shop (green square) to gear up: E to enter", "es": "Pasa por la tienda (casilla verde) para equiparte: E para entrar", "pt": "Passe na loja (quadrado verde) para se equipar: E para entrar"},
+  "Pause": {"en": "Pause", "es": "Pausa", "pt": "Pausa"},
+  "Pistolet": {"en": "Pistol", "es": "Pistola", "pt": "Pistola"},
+  "Plein écran": {"en": "Fullscreen", "es": "Pantalla completa", "pt": "Tela cheia"},
+  "Plein écran indisponible ici": {"en": "Fullscreen unavailable here", "es": "Pantalla completa no disponible aquí", "pt": "Tela cheia indisponível aqui"},
+  "Plus de munitions : ramasse des caisses ou change d’arme": {"en": "Out of ammo: grab crates or switch weapons", "es": "Sin munición: recoge cajas o cambia de arma", "pt": "Sem munição: pegue caixas ou troque de arma"},
+  "Plus de nitro (boutique)": {"en": "More nitro (shop)", "es": "Más nitro (tienda)", "pt": "Mais nitro (loja)"},
+  "Plus de trousse de soins (boutique)": {"en": "More med kits (shop)", "es": "Más botiquines (tienda)", "pt": "Mais kits médicos (loja)"},
+  "Plus tu as d’étoiles, plus la police est nombreuse. Pour la semer : reste hors de vue, prends un tunnel (T), repeins ta voiture (case rose) ou paie les agents (B).": {"en": "The more stars you have, the more cops come after you. To lose them: stay out of sight, take a tunnel (T), repaint your car (pink square) or pay off the cops (B).", "es": "Cuantas más estrellas tengas, más policías habrá. Para perderlos: no te dejes ver, entra en un túnel (T), repinta tu coche (casilla rosa) o paga a los agentes (B).", "pt": "Quanto mais estrelas, mais polícia na sua cola. Para despistar: fique fora de vista, pegue um túnel (T), repinte o carro (quadrado rosa) ou pague os policiais (B)."},
+  "Poings": {"en": "Fists", "es": "Puños", "pt": "Socos"},
+  "Police semée": {"en": "Cops lost", "es": "Policía perdida", "pt": "Polícia despistada"},
+  "Police, gangs, cartel : toute la ville est à tes trousses. Tiens bon.": {"en": "Cops, gangs, cartel: the whole city is after you. Hang in there.", "es": "Policía, pandillas, cartel: toda la ciudad va por ti. Aguanta.", "pt": "Polícia, gangues, cartel: a cidade inteira está atrás de você. Aguenta firme."},
+  "Porto Lumi": {"en": "Porto Lumi", "es": "Porto Lumi", "pt": "Porto Lumi"},
+  "Pour semer la police : reste hors de vue, prends un tunnel, repeins ta voiture (case rose) ou touche PAYER FLICS.": {"en": "To lose the cops: stay out of sight, take a tunnel, repaint your car (pink square) or hit PAY COPS.", "es": "Para perder a la policía: no te dejes ver, entra en un túnel, repinta tu coche (casilla rosa) o pulsa PAGAR POLIS.", "pt": "Para despistar a polícia: fique fora de vista, pegue um túnel, repinte o carro (quadrado rosa) ou aperte PAGAR POLÍCIA."},
+  "Prends le tunnel souterrain (E sur la bouche T)": {"en": "Take the underground tunnel (E at the T entrance)", "es": "Toma el túnel subterráneo (E en la entrada T)", "pt": "Pegue o túnel subterrâneo (E na entrada T)"},
+  "Précis et rapide, longue portée.": {"en": "Accurate and fast, long range.", "es": "Precisa y rápida, largo alcance.", "pt": "Precisa e rápida, longo alcance."},
+  "Q / molette / 1-8 · R": {"en": "Q / wheel / 1-8 · R", "es": "Q / rueda / 1-8 · R", "pt": "Q / rodinha / 1-8 · R"},
+  "Queue de cheval": {"en": "Ponytail", "es": "Cola de caballo", "pt": "Rabo de cavalo"},
+  "Quitter vers la carte": {"en": "Quit to map", "es": "Salir al mapa", "pt": "Sair para o mapa"},
+  "Ramène la voiture dorée": {"en": "Bring back the gold car", "es": "Trae el coche dorado", "pt": "Traga o carro dourado"},
+  "Rapide : moins de": {"en": "Fast: under", "es": "Rápido: menos de", "pt": "Rápido: menos de"},
+  "Rasée": {"en": "Shaved", "es": "Rapado", "pt": "Raspado"},
+  "Recommencer le niveau": {"en": "Restart level", "es": "Reiniciar nivel", "pt": "Reiniciar nível"},
+  "Rejoins": {"en": "Go to", "es": "Ve a", "pt": "Vá até"},
+  "Rendez-vous": {"en": "Meetup", "es": "Encuentro", "pt": "Encontro"},
+  "Reprendre": {"en": "Resume", "es": "Continuar", "pt": "Continuar"},
+  "Restaurer mes achats": {"en": "Restore my purchases", "es": "Restaurar mis compras", "pt": "Restaurar minhas compras"},
+  "Retrouve": {"en": "Find", "es": "Encuentra a", "pt": "Encontre"},
+  "Roi de Néon Bay": {"en": "King of Néon Bay", "es": "Rey de Néon Bay", "pt": "Rei de Néon Bay"},
+  "Rosa": {"en": "Rosa", "es": "Rosa", "pt": "Rosa"},
+  "Rosa te dépose à Morro Azul. Dans les ruelles des favelas, il faut gagner le respect avant tout.": {"en": "Rosa drops you off in Morro Azul. In the alleys of the favelas, respect comes first.", "es": "Rosa te deja en Morro Azul. En los callejones de las favelas, primero hay que ganarse el respeto.", "pt": "Rosa te deixa no Morro Azul. Nos becos das favelas, você precisa ganhar respeito antes de tudo."},
+  "Rosa, la pilote de brousse": {"en": "Rosa, the bush pilot", "es": "Rosa, la piloto de monte", "pt": "Rosa, a pilota do mato"},
+  "Rose": {"en": "Pink", "es": "Rosa", "pt": "Rosa"},
+  "Rose néon": {"en": "Neon Pink", "es": "Rosa neón", "pt": "Rosa neon"},
+  "Rouge": {"en": "Red", "es": "Rojo", "pt": "Vermelho"},
+  "Rouges": {"en": "Red", "es": "Rojas", "pt": "Vermelhos"},
+  "Roux": {"en": "Red", "es": "Pelirrojo", "pt": "Ruivo"},
+  "Récompense :": {"en": "Reward:", "es": "Recompensa:", "pt": "Recompensa:"},
+  "Récupère les valises près de": {"en": "Grab the briefcases near", "es": "Recoge los maletines cerca de", "pt": "Pegue as maletas perto de"},
+  "Récupération": {"en": "Pickup", "es": "Recogida", "pt": "Coleta"},
+  "Réessayer": {"en": "Retry", "es": "Reintentar", "pt": "Tentar de novo"},
+  "SOIN": {"en": "HEAL", "es": "CURAR", "pt": "CURAR"},
+  "Sans veste": {"en": "No jacket", "es": "Sin chaqueta", "pt": "Sem jaqueta"},
+  "Santé basse : H pour une trousse de soins, ou mets-toi à l’abri.": {"en": "Low health: H for a med kit, or get to cover.", "es": "Salud baja: H para un botiquín, o ponte a cubierto.", "pt": "Vida baixa: H para um kit médico, ou se proteja."},
+  "Santé basse : touche SOIN, ou mets-toi à l’abri.": {"en": "Low health: HEAL button, or get to cover.", "es": "Salud baja: botón CURAR, o ponte a cubierto.", "pt": "Vida baixa: botão CURAR, ou se proteja."},
+  "Santé déjà au maximum": {"en": "Health already full", "es": "Salud al máximo", "pt": "Vida já está cheia"},
+  "Segoe UI": {"en": "Segoe UI", "es": "Segoe UI", "pt": "Segoe UI"},
+  "Sierra Verde": {"en": "Sierra Verde", "es": "Sierra Verde", "pt": "Sierra Verde"},
+  "Silencieux et toujours là. Mets K.O. au contact.": {"en": "Silent and always there. Knocks out up close.", "es": "Silencioso y siempre a mano. Noquea cuerpo a cuerpo.", "pt": "Silencioso e sempre à mão. Nocauteia de perto."},
+  "Soins": {"en": "Healing", "es": "Curación", "pt": "Cura"},
+  "Sombra, le chef du Comando, contrôle tout Morro Azul. Le dernier coup, le plus gros.": {"en": "Sombra, boss of the Comando, controls all of Morro Azul. The last job, and the biggest.", "es": "Sombra, el jefe del Comando, controla todo Morro Azul. El último golpe, el más grande.", "pt": "Sombra, o chefe do Comando, controla todo o Morro Azul. O último golpe, o maior de todos."},
+  "Sortie du tunnel": {"en": "Tunnel exit", "es": "Salida del túnel", "pt": "Saída do túnel"},
+  "Soudoyer la police": {"en": "Bribe the cops", "es": "Sobornar a la policía", "pt": "Subornar a polícia"},
+  "Soudoyer les agents coûte 40 % de moins.": {"en": "Bribing cops costs 40% less.", "es": "Sobornar a los agentes cuesta un 40 % menos.", "pt": "Subornar policiais custa 40% menos."},
+  "Sous Porto Lumi passent de vieux tunnels de contrebandiers. Celui qui les contrôle contrôle la ville.": {"en": "Old smugglers' tunnels run under Porto Lumi. Whoever controls them controls the city.", "es": "Bajo Porto Lumi pasan viejos túneles de contrabandistas. Quien los controla, controla la ciudad.", "pt": "Por baixo de Porto Lumi passam velhos túneis de contrabandistas. Quem controla os túneis controla a cidade."},
+  "Succès": {"en": "Achievements", "es": "Logros", "pt": "Conquistas"},
+  "Succès débloqué": {"en": "Achievement unlocked", "es": "Logro desbloqueado", "pt": "Conquista desbloqueada"},
+  "Survie": {"en": "Survival", "es": "Supervivencia", "pt": "Sobrevivência"},
+  "Survis jusqu’à la fin du chrono": {"en": "Survive until the timer runs out", "es": "Sobrevive hasta que acabe el tiempo", "pt": "Sobreviva até o tempo acabar"},
+  "Série :": {"en": "Streak:", "es": "Racha:", "pt": "Sequência:"},
+  "T-shirt": {"en": "T-shirt", "es": "Camiseta", "pt": "Camiseta"},
+  "TIRER": {"en": "SHOOT", "es": "DISPARAR", "pt": "ATIRAR"},
+  "Teint": {"en": "Skin Tone", "es": "Tono de piel", "pt": "Tom de pele"},
+  "Temps :": {"en": "Time:", "es": "Tiempo:", "pt": "Tempo:"},
+  "Temps écoulé": {"en": "Time's up", "es": "Se acabó el tiempo", "pt": "Tempo esgotado"},
+  "Tenues": {"en": "Outfits", "es": "Ropa", "pt": "Visual"},
+  "Termine le niveau": {"en": "Finish the level", "es": "Termina el nivel", "pt": "Termine o nível"},
+  "Tes voitures prennent 2 fois moins de dégâts.": {"en": "Your cars take half the damage.", "es": "Tus coches reciben la mitad de daño.", "pt": "Seus carros levam metade do dano."},
+  "Tirer · frein à main en voiture": {"en": "Shoot · handbrake in car", "es": "Disparar · freno de mano en coche", "pt": "Atirar · freio de mão no carro"},
+  "Ton avion se pose en catastrophe à Sierra Verde. Rosa, la pilote, connaît tout le monde ici.": {"en": "Your plane crash-lands in Sierra Verde. Rosa, the pilot, knows everyone around here.", "es": "Tu avión aterriza de emergencia en Sierra Verde. Rosa, la piloto, conoce a todo el mundo aquí.", "pt": "Seu avião faz um pouso forçado em Sierra Verde. Rosa, a pilota, conhece todo mundo por aqui."},
+  "Total gagné :": {"en": "Total earned:", "es": "Total ganado:", "pt": "Total ganho:"},
+  "Touche ACTION pour voler cette voiture.": {"en": "ACTION button to steal this car.", "es": "Botón ACCIÓN para robar este coche.", "pt": "Botão AÇÃO para roubar este carro."},
+  "Touche l'écran pour passer": {"en": "Tap the screen to skip", "es": "Toca la pantalla para saltar", "pt": "Toque na tela para pular"},
+  "Tout le monde te cherche": {"en": "Everyone's After You", "es": "Todos te buscan", "pt": "Todo mundo atrás de você"},
+  "Trahison à la villa": {"en": "Betrayal at the Villa", "es": "Traición en la villa", "pt": "Traição na mansão"},
+  "Trois étoiles": {"en": "Three Stars", "es": "Tres estrellas", "pt": "Três estrelas"},
+  "Trousse de soins": {"en": "Med Kit", "es": "Botiquín", "pt": "Kit médico"},
+  "Trousse de soins · nitro": {"en": "Med kit · nitro", "es": "Botiquín · nitro", "pt": "Kit médico · nitro"},
+  "Tu as déjà un code ?": {"en": "Already have a code?", "es": "¿Ya tienes un código?", "pt": "Já tem um código?"},
+  "Tu as terminé les 30 niveaux. Morro Azul est à toi.": {"en": "You've beaten all 30 levels. Morro Azul is yours.", "es": "Completaste los 30 niveles. Morro Azul es tuyo.", "pt": "Você zerou os 30 níveis. O Morro Azul é seu."},
+  "Tu as été mis K.O.": {"en": "You got knocked out", "es": "Te dejaron K.O.", "pt": "Você foi nocauteado"},
+  "Tu débarques à Néon Bay sans un dollar. Ton cousin Dre te confie tes premiers petits boulots pour te faire un nom.": {"en": "You land in Néon Bay without a dollar to your name. Your cousin Dre hooks you up with some small jobs to make a name for yourself.", "es": "Llegas a Néon Bay sin un dólar. Tu primo Dre te da tus primeros trabajitos para que te hagas un nombre.", "pt": "Você chega em Néon Bay sem um dólar no bolso. Seu primo Dre te arruma uns primeiros bicos pra você fazer seu nome."},
+  "Tu viens de voler cette voiture : la police te suit ! Pointe le joystick pour rouler, sème-la, puis suis la flèche bleue.": {"en": "You just stole this car: the cops are on you! Point the joystick to drive, lose them, then follow the blue arrow.", "es": "Acabas de robar este coche: ¡la policía te sigue! Mueve el joystick para conducir, piérdela y sigue la flecha azul.", "pt": "Você acabou de roubar este carro: a polícia está na sua cola! Use o joystick para dirigir, despiste e siga a seta azul."},
+  "Tu viens de voler cette voiture : la police te suit ! Roule (ZQSD ou flèches), sème-la, puis suis la flèche bleue.": {"en": "You just stole this car: the cops are on you! Drive (WASD or arrows), lose them, then follow the blue arrow.", "es": "Acabas de robar este coche: ¡la policía te sigue! Conduce (WASD o flechas), piérdela y sigue la flecha azul.", "pt": "Você acabou de roubar este carro: a polícia está na sua cola! Dirija (WASD ou setas), despiste e siga a seta azul."},
+  "Tunnel": {"en": "Tunnel", "es": "Túnel", "pt": "Túnel"},
+  "Tunnel souterrain…": {"en": "Underground tunnel…", "es": "Túnel subterráneo…", "pt": "Túnel subterrâneo…"},
+  "Un convoi de marchandise traverse la ville cette nuit. Détruis-le et va chercher leur chef, Snake.": {"en": "A shipment convoy is crossing town tonight. Destroy it and go after their boss, Snake.", "es": "Un convoy de mercancía cruza la ciudad esta noche. Destrúyelo y ve por su jefe, Snake.", "pt": "Um comboio de mercadoria atravessa a cidade esta noite. Destrua e vá atrás do chefe deles, Snake."},
+  "Un mur de balles.": {"en": "A wall of bullets.", "es": "Un muro de balas.", "pt": "Uma parede de balas."},
+  "Un vieil ami de Dre te fait venir en Italie. Ici, rien ne se fait sans l'accord des familles.": {"en": "An old friend of Dre's brings you over to Italy. Here, nothing happens without the families' blessing.", "es": "Un viejo amigo de Dre te lleva a Italia. Aquí, nada se hace sin el permiso de las familias.", "pt": "Um velho amigo do Dre te leva para a Itália. Aqui, nada acontece sem a bênção das famílias."},
+  "Une balle, un ennemi.": {"en": "One bullet, one enemy.", "es": "Una bala, un enemigo.", "pt": "Uma bala, um inimigo."},
+  "Une cargaison du Comando Sombra arrive par la plage de Copa Azul cette nuit.": {"en": "A Comando Sombra shipment is landing on Copa Azul beach tonight.", "es": "Un cargamento del Comando Sombra llega esta noche por la playa de Copa Azul.", "pt": "Um carregamento do Comando Sombra chega esta noite pela praia de Copa Azul."},
+  "VIP": {"en": "VIP", "es": "VIP", "pt": "VIP"},
+  "Va voir l’agent corrompu et donne-lui": {"en": "Go see the dirty cop and give him", "es": "Ve a ver al agente corrupto y dale", "pt": "Vá até o policial corrupto e dê a ele"},
+  "Valider": {"en": "Confirm", "es": "Validar", "pt": "Confirmar"},
+  "Valise récupérée": {"en": "Briefcase grabbed", "es": "Maletín recogido", "pt": "Maleta recuperada"},
+  "Verrouillé": {"en": "Locked", "es": "Bloqueado", "pt": "Bloqueado"},
+  "Version complète": {"en": "Full Version", "es": "Versión completa", "pt": "Versão completa"},
+  "Vert": {"en": "Green", "es": "Verde", "pt": "Verde"},
+  "Veste": {"en": "Jacket", "es": "Chaqueta", "pt": "Jaqueta"},
+  "Veste dorée": {"en": "Gold Jacket", "es": "Chaqueta dorada", "pt": "Jaqueta dourada"},
+  "Veste kaki": {"en": "Khaki Jacket", "es": "Chaqueta caqui", "pt": "Jaqueta cáqui"},
+  "Veste néon": {"en": "Neon Jacket", "es": "Chaqueta neón", "pt": "Jaqueta neon"},
+  "Veste violette": {"en": "Purple Jacket", "es": "Chaqueta morada", "pt": "Jaqueta roxa"},
+  "Voiture de police volée !": {"en": "Police car stolen!", "es": "¡Patrulla robada!", "pt": "Viatura roubada!"},
+  "Voiture détruite !": {"en": "Car destroyed!", "es": "¡Coche destruido!", "pt": "Carro destruído!"},
+  "Voiture repeinte · police semée (−": {"en": "Car repainted · cops lost (−", "es": "Coche repintado · policía perdida (−", "pt": "Carro repintado · polícia despistada (−"},
+  "Voiture, boutique, tunnel, payer un agent": {"en": "Car, shop, tunnel, pay a cop", "es": "Coche, tienda, túnel, pagar a un agente", "pt": "Carro, loja, túnel, pagar um policial"},
+  "Vol de voiture": {"en": "Car Theft", "es": "Robo de coche", "pt": "Roubo de carro"},
+  "Vole la voiture dorée": {"en": "Steal the gold car", "es": "Roba el coche dorado", "pt": "Roube o carro dourado"},
+  "Voleur de voitures": {"en": "Car Thief", "es": "Ladrón de coches", "pt": "Ladrão de carros"},
+  "Vue de dessus": {"en": "Top view", "es": "Vista cenital", "pt": "Visão de cima"},
+  "Vue poursuite": {"en": "Chase view", "es": "Vista persecución", "pt": "Visão de perseguição"},
+  "ZQSD / flèches": {"en": "WASD / arrows", "es": "WASD / flechas", "pt": "WASD / setas"},
+  "d’abord": {"en": "first", "es": "primero", "pt": "primeiro"},
+  "en vie": {"en": "alive", "es": "con vida", "pt": "com vida"},
+  "en voiture": {"en": "by car", "es": "en coche", "pt": "de carro"},
+  "erreur inconnue": {"en": "unknown error", "es": "error desconocido", "pt": "erro desconhecido"},
+  "est tombé !": {"en": "is down!", "es": "¡ha caído!", "pt": "caiu!"},
+  "et te balance !": {"en": "and rats you out!", "es": "¡y te delata!", "pt": "e te dedura!"},
+  "et te donne le tuyau": {"en": "and gives you the tip", "es": "y te pasa el dato", "pt": "e te passa a dica"},
+  "il Consigliere": {"en": "il Consigliere", "es": "il Consigliere", "pt": "il Consigliere"},
+  "l'entrepôt d'huile d'olive": {"en": "the olive oil warehouse", "es": "el almacén de aceite de oliva", "pt": "o depósito de azeite"},
+  "l'escalier coloré": {"en": "the colorful staircase", "es": "la escalera de colores", "pt": "a escadaria colorida"},
+  "l'hacienda": {"en": "the hacienda", "es": "la hacienda", "pt": "a hacienda"},
+  "la Famiglia Moretti": {"en": "the Famiglia Moretti", "es": "la Famiglia Moretti", "pt": "a Famiglia Moretti"},
+  "la Famiglia Varga": {"en": "the Famiglia Varga", "es": "la Famiglia Varga", "pt": "a Famiglia Varga"},
+  "la boutique de sneakers": {"en": "the sneaker shop", "es": "la tienda de zapatillas", "pt": "a loja de tênis"},
+  "la cascade": {"en": "the waterfall", "es": "la cascada", "pt": "a cachoeira"},
+  "la piazza del Duomo": {"en": "the piazza del Duomo", "es": "la piazza del Duomo", "pt": "a piazza del Duomo"},
+  "la piste d'atterrissage": {"en": "the airstrip", "es": "la pista de aterrizaje", "pt": "a pista de pouso"},
+  "la plage de Copa Azul": {"en": "Copa Azul beach", "es": "la playa de Copa Azul", "pt": "a praia de Copa Azul"},
+  "la planque du Comando": {"en": "the Comando hideout", "es": "la guarida del Comando", "pt": "o esconderijo do Comando"},
+  "la plantation de café": {"en": "the coffee plantation", "es": "la plantación de café", "pt": "a plantação de café"},
+  "la station de radio": {"en": "the radio station", "es": "la estación de radio", "pt": "a estação de rádio"},
+  "la station de téléphérique": {"en": "the cable car station", "es": "la estación del teleférico", "pt": "a estação do teleférico"},
+  "la trattoria Nonna Lia": {"en": "Nonna Lia's trattoria", "es": "la trattoria Nonna Lia", "pt": "a trattoria Nonna Lia"},
+  "la villa sur la colline": {"en": "the villa on the hill", "es": "la villa de la colina", "pt": "a mansão no morro"},
+  "le Bonde do Trovão": {"en": "the Bonde do Trovão", "es": "el Bonde do Trovão", "pt": "o Bonde do Trovão"},
+  "le Cartel del Cóndor": {"en": "the Cartel del Cóndor", "es": "el Cartel del Cóndor", "pt": "o Cartel del Cóndor"},
+  "le Comando Sombra": {"en": "the Comando Sombra", "es": "el Comando Sombra", "pt": "o Comando Sombra"},
+  "le Crew du Port": {"en": "the Port Crew", "es": "la Crew del Puerto", "pt": "a Crew do Porto"},
+  "le baile funk": {"en": "the baile funk", "es": "el baile funk", "pt": "o baile funk"},
+  "le belvédère": {"en": "the lookout", "es": "el mirador", "pt": "o mirante"},
+  "le casino Lumi": {"en": "the Lumi casino", "es": "el casino Lumi", "pt": "o cassino Lumi"},
+  "le chef": {"en": "the boss", "es": "el jefe", "pt": "o chefe"},
+  "le club Velvet": {"en": "the Velvet club", "es": "el club Velvet", "pt": "o clube Velvet"},
+  "le laboratoire caché": {"en": "the hidden lab", "es": "el laboratorio oculto", "pt": "o laboratório escondido"},
+  "le marché central": {"en": "the central market", "es": "el mercado central", "pt": "o mercado central"},
+  "le marché du morro": {"en": "the morro market", "es": "el mercado del morro", "pt": "o mercado do morro"},
+  "le motel Paradise": {"en": "the Paradise motel", "es": "el motel Paradise", "pt": "o motel Paradise"},
+  "le parking du stade": {"en": "the stadium parking lot", "es": "el estacionamiento del estadio", "pt": "o estacionamento do estádio"},
+  "le petit port fluvial": {"en": "the little river port", "es": "el pequeño puerto fluvial", "pt": "o portinho fluvial"},
+  "le pied de la Neon Tower": {"en": "the foot of Neon Tower", "es": "el pie de la Neon Tower", "pt": "o pé da Neon Tower"},
+  "le pont de la rivière": {"en": "the river bridge", "es": "el puente del río", "pt": "a ponte do rio"},
+  "le pont des Soupirs": {"en": "the Bridge of Sighs", "es": "el puente de los Suspiros", "pt": "a ponte dos Suspiros"},
+  "le port de pêche": {"en": "the fishing port", "es": "el puerto pesquero", "pt": "o porto pesqueiro"},
+  "le studio d'enregistrement": {"en": "the recording studio", "es": "el estudio de grabación", "pt": "o estúdio de gravação"},
+  "le terrain de foot": {"en": "the soccer field", "es": "la cancha de fútbol", "pt": "o campinho de futebol"},
+  "le vignoble": {"en": "the vineyard", "es": "el viñedo", "pt": "o vinhedo"},
+  "les Vipères": {"en": "the Vipers", "es": "las Víboras", "pt": "as Víboras"},
+  "les docks": {"en": "the docks", "es": "los muelles", "pt": "o cais"},
+  "monte dans la voiture": {"en": "gets in the car", "es": "se sube al coche", "pt": "entra no carro"},
+  "n’a pas survécu": {"en": "didn’t make it", "es": "no sobrevivió", "pt": "não sobreviveu"},
+  "par étape": {"en": "per step", "es": "por etapa", "pt": "por etapa"},
+  "pour repeindre": {"en": "to repaint", "es": "para repintar", "pt": "para repintar"},
+  "pour soudoyer les agents": {"en": "to bribe the cops", "es": "para sobornar a los agentes", "pt": "para subornar a polícia"},
+  "restants)": {"en": "left)", "es": "restantes)", "pt": "restantes)"},
+  "succès": {"en": "achievements", "es": "logros", "pt": "conquistas"},
+  "te suit": {"en": "is following you", "es": "te sigue", "pt": "está te seguindo"},
+  "terminé": {"en": "complete", "es": "completado", "pt": "concluído"},
+  "use strict": {"en": "use strict", "es": "use strict", "pt": "use strict"},
+  "· Nitro": {"en": "· Nitro", "es": "· Nitro", "pt": "· Nitro"},
+  "· Niveau": {"en": "· Level", "es": "· Nivel", "pt": "· Nível"},
+  "· étape": {"en": "· step", "es": "· etapa", "pt": "· etapa"},
+  "ÉCHEC": {"en": "FAILED", "es": "FALLASTE", "pt": "FALHOU"},
+  "Élimine": {"en": "Take down", "es": "Acaba con", "pt": "Derrube"},
+  "Équipement": {"en": "Gear", "es": "Equipo", "pt": "Equipamento"},
+  "Équiper": {"en": "Equip", "es": "Equipar", "pt": "Equipar"},
+  "Équipée": {"en": "Equipped", "es": "Equipada", "pt": "Equipado"},
+  "Étape": {"en": "Step", "es": "Etapa", "pt": "Etapa"},
+  "États-Unis": {"en": "United States", "es": "Estados Unidos", "pt": "Estados Unidos"},
+  "← Carte": {"en": "← Map", "es": "← Mapa", "pt": "← Mapa"},
+  "← Menu": {"en": "← Menu", "es": "← Menú", "pt": "← Menu"},
+  "← Reprendre": {"en": "← Resume", "es": "← Continuar", "pt": "← Continuar"},
+  "← Retour": {"en": "← Back", "es": "← Volver", "pt": "← Voltar"},
+  "✓ Terminé": {"en": "✓ Complete", "es": "✓ Completado", "pt": "✓ Concluído"}
+};
+
+</script>
+<script>
+/* Néon Bay : traductions (fr par défaut, en, es, pt).
+   Le jeu est écrit en français ; chaque texte affiché passe par t(), qui cherche
+   la traduction dans NB_DICT (js/i18n-dict.js) puis dans les modèles ci-dessous
+   (textes qui contiennent des nombres ou des noms). */
+window.NB_I18N = (() => {
+  'use strict';
+  const LANGS = ['fr', 'en', 'es', 'pt'];
+  const NAMES = { fr: 'Français', en: 'English', es: 'Español', pt: 'Português' };
+  let lang = 'fr';
+  try {
+    const saved = JSON.parse(localStorage.getItem('neonbay.save.v2') || '{}').lang;
+    const nav = (navigator.language || 'fr').slice(0, 2).toLowerCase();
+    lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
+  } catch (e) { lang = 'fr'; }
+  const EXTRA = {
+    'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
+    'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
+    '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
+    "Tu as aimé ? La suite t'attend.": { en: 'Enjoyed it? The rest is waiting.', es: '¿Te gustó? Lo mejor está por venir.', pt: 'Curtiu? O resto te espera.' },
+    "Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).": { en: 'Purchases are not available yet.', es: 'Las compras aún no están disponibles.', pt: 'As compras ainda não estão disponíveis.' },
+  };
+  const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
+  // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
+  const P = [
+    [/^Rejoins (.+)$/, { en: 'Go to $1', es: 'Ve a $1', pt: 'Vá até $1' }],
+    [/^Livre la marchandise à (.+) en voiture$/, { en: 'Deliver the goods to $1 by car', es: 'Entrega la mercancía en $1 en coche', pt: 'Entregue a mercadoria em $1 de carro' }],
+    [/^Récupère les valises près de (.+) \((\d+)\/(\d+)\)$/, { en: 'Grab the briefcases near $1 ($2/$3)', es: 'Recoge los maletines cerca de $1 ($2/$3)', pt: 'Pegue as maletas perto de $1 ($2/$3)' }],
+    [/^Élimine (.+), chef de (.+)$/, { en: 'Take down $1, boss of $2', es: 'Acaba con $1, jefe de $2', pt: 'Derrube $1, chefe de $2' }],
+    [/^Neutralise (.+) \((\d+) restants\)$/, { en: 'Take out $1 ($2 left)', es: 'Neutraliza a $1 ($2 restantes)', pt: 'Neutralize $1 ($2 restantes)' }],
+    [/^Retrouve (.+)$/, { en: 'Find $1', es: 'Encuentra a $1', pt: 'Encontre $1' }],
+    [/^Emmène (.+) à (.+) en vie$/, { en: 'Get $1 to $2 alive', es: 'Lleva a $1 a $2 con vida', pt: 'Leve $1 até $2 com vida' }],
+    [/^Détruis le convoi de (.+) \((\d+) restants\)$/, { en: 'Destroy $1\u2019s convoy ($2 left)', es: 'Destruye el convoy de $1 ($2 restantes)', pt: 'Destrua o comboio de $1 ($2 restantes)' }],
+    [/^Course : passe les checkpoints \((\d+)\/4\)$/, { en: 'Race: hit the checkpoints ($1/4)', es: 'Carrera: pasa los puntos de control ($1/4)', pt: 'Corrida: passe pelos checkpoints ($1/4)' }],
+    [/^Va voir l’agent corrompu et donne-lui (.+) \(E\)$/, { en: 'Meet the corrupt cop and hand over $1 (E)', es: 'Ve a ver al agente corrupto y dale $1 (E)', pt: 'Encontre o policial corrupto e entregue $1 (E)' }],
+    [/^(.+) \(monte dans une voiture : E\)$/, { en: '$1 (get in a car: E)', es: '$1 (súbete a un coche: E)', pt: '$1 (entre em um carro: E)' }],
+    [/^Niveau (\d+) · (.+) · étape (\d+)\/10$/, { en: 'Level $1 · $2 · step $3/10', es: 'Nivel $1 · $2 · etapa $3/10', pt: 'Nível $1 · $2 · etapa $3/10' }],
+    [/^Niveau (\d+) · (.+)$/, { en: 'Level $1 · $2', es: 'Nivel $1 · $2', pt: 'Nível $1 · $2' }],
+    [/^Niveau (\d+) : (.+)$/, { en: 'Level $1: $2', es: 'Nivel $1: $2', pt: 'Nível $1: $2' }],
+    [/^Niveau (\d+) terminé$/, { en: 'Level $1 complete', es: 'Nivel $1 completado', pt: 'Nível $1 concluído' }],
+    [/^Niveau (\d+)$/, { en: 'Level $1', es: 'Nivel $1', pt: 'Nível $1' }],
+    [/^(.+) · (.+) · Niveau (\d+)\/30$/, { en: '$1 · $2 · Level $3/30', es: '$1 · $2 · Nivel $3/30', pt: '$1 · $2 · Nível $3/30' }],
+    [/^(.+) · niveaux (\d+)–(\d+)$/, { en: '$1 · levels $2–$3', es: '$1 · niveles $2–$3', pt: '$1 · níveis $2–$3' }],
+    [/^Étape (\d+)\/10 · (.+)$/, { en: 'Step $1/10 · $2', es: 'Etapa $1/10 · $2', pt: 'Etapa $1/10 · $2' }],
+    [/^Étape (\d+)\/10 réussie · \+(.+)$/, { en: 'Step $1/10 done · +$2', es: 'Etapa $1/10 superada · +$2', pt: 'Etapa $1/10 concluída · +$2' }],
+    [/^Mission réussie ! \+(.+)$/, { en: 'Mission complete! +$1', es: '¡Misión cumplida! +$1', pt: 'Missão cumprida! +$1' }],
+    [/^Point (\d+)\/(\d+)$/, { en: 'Point $1/$2', es: 'Punto $1/$2', pt: 'Ponto $1/$2' }],
+    [/^Checkpoint (\d+)\/4$/, { en: 'Checkpoint $1/4', es: 'Punto de control $1/4', pt: 'Checkpoint $1/4' }],
+    [/^Soins (\d+) · Nitro (\d+)$/, { en: 'Medkits $1 · Nitro $2', es: 'Botiquines $1 · Nitro $2', pt: 'Kits $1 · Nitro $2' }],
+    [/^Agents soudoyés \(−(.+)\)$/, { en: 'Cops bribed (−$1)', es: 'Agentes sobornados (−$1)', pt: 'Policiais subornados (−$1)' }],
+    [/^Voiture repeinte · police semée \(−(.+)\)$/, { en: 'Car repainted · cops lost (−$1)', es: 'Coche repintado · policía despistada (−$1)', pt: 'Carro repintado · polícia despistada (−$1)' }],
+    [/^Il faut (.+) pour repeindre$/, { en: 'You need $1 to repaint', es: 'Necesitas $1 para repintar', pt: 'Você precisa de $1 para repintar' }],
+    [/^Il te faut (.+) pour soudoyer les agents$/, { en: 'You need $1 to bribe the cops', es: 'Necesitas $1 para sobornar a los agentes', pt: 'Você precisa de $1 para subornar a polícia' }],
+    [/^B : soudoyer les agents \((.+)\)$/, { en: 'B: bribe the cops ($1)', es: 'B: sobornar a los agentes ($1)', pt: 'B: subornar a polícia ($1)' }],
+    [/^E : payer l’agent \((.+)\)$/, { en: 'E: pay the cop ($1)', es: 'E: pagar al agente ($1)', pt: 'E: pagar o policial ($1)' }],
+    [/^L’agent empoche (.+) et te donne le tuyau$/, { en: 'The cop pockets $1 and gives you the tip', es: 'El agente se embolsa $1 y te pasa el dato', pt: 'O policial embolsa $1 e te passa a dica' }],
+    [/^Pas assez d’argent : l’agent prend (.+) et te balance !$/, { en: 'Not enough cash: the cop takes $1 and rats you out!', es: '¡No te alcanza: el agente se queda $1 y te delata!', pt: 'Dinheiro insuficiente: o policial pega $1 e te dedura!' }],
+    [/^Termine le niveau (\d+) d’abord$/, { en: 'Finish level $1 first', es: 'Termina primero el nivel $1', pt: 'Termine o nível $1 primeiro' }],
+    [/^(.+) est tombé !$/, { en: '$1 is down!', es: '¡$1 ha caído!', pt: '$1 caiu!' }],
+    [/^(.+) te suit$/, { en: '$1 is following you', es: '$1 te sigue', pt: '$1 está te seguindo' }],
+    [/^(.+) monte dans la voiture$/, { en: '$1 gets in the car', es: '$1 se sube al coche', pt: '$1 entra no carro' }],
+    [/^(.+) n’a pas survécu$/, { en: '$1 didn\u2019t make it', es: '$1 no sobrevivió', pt: '$1 não sobreviveu' }],
+    [/^\+ (.+) par étape$/, { en: '+ $1 per step', es: '+ $1 por etapa', pt: '+ $1 por etapa' }],
+    [/^Conseillé : (.+)$/, { en: 'Recommended: $1', es: 'Recomendado: $1', pt: 'Recomendado: $1' }],
+    [/^Rapide : moins de (\d+) min (\d+)$/, { en: 'Fast: under $1 min $2', es: 'Rápido: menos de $1 min $2', pt: 'Rápido: menos de $1 min $2' }],
+    [/^Propre : santé ≥ 60 % et 3 passants K\.O\. maximum \((\d+)\)$/, { en: 'Clean: health ≥ 60% and 3 bystanders K.O. max ($1)', es: 'Limpio: salud ≥ 60 % y máximo 3 transeúntes K.O. ($1)', pt: 'Limpo: saúde ≥ 60% e no máximo 3 pedestres nocauteados ($1)' }],
+    [/^(\d+) min (\d+)$/, { en: '$1 min $2', es: '$1 min $2', pt: '$1 min $2' }],
+    [/^Nouveau dans la boutique : (.+)$/, { en: 'New in the shop: $1', es: 'Nuevo en la tienda: $1', pt: 'Novo na loja: $1' }],
+    [/^(\d+)\/30 niveaux$/, { en: '$1/30 levels', es: '$1/30 niveles', pt: '$1/30 níveis' }],
+    [/^(\d+)\/(\d+) succès$/, { en: '$1/$2 achievements', es: '$1/$2 logros', pt: '$1/$2 conquistas' }],
+    [/^Musique : (oui|non)$/, { en: 'Music: $1', es: 'Música: $1', pt: 'Música: $1' }],
+    [/^Bruitages : (oui|non)$/, { en: 'Sound effects: $1', es: 'Efectos: $1', pt: 'Efeitos: $1' }],
+    [/^Vibrations : (oui|non)$/, { en: 'Vibration: $1', es: 'Vibración: $1', pt: 'Vibração: $1' }],
+    [/^Caméra : (.+)$/, { en: 'Camera: $1', es: 'Cámara: $1', pt: 'Câmera: $1' }],
+    [/^Jeu complet · (.+)$/, { en: 'Full game · $1', es: 'Juego completo · $1', pt: 'Jogo completo · $1' }],
+    [/^Débloquer le jeu complet · (.+)$/, { en: 'Unlock the full game · $1', es: 'Desbloquear el juego completo · $1', pt: 'Desbloquear o jogo completo · $1' }],
+    [/^Série : (\d+) jours? · \+(.+) chacun$/, { en: 'Streak: $1 day(s) · +$2 each', es: 'Racha: $1 día(s) · +$2 cada uno', pt: 'Sequência: $1 dia(s) · +$2 cada' }],
+    [/^\+(.+) chacun$/, { en: '+$1 each', es: '+$1 cada uno', pt: '+$1 cada' }],
+    [/^Vole (\d+) voitures$/, { en: 'Steal $1 cars', es: 'Roba $1 coches', pt: 'Roube $1 carros' }],
+    [/^Sème la police (\d+) fois$/, { en: 'Lose the cops $1 times', es: 'Despista a la policía $1 veces', pt: 'Despiste a polícia $1 vezes' }],
+    [/^Neutralise (\d+) ennemis$/, { en: 'Take out $1 enemies', es: 'Neutraliza a $1 enemigos', pt: 'Neutralize $1 inimigos' }],
+    [/^Prends (\d+) tunnels$/, { en: 'Take $1 tunnels', es: 'Usa $1 túneles', pt: 'Use $1 túneis' }],
+    [/^Soudoie la police (\d+) fois$/, { en: 'Bribe the cops $1 times', es: 'Soborna a la policía $1 veces', pt: 'Suborne a polícia $1 vezes' }],
+    [/^Fais exploser (\d+) véhicules$/, { en: 'Blow up $1 vehicles', es: 'Haz explotar $1 vehículos', pt: 'Exploda $1 veículos' }],
+    [/^Ramasse (.+) \$ par terre$/, { en: 'Pick up $$1 from the street', es: 'Recoge $1 $ del suelo', pt: 'Pegue $1 $ do chão' }],
+    [/^Termine (\d+) niveaux différents$/, { en: 'Complete $1 different levels', es: 'Completa $1 niveles distintos', pt: 'Conclua $1 níveis diferentes' }],
+    [/^Termine (\d+) niveau\(x\)$/, { en: 'Complete $1 level(s)', es: 'Completa $1 nivel(es)', pt: 'Conclua $1 nível(is)' }],
+    [/^Obtiens 3 étoiles sur (\d+) niveaux$/, { en: 'Get 3 stars on $1 levels', es: 'Consigue 3 estrellas en $1 niveles', pt: 'Ganhe 3 estrelas em $1 níveis' }],
+    [/^(\d+) étoiles sur 3$/, { en: '$1 stars out of 3', es: '$1 estrellas de 3', pt: '$1 estrelas de 3' }],
+    [/^(.+) · recharge…$/, { en: '$1 · reloading…', es: '$1 · recargando…', pt: '$1 · recarregando…' }],
+    [/^(\d\d:\d\d) · pluie$/, { en: '$1 · rain', es: '$1 · lluvia', pt: '$1 · chuva' }],
+    [/^(.+)\. L'argent gagné pendant la tentative est conservé \((.+)\)\.$/, { en: '$1. The money earned during this attempt is kept ($2).', es: '$1. Conservas el dinero ganado en este intento ($2).', pt: '$1. O dinheiro ganho nesta tentativa fica com você ($2).' }],
+    [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
+    [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
+  ];
+  const OUI = { oui: { en: 'on', es: 'sí', pt: 'sim' }, non: { en: 'off', es: 'no', pt: 'não' } };
+  // contractions : es « de el » -> « del », pt « em o » -> « no », etc.
+  function fix(x) {
+    if (lang === 'es') return x.replace(/\bde el\b/g, 'del').replace(/\ba el\b/g, 'al').replace(/\bDe el\b/g, 'Del');
+    if (lang === 'pt') return x.replace(/\bem o\b/g, 'no').replace(/\bem a\b/g, 'na').replace(/\bem os\b/g, 'nos').replace(/\bem as\b/g, 'nas').replace(/\bde o\b/g, 'do').replace(/\bde a\b/g, 'da').replace(/\bde os\b/g, 'dos').replace(/\bde as\b/g, 'das').replace(/\baté o\b/g, 'até o');
+    return x;
+  }
+  function t(s) {
+    if (lang === 'fr' || s == null) return s;
+    s = String(s);
+    const key = s.replace(/\s+/g, ' ').trim();
+    if (!key) return s;
+    if (OUI[key]) return OUI[key][lang];
+    const d = dict()[key];
+    if (d && d[lang]) return s.replace(s.trim(), d[lang]);
+    for (const [re, tp] of P) {
+      const m = key.match(re);
+      if (m) { let out = tp[lang]; for (let i = m.length - 1; i >= 1; i--) out = out.split('$' + i).join(t(m[i])); return s.replace(s.trim(), fix(out)); }
+    }
+    return s;
+  }
+  function dom(root) {
+    if (lang === 'fr' || !root) return;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    const nodes = []; while (w.nextNode()) nodes.push(w.currentNode);
+    for (const n of nodes) { const v = n.nodeValue; if (/[A-Za-zÀ-ÿ]/.test(v)) { const r = t(v); if (r !== v) n.nodeValue = r; } }
+    root.querySelectorAll('[placeholder],[aria-label],[title]').forEach(el => { for (const a of ['placeholder', 'aria-label', 'title']) { const v = el.getAttribute(a); if (v && /[A-Za-zÀ-ÿ]{2}/.test(v)) el.setAttribute(a, t(v)); } });
+  }
+  return { t, dom, LANGS, NAMES, get lang() { return lang; }, set(l) { if (LANGS.includes(l)) lang = l; document.documentElement.lang = lang; } };
+})();
+
+</script>
+<script>
 /* Néon Bay : sons et musiques.
    Tout est synthétisé en direct (Web Audio) : aucun fichier, aucun droit d'auteur.
    On peut remplacer n'importe quel son par un fichier : voir NB_DATA.AUDIO_FILES dans js/data.js. */
@@ -409,7 +950,8 @@ window.NB_AUDIO = (() => {
   const prefs = (() => { try { return Object.assign({ sfx: true, music: true }, JSON.parse(localStorage.getItem('neonbay.audio') || '{}')); } catch (e) { return { sfx: true, music: true }; } })();
   const savePrefs = () => { try { localStorage.setItem('neonbay.audio', JSON.stringify(prefs)); } catch (e) {} };
   const files = {}; // buffers chargés depuis des fichiers
-  const now = () => ctx.currentTime;
+  let tOff = 0;
+  const now = () => ctx.currentTime + tOff;
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   function init() {
@@ -625,7 +1167,36 @@ window.NB_AUDIO = (() => {
     if (ctx) { if (kind === 'sfx') sfxBus.gain.setTargetAtTime(prefs.sfx ? .8 : 0, now(), .05); else musBus.gain.setTargetAtTime(prefs.music ? .42 : 0, now(), .1); }
     return prefs[kind];
   }
-  return { init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  // Rendu hors ligne (bande-annonce) : musique d'un style + bruitages placés dans le temps -> WAV
+  async function renderOffline(style, seconds, events = []) {
+    const saved = { ctx, master, sfxBus, musBus, comp, noiseBuf, sfx: prefs.sfx, music: prefs.music };
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const oc = new OAC(2, Math.ceil(44100 * seconds), 44100);
+    ctx = oc; prefs.sfx = prefs.music = true;
+    comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = .9; master.connect(comp);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = .8; sfxBus.connect(master);
+    musBus = ctx.createGain(); musBus.gain.value = .5; musBus.connect(master);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const st = STYLES[style] || STYLES.usa, spb = 60 / st.bpm / 4, prevI = mus.intensity;
+    for (let i = 0, t = 0; t < seconds; i++, t += spb) { mus.intensity = events.some(e => e.hot && t >= e.t && t < e.t + e.d) ? 1 : 0; playStep(st, i, t, spb); }
+    mus.intensity = prevI;
+    for (const e of events) { if (!e.fn) continue; tOff = e.t; try { api[e.fn](...(e.args || [])); } catch (err) {} }
+    tOff = 0;
+    const buf = await oc.startRendering();
+    ({ ctx, master, sfxBus, musBus, comp, noiseBuf } = saved); prefs.sfx = saved.sfx; prefs.music = saved.music;
+    // encodage WAV 16 bits
+    const n = buf.length, ch = 2, out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+    const ws = (o, str) => { for (let i = 0; i < str.length; i++) out.setUint8(o + i, str.charCodeAt(i)); };
+    ws(0, 'RIFF'); out.setUint32(4, 36 + n * ch * 2, true); ws(8, 'WAVEfmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, ch, true);
+    out.setUint32(24, 44100, true); out.setUint32(28, 44100 * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true); ws(36, 'data'); out.setUint32(40, n * ch * 2, true);
+    const L = buf.getChannelData(0), Rr = buf.getChannelData(1);
+    for (let i = 0, o = 44; i < n; i++) { for (const v of [L[i], Rr[i]]) { out.setInt16(o, Math.max(-1, Math.min(1, v)) * 32767, true); o += 2; } }
+    return out.buffer;
+  }
+  function setMute(m) { if (ctx) master.gain.setTargetAtTime(m ? 0 : .9, now(), .05); }
+  const api = { renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  return api;
 })();
 
 </script>
@@ -712,6 +1283,52 @@ window.NB_STORE = (() => {
 
 </script>
 <script>
+/* Néon Bay : version portails de jeux (Poki, CrazyGames).
+   Activée seulement si window.NB_PORTAL vaut 'poki' ou 'crazygames' (mis par tools/build-portal.js).
+   Sur les portails : tous les niveaux sont gratuits, l'argent vient des publicités du portail.
+   Vérifie les API dans la documentation de chaque portail avant de soumettre. */
+window.NB_PORTAL_API = (() => {
+  'use strict';
+  const kind = window.NB_PORTAL || null;
+  let sdk = null, playing = false;
+  const mute = m => { try { window.NB_AUDIO && window.NB_AUDIO.setMute(m); } catch (e) {} };
+  let ready = Promise.resolve();
+  try {
+    if (kind === 'poki' && window.PokiSDK) ready = window.PokiSDK.init().then(() => { sdk = 'poki'; }).catch(() => { sdk = 'poki'; });
+    else if (kind === 'crazygames' && window.CrazyGames && window.CrazyGames.SDK) ready = window.CrazyGames.SDK.init().then(() => { sdk = 'cg'; }).catch(() => {});
+  } catch (e) {}
+  const CG = () => window.CrazyGames.SDK;
+  return {
+    kind,
+    get active() { return !!kind; },
+    loaded() { ready.then(() => { try { if (sdk === 'poki') window.PokiSDK.gameLoadingFinished(); else if (sdk === 'cg' && CG().game.loadingStop) CG().game.loadingStop(); } catch (e) {} }); },
+    start() { if (playing) return; playing = true; try { if (sdk === 'poki') window.PokiSDK.gameplayStart(); else if (sdk === 'cg') CG().game.gameplayStart(); } catch (e) {} },
+    stop() { if (!playing) return; playing = false; try { if (sdk === 'poki') window.PokiSDK.gameplayStop(); else if (sdk === 'cg') CG().game.gameplayStop(); } catch (e) {} },
+    // pub entre deux niveaux (le portail décide s'il en montre une)
+    breakAd() {
+      return new Promise(res => {
+        try {
+          if (sdk === 'poki') { window.PokiSDK.commercialBreak(() => mute(true)).then(() => { mute(false); res(); }).catch(() => { mute(false); res(); }); return; }
+          if (sdk === 'cg') { CG().ad.requestAd('midgame', { adStarted: () => mute(true), adFinished: () => { mute(false); res(); }, adError: () => { mute(false); res(); } }); return; }
+        } catch (e) {}
+        res();
+      });
+    },
+    // pub récompensée : renvoie true si le joueur l'a regardée jusqu'au bout
+    rewarded() {
+      return new Promise(res => {
+        try {
+          if (sdk === 'poki') { window.PokiSDK.rewardedBreak(() => mute(true)).then(ok => { mute(false); res(!!ok); }).catch(() => { mute(false); res(false); }); return; }
+          if (sdk === 'cg') { CG().ad.requestAd('rewarded', { adStarted: () => mute(true), adFinished: () => { mute(false); res(true); }, adError: () => { mute(false); res(false); } }); return; }
+        } catch (e) {}
+        res(false);
+      });
+    },
+  };
+})();
+
+</script>
+<script>
 /* Néon Bay : moteur du jeu */
 (() => {
 'use strict';
@@ -726,12 +1343,15 @@ function mulberry(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Ma
 const hash = (x, y) => (((x * 73856093) ^ (y * 19349663)) >>> 0) % 1000;
 const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} };
-const fmt = n => Math.round(n).toLocaleString('fr-FR') + ' $';
+const I18 = window.NB_I18N || null;
+const TR = v => I18 ? I18.t(v) : v;
+const fmt = n => { const l = I18 ? I18.lang : 'fr'; return l === 'en' ? '$' + Math.round(n).toLocaleString('en-US') : Math.round(n).toLocaleString(l === 'fr' ? 'fr-FR' : l) + ' $'; };
 const AU = window.NB_AUDIO || null;
 const au = (fn, ...a) => { try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
 const spatial = (x, y) => { const d = Math.hypot(x - P.x, y - P.y); return [Math.max(-1, Math.min(1, (x - P.x) / 600)), Math.max(0, 1 - d / 1000)]; };
 const ST = window.NB_STORE || null;
 const isPlay = () => !!(ST && ST.isPlay);
+const PORTAL = window.NB_PORTAL_API && window.NB_PORTAL_API.active ? window.NB_PORTAL_API : null;
 const priceLabel = () => isPlay() ? (ST.state.price || '') : D.SHOP_CONFIG.price;
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -1360,7 +1980,7 @@ const levelBonus = n => 1000 + n * 800;
 
 // ---------- niveaux ----------
 function regionOf(n) { return D.REGIONS.find(r => n >= r.from && n <= r.to); }
-function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium); }
+function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium || !!PORTAL); }
 function startLevel(n) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
@@ -1382,7 +2002,7 @@ function startLevel(n) {
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
-  S.mode = 'play'; showScreen(null);
+  S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   toast('Niveau ' + n + ' : ' + L.def.t);
   nextStep();
 }
@@ -1416,13 +2036,13 @@ function completeLevel() {
   if (first) track('levelsDone'); track('levelsPlayed');
   if (sc.stars === 3 && prevStars < 3) track('threeStars');
   save.done[n] = true; save.maxLevel = Math.max(save.maxLevel, Math.min(30, n + 1)); persist();
-  S.mode = 'result';
+  S.mode = 'result'; if (PORTAL) PORTAL.stop();
   const unlockW = D.WEAPONS.filter(w => w.lvl === n + 1).concat(D.GEAR.filter(g => g.lvl === n + 1));
   showScreen('result', { ok: true, n, earned: L.earned, bonus, time: L.time, first, unlocks: unlockW, sc, kos: L.kos || 0 });
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
-  S.mode = 'result'; persist(); au('fail'); vib(300); au('setMusic', null);
+  S.mode = 'result'; if (PORTAL) PORTAL.stop(); persist(); au('fail'); vib(300); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
 }
@@ -1476,7 +2096,7 @@ let rewardQ = [];
 function reward(title, name, r) { rewardQ.push({ title, name, r }); if (rewardQ.length === 1) showReward(); }
 function showReward() {
   const it = rewardQ[0]; if (!it) return;
-  const el = $('reward'); el.innerHTML = `<b>${esc(it.title)}</b><span>${esc(it.name)}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  const el = $('reward'); el.innerHTML = `<b>${esc(TR(it.title))}</b><span>${esc(TR(it.name))}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
   au('win'); vib([40, 30, 40]);
   setTimeout(() => { el.classList.remove('in'); setTimeout(() => { el.hidden = true; rewardQ.shift(); showReward(); }, 350); }, 2600);
 }
@@ -1486,7 +2106,7 @@ function tip(id, kb, tc) {
   if (save.tips[id] || S.mode !== 'play') return;
   if (S.tipT > 0) return;
   save.tips[id] = 1; persist();
-  const el = $('tip'); el.textContent = touch.on ? (tc || kb) : kb; el.hidden = false; S.tipT = 6;
+  const el = $('tip'); el.textContent = TR(touch.on ? (tc || kb) : kb); el.hidden = false; S.tipT = 6;
 }
 function updTips(dt) {
   if (S.tipT > 0) { S.tipT -= dt; if (S.tipT <= 0) $('tip').hidden = true; }
@@ -1568,11 +2188,11 @@ const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor
 const starEls = [...hud.stars.children];
 const last = {};
 let toastT = 0, msgT = 0;
-function toast(t) { hud.toast.textContent = t; hud.toast.style.opacity = 1; toastT = 2.4; }
-function msg(t) { if (S.msgCd > 0 && last.msg === t) return; last.msg = t; S.msgCd = 1.5; hud.prompt.textContent = t; hud.prompt.hidden = false; msgT = 1.6; }
-function showBanner(t) { hud.banner.textContent = t; hud.banner.style.opacity = 1; setTimeout(() => { hud.banner.style.opacity = 0; }, 1500); }
-function fade(t) { hud.fade.textContent = t; hud.fade.style.opacity = 1; setTimeout(() => { hud.fade.style.opacity = 0; }, 1300); }
-function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = v; } }
+function toast(t) { t = TR(t); hud.toast.textContent = t; hud.toast.style.opacity = 1; toastT = 2.4; }
+function msg(t) { if (S.msgCd > 0 && last.msg === t) return; last.msg = t; S.msgCd = 1.5; hud.prompt.textContent = TR(t); hud.prompt.hidden = false; msgT = 1.6; }
+function showBanner(t) { hud.banner.textContent = TR(t); hud.banner.style.opacity = 1; setTimeout(() => { hud.banner.style.opacity = 0; }, 1500); }
+function fade(t) { hud.fade.textContent = TR(t); hud.fade.style.opacity = 1; setTimeout(() => { hud.fade.style.opacity = 0; }, 1300); }
+function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = TR(v); } }
 function setW(el, k, v) { if (last[k] !== v) { last[k] = v; el.style.width = v + '%'; } }
 function updHud(dt) {
   setText(hud.money, 'm', fmt(save.money));
@@ -1795,13 +2415,13 @@ function drawTile(tx, ty) {
   if (tileAt(x - 1, y + 1) === ROAD) ctx.fillRect(x, y, 3, T); if (tileAt(x + T + 1, y + 1) === ROAD) ctx.fillRect(x + T - 3, y, 3, T);
   if (tileAt(x + 1, y - 1) === ROAD) ctx.fillRect(x, y, T, 3); if (tileAt(x + 1, y + T + 1) === ROAD) ctx.fillRect(x, y + T - 3, T, 3);
   const pad = (col, a, b) => { ctx.fillStyle = col + '33'; ctx.fillRect(x + 4, y + 4, T - 8, T - 8); ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.strokeRect(x + 5, y + 5, T - 10, T - 10); ctx.fillStyle = col; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(a, x + T / 2, y + T / 2 + 2); if (b) ctx.fillText(b, x + T / 2, y + T / 2 + 14); };
-  if (t === PAD) pad('#ff2e93', 'PEINTURE', fmt(200 + lvl() * 60));
-  else if (t === SHOP) { pad('#a6ff4d', 'BOUTIQUE', 'armes'); }
-  else if (t === GARAGE) { pad('#3ee0c5', 'GARAGE', ''); }
+  if (t === PAD) pad('#ff2e93', TR('PEINTURE'), fmt(200 + lvl() * 60));
+  else if (t === SHOP) { pad('#a6ff4d', TR('BOUTIQUE'), TR('armes')); }
+  else if (t === GARAGE) { pad('#3ee0c5', TR('GARAGE'), ''); }
   else if (t === TUNNEL) {
     ctx.fillStyle = '#05040a'; ctx.beginPath(); ctx.arc(x + T / 2, y + T / 2, 22, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#ffb627'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x + T / 2, y + T / 2, 22, 0, TAU); ctx.stroke();
-    ctx.fillStyle = '#ffb627'; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText('TUNNEL', x + T / 2, y + T / 2 + 4);
+    ctx.fillStyle = '#ffb627'; ctx.font = '700 10px "Chakra Petch",sans-serif'; ctx.textAlign = 'center'; ctx.fillText(TR('TUNNEL'), x + T / 2, y + T / 2 + 4);
   }
 }
 function tileIsFavela(tx, ty) { const bx = Math.floor(tx / B), by = Math.floor(ty / B); const k = world.favCache || (world.favCache = {}); const key = bx + ',' + by; if (k[key] === undefined) { let w = 0; for (let ly = 3; ly < 7; ly++) for (let lx = 3; lx < 7; lx++) if (world.map[(by * B + ly) * N + bx * B + lx] === WALK) w++; k[key] = w > 0 && w < 10 && !(w === 4); } return k[key]; }
@@ -2179,7 +2799,7 @@ function poseHeli(m, h) {
   u.rotor.rotation.y = S.time * 28; u.tail.rotation.z = S.time * 40; u.red.visible = Math.sin(S.time * 8) > 0;
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
-function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = sub; el.querySelector('b').textContent = title; el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+function showCine(sub, title) { const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
 function hideCine() { const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
@@ -2345,6 +2965,7 @@ function showScreen(name, data) {
   if (!name) { screenEl.hidden = true; screenEl.innerHTML = ''; return; }
   screenEl.hidden = false;
   screenEl.innerHTML = SCREENS[name](data || {});
+  if (I18) I18.dom(screenEl);
   screenEl.scrollTop = 0;
   const f = screenEl.querySelector('[autofocus],.btn.primary'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
   void hudOn;
@@ -2360,10 +2981,11 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         <button class="btn" data-go="trophies">Succès</button>
-        ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
+        ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}
       </div>
+      <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
       <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
@@ -2383,7 +3005,7 @@ const SCREENS = {
       <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Carte des niveaux</h2><div class="row">${money()}<button class="btn small" data-go="shop">Boutique</button></div></div>
       ${D.REGIONS.map(r => `<section class="region" style="--acc:${r.accent}">
         <div class="rhead"><h3>${r.name}</h3><span>${r.country} · niveaux ${r.from}–${r.to}</span><p>${r.tagline}</p></div>
-        <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium;
+        <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium && !PORTAL;
           const cls = ok ? 'done' : open ? (paid ? 'paid' : 'open') : 'locked';
           const tag = ok ? '✓ Terminé' : paid ? 'Version complète' : open ? 'Disponible' : 'Verrouillé';
           return `<button class="lvl ${cls}" data-lvl="${n}"><span class="num">${n}</span><span class="lt">${esc(l.t)}</span><span class="tag">${tag}</span><span class="st">${save.stars && save.stars[n] ? starStr(save.stars[n]) : ''}</span><span class="rw">+${fmt(levelBonus(n) + stepReward(n) * 10)}</span></button>`; }).join('')}</div>
@@ -2445,7 +3067,8 @@ const SCREENS = {
         <div class="bigstars" aria-label="${d.sc.stars} étoiles sur 3">${starStr(d.sc.stars)}</div>
         <ul class="crit"><li class="${'ok'}">Mission accomplie</li><li class="${d.sc.fast ? 'ok' : ''}">Rapide : moins de ${Math.floor(parTime(d.n) / 60)} min ${String(parTime(d.n) % 60).padStart(2, '0')}</li><li class="${d.sc.clean ? 'ok' : ''}">Propre : santé ≥ 60 % et 3 passants K.O. maximum (${d.kos})</li></ul>
         <div class="info"><span>Bonus de fin : <b>${fmt(d.bonus)}</b></span><span>Total gagné : <b>${fmt(d.earned)}</b></span><span>Temps : <b>${Math.floor(d.time / 60)} min ${String(Math.floor(d.time % 60)).padStart(2, '0')}</b></span></div>
-        ${!save.premium && d.n === 1 ? `<div class="offer"><b>Tu as aimé ? La suite t'attend.</b><span>29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.</span><button class="btn gold" data-go="unlock">Débloquer le jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button></div>` : ''}
+        ${PORTAL ? `<button class="btn gold" data-rewarded="${d.bonus}">Doubler le bonus (vidéo) · +${fmt(d.bonus)}</button>` : ''}
+        ${!save.premium && !PORTAL && d.n === 1 ? `<div class="offer"><b>Tu as aimé ? La suite t'attend.</b><span>29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.</span><button class="btn gold" data-go="unlock">Débloquer le jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button></div>` : ''}
         ${d.unlocks.length ? `<p class="lead">Nouveau dans la boutique : ${d.unlocks.map(u => u.name).join(', ')}</p>` : ''}
         ${next > 30 ? '<p class="lead">Tu as terminé les 30 niveaux. Morro Azul est à toi.</p>' : ''}
         <div class="col">${next <= 30 ? `<button class="btn primary" data-lvl="${next}">Niveau suivant</button>` : ''}<button class="btn" data-go="shop" data-ret="map">Boutique</button><button class="btn" data-go="map">Carte</button></div>
@@ -2533,21 +3156,23 @@ function buy(id) {
   if (L && S.mode === 'shop') L.bought = true;
   persist(); showScreen('shop', shopState);
 }
-function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = t; screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
-function pauseGame() { if (S.mode !== 'play') return; S.mode = 'pause'; au('duck', true); showScreen('pause'); }
-function resumeGame() { S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
-function goLevel(n) { if (n > 1 && !save.premium) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
+function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = TR(t); screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
+function pauseGame() { if (S.mode !== 'play') return; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
+function resumeGame() { if (PORTAL) PORTAL.start(); S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
+function goLevel(n) { if (n > 1 && !save.premium && !PORTAL) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
 screenEl.addEventListener('click', e => {
   const b = e.target.closest('button,a'); if (!b) return;
   const ds = b.dataset;
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
+  if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
-  if (ds.start) { const n = +ds.start; if (canPlay(n)) startLevel(n); else goLevel(n); return; }
+  if (ds.start) { const n = +ds.start; if (canPlay(n)) { if (PORTAL && S.levelsStarted) PORTAL.breakAd().then(() => startLevel(n)); else startLevel(n); } else goLevel(n); return; }
+  if (ds.rewarded) { b.disabled = true; PORTAL.rewarded().then(ok => { if (ok) { save.money += +ds.rewarded; persist(); au('cash'); flashNote('+' + fmt(+ds.rewarded)); b.remove(); } else b.disabled = false; }); return; }
   if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); if (ds.tab === 'o') drawOutfitPreview(); return; }
   if (ds.outfit) {
     const [cat, id] = ds.outfit.split(':'), it = D.OUTFITS[cat].items.find(i => i[0] === id), price = it[2];
@@ -2586,7 +3211,12 @@ screenEl.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id
 // ---------- boucle ----------
 let lastT = performance.now();
 function frame(t) {
+  if (S.manual) { lastT = t; requestAnimationFrame(frame); return; }
   const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  tick(dt);
+  requestAnimationFrame(frame);
+}
+function tick(dt) {
   if (S.mode === 'play') {
     let gdt = dt;
     if (S.cine) { S.cine.t = S.cine.start ? (performance.now() - S.cine.start) / 1000 : (S.cine.start = performance.now(), 0); gdt = S.cine.type === 'intro' ? 0 : dt * .18; if (S.cine.t >= S.cine.dur) { S.cine = null; hideCine(); } }
@@ -2596,16 +3226,17 @@ function frame(t) {
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); var hd = heli ? dist(heli.x, heli.y, P.x, P.y) : 1e9; au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd, heliDist: hd, rain: !!S.rain }, dt); }
   else if (S.mode === 'result') { for (const p of parts) { p.life -= dt; } }
   render(dt);
-  requestAnimationFrame(frame);
 }
 // décor du menu : la ville du premier pays
 world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
+if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); }
 init3D();
+if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
 
 </script>

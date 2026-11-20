@@ -7,7 +7,8 @@ window.NB_AUDIO = (() => {
   const prefs = (() => { try { return Object.assign({ sfx: true, music: true }, JSON.parse(localStorage.getItem('neonbay.audio') || '{}')); } catch (e) { return { sfx: true, music: true }; } })();
   const savePrefs = () => { try { localStorage.setItem('neonbay.audio', JSON.stringify(prefs)); } catch (e) {} };
   const files = {}; // buffers chargés depuis des fichiers
-  const now = () => ctx.currentTime;
+  let tOff = 0;
+  const now = () => ctx.currentTime + tOff;
   const rnd = (a, b) => a + Math.random() * (b - a);
 
   function init() {
@@ -223,5 +224,34 @@ window.NB_AUDIO = (() => {
     if (ctx) { if (kind === 'sfx') sfxBus.gain.setTargetAtTime(prefs.sfx ? .8 : 0, now(), .05); else musBus.gain.setTargetAtTime(prefs.music ? .42 : 0, now(), .1); }
     return prefs[kind];
   }
-  return { init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  // Rendu hors ligne (bande-annonce) : musique d'un style + bruitages placés dans le temps -> WAV
+  async function renderOffline(style, seconds, events = []) {
+    const saved = { ctx, master, sfxBus, musBus, comp, noiseBuf, sfx: prefs.sfx, music: prefs.music };
+    const OAC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const oc = new OAC(2, Math.ceil(44100 * seconds), 44100);
+    ctx = oc; prefs.sfx = prefs.music = true;
+    comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4; comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = .9; master.connect(comp);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = .8; sfxBus.connect(master);
+    musBus = ctx.createGain(); musBus.gain.value = .5; musBus.connect(master);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+    const st = STYLES[style] || STYLES.usa, spb = 60 / st.bpm / 4, prevI = mus.intensity;
+    for (let i = 0, t = 0; t < seconds; i++, t += spb) { mus.intensity = events.some(e => e.hot && t >= e.t && t < e.t + e.d) ? 1 : 0; playStep(st, i, t, spb); }
+    mus.intensity = prevI;
+    for (const e of events) { if (!e.fn) continue; tOff = e.t; try { api[e.fn](...(e.args || [])); } catch (err) {} }
+    tOff = 0;
+    const buf = await oc.startRendering();
+    ({ ctx, master, sfxBus, musBus, comp, noiseBuf } = saved); prefs.sfx = saved.sfx; prefs.music = saved.music;
+    // encodage WAV 16 bits
+    const n = buf.length, ch = 2, out = new DataView(new ArrayBuffer(44 + n * ch * 2));
+    const ws = (o, str) => { for (let i = 0; i < str.length; i++) out.setUint8(o + i, str.charCodeAt(i)); };
+    ws(0, 'RIFF'); out.setUint32(4, 36 + n * ch * 2, true); ws(8, 'WAVEfmt '); out.setUint32(16, 16, true); out.setUint16(20, 1, true); out.setUint16(22, ch, true);
+    out.setUint32(24, 44100, true); out.setUint32(28, 44100 * ch * 2, true); out.setUint16(32, ch * 2, true); out.setUint16(34, 16, true); ws(36, 'data'); out.setUint32(40, n * ch * 2, true);
+    const L = buf.getChannelData(0), Rr = buf.getChannelData(1);
+    for (let i = 0, o = 44; i < n; i++) { for (const v of [L[i], Rr[i]]) { out.setInt16(o, Math.max(-1, Math.min(1, v)) * 32767, true); o += 2; } }
+    return out.buffer;
+  }
+  function setMute(m) { if (ctx) master.gain.setTargetAtTime(m ? 0 : .9, now(), .05); }
+  const api = { renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  return api;
 })();
