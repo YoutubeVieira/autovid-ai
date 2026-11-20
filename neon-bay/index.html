@@ -156,6 +156,24 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
   #stickBase{width:104px;height:104px}#stickKnob{left:26px;top:26px}
   .logo{font-size:52px}.home{gap:10px;padding-top:0}
 }
+#tip{bottom:calc(64px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 32px));background:rgba(33,230,255,.14);border:1px solid rgba(33,230,255,.6);box-shadow:0 0 18px rgba(33,230,255,.3);color:var(--ink);font-size:15px;line-height:1.4;padding:10px 14px;border-radius:12px;text-align:center;backdrop-filter:blur(4px)}
+body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
+#reward{position:fixed;top:calc(70px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-20px);opacity:0;transition:transform .35s,opacity .35s;z-index:15;background:linear-gradient(180deg,#2a1f00,#140f00);border:1px solid var(--gold);border-radius:12px;padding:10px 18px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 0 26px rgba(255,215,0,.35);pointer-events:none;text-align:center}
+#reward.in{opacity:1;transform:translate(-50%,0)}
+#reward b{font-family:var(--display);font-weight:400;font-size:12px;color:var(--gold);letter-spacing:.06em}#reward span{font-size:16px;font-weight:700}#reward i{font-style:normal;color:var(--lime);font-weight:700}
+.bigstars{font-size:46px;color:var(--gold);letter-spacing:6px;text-shadow:0 0 18px rgba(255,215,0,.5);line-height:1}
+.crit{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+.crit li::before{content:'☆ ';color:var(--muted)}.crit li.ok{color:var(--ink)}.crit li.ok::before{content:'★ ';color:var(--gold)}
+.offer{display:flex;flex-direction:column;gap:8px;align-items:center;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.45);border-radius:14px;padding:14px 16px;max-width:460px}
+.offer b{font-family:var(--display);font-weight:400;font-size:16px;color:var(--gold)}.offer span{font-size:14px;color:var(--muted)}
+.lvl .st{color:var(--gold);font-size:13px;letter-spacing:2px}
+.daily{width:100%;max-width:460px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;text-align:left}
+.daily .dh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.daily .dh b{font-family:var(--display);font-weight:400;font-size:13px;color:var(--cyan)}.daily .dh span{font-size:12px;color:var(--muted)}
+.dl{display:grid;grid-template-columns:1fr 70px auto;gap:10px;align-items:center;font-size:14px}.dl em{font-style:normal;font-size:12px;color:var(--muted);min-width:34px;text-align:right}.dl.ok span{color:var(--lime)}.dl.ok em{color:var(--lime)}
+.pbar{height:5px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--lime))}
+.ach{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px}
+.ach .a{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px}.ach .a>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.ach .a b{font-size:14px}.ach .a span{font-size:12px;color:var(--muted)}.ach .a em{font-style:normal;font-size:12px;color:var(--amber);white-space:nowrap}.ach .a.ok{border-color:rgba(166,255,77,.5)}.ach .a.ok em{color:var(--lime);font-size:16px}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 
@@ -177,6 +195,8 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
 <div class="hud" id="banner"></div>
 <div class="hud" id="prompt" hidden></div>
 <div id="fade"></div>
+<div class="hud" id="tip" hidden></div>
+<div id="reward" hidden></div>
 
 <div id="touch" hidden>
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>

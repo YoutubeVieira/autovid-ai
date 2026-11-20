@@ -196,7 +196,7 @@ function explosionAt(x, y, r, dmg, byPlayer) {
   if (!P.car && dist(P.x, P.y, x, y) < r) hurt(dmg * .5);
 }
 function explode(c) {
-  c.wreck = true; c.v = 0; c.ai = null; c.hp = 0;
+  c.wreck = true; c.v = 0; c.ai = null; c.hp = 0; if (S.mode === 'play' && dist(c.x, c.y, P.x, P.y) < 700) track('explosions');
   const wasPlayer = c === P.car;
   if (wasPlayer) { P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30); toast('Voiture détruite !'); }
   if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x; vip.y = c.y + 26; hurtVip(30); }
@@ -256,7 +256,7 @@ function koPed(p, byPlayer) {
   p.state = 'ko'; p.ko = 9; { const [pn, vl] = spatial(p.x, p.y); if (vl > .2) au('ko', pn); }
   for (let i = 0; i < 6; i++) parts.push({ x: p.x, y: p.y, vx: rnd(-90, 90), vy: rnd(-90, 90), life: .5, max: .5, r: 3, col: '#fff2a8' });
   if (p.cash) picks.push({ x: p.x + rnd(-8, 8), y: p.y + rnd(-8, 8), amt: p.cash, t: 30 });
-  if (byPlayer) addHeat(.6);
+  if (byPlayer) { addHeat(.6); if (L) L.kos = (L.kos || 0) + 1; }
   panic(p.x, p.y, 320);
 }
 function panic(x, y, r) {
@@ -286,6 +286,7 @@ function hitEnemy(e, dmg) {
   e.hp -= dmg; e.alert = true; au('hit', spatial(e.x, e.y)[0]);
   for (let i = 0; i < 4; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-80, 80), vy: rnd(-80, 80), life: .3, max: .3, r: 2.5, col: '#ff4d5e' });
   if (e.hp <= 0) {
+    track('kills');
     for (const o of enemies) if (o.group === e.group && dist(o.x, o.y, e.x, e.y) < 600) o.alert = true;
     if (Math.random() < .5) picks.push({ x: e.x, y: e.y, amt: (20 + lvl() * 8 + rnd(30)) | 0, t: 30 });
     if (e.boss) { toast(e.boss + ' est tombé !'); for (let i = 0; i < 3; i++) picks.push({ x: e.x + rnd(-20, 20), y: e.y + rnd(-20, 20), amt: 200 + lvl() * 40, t: 40 }); }
@@ -337,7 +338,7 @@ function bribePolice() {
   if (!nearCop()) { msg('Approche-toi d’une voiture de police pour la soudoyer'); return; }
   const c = bribeCost();
   if (save.money < c) { msg('Il te faut ' + fmt(c) + ' pour soudoyer les agents'); return; }
-  au('cash'); save.money -= c; S.heat = 0; S.unseen = 0; policeLeave(); toast('Agents soudoyés (−' + fmt(c) + ')');
+  au('cash'); save.money -= c; S.heat = 0; S.unseen = 0; policeLeave(); track('bribes'); toast('Agents soudoyés (−' + fmt(c) + ')');
 }
 function contextAction() {
   if (S.mode !== 'play' || S.dead > 0) return;
@@ -365,8 +366,8 @@ function takeTunnel() {
     else { P.x = to.x; P.y = to.y + 4; }
     if (vip && vip.hp > 0 && (vip.inCar || vip.following)) { vip.x = to.x + 20; vip.y = to.y; }
     cam.x = P.x; cam.y = P.y;
-    if (S.heat >= 1) { S.heat = Math.max(0, stars() - 1); if (S.heat < 1) { S.heat = 0; policeLeave(); } for (const c of cars) if (c.kind === 'police') { c.x += 2000 * Math.sign(c.x - P.x || 1); } }
-    if (L) L.tunneled = true;
+    if (S.heat >= 1) { S.heat = Math.max(0, stars() - 1); if (S.heat < 1) { S.heat = 0; policeLeave(); track('escapes'); } for (const c of cars) if (c.kind === 'police') { c.x += 2000 * Math.sign(c.x - P.x || 1); } }
+    if (L) L.tunneled = true; track('tunnels');
     toast('Sortie du tunnel');
   }, 700);
 }
@@ -384,6 +385,7 @@ function toggleCar() {
   if (!best) { msg('Aucune voiture à portée'); return; }
   if (best.ai === 'traffic' || best.ai === 'convoy') { const d = mkPed(best.x - Math.sin(best.a) * 24, best.y + Math.cos(best.a) * 24); d.state = 'flee'; d.t = 6; peds.push(d); if (Math.random() < .3) addHeat(.4); }
   if (best.kind === 'police') { S.heat = Math.max(S.heat, 2); S.unseen = 0; toast('Voiture de police volée !'); }
+  if (best !== P.lastCar) track('carsStolen'); P.lastCar = best;
   best.ai = null; best.v = Math.min(best.v, 40); P.car = best; au('door');
 }
 function fire() {
@@ -540,11 +542,14 @@ function startLevel(n) {
   for (let k = 0; k < 3; k++) { const p = freeNear(P.x + 60, P.y + 40, 80); parkedCar(p.x, p.y); }
   for (let i = 0; i < 25; i++) spawnPed();
   for (let i = 0; i < 14; i++) spawnTraffic();
-  L = { n, def: D.LEVELS[n - 1], region, idx: -1, earned: 0, time: 0, step: null };
+  L = { n, def: D.LEVELS[n - 1], region, idx: -1, earned: 0, time: 0, step: null, kos: 0 };
+  ensureDaily();
+  if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   S.mode = 'play'; showScreen(null);
   toast('Niveau ' + n + ' : ' + L.def.t);
   nextStep();
 }
+function nearestFreeCar() { let b = null, bd = 400; for (const c of cars) { if (c.wreck || c.ai) continue; const d = dist(c.x, c.y, P.x, P.y); if (d < bd) { bd = d; b = c; } } return b; }
 function nextStep() {
   if (L.step) { if (L.idx < 9) { au('step'); vib([30, 50, 30]); } const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
   L.idx++;
@@ -569,10 +574,13 @@ function completeLevel() {
   const n = L.n, bonus = levelBonus(n);
   save.money += bonus; L.earned += bonus; au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
   const first = !save.done[n];
+  const sc = levelStars(L); save.stars = save.stars || {}; const prevStars = save.stars[n] || 0; save.stars[n] = Math.max(prevStars, sc.stars);
+  if (first) track('levelsDone'); track('levelsPlayed');
+  if (sc.stars === 3 && prevStars < 3) track('threeStars');
   save.done[n] = true; save.maxLevel = Math.max(save.maxLevel, Math.min(30, n + 1)); persist();
   S.mode = 'result';
   const unlockW = D.WEAPONS.filter(w => w.lvl === n + 1).concat(D.GEAR.filter(g => g.lvl === n + 1));
-  showScreen('result', { ok: true, n, earned: L.earned, bonus, time: L.time, first, unlocks: unlockW });
+  showScreen('result', { ok: true, n, earned: L.earned, bonus, time: L.time, first, unlocks: unlockW, sc, kos: L.kos || 0 });
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
@@ -580,6 +588,86 @@ function failLevel(reason) {
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
 }
+
+// ---------- progression : succès, défis du jour, conseils ----------
+const ACH = [
+  { id: 'steal10', name: 'Voleur de voitures', key: 'carsStolen', goal: 10, r: 500 },
+  { id: 'steal100', name: 'Grand voleur', key: 'carsStolen', goal: 100, r: 3000 },
+  { id: 'esc10', name: 'Fantôme', key: 'escapes', goal: 10, r: 1000 },
+  { id: 'esc50', name: 'Insaisissable', key: 'escapes', goal: 50, r: 5000 },
+  { id: 'kill50', name: 'Tireur', key: 'kills', goal: 50, r: 1000 },
+  { id: 'kill500', name: 'Nettoyeur', key: 'kills', goal: 500, r: 8000 },
+  { id: 'tun10', name: 'La taupe', key: 'tunnels', goal: 10, r: 800 },
+  { id: 'bribe5', name: 'Bon payeur', key: 'bribes', goal: 5, r: 800 },
+  { id: 'boom25', name: 'Artificier', key: 'explosions', goal: 25, r: 1500 },
+  { id: 'cash5k', name: 'Les poches pleines', key: 'cashPicked', goal: 5000, r: 1000 },
+  { id: 'star5', name: 'Trois étoiles', key: 'threeStars', goal: 5, r: 2000 },
+  { id: 'star30', name: 'Perfectionniste', key: 'threeStars', goal: 30, r: 20000 },
+  { id: 'lvl8', name: 'Roi de Néon Bay', key: 'levelsDone', goal: 8, r: 3000 },
+  { id: 'lvl16', name: 'Parrain de Porto Lumi', key: 'levelsDone', goal: 16, r: 6000 },
+  { id: 'lvl23', name: 'Maître de Sierra Verde', key: 'levelsDone', goal: 23, r: 9000 },
+  { id: 'lvl30', name: 'Légende de Morro Azul', key: 'levelsDone', goal: 30, r: 15000 },
+];
+const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux' };
+const DAILY_POOL = [['escapes', 3], ['carsStolen', 5], ['kills', 20], ['tunnels', 2], ['cashPicked', 400], ['explosions', 4], ['levelsPlayed', 1], ['bribes', 1]];
+const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+function ensureDaily() {
+  const t = today();
+  if (save.daily && save.daily.date === t) return save.daily;
+  const prev = save.daily && save.daily.date;
+  const y = new Date(Date.now() - 864e5), yd = y.getFullYear() + '-' + String(y.getMonth() + 1).padStart(2, '0') + '-' + String(y.getDate()).padStart(2, '0');
+  save.streak = prev === yd && save.daily.items.every(i => i.done) ? (save.streak || 0) + 1 : (prev === t ? save.streak || 0 : 0);
+  let h = 0; for (const c of t) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  const pool = DAILY_POOL.slice(), items = [];
+  for (let k = 0; k < 3; k++) { const i = (h >>> (k * 5)) % pool.length; const [key, goal] = pool.splice(i, 1)[0]; items.push({ key, goal, prog: 0, done: false }); }
+  save.daily = { date: t, items }; persist(); return save.daily;
+}
+const dailyReward = () => 600 + Math.min(10, save.streak || 0) * 100;
+function track(key, n = 1) {
+  save.stats = save.stats || {};
+  save.stats[key] = (save.stats[key] || 0) + n;
+  const d = ensureDaily();
+  for (const it of d.items) if (it.key === key && !it.done) {
+    it.prog = Math.min(it.goal, it.prog + n);
+    if (it.prog >= it.goal) { it.done = true; const r = dailyReward(); save.money += r; reward('Défi du jour réussi', STAT_LABEL[key].replace('{n}', it.goal), r); }
+  }
+  save.ach = save.ach || {};
+  for (const a of ACH) if (a.key === key && !save.ach[a.id] && save.stats[key] >= a.goal) { save.ach[a.id] = Date.now(); save.money += a.r; reward('Succès débloqué', a.name, a.r); }
+}
+let rewardQ = [];
+function reward(title, name, r) { rewardQ.push({ title, name, r }); if (rewardQ.length === 1) showReward(); }
+function showReward() {
+  const it = rewardQ[0]; if (!it) return;
+  const el = $('reward'); el.innerHTML = `<b>${esc(it.title)}</b><span>${esc(it.name)}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  au('win'); vib([40, 30, 40]);
+  setTimeout(() => { el.classList.remove('in'); setTimeout(() => { el.hidden = true; rewardQ.shift(); showReward(); }, 350); }, 2600);
+}
+// conseils affichés une seule fois, au bon moment
+function tip(id, kb, tc) {
+  save.tips = save.tips || {};
+  if (save.tips[id] || S.mode !== 'play') return;
+  if (S.tipT > 0) return;
+  save.tips[id] = 1; persist();
+  const el = $('tip'); el.textContent = touch.on ? (tc || kb) : kb; el.hidden = false; S.tipT = 6;
+}
+function updTips(dt) {
+  if (S.tipT > 0) { S.tipT -= dt; if (S.tipT <= 0) $('tip').hidden = true; }
+  if (!L) return;
+  if (L.n === 1 && L.time > 1) tip('chase', 'Tu viens de voler cette voiture : la police te suit ! Roule (ZQSD ou flèches), sème-la, puis suis la flèche bleue.', 'Tu viens de voler cette voiture : la police te suit ! Pointe le joystick pour rouler, sème-la, puis suis la flèche bleue.');
+  if (P.car && L.time > 8) tip('drive', 'Espace = frein à main pour tourner sec. C = changer de caméra. N = nitro.', 'FREIN = frein à main pour tourner sec. CAM = changer de caméra.');
+  if (!P.car) { for (const c of cars) if (!c.wreck && dist(c.x, c.y, P.x, P.y) < 70) { tip('car', 'Appuie sur E pour voler cette voiture.', 'Touche ACTION pour voler cette voiture.'); break; } }
+  if (stars() >= 2) tip('police', 'Plus tu as d’étoiles, plus la police est nombreuse. Pour la semer : reste hors de vue, prends un tunnel (T), repeins ta voiture (case rose) ou paie les agents (B).', 'Pour semer la police : reste hors de vue, prends un tunnel, repeins ta voiture (case rose) ou touche PAYER FLICS.');
+  if (enemies.some(e => e.alert && e.hp > 0)) tip('fight', 'Des ennemis ! Tire avec Espace ou clic gauche. La visée aide automatiquement. Q = changer d’arme.', 'Des ennemis ! Garde TIRER appuyé, la visée est automatique. ARME = changer d’arme.');
+  if (S.hp < 40) tip('heal', 'Santé basse : H pour une trousse de soins, ou mets-toi à l’abri.', 'Santé basse : touche SOIN, ou mets-toi à l’abri.');
+  if (tileAt(P.x, P.y) === SHOP) tip('shop', 'Boutique : E pour acheter armes, armure et nitro avec l’argent gagné.', 'Boutique : touche ACTION pour acheter armes et équipement.');
+}
+// note de fin de niveau
+const parTime = n => 360 + n * 12;
+function levelStars(L) {
+  const s1 = L.time <= parTime(L.n), s2 = S.hp >= 60 && (L.kos || 0) <= 3;
+  return { stars: 1 + (s1 ? 1 : 0) + (s2 ? 1 : 0), fast: s1, clean: s2 };
+}
+const starStr = n => '★'.repeat(n) + '☆'.repeat(3 - n);
 
 // ---------- effets ----------
 function puff(x, y, col, s = 1) { parts.push({ x, y, vx: rnd(-20, 20), vy: rnd(-20, 20), life: s, max: s, r: rnd(6, 12), col, grow: 18 }); }
@@ -763,13 +851,13 @@ function update(dt) {
     }
   }
   bullets = bullets.filter(b => b.life > 0);
-  for (const k of picks) { k.t -= dt; if (dist(P.x, P.y, k.x, k.y) < 30) { save.money += k.amt; if (L) L.earned += k.amt; au('cash'); msg('+' + fmt(k.amt)); k.t = 0; } }
+  for (const k of picks) { k.t -= dt; if (dist(P.x, P.y, k.x, k.y) < 30) { save.money += k.amt; if (L) L.earned += k.amt; au('cash'); track('cashPicked', k.amt); msg('+' + fmt(k.amt)); k.t = 0; } }
   picks = picks.filter(k => k.t > 0);
   for (const c of cases) if (!c.got && dist(P.x, P.y, c.x, c.y) < 32) { c.got = true; au('pickup'); msg('Valise récupérée'); sparks(c.x, c.y, 10); }
   // atelier de peinture
   if (P.car && tileAt(P.car.x, P.car.y) === PAD && stars() > 0 && !(L && L.step && L.step.lock)) {
     const cost = 200 + lvl() * 60;
-    if (save.money >= cost) { save.money -= cost; S.heat = 0; P.car.color = pick(CIV); P.car.hp = Math.max(P.car.hp, 100); toast('Voiture repeinte · police semée (−' + fmt(cost) + ')'); policeLeave(); }
+    if (save.money >= cost) { save.money -= cost; S.heat = 0; P.car.color = pick(CIV); P.car.hp = Math.max(P.car.hp, 100); track('escapes'); toast('Voiture repeinte · police semée (−' + fmt(cost) + ')'); policeLeave(); }
     else msg('Il faut ' + fmt(cost) + ' pour repeindre');
   }
   // police
@@ -777,7 +865,7 @@ function update(dt) {
   if (s > 0) {
     if (cars.some(c => c.kind === 'police' && c.ai === 'police' && dist(c.x, c.y, P.x, P.y) < 430)) S.unseen = 0; else S.unseen += dt;
     const lose = (save.perks.radio ? 5 : 7) + lvl() * .04;
-    if (S.unseen > lose && !(L && L.step && L.step.lock)) { S.heat = Math.max(0, s - 1); S.unseen = 0; if (S.heat < 1) { S.heat = 0; msg('Police semée'); policeLeave(); } }
+    if (S.unseen > lose && !(L && L.step && L.step.lock)) { S.heat = Math.max(0, s - 1); S.unseen = 0; if (S.heat < 1) { S.heat = 0; msg('Police semée'); policeLeave(); track('escapes'); } }
     let near = false; for (const c of cars) if (c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, P.x, P.y) < (P.car ? 62 : 56) && Math.abs(c.v) < 90) { near = true; break; }
     if (near && (!P.car || Math.abs(P.car.v) < 30)) S.bust += dt * (P.car ? .6 : 1); else S.bust = Math.max(0, S.bust - dt);
     if (S.bust > 1.6) failLevel('Arrêté par la police');
@@ -1334,11 +1422,13 @@ const SCREENS = {
       <div class="row center">
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
+        <button class="btn" data-go="trophies">Succès</button>
         ${save.premium ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}
       </div>
-      <div class="stats"><span>${done}/30 niveaux</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
+      ${dailyHtml()}
+      <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
         <b>E</b><span>Voiture, boutique, tunnel, payer un agent</span>
@@ -1359,8 +1449,16 @@ const SCREENS = {
         <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium;
           const cls = ok ? 'done' : open ? (paid ? 'paid' : 'open') : 'locked';
           const tag = ok ? '✓ Terminé' : paid ? 'Version complète' : open ? 'Disponible' : 'Verrouillé';
-          return `<button class="lvl ${cls}" data-lvl="${n}"><span class="num">${n}</span><span class="lt">${esc(l.t)}</span><span class="tag">${tag}</span><span class="rw">+${fmt(levelBonus(n) + stepReward(n) * 10)}</span></button>`; }).join('')}</div>
+          return `<button class="lvl ${cls}" data-lvl="${n}"><span class="num">${n}</span><span class="lt">${esc(l.t)}</span><span class="tag">${tag}</span><span class="st">${save.stars && save.stars[n] ? starStr(save.stars[n]) : ''}</span><span class="rw">+${fmt(levelBonus(n) + stepReward(n) * 10)}</span></button>`; }).join('')}</div>
       </section>`).join('')}
+    </div>`;
+  },
+  trophies: () => {
+    const st = save.stats || {}, got = save.ach || {};
+    return `<div class="wrap narrow">
+      <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Succès</h2>${money()}</div>
+      ${dailyHtml()}
+      <div class="ach">${ACH.map(a => { const v = Math.min(a.goal, st[a.key] || 0), ok = !!got[a.id]; return `<div class="a ${ok ? 'ok' : ''}"><div><b>${esc(a.name)}</b><span>${STAT_LABEL[a.key].replace('{n}', a.goal.toLocaleString('fr-FR'))}</span><div class="pbar"><i style="width:${Math.round(v / a.goal * 100)}%"></i></div></div><em>${ok ? '✓' : '+' + fmt(a.r)}</em></div>`; }).join('')}</div>
     </div>`;
   },
   brief: ({ n }) => {
@@ -1407,7 +1505,10 @@ const SCREENS = {
       const next = d.n + 1;
       return `<div class="wrap narrow center-col" style="--acc:${r.accent}">
         <p class="eyebrow">Niveau ${d.n} terminé</p><h2 class="title big">MISSION RÉUSSIE</h2>
+        <div class="bigstars" aria-label="${d.sc.stars} étoiles sur 3">${starStr(d.sc.stars)}</div>
+        <ul class="crit"><li class="${'ok'}">Mission accomplie</li><li class="${d.sc.fast ? 'ok' : ''}">Rapide : moins de ${Math.floor(parTime(d.n) / 60)} min ${String(parTime(d.n) % 60).padStart(2, '0')}</li><li class="${d.sc.clean ? 'ok' : ''}">Propre : santé ≥ 60 % et 3 passants K.O. maximum (${d.kos})</li></ul>
         <div class="info"><span>Bonus de fin : <b>${fmt(d.bonus)}</b></span><span>Total gagné : <b>${fmt(d.earned)}</b></span><span>Temps : <b>${Math.floor(d.time / 60)} min ${String(Math.floor(d.time % 60)).padStart(2, '0')}</b></span></div>
+        ${!save.premium && d.n === 1 ? `<div class="offer"><b>Tu as aimé ? La suite t'attend.</b><span>29 niveaux de plus en Italie, en Colombie et au Brésil, 7 chefs de gang, le lance-roquettes et le minigun.</span><button class="btn gold" data-go="unlock">Débloquer le jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button></div>` : ''}
         ${d.unlocks.length ? `<p class="lead">Nouveau dans la boutique : ${d.unlocks.map(u => u.name).join(', ')}</p>` : ''}
         ${next > 30 ? '<p class="lead">Tu as terminé les 30 niveaux. Morro Azul est à toi.</p>' : ''}
         <div class="col">${next <= 30 ? `<button class="btn primary" data-lvl="${next}">Niveau suivant</button>` : ''}<button class="btn" data-go="shop" data-ret="map">Boutique</button><button class="btn" data-go="map">Carte</button></div>
@@ -1438,6 +1539,10 @@ const SCREENS = {
     </div>`;
   },
 };
+function dailyHtml() {
+  const d = ensureDaily();
+  return `<div class="daily"><div class="dh"><b>Défis du jour</b><span>${save.streak ? 'Série : ' + save.streak + ' jour' + (save.streak > 1 ? 's' : '') + ' · ' : ''}+${fmt(dailyReward())} chacun</span></div>${d.items.map(it => `<div class="dl ${it.done ? 'ok' : ''}"><span>${STAT_LABEL[it.key].replace('{n}', it.goal)}</span><div class="pbar"><i style="width:${Math.round(it.prog / it.goal * 100)}%"></i></div><em>${it.done ? '✓' : it.prog + '/' + it.goal}</em></div>`).join('')}</div>`;
+}
 function canFull() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
 function toggleFull() {
   try {
@@ -1513,7 +1618,7 @@ screenEl.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id
 let lastT = performance.now();
 function frame(t) {
   const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
-  if (S.mode === 'play') { update(dt); updHud(dt); }
+  if (S.mode === 'play') { update(dt); updHud(dt); updTips(dt); }
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd }, dt); }
   else if (S.mode === 'result') { for (const p of parts) { p.life -= dt; } }
   render(dt);
