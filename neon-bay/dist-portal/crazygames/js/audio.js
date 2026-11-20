@@ -21,6 +21,11 @@ window.NB_AUDIO = (() => {
     musBus = ctx.createGain(); musBus.gain.value = prefs.music ? .42 : 0; musBus.connect(master);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // réverbération de rue : les tirs et explosions résonnent entre les immeubles
+    try { const len = ctx.sampleRate * 1.8, ir = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let c = 0; c < 2; c++) { const ch = ir.getChannelData(c); for (let i = 0; i < len; i++) ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2) * (i < 900 ? .2 : 1); }
+      const conv = ctx.createConvolver(); conv.buffer = ir; const send = ctx.createGain(); send.gain.value = .28; const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 220;
+      sfxBus.connect(send); send.connect(hp); hp.connect(conv); conv.connect(master); } catch (e) {}
     loadFiles();
   }
   async function loadFiles() {
@@ -60,11 +65,11 @@ window.NB_AUDIO = (() => {
   }
   // ---------- effets ----------
   const SHOTS = {
-    pistol: d => { noise(d, now(), .12, 'bandpass', 1800, .8, .9); tone(d, now(), 'sine', 180, 50, .1, .7); },
+    pistol: d => { noise(d, now(), .015, 'highpass', 4500, .7, .9); noise(d, now(), .12, 'bandpass', 1800, .8, .9); tone(d, now(), 'sine', 180, 50, .1, .7); },
     uzi: d => { noise(d, now(), .06, 'bandpass', 2400, 1, .7); tone(d, now(), 'square', 140, 60, .05, .25); },
     shotgun: d => { noise(d, now(), .35, 'lowpass', 2600, .7, 1, .002, 300); tone(d, now(), 'sine', 120, 35, .25, .9); },
-    rifle: d => { noise(d, now(), .1, 'bandpass', 2900, 1.2, .9); noise(d, now(), .25, 'lowpass', 900, .5, .3); tone(d, now(), 'sine', 160, 45, .09, .6); },
-    sniper: d => { noise(d, now(), .5, 'lowpass', 3500, .6, 1, .001, 400); tone(d, now(), 'sine', 220, 30, .4, .9); },
+    rifle: d => { noise(d, now(), .02, 'highpass', 5000, .7, 1); noise(d, now(), .1, 'bandpass', 2900, 1.2, .9); noise(d, now(), .25, 'lowpass', 900, .5, .3); tone(d, now(), 'sine', 160, 45, .09, .6); },
+    sniper: d => { noise(d, now(), .02, 'highpass', 6000, .7, 1.1); noise(d, now(), .5, 'lowpass', 3500, .6, 1, .001, 400); tone(d, now(), 'sine', 220, 30, .4, .9); },
     rocket: d => { noise(d, now(), .7, 'bandpass', 500, .8, .7, .02, 2600); tone(d, now(), 'sawtooth', 90, 200, .5, .2); },
     minigun: d => { noise(d, now(), .045, 'bandpass', 2600, 1, .55); },
     enemy: d => { noise(d, now(), .12, 'bandpass', 1300, .8, .7); tone(d, now(), 'sine', 150, 50, .08, .4); },
