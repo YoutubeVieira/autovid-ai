@@ -899,6 +899,9 @@ window.NB_I18N = (() => {
     'Tourne ton téléphone': { en: 'Turn your phone', es: 'Gira tu teléfono', pt: 'Gire o celular' },
     "Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.": { en: 'Néon Bay is played in landscape, one thumb on each side.', es: 'Néon Bay se juega en horizontal, con un pulgar a cada lado.', pt: 'Néon Bay se joga na horizontal, com um polegar de cada lado.' },
     'Jouer en vertical quand même': { en: 'Play in portrait anyway', es: 'Jugar en vertical de todos modos', pt: 'Jogar na vertical mesmo assim' },
+    'Photo à partager': { en: 'Share a photo', es: 'Foto para compartir', pt: 'Foto para compartilhar' },
+    'Regarde ma partie de Néon Bay !': { en: 'Check out my Néon Bay run!', es: '¡Mira mi partida de Néon Bay!', pt: 'Olha minha partida de Néon Bay!' },
+    'Photo enregistrée': { en: 'Photo saved', es: 'Foto guardada', pt: 'Foto salva' }, 'Photo impossible ici': { en: 'Photos aren\u2019t available here', es: 'Aquí no se pueden hacer fotos', pt: 'Foto indisponível aqui' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -2711,6 +2714,15 @@ function init3D() {
   { const MS = 260, sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(MS * 3), 3)); sg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(MS * 3), 3));
     R3.smoke = new THREE.Points(sg, new THREE.PointsMaterial({ size: 34, vertexColors: true, transparent: true, opacity: .55, depthWrite: false })); R3.smoke.frustumCulled = false; R3.MS = MS; sc.add(R3.smoke); }
   R3.debris = [];
+  { const sg = new THREE.SphereGeometry(4200, 24, 12), cols = []; const pos = sg.attributes.position;
+    for (let i = 0; i < pos.count; i++) cols.push(1, 1, 1);
+    sg.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+    R3.sky = new THREE.Mesh(sg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false })); R3.sky.renderOrder = -10; R3.sky.frustumCulled = false; sc.add(R3.sky);
+    const NS = 900, sp = new Float32Array(NS * 3); for (let i = 0; i < NS; i++) { const a = Math.random() * TAU, e = Math.random() * 1.3 + .15, r = 3900; sp[i * 3] = Math.cos(a) * Math.cos(e) * r; sp[i * 3 + 1] = Math.sin(e) * r; sp[i * 3 + 2] = Math.sin(a) * Math.cos(e) * r; }
+    const stg = new THREE.BufferGeometry(); stg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
+    R3.stars = new THREE.Points(stg, new THREE.PointsMaterial({ color: 0xffffff, size: 2.2, sizeAttenuation: false, transparent: true, fog: false, depthWrite: false })); R3.stars.frustumCulled = false; sc.add(R3.stars);
+    R3.moon = new THREE.Mesh(new THREE.SphereGeometry(120, 16, 10), new THREE.MeshBasicMaterial({ color: 0xfff6dd, fog: false })); sc.add(R3.moon);
+    R3.glow = new THREE.Mesh(new THREE.CircleGeometry(40, 24), new THREE.MeshBasicMaterial({ color: 0x21e6ff, transparent: true, opacity: .45, blending: THREE.AdditiveBlending, depthWrite: false })); R3.glow.rotation.x = -PI / 2; R3.glow.scale.set(1.5, .8, 1); sc.add(R3.glow); }
   R3.dyn = new THREE.Group(); sc.add(R3.dyn);
   R3.seen = new Set();
   const MAXP = 700, pg = new THREE.BufferGeometry();
@@ -2815,7 +2827,8 @@ function build3DWorld() {
   inst(new THREE.ConeGeometry(1, 1, 7), mat(p.tree), groups.cone, tr => pos(tr, 44, 24, 50, 24));
   R3.s.set(1, 1, 1);
   // colonnes de lumière : boutique, tunnels, peinture, garages, hôpital, police
-  const beam = (pt, colr, h = 150) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, h, 18, 1, true), bmat(colr, .2, true)); m.position.set(pt.x, h / 2, pt.y); g.add(m); };
+  R3.beacons = [];
+  const beam = (pt, colr, h = 150) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(22, 22, h, 18, 1, true), bmat(colr, .2, true)); m.position.set(pt.x, h / 2, pt.y); g.add(m); R3.beacons.push(m); };
   world.shops.forEach(s => beam(s, '#a6ff4d')); world.tunnels.forEach(s => beam(s, '#ffb627', 110)); world.pads.forEach(s => beam(s, '#ff2e93', 110));
   world.garages.forEach(s => beam(s, '#3ee0c5', 110)); beam(world.hospital, '#a6ff4d', 90); beam(world.station, '#2e6bff', 90);
   sc.add(g);
@@ -2882,6 +2895,30 @@ function buildRegionDecor(g, tiles) {
   g.add(poleM, bulbM);
   // monuments
   for (const L2 of world.landmarks) buildLandmark(g, L2, LK);
+  buildSigns(g);
+}
+const SIGNS = { usa: ['MOTEL', 'PIZZA', 'CLUB', '24/7', 'BAR', 'TATTOO', 'DINER', 'ARCADE'], ita: ['PIZZERIA', 'GELATO', 'CAFFÈ', 'HOTEL', 'BAR', 'TRATTORIA'], col: ['CAFÉ', 'TIENDA', 'HOTEL', 'AREPAS', 'FARMACIA', 'BAR'], bra: ['BAR', 'AÇAÍ', 'LANCHES', 'HOTEL', 'BAILE', 'SALÃO'] };
+function signMat(word, col) {
+  const k = 'sign|' + word + '|' + col; if (matCache[k]) return matCache[k];
+  const cv = document.createElement('canvas'); cv.width = 256; cv.height = 64; const x = cv.getContext('2d');
+  x.fillStyle = 'rgba(8,6,16,.85)'; x.fillRect(0, 0, 256, 64); x.strokeStyle = col; x.lineWidth = 4; x.strokeRect(4, 4, 248, 56);
+  x.font = '900 38px "Bungee", "Arial Black", sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.shadowColor = col; x.shadowBlur = 14; x.fillStyle = '#ffffff'; x.fillText(word, 128, 34); x.fillStyle = col; x.globalAlpha = .55; x.fillText(word, 128, 34);
+  return (matCache[k] = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cv), side: THREE.DoubleSide }));
+}
+function buildSigns(g) {
+  const words = SIGNS[world.region.id] || SIGNS.usa, neon = world.region.pal.neon; let n = 0; const flick = [];
+  for (let ty = 2; ty < N - 2 && n < 70; ty++) for (let tx = 2; tx < N - 2 && n < 70; tx++) {
+    const k = ty * N + tx; if (world.map[k] !== BLD || world.lm[k] || world.wh[k] || hash(tx * 5, ty * 3) % 9) continue;
+    for (const [dx, dy] of [[0, 1], [0, -1], [1, 0], [-1, 0]]) {
+      const nt = world.map[(ty + dy) * N + tx + dx]; if (nt === BLD) continue;
+      const h = bHeight(tx, ty), y = Math.min(h - 10, 26 + hash(tx, ty) % 18); if (y < 18) break;
+      const w = words[hash(tx, ty) % words.length], col = neon[hash(ty, tx) % neon.length];
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(52, 13), signMat(w, col));
+      m.position.set(tx * T + T / 2 + dx * (T / 2 + 1.5), y, ty * T + T / 2 + dy * (T / 2 + 1.5)); m.rotation.y = dx ? (dx > 0 ? PI / 2 : -PI / 2) : (dy > 0 ? 0 : PI);
+      g.add(m); n++; if (hash(tx, ty) % 5 === 0) flick.push(m); break;
+    }
+  }
+  if (flick.length) R3.anim.push(() => { for (const m of flick) m.visible = Math.sin(S.time * 7 + m.position.x) > -.85 || Math.random() < .5; });
 }
 function buildLandmark(g, L2, LK) {
   const add = (geo, m, x, y, z, parent = g) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); parent.add(me); return me; };
@@ -3152,10 +3189,22 @@ function envFx(dt, playing) {
   const p = world.region.pal;
   let sky = lerpC(p.ground, (world.region.look || {}).sky || '#86b4e3', Math.pow(day, 1.4) * (1 - rainK * .5)); sky.lerp(col3('#ff8a5c'), Math.min(.45, dusk * .45)); if (rainK) sky.lerp(col3('#3a4250'), .35 * day);
   R3.scene.background = sky; if (R3.scene.fog) R3.scene.fog.color = sky;
+  if (R3.sky) {
+    const top = lerpC('#05030f', (world.region.look || {}).sky || '#4f8fd6', Math.pow(day, 1.2)).multiplyScalar(rainK ? .6 : 1), hor = sky.clone();
+    if (dusk > .05) top.lerp(col3('#3a2a6a'), Math.min(.5, dusk * .5));
+    const cA = R3.sky.geometry.attributes.color, pA = R3.sky.geometry.attributes.position;
+    for (let i = 0; i < pA.count; i++) { const y = pA.getY(i) / 4200, k = Math.max(0, Math.min(1, y * 1.6)); const c = hor.clone().lerp(top, k); cA.setXYZ(i, c.r, c.g, c.b); }
+    cA.needsUpdate = true; R3.sky.position.set(R3.cam.position.x, 0, R3.cam.position.z);
+    R3.stars.position.copy(R3.sky.position); R3.stars.material.opacity = Math.max(0, night - .35) * (rainK ? .2 : 1.4);
+    const ang = tod * TAU - PI / 2; R3.moon.position.set(R3.sky.position.x + Math.cos(ang) * 3200, Math.max(-400, Math.sin(ang) * 2200 + 300), R3.sky.position.z - 2400);
+    R3.moon.material.color = night > .5 ? col3('#fff6dd') : col3('#fff1a8'); R3.moon.scale.setScalar(night > .5 ? 1 : 1.5);
+    if (playing && P.car && !P.car.wreck) { R3.glow.visible = true; R3.glow.position.set(P.car.x, .9, P.car.y); R3.glow.rotation.z = -P.car.a; R3.glow.material.opacity = .15 + night * .45; R3.glow.material.color.setHSL((S.time * .08) % 1, 1, .55); } else R3.glow.visible = false;
+  }
   R3.hemi.intensity = .6 + day * .8 - rainK * .15; R3.hemi.color = lerpC('#a7b0ff', '#ffffff', day); R3.hemi.groundColor = lerpC('#241838', '#6a6070', day);
   R3.moon.intensity = .45 + day * .7; R3.moon.color = lerpC('#9fb0ff', '#fff2dd', day).lerp(col3('#ffb070'), Math.min(.6, dusk));
   if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85;
   if (R3.anim) for (const f of R3.anim) f(dt, night);
+  if (R3.beacons) { const cx = R3.cam.position.x, cz = R3.cam.position.z, px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y; for (const m of R3.beacons) { const dc = Math.hypot(m.position.x - cx, m.position.z - cz), dp = Math.hypot(m.position.x - px, m.position.z - pz); m.visible = dc > 140 && dp > 90; } }
   if (R3.coneMat) R3.coneMat.opacity = .02 + night * .1;
   // éclair des tirs et explosions
   if (S.flash && !Q.fx) { S.flash = null; R3.flash.intensity = 0; }
@@ -3298,7 +3347,7 @@ function render3D(dt) {
   envFx(dt, playing);
   // cible de mission
   const st = playing && L.step, target = st ? stepTarget(st) : null;
-  R3.ring.visible = R3.beam.visible = !!target; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
+  R3.ring.visible = R3.beam.visible = !!target; if (target && Math.hypot(target.x - R3.cam.position.x, target.y - R3.cam.position.z) < 150) R3.beam.visible = false; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
@@ -3413,7 +3462,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -3487,6 +3536,20 @@ function dailyHtml() {
   const d = ensureDaily();
   return `<div class="daily"><div class="dh"><b>Défis du jour</b><span>${save.streak ? 'Série : ' + save.streak + ' jour' + (save.streak > 1 ? 's' : '') + ' · ' : ''}+${fmt(dailyReward())} chacun</span></div>${d.items.map(it => `<div class="dl ${it.done ? 'ok' : ''}"><span>${STAT_LABEL[it.key].replace('{n}', it.goal)}</span><div class="pbar"><i style="width:${Math.round(it.prog / it.goal * 100)}%"></i></div><em>${it.done ? '✓' : it.prog + '/' + it.goal}</em></div>`).join('')}</div>`;
 }
+function takePhoto() {
+  if (!R3.ok) return;
+  screenEl.hidden = true; R3.r.render(R3.scene, R3.cam);
+  const src = $('game3d'), cv = document.createElement('canvas'); cv.width = src.width; cv.height = src.height; const x = cv.getContext('2d');
+  x.drawImage(src, 0, 0);
+  const fs = Math.round(cv.height * .05); x.font = `900 ${fs}px Bungee, "Arial Black", sans-serif`; x.textAlign = 'right'; x.shadowColor = '#ff2e93'; x.shadowBlur = fs * .5; x.fillStyle = '#ffffff';
+  x.fillText('NÉON BAY', cv.width - fs * .6, cv.height - fs * .7); x.shadowBlur = 0; x.font = `700 ${Math.round(fs * .4)}px "Chakra Petch", sans-serif`; x.fillStyle = '#ffb627'; x.fillText(TR('Niveau') + ' ' + (L ? L.n : 1) + ' · ' + world.region.name, cv.width - fs * .6, cv.height - fs * .2);
+  screenEl.hidden = false;
+  cv.toBlob(async blob => {
+    if (!blob) return; const file = new File([blob], 'neon-bay.png', { type: 'image/png' });
+    try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Néon Bay', text: TR('Regarde ma partie de Néon Bay !') }); return; } } catch (e) {}
+    try { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'neon-bay.png'; document.body.appendChild(a); a.click(); a.remove(); flashNote('Photo enregistrée'); } catch (e) { flashNote('Photo impossible ici'); }
+  }, 'image/png');
+}
 function canFull() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
 function toggleFull() {
   try {
@@ -3522,6 +3585,7 @@ screenEl.addEventListener('click', e => {
   const ds = b.dataset;
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
   if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
+  if (ds.photo) { takePhoto(); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }

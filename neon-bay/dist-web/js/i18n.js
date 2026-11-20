@@ -30,6 +30,9 @@ window.NB_I18N = (() => {
     'Tourne ton téléphone': { en: 'Turn your phone', es: 'Gira tu teléfono', pt: 'Gire o celular' },
     "Néon Bay se joue à l'horizontale, avec un pouce de chaque côté.": { en: 'Néon Bay is played in landscape, one thumb on each side.', es: 'Néon Bay se juega en horizontal, con un pulgar a cada lado.', pt: 'Néon Bay se joga na horizontal, com um polegar de cada lado.' },
     'Jouer en vertical quand même': { en: 'Play in portrait anyway', es: 'Jugar en vertical de todos modos', pt: 'Jogar na vertical mesmo assim' },
+    'Photo à partager': { en: 'Share a photo', es: 'Foto para compartir', pt: 'Foto para compartilhar' },
+    'Regarde ma partie de Néon Bay !': { en: 'Check out my Néon Bay run!', es: '¡Mira mi partida de Néon Bay!', pt: 'Olha minha partida de Néon Bay!' },
+    'Photo enregistrée': { en: 'Photo saved', es: 'Foto guardada', pt: 'Foto salva' }, 'Photo impossible ici': { en: 'Photos aren\u2019t available here', es: 'Aquí no se pueden hacer fotos', pt: 'Foto indisponível aqui' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
