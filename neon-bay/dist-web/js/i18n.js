@@ -18,6 +18,9 @@ window.NB_I18N = (() => {
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
     "Tu as aimé ? La suite t'attend.": { en: 'Enjoyed it? The rest is waiting.', es: '¿Te gustó? Lo mejor está por venir.', pt: 'Curtiu? O resto te espera.' },
     "Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).": { en: 'Purchases are not available yet.', es: 'Las compras aún no están disponibles.', pt: 'As compras ainda não estão disponíveis.' },
+    'Aide activée : plus de temps et ennemis moins dangereux': { en: 'Assist on: more time and weaker enemies', es: 'Ayuda activada: más tiempo y enemigos menos peligrosos', pt: 'Ajuda ativada: mais tempo e inimigos menos perigosos' },
+    'Qualité graphique réduite pour plus de fluidité': { en: 'Graphics quality lowered for smoother play', es: 'Calidad gráfica reducida para más fluidez', pt: 'Qualidade gráfica reduzida para mais fluidez' },
+    'Haute': { en: 'High', es: 'Alta', pt: 'Alta' }, 'Moyenne': { en: 'Medium', es: 'Media', pt: 'Média' }, 'Basse': { en: 'Low', es: 'Baja', pt: 'Baixa' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -89,6 +92,8 @@ window.NB_I18N = (() => {
     [/^(.+) · recharge…$/, { en: '$1 · reloading…', es: '$1 · recargando…', pt: '$1 · recarregando…' }],
     [/^(\d\d:\d\d) · pluie$/, { en: '$1 · rain', es: '$1 · lluvia', pt: '$1 · chuva' }],
     [/^(.+)\. L'argent gagné pendant la tentative est conservé \((.+)\)\.$/, { en: '$1. The money earned during this attempt is kept ($2).', es: '$1. Conservas el dinero ganado en este intento ($2).', pt: '$1. O dinheiro ganho nesta tentativa fica com você ($2).' }],
+    [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
+    [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
     [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
   ];

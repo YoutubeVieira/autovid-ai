@@ -141,6 +141,22 @@ const CIV = ['#ff5d8f', '#ffd23f', '#3ee0c5', '#8b7bff', '#ff8a3d', '#e7e3f5', '
 const PEDC = ['#ffcf99', '#e0a070', '#8d5a3b', '#f2d3b3', '#5c3a24', '#c68b59'];
 const SHIRT = ['#ff2e93', '#21e6ff', '#ffb627', '#a6ff4d', '#ffffff', '#9d7bff', '#ff6b3d'];
 const lvl = () => L ? L.n : 1;
+// qualité graphique : auto (selon les images par seconde), haute, moyenne, basse
+const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, label: 'Haute' }, medium: { pr: 1.25, peds: 24, traffic: 13, lod: 600, fx: true, label: 'Moyenne' }, low: { pr: 1, peds: 14, traffic: 8, lod: 350, fx: false, label: 'Basse' } };
+const QORDER = ['high', 'medium', 'low'];
+let Q = QUAL.high, qLevel = 'high';
+const fpsMon = { t: 0, n: 0, slow: 0 };
+function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; } }
+function qualityLabel() { return (save.quality || 'auto') === 'auto' ? 'Auto (' + QUAL[qLevel].label + ')' : QUAL[save.quality].label; }
+function monitorFps(dt) {
+  if ((save.quality || 'auto') !== 'auto' || S.mode !== 'play' || S.cine) return;
+  fpsMon.t += dt; fpsMon.n++;
+  if (fpsMon.t >= 3) { const fps = fpsMon.n / fpsMon.t; fpsMon.t = 0; fpsMon.n = 0;
+    if (fps < 38) { fpsMon.slow++; if (fpsMon.slow >= 1 && qLevel !== 'low') { setQuality(QORDER[QORDER.indexOf(qLevel) + 1]); msg('Qualité graphique réduite pour plus de fluidité'); fpsMon.slow = 0; } } else fpsMon.slow = 0; }
+}
+// aide après plusieurs échecs sur un même niveau
+const fails = () => (L && save.fails && save.fails[L.n]) || 0;
+const assist = () => Math.min(3, Math.max(0, fails() - 1));
 const camRot = () => (R3.ok && save.cam && save.cam !== 'top' && R3.yaw !== undefined) ? R3.yaw + PI / 2 : 0;
 const stars = () => Math.floor(S.heat);
 const wepDef = id => D.WEAPONS.find(w => w.id === id) || D.WEAPONS[0];
@@ -405,7 +421,7 @@ function updEnemy(e, dt) {
   if (e.cd <= 0 && d < 520 && shootersNow < 4 && los(e.x, e.y, tx, ty)) {
     shootersNow++;
     const spread = Math.max(.05, .32 - n * .009), a = e.a + rnd(-spread, spread);
-    const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1);
+    const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist());
     const shots = e.boss && n >= 15 ? 3 : 1;
     { const [pn, vl] = spatial(e.x, e.y); if (vl > .05) au('shot', 'enemy', pn, vl * .8); }
     for (let k = 0; k < shots; k++) { const aa = a + (k - (shots - 1) / 2) * .12; bullets.push({ x: e.x + Math.cos(aa) * 12, y: e.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 560, vy: Math.sin(aa) * 560, life: 1, dmg, from: 'enemy' }); }
@@ -688,6 +704,7 @@ function nextStep() {
 function updLevel(dt) {
   const st = L.step; if (!st) return;
   L.time += dt;
+  if (st.time !== null && !st.assisted) { st.assisted = true; if (assist() && !st.survive) st.time = Math.round(st.time * (1 + .2 * assist())); }
   if (st.time !== null) {
     st.time -= dt;
     if (st.time <= 0) { if (st.survive) { nextStep(); return; } failLevel('Temps écoulé'); return; }
@@ -700,7 +717,7 @@ function updLevel(dt) {
 function completeLevel() {
   const n = L.n, bonus = levelBonus(n);
   save.money += bonus; L.earned += bonus; au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
-  const first = !save.done[n];
+  const first = !save.done[n]; if (save.fails) delete save.fails[n];
   const sc = levelStars(L); save.stars = save.stars || {}; const prevStars = save.stars[n] || 0; save.stars[n] = Math.max(prevStars, sc.stars);
   if (first) track('levelsDone'); track('levelsPlayed');
   if (sc.stars === 3 && prevStars < 3) track('threeStars');
@@ -711,6 +728,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
+  save.fails = save.fails || {}; save.fails[L.n] = (save.fails[L.n] || 0) + 1;
   S.mode = 'result'; if (PORTAL) PORTAL.stop(); persist(); au('fail'); vib(300); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
@@ -903,8 +921,8 @@ const PCOUNT = [0, 1, 2, 3, 5, 7];
 function update(dt) {
   S.time += dt; S.msgCd -= dt; mouse.aim -= dt; S.tunnelCd -= dt;
   if (P.nitro > 0) P.nitro -= dt;
-  if (peds.length < (touch.on ? 24 : 36) && Math.random() < .5) spawnPed();
-  if (cars.filter(c => c.ai === 'traffic').length < 18 && Math.random() < .3) spawnTraffic();
+  if (peds.length < Q.peds && Math.random() < .5) spawnPed();
+  if (cars.filter(c => c.ai === 'traffic').length < Q.traffic && Math.random() < .3) spawnTraffic();
   const want = Math.round(PCOUNT[stars()] * (save.perks.radio ? .6 : 1) + (stars() >= 3 ? Math.floor(lvl() / 12) : 0));
   const cops = cars.filter(c => c.kind === 'police' && c.ai === 'police');
   S.spawnPol -= dt; if (cops.length < want && S.spawnPol <= 0) { spawnPolice(); S.spawnPol = save.perks.radio ? 2 : 1.2; }
@@ -1199,7 +1217,7 @@ function init3D() {
   const c3 = $('game3d');
   try {
     const r = new THREE.WebGLRenderer({ canvas: c3, antialias: (devicePixelRatio || 1) < 2, powerPreference: 'high-performance' });
-    r.setPixelRatio(Math.min(touch.on ? 1.5 : 1.75, devicePixelRatio || 1));
+    r.setPixelRatio(Math.min(touch.on ? 1.25 : 1.75, devicePixelRatio || 1));
     R3.r = r;
   } catch (e) { return; }
   const sc = R3.scene = new THREE.Scene();
@@ -1401,7 +1419,7 @@ function poseChar(m, x, y, a, step, ko, aim) {
     aL.sh.rotation.set(-.08, 0, -sw * .85); aR.sh.rotation.set(.08, 0, sw * .85);
     aL.el.rotation.z = .25 + Math.max(0, sw) * .5; aR.el.rotation.z = .25 + Math.max(0, -sw) * .5;
   }
-  if (u.detail.length) { const far = Math.abs(x - cam.x) + Math.abs(y - cam.y) > 900; if (far !== u.far) { u.far = far; for (const d of u.detail) d.visible = !far; } }
+  if (u.detail.length) { const far = Math.abs(x - cam.x) + Math.abs(y - cam.y) > Q.lod; if (far !== u.far) { u.far = far; for (const d of u.detail) d.visible = !far; } }
 }
 // ---- voitures
 function makeCar3(c) {
@@ -1484,12 +1502,13 @@ function envFx(dt, playing) {
   if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85;
   if (R3.coneMat) R3.coneMat.opacity = .02 + night * .1;
   // éclair des tirs et explosions
+  if (S.flash && !Q.fx) { S.flash = null; R3.flash.intensity = 0; }
   if (S.flash) { R3.flash.position.set(S.flash.x, 30, S.flash.y); R3.flash.intensity = S.flash.i; S.flash.i -= dt * 18; if (S.flash.i <= 0) { S.flash = null; R3.flash.intensity = 0; } }
   // phares de la voiture du joueur
-  if (playing && P.car && !P.car.wreck) { const c = P.car; R3.head.intensity = .3 + night * 2.4; R3.head.position.set(c.x + Math.cos(c.a) * 20, 22, c.y + Math.sin(c.a) * 20); R3.head.target.position.set(c.x + Math.cos(c.a) * 260, 0, c.y + Math.sin(c.a) * 260); }
+  if (playing && P.car && !P.car.wreck && Q.fx) { const c = P.car; R3.head.intensity = .3 + night * 2.4; R3.head.position.set(c.x + Math.cos(c.a) * 20, 22, c.y + Math.sin(c.a) * 20); R3.head.target.position.set(c.x + Math.cos(c.a) * 260, 0, c.y + Math.sin(c.a) * 260); }
   else R3.head.intensity = 0;
   // débris
-  if (S.debris && S.debris.length) { for (const d of S.debris) for (let k = 0; k < 7; k++) { const m = new THREE.Mesh(bx(rnd(4, 9), rnd(2, 5), rnd(4, 9)), mat(k % 2 ? d.col : '#2a2633')); m.position.set(d.x, 12, d.y); m.userData = { vx: rnd(-160, 160), vy: rnd(120, 260), vz: rnd(-160, 160), life: 2.2, rx: rnd(-8, 8), rz: rnd(-8, 8) }; R3.scene.add(m); R3.debris.push(m); } S.debris = []; }
+  if (S.debris && S.debris.length) { for (const d of S.debris) for (let k = 0; k < (Q.fx ? 7 : 2); k++) { const m = new THREE.Mesh(bx(rnd(4, 9), rnd(2, 5), rnd(4, 9)), mat(k % 2 ? d.col : '#2a2633')); m.position.set(d.x, 12, d.y); m.userData = { vx: rnd(-160, 160), vy: rnd(120, 260), vz: rnd(-160, 160), life: 2.2, rx: rnd(-8, 8), rz: rnd(-8, 8) }; R3.scene.add(m); R3.debris.push(m); } S.debris = []; }
   for (const m of R3.debris) { const u = m.userData; u.life -= dt; u.vy -= 520 * dt; m.position.x += u.vx * dt; m.position.y = Math.max(1.5, m.position.y + u.vy * dt); m.position.z += u.vz * dt; if (m.position.y <= 1.5) { u.vx *= .9; u.vz *= .9; u.vy = Math.abs(u.vy) * .25; } m.rotation.x += u.rx * dt; m.rotation.z += u.rz * dt; if (u.life <= 0) R3.scene.remove(m); }
   R3.debris = R3.debris.filter(m => m.userData.life > 0);
   // pluie autour de la caméra
@@ -1652,7 +1671,7 @@ const SCREENS = {
         <button class="btn" data-go="trophies">Succès</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -1698,7 +1717,7 @@ const SCREENS = {
       <h2 class="title">${esc(l.t)}</h2>
       <p class="lead">${esc(l.s)}</p>
       <ol class="steps">${l.steps.map(s => `<li>${D.STEP_LABEL[s]}</li>`).join('')}</ol>
-      <div class="info"><span>Récompense : <b>${fmt(levelBonus(n))}</b> + ${fmt(stepReward(n))} par étape</span>${l.boss ? `<span>Chef à abattre : <b>${esc(l.boss)}</b></span>` : ''}${recW && !save.owned[recW.id] ? `<span>Conseillé : ${recW.name}</span>` : ''}</div>
+      <div class="info"><span>Récompense : <b>${fmt(levelBonus(n))}</b> + ${fmt(stepReward(n))} par étape</span>${save.fails && save.fails[n] >= 2 ? '<span class="assist">Aide activée : plus de temps et ennemis moins dangereux</span>' : ''}${l.boss ? `<span>Chef à abattre : <b>${esc(l.boss)}</b></span>` : ''}${recW && !save.owned[recW.id] ? `<span>Conseillé : ${recW.name}</span>` : ''}</div>
       <div class="row"><button class="btn primary" data-start="${n}">Commencer</button><button class="btn" data-go="shop" data-ret="brief:${n}">Boutique</button></div>
     </div>`;
   },
@@ -1725,7 +1744,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}</div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -1835,6 +1854,7 @@ screenEl.addEventListener('click', e => {
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
   if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
+  if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
@@ -1890,7 +1910,7 @@ function tick(dt) {
     let gdt = dt;
     if (S.cine) { S.cine.t = S.cine.start ? (performance.now() - S.cine.start) / 1000 : (S.cine.start = performance.now(), 0); gdt = S.cine.type === 'intro' ? 0 : dt * .18; if (S.cine.t >= S.cine.dur) { S.cine = null; hideCine(); } }
     S.tod = ((S.tod || 0) + gdt / 480) % 1;
-    if (gdt > 0) update(gdt); updHud(dt); updTips(gdt);
+    if (gdt > 0) update(gdt); updHud(dt); updTips(gdt); monitorFps(dt);
   }
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); var hd = heli ? dist(heli.x, heli.y, P.x, P.y) : 1e9; au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd, heliDist: hd, rain: !!S.rain }, dt); }
   else if (S.mode === 'result') { for (const p of parts) { p.life -= dt; } }
@@ -1901,9 +1921,10 @@ world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
 if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); }
 init3D();
+setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { step: dt => tick(dt), S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
