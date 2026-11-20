@@ -177,7 +177,11 @@ const fails = () => (L && save.fails && save.fails[L.n]) || 0;
 const assist = () => Math.min(3, Math.max(0, fails() - 1));
 const camRot = () => (R3.ok && save.cam && save.cam !== 'top' && R3.yaw !== undefined) ? R3.yaw + PI / 2 : 0;
 const stars = () => Math.floor(S.heat);
-const wepDef = id => D.WEAPONS.find(w => w.id === id) || D.WEAPONS[0];
+const WBASE = id => D.WEAPONS.find(w => w.id === id) || D.WEAPONS[0];
+const WUPS = [['dmg', 'Dégâts'], ['mag', 'Chargeur'], ['rate', 'Cadence'], ['acc', 'Précision']];
+const wup = id => ((save.wup || {})[id]) || {};
+const wepDef = id => { const b = WBASE(id), u = wup(id); if (b.melee || !Object.keys(u).length) return b; return Object.assign({}, b, { dmg: b.dmg * (1 + .15 * (u.dmg || 0)), mag: b.mag ? Math.round(b.mag * (1 + .3 * (u.mag || 0))) : b.mag, rate: b.rate * (1 - .1 * (u.rate || 0)), spread: b.spread * (1 - .25 * (u.acc || 0)) }); };
+const upPrice = (id, k) => { const b = WBASE(id), l = wup(id)[k] || 0; return Math.round(Math.max(400, b.price * .18) * (l + 1) / 50) * 50; };
 const armorMax = () => save.armor || 0;
 const bribeDiscount = () => save.perks.contacts ? .6 : 1;
 
@@ -423,7 +427,7 @@ function mkEnemy(x, y, faction, boss, group) {
 }
 function hitEnemy(e, dmg) {
   if (e.hp <= 0) return;
-  e.hp -= dmg; e.alert = true; au('hit', spatial(e.x, e.y)[0]);
+  e.hp -= dmg; e.alert = true; e.hitT = S.time; au('hit', spatial(e.x, e.y)[0]);
   for (let i = 0; i < 4; i++) parts.push({ x: e.x, y: e.y, vx: rnd(-80, 80), vy: rnd(-80, 80), life: .3, max: .3, r: 2.5, col: '#ff4d5e' });
   if (e.hp <= 0) {
     track('kills');
@@ -451,7 +455,7 @@ function updEnemy(e, dt) {
   moveBody(e, mx * sp * dt, my * sp * dt); e.step += sp * dt * .25;
   e.cd -= dt;
   if (e.cd <= 0 && d < 520 && shootersNow < 4 && los(e.x, e.y, tx, ty)) {
-    shootersNow++;
+    shootersNow++; e.firedT = S.time;
     const spread = Math.max(.05, .32 - n * .009) + (1 - ez()) * .35, a = e.a + rnd(-spread, spread);
     const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist()) * ez();
     const shots = e.boss && n >= 15 ? 3 : 1;
@@ -471,7 +475,7 @@ function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.
 function hurt(n) {
   if (S.dead > 0 || S.mode !== 'play') return;
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
-  S.hp -= n; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
+  S.hp -= n; P.hitT = S.time; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
 }
 function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n; if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
@@ -563,7 +567,8 @@ function fire() {
   if (am && am.mag <= 0) { startReload(); if (am.res <= 0) { const alt = D.WEAPONS.find(x => save.owned[x.id] && x.id === 'pistol'); if (alt) save.weapon = 'pistol'; } return; }
   if (am) { am.mag--; if (am.mag <= 0 && am.res > 0) setTimeout(startReload, 150); }
   let a = P.a;
-  if (touch.aiming) { a = touch.aimA; P.a = a; }
+  if (P.lock && lockAlive(P.lock)) { a = Math.atan2(P.lock.y - P.y, P.lock.x - P.x); P.a = a; }
+  else if (touch.aiming) { a = touch.aimA; P.a = a; }
   else if (mouse.aim > 0) { a = Math.atan2(mouse.wy - P.y, mouse.wx - P.x); P.a = a; }
   if (!touch.aiming && mouse.aim <= 0 && (!touch.on || touch.autoAim)) { // visée auto vers l'ennemi le plus proche devant
     let best = null, bd = 520;
@@ -583,6 +588,26 @@ const REGION_RADIO = { usa: 1, ita: 0, col: 2, bra: 3 };
 function radioOn() { if (save.radio === undefined) save.radio = REGION_RADIO[world.region.id] || 0; const st = STATIONS[save.radio]; au('setMusic', st[1] || '__none'); msg('Radio : ' + st[0]); }
 function radioNext() { if (!P.car) return; save.radio = ((save.radio || 0) + 1) % STATIONS.length; persist(); radioOn(); }
 function radioOff() { au('setMusic', world.region.id); }
+// ---------- verrouillage de cible (façon avion de chasse) ----------
+const lockAlive = t => t && (t.hp === undefined ? !t.wreck : t.hp > 0) && dist(t.x, t.y, P.x, P.y) < 700 && (t !== heli || heli);
+function lockCandidates() {
+  const list = [];
+  for (const e of enemies) if (e.hp > 0 && dist(e.x, e.y, P.x, P.y) < 620) list.push(e);
+  for (const c of cars) if (!c.wreck && (c.ai === 'gang' || c.convoy) && dist(c.x, c.y, P.x, P.y) < 620) list.push(c);
+  if (heli && dist(heli.x, heli.y, P.x, P.y) < 650) list.push(heli);
+  return list.sort((p1, p2) => dist(p1.x, p1.y, P.x, P.y) - dist(p2.x, p2.y, P.x, P.y));
+}
+function lockNext() {
+  if (S.mode !== 'play') return;
+  const list = lockCandidates();
+  if (!list.length) { P.lock = null; msg('Aucune cible à portée'); au('deny'); return; }
+  const i = P.lock ? list.indexOf(P.lock) : -1;
+  P.lock = list[(i + 1) % list.length]; P.lockT = S.time;
+  au('lock'); vib([15, 30, 15]); msg('Cible verrouillée');
+}
+function updLock() {
+  if (P.lock && !lockAlive(P.lock)) { const was = P.lock; P.lock = null; if (was.hp !== undefined ? was.hp <= 0 : was.wreck) { const nx = lockCandidates()[0]; if (nx) { P.lock = nx; P.lockT = S.time; au('lock'); } } }
+}
 const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['car', 'Caméra embarquée']];
 function cycleCam() { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); toast(CAMS.find(c => c[0] === save.cam)[1]); }
 const canVib = () => typeof navigator !== 'undefined' && 'vibrate' in navigator;
@@ -717,7 +742,7 @@ function startLevel(n) {
   S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = 100; S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
   P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0;
   if (!save.owned[save.weapon]) save.weapon = 'pistol';
-  P.ammo = {}; for (const w of D.WEAPONS) if (w.mag) P.ammo[w.id] = { mag: w.mag, res: w.reserve }; P.reload = 0;
+  P.ammo = {}; for (const w0 of D.WEAPONS) if (w0.mag) { const w = wepDef(w0.id); P.ammo[w.id] = { mag: w.mag, res: w.reserve }; } P.reload = 0;
   heli = null; S.heliCd = 0; S.blockCd = 15;
   cam.x = P.x; cam.y = P.y;
   for (let i = 0; i < 90; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
@@ -881,6 +906,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyN') useNitro();
     else if (e.code === 'KeyC') cycleCam();
     else if (e.code === 'KeyT') radioNext();
+    else if (e.code === 'Tab' || e.code === 'KeyL') { e.preventDefault && e.preventDefault(); lockNext(); }
     else if (e.code === 'KeyR') startReload();
     else if (/^Digit[1-8]$/.test(e.code)) { const w = D.WEAPONS[+e.code.slice(5) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
     else if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
@@ -889,6 +915,7 @@ addEventListener('keydown', e => {
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; if (S.mode === 'play') pauseGame(); });
 const cvs = document.getElementById('game'); let ctx = cvs.getContext('2d');
+addEventListener('contextmenu', e => { if (S.mode === 'play') { e.preventDefault(); lockNext(); } });
 [cvs, document.getElementById('game3d')].forEach(el => {
   el.addEventListener('mousemove', e => { mouse.sx = e.clientX; mouse.sy = e.clientY; mouse.aim = 3; });
   el.addEventListener('mousedown', e => { if (e.button === 0) { mouse.down = true; mouse.aim = 3; } });
@@ -934,7 +961,8 @@ function pollPad() {
     if (press(4)) cycleCam();                            // LB : caméra
     if (press(8)) bribePolice();                         // Select : soudoyer
     if (press(12)) useMedkit();                          // croix haut : soin
-    if (press(15)) radioNext();                          // croix droite : radio
+    if (press(15)) radioNext();
+    if (press(6) && !P.car) lockNext();                  // gâchette gauche à pied : verrouiller                          // croix droite : radio
     if (press(9)) pauseGame();                           // Start : pause
   } else if (S.mode === 'pause' && press(9)) resumeGame();
   pad.prev = gp.buttons.map(b => b.pressed);
@@ -947,7 +975,7 @@ const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDef
   const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
   fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
 $('portraitOk').addEventListener('click', () => { save.portraitOk = true; persist(); $('rotate').hidden = true; S.rot = false; });
-tb('bRadio', radioNext); tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+tb('bLock', lockNext); tb('bRadio', radioNext); tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -1059,7 +1087,7 @@ function update(dt) {
     if (vip && vip.hp > 0 && !vip.inCar && c !== P.car && dist(c.x, c.y, vip.x, vip.y) < 20) hurtVip(sp * .05);
     if (!P.car && S.dead <= 0 && dist(c.x, c.y, P.x, P.y) < 22 && P.hurt <= 0) { hurt(sp * .06); P.hurt = .6; const a = Math.atan2(P.y - c.y, P.x - c.x); moveBody(P, Math.cos(a) * 30, Math.sin(a) * 30); }
   }
-  P.hurt -= dt;
+  P.hurt -= dt; updLock();
   if (P.reload > 0) { P.reload -= dt; if (P.reload <= 0) finishReload(); }
   if (P.punch > 0) P.punch -= dt;
   updHeli(dt); updRoadblocks(dt);
@@ -1593,98 +1621,140 @@ function buildLandmark(g, L2, LK) {
 function cyl(rt, rb, h, seg = 7) { const k = 'c' + rt + '|' + rb + '|' + h + '|' + seg; return geoCache[k] || (geoCache[k] = new THREE.CylinderGeometry(rt, rb, h, seg)); }
 function sph(r, ws = 9, hs = 7, half) { const k = 's' + r + '|' + ws + '|' + hs + '|' + (half || 0); return geoCache[k] || (geoCache[k] = half ? new THREE.SphereGeometry(r, ws, hs, 0, PI * 2, 0, PI / 2) : new THREE.SphereGeometry(r, ws, hs)); }
 // Personnage humain low-poly : hanches, genoux, épaules, coudes, cou, visage. Face au +x.
+// ---- armes en 3D (un modèle par arme, peinture au choix), construites le long de +x, poignée à l'origine
+const SKINS = [['black', 'Noir mat', 0, '#16161c'], ['chrome', 'Chrome', 800, '#cfd3dc'], ['camo', 'Camouflage', 1200, '#4b5320'], ['neon', 'Rose néon', 2000, '#ff2e93'], ['cyan', 'Cyan néon', 2000, '#21e6ff'], ['gold', 'Or', 6000, '#d4a017']];
+function makeGun(id, skin) {
+  const g = new THREE.Group(), sk = (SKINS.find(s => s[0] === skin) || SKINS[0])[3];
+  const body = mat(sk, skin === 'neon' || skin === 'cyan' ? sk : skin === 'gold' ? '#4a3500' : null), dark = mat('#0c0c10'), wood = mat('#6b4a2a');
+  const add = (geo, m, x, y, z, rz = 0) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); me.rotation.z = rz; g.add(me); return me; };
+  const barrel = (len, r, x, y = 0) => { const b = add(cyl(r, r, len, 8), dark, x, y, 0); b.rotation.z = PI / 2; return b; };
+  switch (id) {
+    case 'pistol': add(bx(8, 2.2, 1.5), body, 3, 1.2, 0); add(bx(2, 4, 1.4), dark, 0, -1, 0, .25); barrel(1.5, .5, 7.6, 1.2); break;
+    case 'uzi': add(bx(9, 3, 1.8), body, 2.5, 1.2, 0); add(bx(1.5, 6, 1.3), dark, 1.5, -2.4, 0, .1); add(bx(2, 3.5, 1.3), dark, -1, -1, 0, .3); barrel(3, .6, 8, 1.4); break;
+    case 'shotgun': barrel(18, .75, 10, 1.4); add(bx(7, 1.8, 1.8), wood, 6, .2, 0); add(bx(6, 2.6, 1.6), body, 0, 1, 0); add(bx(7, 3, 1.4), wood, -6, .3, 0, -.12); add(bx(1.8, 3.4, 1.2), dark, -1, -1.4, 0, .3); break;
+    case 'rifle': add(bx(12, 3, 1.8), body, 2, 1.2, 0); barrel(9, .55, 12, 1.5); add(bx(1.6, 5.5, 1.2), dark, 3, -2, 0, -.25); add(bx(6, 2.6, 1.4), body, -6, .8, 0, -.08); add(bx(1.8, 3.4, 1.2), dark, -.5, -1.3, 0, .3); add(bx(4, 1, 1), dark, 2, 3.2, 0); break;
+    case 'sniper': add(bx(13, 2.6, 1.6), body, 1.5, 1, 0); barrel(18, .5, 16, 1.3); add(cyl(1.2, 1.2, 8, 10), dark, 2, 3.8, 0, PI / 2); add(bx(7, 3, 1.4), body, -7, .4, 0, -.1); add(bx(1.8, 3.4, 1.2), dark, -1, -1.4, 0, .3); add(bx(1.4, 4, 1.2), dark, 4, -1.4, 0); break;
+    case 'rocket': { const t = add(cyl(2.3, 2.3, 26, 12), body, 6, 2.5, 0); t.rotation.z = PI / 2; add(cyl(2.8, 2.3, 3, 12), dark, 19.5, 2.5, 0, PI / 2); add(bx(2, 4, 1.4), dark, 0, -.8, 0, .2); add(bx(3, 2, 1.2), dark, 4, 5.4, 0); break; }
+    case 'minigun': for (let k = 0; k < 6; k++) { const a = k / 6 * TAU, b = barrel(16, .45, 12, 1.4 + Math.sin(a) * 1.4); b.position.z = Math.cos(a) * 1.4; } add(bx(8, 4.5, 4), body, 1, 1.4, 0); add(cyl(2.6, 2.6, 1.5, 10), dark, 5, 1.4, 0, PI / 2); add(bx(2, 4, 1.4), dark, -2, -1.6, 0, .2); add(bx(5, 1.2, 1.2), dark, 1, 4.6, 0); break;
+    default: return null;
+  }
+  g.userData.twoHand = ['shotgun', 'rifle', 'sniper', 'rocket', 'minigun', 'uzi'].includes(id);
+  return g;
+}
+// ---- personnages articulés : bassin, taille, cou, épaules, coudes, poignets, hanches, genoux, chevilles
 function makeChar(o) {
   const g = new THREE.Group(), F = !!o.female, detail = [];
   const add = (geo, m, x, y, z, parent = g) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); parent.add(me); return me; };
   const joint = (parent, x, y, z) => { const p = new THREE.Group(); p.position.set(x, y, z); parent.add(p); return p; };
-  const pants = mat(o.pants || '#1d1a2e'), shirt = mat(o.shirt), sleeve = mat(o.sleeve || o.shirt), skin = mat(o.skin), shoes = mat(o.shoes || '#0c0b12');
-  const body = joint(g, 0, 0, 0); // tout le haut du corps (pour la respiration)
-  // jambes : cuisse + genou + mollet + chaussure
+  const pants = mat(o.pants || '#1d1a2e'), shirt = mat(o.shirt), sleeve = mat(o.sleeve || o.shirt), skin = mat(o.skin), shoes = mat(o.shoes || '#0c0b12'), dark = mat('#0b0a12');
+  const root = joint(g, 0, 0, 0);                       // tout le corps (chute, sursaut)
+  const pelvis = joint(root, 0, 15.5, 0);
+  // jambes
   const legs = [];
   for (const side of [-1, 1]) {
-    const hip = joint(g, 0, 15.5, side * (F ? 2.3 : 2.5));
+    const hip = joint(pelvis, 0, 0, side * (F ? 2.3 : 2.5));
     add(cyl(F ? 2.5 : 2.6, 2.1, 8), pants, 0, -4, 0, hip);
     const knee = joint(hip, 0, -8, 0);
+    add(sph(2.05, 7, 5), o.skirt || o.shorts ? skin : pants, 0, 0, 0, knee);
     add(cyl(2.05, 1.6, 7.2), o.skirt || o.shorts ? skin : pants, 0, -3.6, 0, knee);
-    add(bx(5.2, 1.8, 3.4), shoes, 1.1, -7.6, 0, knee);
-    legs.push({ hip, knee });
+    const ankle = joint(knee, 0, -7.4, 0);
+    add(bx(5.4, 1.9, 3.4), shoes, 1.1, -.3, 0, ankle); add(bx(5.6, .5, 3.6), mat('#e8e8ee'), 1.1, -1.2, 0, ankle);
+    legs.push({ hip, knee, ankle });
   }
-  // bassin et torse
-  add(cyl(F ? 4.6 : 4.3, F ? 4.9 : 4.4, 3.2, 8), pants, 0, 16.4, 0, body).scale.set(.75, 1, 1);
-  if (o.skirt) add(cyl(4.6, 6.4, 6, 8), mat(o.skirt), 0, 13.6, 0, body).scale.set(.85, 1, 1);
-  const torso = add(cyl(F ? 4.7 : 5.4, F ? 3.9 : 4.3, 11, 8), shirt, 0, 23.4, 0, body); torso.scale.set(.66, 1, 1);
-  if (F) { add(sph(1.9, 7, 5), shirt, 2.2, 25.2, -1.7, body); add(sph(1.9, 7, 5), shirt, 2.2, 25.2, 1.7, body); }
-  if (o.jacket) { const j = add(cyl(F ? 5 : 5.7, F ? 4.3 : 4.7, 10.6, 8), mat(o.jacket), -.35, 23.6, 0, body); j.scale.set(.68, 1, 1.02); }
-  add(cyl(1.5, 1.7, 2.4, 6), skin, 0, 30, 0, body);
+  add(cyl(F ? 4.6 : 4.3, F ? 4.9 : 4.4, 3.2, 10), pants, 0, .9, 0, pelvis).scale.set(.75, 1, 1);
+  add(cyl(F ? 4.5 : 4.4, F ? 4.5 : 4.4, .9, 10), mat('#1a1410'), 0, 2.2, 0, pelvis).scale.set(.77, 1, 1);  // ceinture
+  if (o.skirt) add(cyl(4.6, 6.4, 6, 10), mat(o.skirt), 0, -1.9, 0, pelvis).scale.set(.85, 1, 1);
+  // buste articulé à la taille
+  const chest = joint(pelvis, 0, 2.4, 0);
+  const torso = add(cyl(F ? 4.7 : 5.4, F ? 3.9 : 4.3, 11, 10), shirt, 0, 5.6, 0, chest); torso.scale.set(.66, 1, 1);
+  if (F) { add(sph(1.9, 7, 5), shirt, 2.2, 7.4, -1.7, chest); add(sph(1.9, 7, 5), shirt, 2.2, 7.4, 1.7, chest); }
+  if (o.jacket) { const jm = mat(o.jacket); const j = add(cyl(F ? 5 : 5.7, F ? 4.3 : 4.7, 10.6, 10), jm, -.35, 5.8, 0, chest); j.scale.set(.68, 1, 1.02);
+    add(bx(.5, 9, 1.4), jm, 3.5, 6, -1.8, chest).rotation.x = .12; add(bx(.5, 9, 1.4), jm, 3.5, 6, 1.8, chest).rotation.x = -.12; }
+  add(new THREE.TorusGeometry(1.9, .45, 5, 12), o.jacket ? mat(o.jacket) : shirt, 0, 11.3, 0, chest).rotation.x = PI / 2;   // col
+  if (o.tie) add(bx(.5, 7, 1.4), mat(o.tie), 3.65, 6.7, 0, chest);
+  if (o.chain) { const c = add(new THREE.TorusGeometry(3.3, .45, 5, 12), mat('#ffd700', '#7a5a00'), 1.2, 9.8, 0, chest); c.rotation.y = PI / 2; c.rotation.x = .25; }
+  const neck = joint(chest, 0, 11.4, 0);
+  add(cyl(1.5, 1.7, 2.4, 8), skin, 0, .6, 0, neck);
   // tête
-  const headJ = joint(body, 0, 31, 0);
-  const head = add(sph(4.1, 10, 8), skin, 0, 3.6, 0, headJ); head.scale.set(.95, 1.08, .9);
-  const eyeW = mat('#f4f1ea'), eyeP = mat('#17110c');
-  for (const s of [-1, 1]) {
-    detail.push(add(sph(.85, 6, 4), eyeW, 3.35, 4.1, s * 1.45, headJ));
-    detail.push(add(sph(.48, 5, 4), eyeP, 4.05, 4.1, s * 1.45, headJ));
-    detail.push(add(bx(.5, .45, 1.7), mat(o.hair || '#2a1d14'), 3.7, 5.3, s * 1.5, headJ));
+  const headJ = joint(neck, 0, 1.6, 0);
+  const head = add(sph(4.1, 12, 9), skin, 0, 3.6, 0, headJ); head.scale.set(.95, 1.08, .9);
+  for (const s2 of [-1, 1]) {
+    add(sph(1, 6, 5), skin, -.2, 3.6, s2 * 3.7, headJ).scale.set(.6, 1.2, .5);  // oreilles
+    detail.push(add(sph(.85, 6, 4), mat('#f4f1ea'), 3.35, 4.1, s2 * 1.45, headJ));
+    detail.push(add(sph(.48, 5, 4), mat('#17110c'), 4.05, 4.1, s2 * 1.45, headJ));
+    detail.push(add(bx(.5, .45, 1.7), mat(o.hair || '#2a1d14'), 3.7, 5.3, s2 * 1.5, headJ));
   }
   detail.push(add(bx(1.1, 1.4, .9), skin, 4, 3.1, 0, headJ));
   detail.push(add(bx(.4, .45, 2), mat('#7a3a3a'), 3.75, 1.6, 0, headJ));
-  // cheveux
   const hs = o.hairStyle || (o.hair ? (F ? 'long' : 'short') : 'none');
   if (o.hair && hs !== 'none' && !o.hat) {
     const hm = mat(o.hair);
-    const cap = add(sph(4.45, 10, 6, true), hm, -.35, 4.4, 0, headJ); cap.scale.set(1, 1.05, .95);
-    if (hs === 'long') { add(bx(2.6, 7.5, 8), hm, -3.2, 1.2, 0, headJ); }
-    else if (hs === 'ponytail') { add(sph(1.8, 6, 5), hm, -4.6, 3.8, 0, headJ); add(cyl(1.2, .7, 5, 5), hm, -5.2, 1.4, 0, headJ); }
-    else if (hs === 'afro') { const a = add(sph(5.3, 9, 7), hm, -.6, 5.2, 0, headJ); a.scale.set(1, .95, 1); }
+    const cap = add(sph(4.45, 12, 7, true), hm, -.35, 4.4, 0, headJ); cap.scale.set(1, 1.05, .95);
+    if (hs === 'long') add(bx(2.6, 7.5, 8), hm, -3.2, 1.2, 0, headJ);
+    else if (hs === 'ponytail') { add(sph(1.8, 6, 5), hm, -4.6, 3.8, 0, headJ); add(cyl(1.2, .7, 5, 6), hm, -5.2, 1.4, 0, headJ); }
+    else if (hs === 'afro') add(sph(5.3, 10, 8), hm, -.6, 5.2, 0, headJ);
   }
   if (o.hat) {
     const hm = mat(o.hat), ht = o.hatType || 'cap';
     if (ht === 'fedora') { add(cyl(6.4, 6.4, .6, 14), hm, 0, 6.6, 0, headJ); add(cyl(3.6, 4.3, 3.6, 12), hm, 0, 8.6, 0, headJ); add(cyl(4.35, 4.35, .9, 12), mat('#111111'), 0, 7.2, 0, headJ); }
     else if (ht === 'straw') { add(cyl(7.6, 7.6, .5, 16), hm, 0, 6.8, 0, headJ); add(cyl(3.8, 4.4, 3, 12), hm, 0, 8.4, 0, headJ); add(cyl(4.45, 4.45, .8, 12), mat('#2a1d14'), 0, 7.3, 0, headJ); }
-    else if (ht === 'beanie') { add(sph(4.6, 10, 6, true), hm, -.2, 5.2, 0, headJ).scale.set(1, 1.15, 1); }
+    else if (ht === 'beanie') add(sph(4.6, 10, 6, true), hm, -.2, 5.2, 0, headJ).scale.set(1, 1.15, 1);
     else { add(cyl(4.5, 4.6, 2.6, 10), hm, -.3, 7.6, 0, headJ); add(bx(4.5, .8, 7.5), hm, 3.6, 6.5, 0, headJ); }
   }
-  if (o.tie) add(bx(.5, 7, 1.4), mat(o.tie), 3.65, 24.5, 0, body);
   if (o.bandana) add(cyl(4.35, 4.35, 1.8, 10), mat(o.bandana, o.bandana), 0, 5.6, 0, headJ);
-  if (o.chain) { const c = add(new THREE.TorusGeometry(3.3, .45, 5, 12), mat('#ffd700', '#7a5a00'), 1.2, 27.6, 0, body); c.rotation.y = PI / 2; c.rotation.x = .25; }
-  // bras : épaule + coude + main
+  // bras : épaule, coude, poignet, main avec pouce
   const arms = [];
   for (const side of [-1, 1]) {
-    const sh = joint(body, 0, 27.6, side * (F ? 5 : 5.8));
+    const sh = joint(chest, 0, 9.6, side * (F ? 5 : 5.8));
+    add(sph(1.9, 7, 5), sleeve, 0, 0, 0, sh);
     add(cyl(1.65, 1.4, 6.6), sleeve, 0, -3.3, 0, sh);
     const el = joint(sh, 0, -6.6, 0);
-    add(cyl(1.35, 1.15, 6), o.longSleeve === false ? skin : sleeve, 0, -3, 0, el);
-    detail.push(add(sph(1.4, 6, 5), skin, .3, -6.6, 0, el));
-    arms.push({ sh, el });
+    add(cyl(1.35, 1.15, 6, 8), o.longSleeve === false ? skin : sleeve, 0, -3, 0, el);
+    const wr = joint(el, 0, -6, 0);
+    detail.push(add(bx(1.6, 2.6, 2.2), skin, .3, -1.3, 0, wr)); detail.push(add(bx(1, 1.4, .8), skin, 1.2, -.6, side * .9, wr));
+    arms.push({ sh, el, wr });
   }
-  const gunMesh = o.gun ? add(bx(10, 2.6, 2.2), mat('#101014'), 4.5, -6.8, 0, arms[1].el) : null;
+  let gunMesh = null;
+  if (o.gun) { gunMesh = makeGun(o.gunId || 'pistol', o.gunSkin) || makeGun('pistol'); gunMesh.rotation.z = -PI / 2; gunMesh.position.set(.6, -1.6, 0); arms[1].wr.add(gunMesh); }
   if (o.glow) { const r = new THREE.Mesh(new THREE.RingGeometry(10, 12.5, 20), bmat(o.glow, .75, true)); r.rotation.x = -PI / 2; r.position.y = .6; g.add(r); }
   const shd = new THREE.Mesh(new THREE.CircleGeometry(9, 14), bmat('#000000', .35)); shd.rotation.x = -PI / 2; shd.position.y = .3; g.add(shd);
-  const s = (o.scale || 1) * 1.5 * (o.height || 1);
-  g.scale.setScalar(s);
-  g.userData = { legs, arms, body, headJ, detail, gun: !!o.gun, gunMesh, ls: -1, ph: Math.random() * 6, bob: 0 };
+  g.scale.setScalar((o.scale || 1) * 1.5 * (o.height || 1));
+  g.userData = { root, pelvis, chest, neck, legs, arms, body: chest, headJ, detail, gun: !!o.gun, gunMesh, gunId: o.gunId || 'pistol', gunSkin: o.gunSkin, ls: -1, ph: Math.random() * 6, spd: 0, amt: 0, fall: 0, recoil: 0, hurt: 0 };
   return g;
 }
-function poseChar(m, x, y, a, step, ko, aim) {
-  const u = m.userData;
-  m.position.set(x, ko ? 4 : 0, y); m.rotation.set(0, -a, ko ? -PI / 2 : 0);
-  const moving = step !== u.ls; u.ls = step;
-  u.amt = (u.amt || 0) + ((moving ? 1 : 0) - (u.amt || 0)) * .25; // transition douce marche / arrêt
-  const t = step * 1.1, A = u.amt;
-  const sw = Math.sin(t) * .62 * A;
+function poseChar(m, x, y, a, step, ko, aim, fx) {
+  const u = m.userData; fx = fx || {};
+  const ds = step - (u.ls < 0 ? step : u.ls); u.ls = step;
+  u.spd += (Math.min(8, Math.abs(ds) * 60) - u.spd) * .2;
+  const moving = Math.abs(ds) > .0001; u.amt += ((moving ? 1 : 0) - u.amt) * .25;
+  const A = u.amt, run = clamp((u.spd - 2.5) / 3, 0, 1), t = step * 1.1;
+  // chute au sol (K.O.)
+  u.fall += ((ko ? 1 : 0) - u.fall) * (ko ? .12 : .3);
+  m.position.set(x, 0, y); m.rotation.set(0, -a, 0);
+  u.root.rotation.z = -u.fall * PI / 2; u.root.position.y = u.fall * 4;
+  if (fx.recoil) u.recoil = Math.max(u.recoil, fx.recoil); u.recoil *= .8;
+  if (fx.hurt) u.hurt = Math.max(u.hurt, fx.hurt); u.hurt *= .85;
+  const sw = Math.sin(t) * (.55 + .35 * run) * A;
   const [L, R] = u.legs;
   L.hip.rotation.z = sw; R.hip.rotation.z = -sw;
-  L.knee.rotation.z = -Math.max(0, -Math.sin(t)) * 1.0 * A - .05; R.knee.rotation.z = -Math.max(0, Math.sin(t)) * 1.0 * A - .05;
-  u.body.position.y = Math.abs(Math.sin(t)) * .7 * A;
-  const breath = Math.sin(S.time * 2.2 + u.ph) * .012;
-  u.body.scale.set(1, 1 + breath, 1);
-  u.headJ.rotation.y = A < .3 ? Math.sin(S.time * .5 + u.ph) * .35 : 0;
+  L.knee.rotation.z = -Math.max(0, -Math.sin(t)) * (1 + .5 * run) * A - .05; R.knee.rotation.z = -Math.max(0, Math.sin(t)) * (1 + .5 * run) * A - .05;
+  L.ankle.rotation.z = Math.max(0, Math.sin(t)) * .3 * A; R.ankle.rotation.z = Math.max(0, -Math.sin(t)) * .3 * A;
+  u.pelvis.position.y = 15.5 + Math.abs(Math.sin(t)) * (.7 + .8 * run) * A;
+  u.chest.rotation.z = -.14 * run * A + u.recoil * .1 - u.hurt * .3;
+  u.chest.rotation.y = Math.sin(t) * .12 * A;
+  const breath = Math.sin(S.time * 2.2 + u.ph) * .015; u.chest.scale.set(1, 1 + breath, 1);
+  u.headJ.rotation.y = A < .3 ? Math.sin(S.time * .5 + u.ph) * .35 : -Math.sin(t) * .1 * A; u.headJ.rotation.z = u.hurt * .25;
   const [aL, aR] = u.arms;
   if (u.gun && aim) {
-    aR.sh.rotation.set(0, 0, PI / 2); aR.el.rotation.z = .08;
-    aL.sh.rotation.set(-.55, 0, PI / 2.25); aL.el.rotation.z = .35;
+    const two = u.gunMesh && u.gunMesh.userData.twoHand;
+    aR.sh.rotation.set(0, 0, PI / 2 - u.recoil * .35); aR.el.rotation.z = .05; aR.wr.rotation.z = 0;
+    if (two) { aL.sh.rotation.set(-.75, 0, PI / 2.15); aL.el.rotation.z = .55; aL.wr.rotation.z = .2; }
+    else { aL.sh.rotation.set(-.08, 0, -sw * .5); aL.el.rotation.z = .3; aL.wr.rotation.z = 0; }
   } else {
-    aL.sh.rotation.set(-.08, 0, -sw * .85); aR.sh.rotation.set(.08, 0, sw * .85);
-    aL.el.rotation.z = .25 + Math.max(0, sw) * .5; aR.el.rotation.z = .25 + Math.max(0, -sw) * .5;
+    const amp = .85 + .5 * run;
+    aL.sh.rotation.set(-.08, 0, -sw * amp); aR.sh.rotation.set(.08, 0, sw * amp);
+    aL.el.rotation.z = .25 + run * .9 + Math.max(0, sw) * .5; aR.el.rotation.z = .25 + run * .9 + Math.max(0, -sw) * .5;
+    aL.wr.rotation.z = aR.wr.rotation.z = .1;
   }
   if (u.detail.length) { const far = Math.abs(x - cam.x) + Math.abs(y - cam.y) > Q.lod; if (far !== u.far) { u.far = far; for (const d of u.detail) d.visible = !far; } }
 }
@@ -1928,11 +1998,12 @@ function render3D(dt) {
   R3.seen.clear();
   for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
   for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
-  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
-    (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
+  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
+    (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar({ shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
-  if (playing && !P.car) sync(P, () => { const m = makeChar(playerLook()); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2)); });
+  if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
+  if (playing && !P.car) sync(P, () => { const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); });
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
   if (playing) { const got = (save.tagsFound || {})[world.region.id] || []; world.tags.forEach((tg, i) => { if (got.includes(i) || !near(tg.x, tg.y)) return; sync(tg, () => { const g2 = new THREE.Group(); const col = world.region.pal.neon[i % world.region.pal.neon.length]; const d = new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), new THREE.MeshBasicMaterial({ color: col })); d.position.y = 22; g2.add(d); const h2 = new THREE.Mesh(new THREE.CircleGeometry(18, 18), bmat(col, .35, true)); h2.rotation.x = -PI / 2; h2.position.y = .8; g2.add(h2); g2.userData.d = d; return g2; }, (m, e) => { m.position.set(e.x, 0, e.y); m.userData.d.rotation.y = S.time * 2.5; m.userData.d.position.y = 22 + Math.sin(S.time * 3 + e.x) * 3; }); }); }
@@ -1963,6 +2034,8 @@ function render3D(dt) {
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
+  if (!R3.lockRet) { const grp = new THREE.Group(), m2 = new THREE.MeshBasicMaterial({ color: 0xff2e4d, depthTest: false, transparent: true }); for (let k = 0; k < 4; k++) { const c2 = new THREE.Group(); c2.rotation.y = k * PI / 2; const b1 = new THREE.Mesh(bx(10, 1.6, 1.6), m2); b1.position.set(16, 0, 11); const b2 = new THREE.Mesh(bx(1.6, 1.6, 10), m2); b2.position.set(21, 0, 6); c2.add(b1, b2); grp.add(c2); } const dot = new THREE.Mesh(new THREE.RingGeometry(3, 4.2, 16), new THREE.MeshBasicMaterial({ color: 0xff2e4d, depthTest: false, side: THREE.DoubleSide })); dot.rotation.x = -PI / 2; grp.add(dot); grp.traverse(o2 => o2.renderOrder = 30); R3.scene.add(grp); R3.lockRet = grp; }
+  { const lt = playing && P.lock && lockAlive(P.lock) ? P.lock : null; R3.lockRet.visible = !!lt; if (lt) { const k2 = Math.min(1, (S.time - (P.lockT || 0)) * 4), sc = 2.2 - 1.2 * k2, hy = lt === heli ? 150 : lt.hp === undefined ? 14 : 30; R3.lockRet.position.set(lt.x, hy, lt.y); R3.lockRet.scale.setScalar(sc * (lt === heli ? 2 : lt.hp === undefined ? 1.6 : 1)); R3.lockRet.rotation.y = S.time * 1.5; } }
   R3.me.visible = !!playing && (mode === 'top' || R3.hidden); if (playing) R3.me.position.set(P.x, 1, P.y);
   // visée souris : on projette le pointeur sur le sol
   R3.ndc.set(mouse.sx / VW * 2 - 1, -(mouse.sy / VH) * 2 + 1); R3.ray.setFromCamera(R3.ndc, R3.cam);
@@ -2014,6 +2087,8 @@ const SCREENS = {
         <b>B</b><span>Soudoyer la police</span>
         <b>H · N / Maj</b><span>Trousse de soins · nitro</span>
         <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
+        <b>Tab / clic droit</b><span>Verrouiller une cible, puis la suivante</span>
+        <b>T</b><span>Changer de station de radio</span>
       </div>
       <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
     </div>`;
@@ -2066,8 +2141,8 @@ const SCREENS = {
     };
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-back="1">${inGame ? '← Reprendre' : '← Retour'}</button><h2>Boutique</h2>${money()}</div>
-      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
-      ${tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
+      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'a' ? 'on' : ''}" data-tab="a">Atelier</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
+      ${tab === 'a' ? armoryHtml() : tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
       ${tab === 'w' ? '<p class="legend"><span class="k1"></span>Dégâts <span class="k2"></span>Cadence</p>' : ''}
     </div>`;
   },
@@ -2122,6 +2197,36 @@ const SCREENS = {
     </div>`;
   },
 };
+function armoryHtml() {
+  const owned = D.WEAPONS.filter(w => !w.melee && save.owned[w.id]);
+  if (!shopState.aw || !save.owned[shopState.aw] || WBASE(shopState.aw).melee) shopState.aw = save.weapon !== 'fists' ? save.weapon : 'pistol';
+  const id = shopState.aw, b = WBASE(id), w = wepDef(id), u = wup(id);
+  const bar = (v, max, col) => `<div class="stat2"><i style="width:${Math.min(100, v / max * 100)}%;background:${col}"></i></div>`;
+  const rows = [['dmg', 'Dégâts', b.dmg * b.pellets, w.dmg * w.pellets, 140, '#ff2e93'], ['mag', 'Chargeur', b.mag || 0, w.mag || 0, 200, '#ffb627'], ['rate', 'Cadence', 1 / b.rate, 1 / w.rate, 25, '#21e6ff'], ['acc', 'Précision', 1 - b.spread, 1 - w.spread, 1, '#a6ff4d']];
+  return `<div class="armory"><div class="wlist">${owned.map(o => `<button class="chip ${o.id === id ? 'on' : ''}" data-aw="${o.id}">${esc(o.name)}</button>`).join('')}</div>
+    <div class="wview"><div id="gunViewSlot"></div><h3>${esc(b.name)}</h3><p>${esc(b.desc)}</p></div>
+    <div class="wups">${rows.map(([k, label, bv, nv, max, col]) => { const l = u[k] || 0, maxed = l >= 3 || (k === 'mag' && !b.mag) || (k === 'acc' && !b.spread);
+      return `<div class="wup"><div class="wh"><b>${label}</b><span>${'■'.repeat(l)}${'□'.repeat(3 - l)}</span></div>${bar(nv, max, col)}${maxed ? `<span class="eq">${l >= 3 ? 'Maximum' : '—'}</span>` : `<button class="btn small ${save.money >= upPrice(id, k) ? 'primary' : ''}" data-up="${k}">Améliorer · ${fmt(upPrice(id, k))}</button>`}</div>`; }).join('')}
+      <div class="wup"><div class="wh"><b>Peinture</b></div><div class="chips">${SKINS.map(([sid, name, price, col]) => { const own = !price || (save.skinsOwned || {})[sid], on = (u.skin || 'black') === sid; return `<button class="chip ${on ? 'on' : ''}" data-skin="${sid}"><i style="background:${col}"></i>${esc(name)}${own ? '' : `<small>${fmt(price)}</small>`}</button>`; }).join('')}</div></div>
+    </div></div>`;
+}
+let gunView = null;
+function mountGunView() {
+  const slot = document.getElementById('gunViewSlot'); if (!slot || !R3.ok) return;
+  if (!gunView) {
+    const cv = document.createElement('canvas'); cv.width = 520; cv.height = 300; cv.className = 'gunview';
+    let r; try { r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true }); } catch (e) { return; }
+    const sc = new THREE.Scene(), cam2 = new THREE.PerspectiveCamera(32, 520 / 300, 1, 400); cam2.position.set(0, 10, 62); cam2.lookAt(0, 0, 0);
+    sc.add(new THREE.HemisphereLight(0xffffff, 0x302040, 1.1)); const dl = new THREE.DirectionalLight(0xffffff, .8); dl.position.set(20, 40, 30); sc.add(dl);
+    const pivot = new THREE.Group(); sc.add(pivot);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(18, 19.5, 48), new THREE.MeshBasicMaterial({ color: 0x21e6ff, transparent: true, opacity: .5, side: THREE.DoubleSide })); ring.rotation.x = -PI / 2; ring.position.y = -9; sc.add(ring);
+    gunView = { cv, r, sc, cam2, pivot, key: '' };
+    const loop = () => { if (gunView.cv.isConnected) { gunView.pivot.rotation.y += .012; gunView.r.render(gunView.sc, gunView.cam2); } requestAnimationFrame(loop); }; loop();
+  }
+  slot.appendChild(gunView.cv);
+  const id = shopState.aw, key = id + '|' + (wup(id).skin || 'black');
+  if (gunView.key !== key) { gunView.key = key; while (gunView.pivot.children.length) gunView.pivot.remove(gunView.pivot.children[0]); const gm = makeGun(id, wup(id).skin || 'black'); if (gm) { const box = new THREE.Box3().setFromObject(gm), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3()); gm.position.sub(c); const k = 34 / Math.max(sz.x, sz.y, sz.z); const holder = new THREE.Group(); holder.add(gm); holder.scale.setScalar(k); gunView.pivot.add(holder); } }
+}
 function outfitHtml() {
   return `<div class="wardrobe"><canvas id="outfitPrev" width="180" height="250" aria-label="Aperçu de ton personnage"></canvas><div class="cats">${Object.entries(D.OUTFITS).map(([cat, c]) => `<div class="cat"><b>${c.label}</b><div class="chips">${c.items.map(([id, name, price, val]) => {
     const owned = !price || save.wardrobe[cat + ':' + id], on = save.outfit[cat] === id;
@@ -2213,7 +2318,10 @@ screenEl.addEventListener('click', e => {
   if (ds.lvl) { goLevel(+ds.lvl); return; }
   if (ds.start) { const n = +ds.start; if (canPlay(n)) { if (PORTAL && S.levelsStarted) PORTAL.breakAd().then(() => startLevel(n)); else startLevel(n); } else goLevel(n); return; }
   if (ds.rewarded) { b.disabled = true; PORTAL.rewarded().then(ok => { if (ok) { save.money += +ds.rewarded; persist(); au('cash'); flashNote('+' + fmt(+ds.rewarded)); b.remove(); } else b.disabled = false; }); return; }
-  if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); if (ds.tab === 'o') drawOutfitPreview(); return; }
+  if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); if (ds.tab === 'o') drawOutfitPreview(); if (ds.tab === 'a') mountGunView(); return; }
+  if (ds.aw) { shopState.aw = ds.aw; showScreen('shop', shopState); mountGunView(); return; }
+  if (ds.up) { const id = shopState.aw, pr = upPrice(id, ds.up); if (save.money < pr) { au('deny'); flashNote('Pas assez d\u2019argent'); return; } save.money -= pr; save.wup = save.wup || {}; save.wup[id] = Object.assign({}, save.wup[id]); save.wup[id][ds.up] = (save.wup[id][ds.up] || 0) + 1; if (P.ammo && P.ammo[id] && ds.up === 'mag') P.ammo[id].mag = wepDef(id).mag; au('buy'); persist(); showScreen('shop', shopState); mountGunView(); return; }
+  if (ds.skin) { const sk = SKINS.find(x => x[0] === ds.skin); save.skinsOwned = save.skinsOwned || {}; if (sk[2] && !save.skinsOwned[sk[0]]) { if (save.money < sk[2]) { au('deny'); flashNote('Pas assez d\u2019argent'); return; } save.money -= sk[2]; save.skinsOwned[sk[0]] = 1; au('buy'); } save.wup = save.wup || {}; save.wup[shopState.aw] = Object.assign({}, save.wup[shopState.aw], { skin: sk[0] }); persist(); showScreen('shop', shopState); mountGunView(); return; }
   if (ds.outfit) {
     const [cat, id] = ds.outfit.split(':'), it = D.OUTFITS[cat].items.find(i => i[0] === id), price = it[2];
     if (price && !save.wardrobe[cat + ':' + id]) { if (save.money < price) { au('deny'); flashNote('Pas assez d\u2019argent'); return; } save.money -= price; save.wardrobe[cat + ':' + id] = 1; au('buy'); }
@@ -2281,5 +2389,5 @@ if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

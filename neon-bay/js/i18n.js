@@ -38,6 +38,9 @@ window.NB_I18N = (() => {
     'Faire une pause': { en: 'Take a break', es: 'Hacer una pausa', pt: 'Fazer uma pausa' }, 'Continuer encore un peu': { en: 'Keep playing a bit', es: 'Seguir un poco más', pt: 'Continuar mais um pouco' },
     'Graffeur': { en: 'Tagger', es: 'Grafitero', pt: 'Grafiteiro' }, 'Chasseur de tags': { en: 'Tag hunter', es: 'Cazador de grafitis', pt: 'Caçador de grafites' },
     'Radio coupée': { en: 'Radio off', es: 'Radio apagada', pt: 'Rádio desligado' }, 'RADIO': { en: 'RADIO', es: 'RADIO', pt: 'RÁDIO' },
+    'Atelier': { en: 'Workshop', es: 'Taller', pt: 'Oficina' }, 'Dégâts': { en: 'Damage', es: 'Daño', pt: 'Dano' }, 'Chargeur': { en: 'Magazine', es: 'Cargador', pt: 'Pente' }, 'Précision': { en: 'Accuracy', es: 'Precisión', pt: 'Precisão' }, 'Peinture': { en: 'Paint', es: 'Pintura', pt: 'Pintura' }, 'Maximum': { en: 'Maxed', es: 'Máximo', pt: 'Máximo' },
+    'Noir mat': { en: 'Matte black', es: 'Negro mate', pt: 'Preto fosco' }, 'Chrome': { en: 'Chrome', es: 'Cromo', pt: 'Cromado' }, 'Camouflage': { en: 'Camo', es: 'Camuflaje', pt: 'Camuflado' }, 'Cyan néon': { en: 'Neon cyan', es: 'Cian neón', pt: 'Ciano neon' }, 'Or': { en: 'Gold', es: 'Oro', pt: 'Ouro' },
+    'CIBLE': { en: 'LOCK', es: 'FIJAR', pt: 'MIRA' }, 'Cible verrouillée': { en: 'Target locked', es: 'Objetivo fijado', pt: 'Alvo travado' }, 'Aucune cible à portée': { en: 'No target in range', es: 'Ningún objetivo a tiro', pt: 'Nenhum alvo ao alcance' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -117,6 +120,7 @@ window.NB_I18N = (() => {
     [/^Trouve (\d+) tags secrets$/, { en: 'Find $1 secret tags', es: 'Encuentra $1 grafitis secretos', pt: 'Encontre $1 grafites secretos' }],
     [/^(\d+)\/48 tags secrets$/, { en: '$1/48 secret tags', es: '$1/48 grafitis secretos', pt: '$1/48 grafites secretos' }],
     [/^Radio : (.+)$/, { en: 'Radio: $1', es: 'Radio: $1', pt: 'Rádio: $1' }],
+    [/^Améliorer · (.+)$/, { en: 'Upgrade · $1', es: 'Mejorar · $1', pt: 'Melhorar · $1' }],
     [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
     [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
   ];

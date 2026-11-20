@@ -70,6 +70,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 .tbtn.x{border-color:#3a8bff;color:#3a8bff;right:calc(150px + env(safe-area-inset-right,0px));bottom:calc(80px + env(safe-area-inset-bottom,0px))}
 .tbtn.y{border-color:#ffd23f;color:#ffd23f;right:calc(98px + env(safe-area-inset-right,0px));bottom:calc(136px + env(safe-area-inset-bottom,0px))}
 .tbtn.b{border-color:#ff4d5e;color:#ff4d5e;right:calc(28px + env(safe-area-inset-right,0px));bottom:calc(140px + env(safe-area-inset-bottom,0px))}
+.tbtn.lk{border-color:#ff4d5e;color:#ff4d5e;right:calc(206px + env(safe-area-inset-right,0px));bottom:calc(142px + env(safe-area-inset-bottom,0px));background:radial-gradient(circle,rgba(255,77,94,.25),rgba(0,0,0,.45) 70%)}
 .tbtn.sh{border-radius:10px;width:auto;height:30px;padding:0 10px;font-size:10px;border-color:var(--line);background:rgba(0,0,0,.5)}
 #bRadio{right:calc(132px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px));border-color:var(--amber);color:var(--amber)}
 #bCam{right:calc(80px + env(safe-area-inset-right,0px));bottom:calc(206px + env(safe-area-inset-bottom,0px))}
@@ -212,6 +213,15 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
 #rotate .ph{width:54px;height:92px;border:4px solid var(--ink);border-radius:12px;position:relative;animation:rot 2.2s ease-in-out infinite}
 #rotate .ph::after{content:'';position:absolute;bottom:6px;left:50%;width:10px;height:3px;margin-left:-5px;background:var(--ink);border-radius:2px}
 @keyframes rot{0%,25%{transform:rotate(0)}55%,85%{transform:rotate(-90deg)}100%{transform:rotate(0)}}
+.armory{display:grid;grid-template-columns:1fr 1.1fr;gap:16px;align-items:start}
+.armory .wlist{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px}
+.wview{background:radial-gradient(ellipse at 50% 60%,rgba(33,230,255,.16),transparent 70%),var(--panel2);border:1px solid var(--line);border-radius:14px;padding:10px 14px;text-align:center}
+.wview h3{font-family:var(--display);font-weight:400;margin:4px 0 2px;font-size:18px}.wview p{margin:0;color:var(--muted);font-size:13px}
+canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;display:block;margin:0 auto}
+.wups{display:flex;flex-direction:column;gap:10px}.wup{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.wup .wh{display:flex;justify-content:space-between}.wup .wh b{font-family:var(--display);font-weight:400;font-size:13px}.wup .wh span{color:var(--amber);letter-spacing:2px}
+.stat2{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}.stat2 i{display:block;height:100%}
+@media (max-width:700px){.armory{grid-template-columns:1fr}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 
@@ -244,6 +254,7 @@ body.cine #step,body.cine #tip,body.cine #toast,body.cine #prompt{display:none!i
   <div class="tbtn pad a" id="bAct"><b>A</b><small id="lblA">ACTION</small></div>
   <div class="tbtn pad b" id="bMed"><b>B</b><small id="lblB">SOIN</small></div>
   <div class="tbtn pad x" id="bRel"><b>X</b><small id="lblX">RECHARGE</small></div>
+  <div class="tbtn pad lk" id="bLock"><b>◎</b><small>CIBLE</small></div>
   <div class="tbtn pad y" id="bWep"><b>Y</b><small>ARME</small></div>
   <div class="tbtn sh" id="bNitro" hidden>NITRO</div>
   <div class="tbtn sh gold" id="bBribe" hidden>PAYER FLICS</div>
