@@ -110,7 +110,7 @@ window.NB_AUDIO = (() => {
   function door() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .5); noise(d, now(), .08, 'lowpass', 700, 1, .7); tone(d, now() + .06, 'sine', 140, 90, .08, .4); }
 
   // ---------- sons continus : moteur, crissement, sirène ----------
-  let engine = null, screech = null, siren = null, rotor = null;
+  let engine = null, screech = null, siren = null, rotor = null, rainL = null;
   function loops() {
     if (engine) return;
     const mk = (type, f) => { const o = ctx.createOscillator(); o.type = type; o.frequency.value = f; o.start(); return o; };
@@ -129,6 +129,8 @@ window.NB_AUDIO = (() => {
     const lfo = mk('square', 13); const lg = ctx.createGain(); lg.gain.value = .5; lfo.connect(lg); lg.connect(am.gain);
     hn.connect(hf); hf.connect(am); am.connect(hg); hg.connect(sfxBus); hn.start();
     rotor = { hg };
+    const rg2 = ctx.createGain(); rg2.gain.value = 0; const rn = ctx.createBufferSource(); rn.buffer = noiseBuf; rn.loop = true; const rf2 = ctx.createBiquadFilter(); rf2.type = 'highpass'; rf2.frequency.value = 1200; rn.connect(rf2); rf2.connect(rg2); rg2.connect(sfxBus); rn.start();
+    rainL = { rg2 };
   }
   function update(st, dt) {
     if (!ctx) return;
@@ -144,6 +146,7 @@ window.NB_AUDIO = (() => {
     siren.t += dt;
     const sv = on && st.sirenDist < 900 ? (1 - st.sirenDist / 900) * .16 : 0;
     siren.rg.gain.setTargetAtTime(sv, t, .2);
+    rainL.rg2.gain.setTargetAtTime(on && st.rain ? .07 : 0, t, .5);
     rotor.hg.gain.setTargetAtTime(on && st.heliDist < 1200 ? (1 - st.heliDist / 1200) * .5 : 0, t, .2);
     siren.ro.frequency.setTargetAtTime(750 + 420 * (.5 + .5 * Math.sin(siren.t * 2.6)), t, .05);
   }

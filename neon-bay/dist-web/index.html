@@ -191,6 +191,15 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 .chip i{width:14px;height:14px;border-radius:50%;border:1px solid rgba(255,255,255,.4);display:inline-block}
 .chip small{color:var(--amber);font-size:11px}.chip.on{border-color:var(--cyan);box-shadow:0 0 0 2px rgba(33,230,255,.35)}
 @media (max-width:560px){.wardrobe{grid-template-columns:1fr;justify-items:center}#outfitPrev{position:static}}
+#clock{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+#cine{position:fixed;inset:0;z-index:9;pointer-events:none}
+#cine .bar{position:absolute;left:0;right:0;height:0;background:#000;transition:height .4s}#cine .bar.t{top:0}#cine .bar.b{bottom:0}
+#cine.on .bar{height:12vh}
+#cine .ct{position:absolute;left:0;right:0;bottom:calc(14vh + 10px);text-align:center;opacity:0;transform:translateY(10px);transition:opacity .5s .2s,transform .5s .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
+#cine.on .ct{opacity:1;transform:none}
+#cine small{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
+#cine b{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,58px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
+#cine em{font-style:normal;font-size:11px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -206,6 +215,7 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
   <div class="barw" title="Santé"><div id="hp"></div></div>
   <div class="barw" title="Armure"><div id="armor"></div></div>
   <div id="wep">Pistolet</div>
+  <div id="clock"></div>
   <div id="inv"></div>
 </div>
 <div class="hud" id="step"><div id="lvlName"></div><div id="sN"></div><div id="sD"></div><div id="sC"></div><div id="dots"></div></div>
@@ -214,6 +224,7 @@ body.touch #tip{bottom:calc(300px + env(safe-area-inset-bottom,0px))}
 <div class="hud" id="banner"></div>
 <div class="hud" id="prompt" hidden></div>
 <div id="fade"></div>
+<div id="cine" hidden><i class="bar t"></i><i class="bar b"></i><div class="ct"><small></small><b></b><em>Touche l'écran pour passer</em></div></div>
 <div class="hud" id="tip" hidden></div>
 <div id="reward" hidden></div>
 
