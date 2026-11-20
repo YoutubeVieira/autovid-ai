@@ -33,6 +33,11 @@ window.NB_I18N = (() => {
     'Photo à partager': { en: 'Share a photo', es: 'Foto para compartir', pt: 'Foto para compartilhar' },
     'Regarde ma partie de Néon Bay !': { en: 'Check out my Néon Bay run!', es: '¡Mira mi partida de Néon Bay!', pt: 'Olha minha partida de Néon Bay!' },
     'Photo enregistrée': { en: 'Photo saved', es: 'Foto guardada', pt: 'Foto salva' }, 'Photo impossible ici': { en: 'Photos aren\u2019t available here', es: 'Aquí no se pueden hacer fotos', pt: 'Foto indisponível aqui' },
+    'Pause conseillée': { en: 'Time for a break', es: 'Pausa recomendada', pt: 'Pausa recomendada' },
+    "Comme au volant : une pause toutes les heures, c'est mieux. Lève-toi, bois un verre d'eau, repose tes yeux quelques minutes. Ta partie t'attend.": { en: 'Like when driving: a break every hour is a good idea. Stand up, drink some water, rest your eyes for a few minutes. Your game will be waiting.', es: 'Como al volante: una pausa cada hora es lo mejor. Levántate, bebe agua y descansa la vista unos minutos. Tu partida te espera.', pt: 'Como no volante: uma pausa a cada hora é o ideal. Levante, beba água e descanse os olhos alguns minutos. Seu jogo te espera.' },
+    'Faire une pause': { en: 'Take a break', es: 'Hacer una pausa', pt: 'Fazer uma pausa' }, 'Continuer encore un peu': { en: 'Keep playing a bit', es: 'Seguir un poco más', pt: 'Continuar mais um pouco' },
+    'Graffeur': { en: 'Tagger', es: 'Grafitero', pt: 'Grafiteiro' }, 'Chasseur de tags': { en: 'Tag hunter', es: 'Cazador de grafitis', pt: 'Caçador de grafites' },
+    'Radio coupée': { en: 'Radio off', es: 'Radio apagada', pt: 'Rádio desligado' }, 'RADIO': { en: 'RADIO', es: 'RADIO', pt: 'RÁDIO' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
@@ -107,6 +112,11 @@ window.NB_I18N = (() => {
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],
+    [/^Ça fait (\d+) heures? que tu joues$/, { en: 'You\u2019ve been playing for $1 hour(s)', es: 'Llevas $1 hora(s) jugando', pt: 'Você está jogando há $1 hora(s)' }],
+    [/^Tag secret (\d+)\/12 · \+(.+)$/, { en: 'Secret tag $1/12 · +$2', es: 'Grafiti secreto $1/12 · +$2', pt: 'Grafite secreto $1/12 · +$2' }],
+    [/^Trouve (\d+) tags secrets$/, { en: 'Find $1 secret tags', es: 'Encuentra $1 grafitis secretos', pt: 'Encontre $1 grafites secretos' }],
+    [/^(\d+)\/48 tags secrets$/, { en: '$1/48 secret tags', es: '$1/48 grafitis secretos', pt: '$1/48 grafites secretos' }],
+    [/^Radio : (.+)$/, { en: 'Radio: $1', es: 'Radio: $1', pt: 'Rádio: $1' }],
     [/^Doubler le bonus \(vidéo\) · \+(.+)$/, { en: 'Double the bonus (video) · +$1', es: 'Duplica el bonus (vídeo) · +$1', pt: 'Dobre o bônus (vídeo) · +$1' }],
     [/^Achat non abouti : (.+)$/, { en: 'Purchase failed: $1', es: 'Compra no completada: $1', pt: 'Compra não concluída: $1' }],
   ];

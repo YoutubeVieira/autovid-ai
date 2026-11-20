@@ -21,6 +21,7 @@ function md(src) {
     if (l.trim() === '<!--CTA-->') { flush(); html.push('<!--CTA-->'); continue; }
     if (/^\|.*\|$/.test(l.trim())) { if (!table) { flush(); table = []; } table.push(l.trim()); continue; } else if (table) { html.push(renderTable(table)); table = null; }
     let m;
+    if (/^#\s+/.test(l)) { flush(); continue; }
     if ((m = l.match(/^(#{2,4})\s+(.*)$/))) { flush(); const lv = m[1].length, id = m[2].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); html.push(`<h${lv} id="${id}">${inline(m[2])}</h${lv}>`); continue; }
     if ((m = l.match(/^\s*[-*]\s+(.*)$/))) { if (para.length) { html.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } if (list !== 'ul') { if (list) html.push(`</${list}>`); html.push('<ul>'); list = 'ul'; } html.push('<li>' + inline(m[1]) + '</li>'); continue; }
     if ((m = l.match(/^\s*\d+[.)]\s+(.*)$/))) { if (para.length) { html.push('<p>' + inline(para.join(' ')) + '</p>'); para = []; } if (list !== 'ol') { if (list) html.push(`</${list}>`); html.push('<ol>'); list = 'ol'; } html.push('<li>' + inline(m[1]) + '</li>'); continue; }
@@ -98,7 +99,7 @@ if (process.argv.includes('--no-pdf') || !guides.length) process.exit(0);
   const b = await chromium.launch(); const p = await b.newPage();
   const files = [];
   for (const g of guides) {
-    const html = fs.readFileSync(path.join(out, 'guides', g.slug + '.html'), 'utf8').replace('</head>', '<style>.nav,.toc,.more,.cta,.row{display:none!important}body{background:#fff!important;color:#111!important}article,h1,h2,h3,p,li{color:#111!important}.article{max-width:none;padding:0}</style></head>');
+    const html = fs.readFileSync(path.join(out, 'guides', g.slug + '.html'), 'utf8').replace('</head>', '<style>:root{color-scheme:light!important}.nav,.toc,.more,.cta,.row,.foot{display:none!important}html,body{background:#fff!important;color:#111!important}article,h1,h2,h3,h4,p,li,strong,em,td,th,.lead,.eyebrow{color:#111!important;text-shadow:none!important}h3{color:#b5005a!important}a{color:#0057b8!important}th{background:#eee!important}code{background:#f1f1f1!important;color:#111!important}.article{max-width:none;padding:0}</style></head>');
     await p.setContent(html, { waitUntil: 'load' }).catch(() => {});
     const f = path.join(out, 'pdf', g.slug + '.pdf');
     await p.pdf({ path: f, format: 'A4', margin: { top: '18mm', bottom: '18mm', left: '16mm', right: '16mm' }, printBackground: true, displayHeaderFooter: true, headerTemplate: '<span></span>', footerTemplate: `<div style="font-size:8px;width:100%;text-align:center;color:#888">Guide de fan non officiel · ${esc(g.game || '')} · page <span class="pageNumber"></span></div>` });

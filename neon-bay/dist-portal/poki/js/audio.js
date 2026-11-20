@@ -155,13 +155,59 @@ window.NB_AUDIO = (() => {
   // ---------- musique (générée, originale) ----------
   const N2F = n => 440 * Math.pow(2, (n - 69) / 12);
   // chaque style : tempo, accords (notes MIDI de la basse), gamme pour la mélodie, motif de batterie (16 pas)
+  // ---- styles modernes (trap 808, lo-fi, dembow) : générés, originaux
+  function kickAt(t, f0 = 150, f1 = 45, dur = .16, pk = 1) { const g = ctx.createGain(); g.connect(musBus); const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur * .7); o.connect(g); env(g, t, .002, pk, dur); o.start(t); o.stop(t + dur + .05); }
+  function b808(t, note, dur, pk = .85) {
+    const g = ctx.createGain(); g.connect(musBus); const f = N2F(note);
+    const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f * 1.5, t); o.frequency.exponentialRampToValueAtTime(f, t + .05);
+    const o2 = ctx.createOscillator(); o2.type = 'triangle'; o2.frequency.setValueAtTime(f * 2, t); const g2 = ctx.createGain(); g2.gain.value = .25; o2.connect(g2); g2.connect(g);
+    o.connect(g); env(g, t, .004, pk, dur); o.start(t); o2.start(t); o.stop(t + dur + .1); o2.stop(t + dur + .1);
+  }
+  function clap(t, pk = .55) { for (let k = 0; k < 3; k++) noise(musBus, t + k * .011, .09 + k * .03, 'bandpass', 1400, .9, pk * (k === 2 ? 1 : .6)); }
+  function hat(t, pk = .14, open) { noise(musBus, t, open ? .18 : .03, 'highpass', 8500, .7, pk); }
+  function keys(t, notes, dur, pk = .06, type = 'triangle', cut = 1800) {
+    for (const n of notes) { const o = ctx.createOscillator(); o.type = type; o.frequency.value = N2F(n); const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = cut; const g = ctx.createGain(); o.connect(f); f.connect(g); g.connect(musBus); env(g, t, .01, pk, dur); o.start(t); o.stop(t + dur + .1); }
+  }
+  function trapStep(i, p, t, spb, root, hot) {
+    const bar = Math.floor(i / 16) % 4;
+    if ([0, 7, 10].includes(p) || (bar % 2 && p === 14)) { kickAt(t, 160, 48, .12, .9); b808(t, root - 24 + (p === 10 ? 3 : p === 14 ? 7 : 0), spb * (p === 0 ? 6 : 3)); }
+    if (p === 8) clap(t, .6); if (hot && p === 15) clap(t, .3);
+    if (p % 2 === 0) hat(t, .12); if (p === 6 || p === 14) hat(t, .08, true);
+    if ((bar === 1 || bar === 3) && p >= 12) { hat(t, .1); hat(t + spb / 2, .09); if (p === 15) hat(t + spb / 4, .08), hat(t + spb * .75, .08); }
+    if (p === 0) keys(t, [root + 12, root + 15, root + 19].map(n => n), spb * 15, .035, 'sawtooth', 900);
+    const mel = [0, 3, 7, 10, 12, 10, 7, 3];
+    if (p % 4 === 2) keys(t, [root + 24 + mel[(i / 4 | 0) % 8]], spb * 1.5, .07, 'triangle', 4000);
+  }
+  function lofiStep(i, p, t, spb, root) {
+    const sw = p % 2 ? spb * .18 : 0, tt = t + sw;
+    if (p === 0 || p === 10) kickAt(tt, 110, 45, .18, .7);
+    if (p === 4 || p === 12) { noise(musBus, tt, .12, 'bandpass', 1800, .6, .25); tone(musBus, tt, 'triangle', 200, 170, .06, .08); }
+    if (p % 2 === 0) hat(tt, .05);
+    if (p === 0 || p === 8) { keys(tt, [root, root + 4, root + 7, root + 11].map(n => n + 12), spb * 7.5, .045, 'sine', 1400); keys(tt + .02, [root + 12, root + 16], spb * 7, .02, 'triangle', 1100); }
+    if (p === 0 || p === 8) b808(tt, root - 12, spb * 6, .35);
+    if (Math.random() < .35) noise(musBus, t + Math.random() * spb, .01, 'highpass', 3000, 1, .03);
+    if (p === 6 || p === 14) keys(tt, [root + 24 + [7, 9, 4, 2][(i / 8 | 0) % 4]], spb * 2, .03, 'sine', 3000);
+  }
+  function dembowStep(i, p, t, spb, root, hot) {
+    if (p % 4 === 0) kickAt(t, 140, 50, .14, .85);
+    if ([3, 6, 11, 14].includes(p)) { noise(musBus, t, .07, 'bandpass', 2400, 1.2, .4); tone(musBus, t, 'square', 380, 300, .03, .06); }
+    if (p % 2 === 0 || hot) hat(t, .08);
+    if ([0, 3, 8, 11].includes(p)) b808(t, root - 12, spb * 2.5, .55);
+    if (p === 0) keys(t, [root + 12, root + 15, root + 19], spb * 15, .03, 'sawtooth', 1100);
+    if (p % 2 === 1) keys(t, [root + 24 + [0, 3, 5, 7, 10, 7, 5, 3][(i / 2 | 0) % 8]], spb * .9, .05, 'square', 2600);
+  }
   const STYLES = {
+    trap: { bpm: 142, chords: [45, 41, 48, 43], minor: true, custom: trapStep },
+    lofi: { bpm: 78, chords: [50, 43, 48, 53], minor: false, custom: lofiStep },
+    dembow: { bpm: 95, chords: [45, 41, 43, 40], minor: true, custom: dembowStep },
+    synth: null,
     menu: { bpm: 84, chords: [45, 41, 48, 43], minor: true, kick: 'x...............', snare: '................', hat: '..x...x...x...x.', lead: 'pad', arp: '0 - - - 7 - - - 12 - - - 7 - - -' },
     usa: { bpm: 100, chords: [45, 41, 48, 43], minor: true, kick: 'x...x...x...x...', snare: '....x.......x...', hat: 'x.x.x.x.x.x.x.x.', lead: 'synth', arp: '0 - 4 - 7 - 4 - 0 - 4 - 7 - 9 -' },
     ita: { bpm: 92, chords: [50, 46, 41, 45], minor: true, kick: 'x.....x.x.......', snare: '....x.......x..x', hat: '..x...x...x...x.', lead: 'pluck', arp: '0 - 2 - 4 - 5 - 7 - 5 - 4 - 2 -' },
     col: { bpm: 96, chords: [43, 48, 50, 43], minor: false, kick: 'x...x...x...x...', snare: '..x...x...x...x.', hat: 'xx.xxx.xxx.xxx.x', lead: 'marimba', arp: '0 4 7 - 12 - 7 4 0 - 4 7 - 4 - -' },
     bra: { bpm: 128, chords: [40, 40, 43, 38], minor: true, kick: 'x..x..x...x..x..', snare: '....x..x....x...', hat: 'x.xxx.xxx.xxx.xx', lead: 'synth', arp: '0 - - 4 - - 7 - - 10 - - 7 - 4 -' },
   };
+  STYLES.synth = STYLES.usa; STYLES.funk = STYLES.bra; STYLES.usa = STYLES.trap; STYLES.menu = STYLES.lofi;
   let mus = { style: null, timer: null, step: 0, next: 0, intensity: 0 };
   function setMusic(style) {
     if (!ctx) return;
@@ -176,10 +222,11 @@ window.NB_AUDIO = (() => {
   function setIntensity(v) { mus.intensity = v; }
   function schedule() {
     if (!ctx || !mus.style || mus.fileSrc) return;
-    const s = STYLES[mus.style], spb = 60 / s.bpm / 4; // durée d'un 16e
+    const s = STYLES[mus.style]; if (!s) return; const spb = 60 / s.bpm / 4; // durée d'un 16e
     while (mus.next < now() + .12) { playStep(s, mus.step, mus.next, spb); mus.step++; mus.next += spb; }
   }
   function playStep(s, i, t, spb) {
+    if (s.custom) { s.custom(i, i % 16, t, spb, s.chords[Math.floor(i / 16) % s.chords.length], mus.intensity > 0); return; }
     const p = i % 16, bar = Math.floor(i / 16) % s.chords.length, root = s.chords[bar];
     const third = s.minor ? 3 : 4;
     const hot = mus.intensity > 0;

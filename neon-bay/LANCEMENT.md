@@ -13,6 +13,14 @@ Ce qui est permis : dire que tu proposes des **guides** sur GTA (contenu de fan,
 - *Street Empire*, *Crime Coast*, *Night City Kings*, *Block Boss*
 Vérifie la disponibilité du nom (store, nom de domaine, et base INPI / EUIPO) avant de le déposer.
 
+## Accroches à utiliser (sans citer GTA)
+Dire « la version moins chère de GTA » ou « pour ceux qui ne peuvent pas acheter GTA » laisse croire que Néon Bay est un GTA : c'est faux, et cela utilise leur marque. Utilise plutôt :
+- « Le monde ouvert à 2,99 €. »
+- « Toute l'action d'un gros jeu de rue, pour le prix d'un café. »
+- « Voitures, gangs, police et poursuites. Le niveau 1 est gratuit. »
+- « 4 pays, 30 missions, aucun abonnement. »
+- « Le jeu d'action qui tourne sur ton téléphone, même sans console. »
+
 ## 2. Le prix : gratuit pour essayer, payant pour tout avoir
 Le modèle déjà en place dans le jeu est le bon pour un jeu « pas cher mais pas 100 % gratuit » :
 - **Niveau 1 gratuit**, sans inscription : les gens essaient, partagent, reviennent.

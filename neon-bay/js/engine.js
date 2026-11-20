@@ -125,7 +125,8 @@ function buildWorld(region) {
     m.fillStyle = t === ROAD ? '#4a4078' : t === BLD ? '#120e22' : t === PARK || t === TREE ? p.park : t === WATER ? '#1f6f9a' : '#2a2346';
     m.fillRect(x * 2, y * 2, 2, 2);
   }
-  return { region, map, bcol, wh, lm, landmarks, pads, shops, garages, tunnels, hospital, station, mm };
+  const tags = []; for (let k = 0; tags.length < 12 && k < 4000; k++) { const tx = 2 + ((R() * (N - 4)) | 0), ty = 2 + ((R() * (N - 4)) | 0); const t = map[ty * N + tx]; if ((t === WALK || t === PARK || t === PLAZA) && !tags.some(q => Math.abs(q.tx - tx) + Math.abs(q.ty - ty) < 12)) tags.push({ tx, ty, x: (tx + .5) * T, y: (ty + .5) * T }); }
+  return { tags, region, map, bcol, wh, lm, landmarks, pads, shops, garages, tunnels, hospital, station, mm };
 }
 const tileAt = (x, y) => { const tx = Math.floor(x / T), ty = Math.floor(y / T); if (tx < 0 || ty < 0 || tx >= N || ty >= N) return BLD; return world.map[ty * N + tx]; };
 const solidT = t => t === BLD || t === WATER || t === TREE;
@@ -256,7 +257,7 @@ function explosionAt(x, y, r, dmg, byPlayer) {
 function explode(c) {
   c.wreck = true; c.v = 0; c.ai = null; c.hp = 0; S.flash = { x: c.x, y: c.y, i: 6 }; S.debris = (S.debris || []).concat([{ x: c.x, y: c.y, col: c.color }]); if (S.mode === 'play' && dist(c.x, c.y, P.x, P.y) < 700) track('explosions');
   const wasPlayer = c === P.car;
-  if (wasPlayer) { P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30); toast('Voiture détruite !'); }
+  if (wasPlayer) { radioOff(); P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30); toast('Voiture détruite !'); }
   if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x; vip.y = c.y + 26; hurtVip(30); }
   explosionAt(c.x, c.y, 85, 45, false);
   if (c.kind === 'police') addHeat(1);
@@ -521,7 +522,7 @@ function toggleCar() {
     const c = P.car, px = -Math.sin(c.a), py = Math.cos(c.a);
     const opts = [[px * -30, py * -30], [px * 30, py * 30], [-Math.cos(c.a) * 36, -Math.sin(c.a) * 36], [Math.cos(c.a) * 36, Math.sin(c.a) * 36]];
     for (const [ox, oy] of opts) { if (!solid(c.x + ox, c.y + oy)) { P.x = c.x + ox; P.y = c.y + oy; break; } }
-    c.ai = null; P.car = null; au('door');
+    c.ai = null; P.car = null; au('door'); radioOff();
     if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x - (P.x - c.x); vip.y = c.y - (P.y - c.y); if (solid(vip.x, vip.y)) { vip.x = P.x + 12; vip.y = P.y; } }
     return;
   }
@@ -531,7 +532,7 @@ function toggleCar() {
   if (best.ai === 'traffic' || best.ai === 'convoy') { const d = mkPed(best.x - Math.sin(best.a) * 24, best.y + Math.cos(best.a) * 24); d.state = 'flee'; d.t = 6; peds.push(d); if (Math.random() < .3) addHeat(.4); }
   if (best.kind === 'police') { S.heat = Math.max(S.heat, 2); S.unseen = 0; toast('Voiture de police volée !'); }
   if (best !== P.lastCar) track('carsStolen'); P.lastCar = best;
-  best.ai = null; best.v = Math.min(best.v, 40); P.car = best; au('door');
+  best.ai = null; best.v = Math.min(best.v, 40); P.car = best; au('door'); radioOn();
 }
 function startReload() {
   const w = wepDef(save.weapon), am = P.ammo && P.ammo[w.id];
@@ -576,6 +577,12 @@ function fire() {
   parts.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14, vx: 0, vy: 0, life: .06, max: .06, r: w.explosive ? 10 : 7, col: '#fff2a8' });
   P.cd = w.rate; P.lastShot = S.time; S.flash = { x: P.x + Math.cos(a) * 18, y: P.y + Math.sin(a) * 18, i: w.explosive ? 3 : 1.6 }; panic(P.x, P.y, 380); au('shot', w.id, 0, 1); if (touch.on) vib({ shotgun: 35, sniper: 50, rocket: 70, rifle: 12, minigun: 6, uzi: 6 }[w.id] || 10);
 }
+// radio de voiture : stations originales générées par le jeu
+const STATIONS = [['Néon FM', 'synth'], ['808 City', 'trap'], ['Calle 95', 'dembow'], ['Baile Azul', 'funk'], ['Lo-fi Nuit', 'lofi'], ['Radio coupée', null]];
+const REGION_RADIO = { usa: 1, ita: 0, col: 2, bra: 3 };
+function radioOn() { if (save.radio === undefined) save.radio = REGION_RADIO[world.region.id] || 0; const st = STATIONS[save.radio]; au('setMusic', st[1] || '__none'); msg('Radio : ' + st[0]); }
+function radioNext() { if (!P.car) return; save.radio = ((save.radio || 0) + 1) % STATIONS.length; persist(); radioOn(); }
+function radioOff() { au('setMusic', world.region.id); }
 const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['car', 'Caméra embarquée']];
 function cycleCam() { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); toast(CAMS.find(c => c[0] === save.cam)[1]); }
 const canVib = () => typeof navigator !== 'undefined' && 'vibrate' in navigator;
@@ -723,7 +730,7 @@ function startLevel(n) {
   S.cine = { type: 'intro', t: 0, dur: 3.4 }; showCine('Niveau ' + n + ' · ' + region.name, L.def.t);
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
-  if (n === 1) { const c = nearestFreeCar(); if (c) { c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
+  if (n === 1) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   try { if (touch.on && screen.orientation && screen.orientation.lock && (document.fullscreenElement || document.webkitFullscreenElement)) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   nextStep();
@@ -783,6 +790,8 @@ const ACH = [
   { id: 'bribe5', name: 'Bon payeur', key: 'bribes', goal: 5, r: 800 },
   { id: 'boom25', name: 'Artificier', key: 'explosions', goal: 25, r: 1500 },
   { id: 'cash5k', name: 'Les poches pleines', key: 'cashPicked', goal: 5000, r: 1000 },
+  { id: 'tags12', name: 'Graffeur', key: 'tags', goal: 12, r: 2000 },
+  { id: 'tags48', name: 'Chasseur de tags', key: 'tags', goal: 48, r: 10000 },
   { id: 'star5', name: 'Trois étoiles', key: 'threeStars', goal: 5, r: 2000 },
   { id: 'star30', name: 'Perfectionniste', key: 'threeStars', goal: 30, r: 20000 },
   { id: 'lvl8', name: 'Roi de Néon Bay', key: 'levelsDone', goal: 8, r: 3000 },
@@ -790,7 +799,7 @@ const ACH = [
   { id: 'lvl23', name: 'Maître de Sierra Verde', key: 'levelsDone', goal: 23, r: 9000 },
   { id: 'lvl30', name: 'Légende de Morro Azul', key: 'levelsDone', goal: 30, r: 15000 },
 ];
-const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux' };
+const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets' };
 const DAILY_POOL = [['escapes', 3], ['carsStolen', 5], ['kills', 20], ['tunnels', 2], ['cashPicked', 400], ['explosions', 4], ['levelsPlayed', 1], ['bribes', 1]];
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 function ensureDaily() {
@@ -871,6 +880,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyH') useMedkit();
     else if (e.code === 'KeyN') useNitro();
     else if (e.code === 'KeyC') cycleCam();
+    else if (e.code === 'KeyT') radioNext();
     else if (e.code === 'KeyR') startReload();
     else if (/^Digit[1-8]$/.test(e.code)) { const w = D.WEAPONS[+e.code.slice(5) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
     else if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
@@ -924,6 +934,7 @@ function pollPad() {
     if (press(4)) cycleCam();                            // LB : caméra
     if (press(8)) bribePolice();                         // Select : soudoyer
     if (press(12)) useMedkit();                          // croix haut : soin
+    if (press(15)) radioNext();                          // croix droite : radio
     if (press(9)) pauseGame();                           // Start : pause
   } else if (S.mode === 'pause' && press(9)) resumeGame();
   pad.prev = gp.buttons.map(b => b.pressed);
@@ -936,7 +947,7 @@ const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDef
   const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
   fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
 $('portraitOk').addEventListener('click', () => { save.portraitOk = true; persist(); $('rotate').hidden = true; S.rot = false; });
-tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+tb('bRadio', radioNext); tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -980,7 +991,7 @@ function updHud(dt) {
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) hud.prompt.hidden = true; }
   else { hud.prompt.hidden = !hint; if (hint) setText(hud.prompt, 'hint', hint); }
   const bb = $('bBribe'), bn = $('bNitro'); const showB = s > 0 && nearCop(); if (last.bb !== showB) { last.bb = showB; bb.hidden = !showB; }
-  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = true; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
+  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = true; $('bRadio').hidden = !inCar; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
   { let la = 'ACTION'; if (P.car) la = 'DESCENDRE'; else if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) la = 'PAYER'; else if (tileAt(P.x, P.y) === TUNNEL) la = 'TUNNEL'; else if (tileAt(P.x, P.y) === SHOP) la = 'BOUTIQUE'; else if (cars.some(c => !c.wreck && dist(c.x, c.y, P.x, P.y) < 48)) la = 'MONTER';
     if (last.la !== la) { last.la = la; $('lblA').textContent = TR(la); } }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) hud.toast.style.opacity = 0; }
@@ -1079,6 +1090,8 @@ function update(dt) {
   bullets = bullets.filter(b => b.life > 0);
   for (const k of picks) { k.t -= dt; if (k.ammo) { if (dist(P.x, P.y, k.x, k.y) < 30) { for (const w of D.WEAPONS) if (w.mag && P.ammo[w.id] && save.owned[w.id] && P.ammo[w.id].res !== Infinity) P.ammo[w.id].res = Math.min(w.reserve, P.ammo[w.id].res + w.mag); au('pickup'); msg('Munitions'); k.t = 0; } continue; } if (dist(P.x, P.y, k.x, k.y) < 30) { save.money += k.amt; if (L) L.earned += k.amt; au('cash'); track('cashPicked', k.amt); msg('+' + fmt(k.amt)); k.t = 0; } }
   picks = picks.filter(k => k.t > 0);
+  { const rid = world.region.id; save.tagsFound = save.tagsFound || {}; const got = save.tagsFound[rid] = save.tagsFound[rid] || [];
+    world.tags.forEach((tg, i) => { if (got.includes(i) || dist(P.x, P.y, tg.x, tg.y) > 34) return; got.push(i); const r = 300 + 150 * Object.keys(REGION_RADIO).indexOf(rid); save.money += r; au('pickup'); vib([30, 30, 60]); toast('Tag secret ' + got.length + '/12 · +' + fmt(r)); track('tags'); persist(); }); }
   for (const c of cases) if (!c.got && dist(P.x, P.y, c.x, c.y) < 32) { c.got = true; au('pickup'); msg('Valise récupérée'); sparks(c.x, c.y, 10); }
   // atelier de peinture
   if (P.car && tileAt(P.car.x, P.car.y) === PAD && stars() > 0 && !(L && L.step && L.step.lock)) {
@@ -1922,6 +1935,7 @@ function render3D(dt) {
   if (playing && !P.car) sync(P, () => { const m = makeChar(playerLook()); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2)); });
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
+  if (playing) { const got = (save.tagsFound || {})[world.region.id] || []; world.tags.forEach((tg, i) => { if (got.includes(i) || !near(tg.x, tg.y)) return; sync(tg, () => { const g2 = new THREE.Group(); const col = world.region.pal.neon[i % world.region.pal.neon.length]; const d = new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), new THREE.MeshBasicMaterial({ color: col })); d.position.y = 22; g2.add(d); const h2 = new THREE.Mesh(new THREE.CircleGeometry(18, 18), bmat(col, .35, true)); h2.rotation.x = -PI / 2; h2.position.y = .8; g2.add(h2); g2.userData.d = d; return g2; }, (m, e) => { m.position.set(e.x, 0, e.y); m.userData.d.rotation.y = S.time * 2.5; m.userData.d.position.y = 22 + Math.sin(S.time * 3 + e.x) * 3; }); }); }
   for (const c of cases) if (!c.got && near(c.x, c.y)) sync(c, () => makeProp('case'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time; });
   for (const m of R3.dyn.children.slice()) if (!R3.seen.has(m)) R3.dyn.remove(m);
   // balles
@@ -1991,7 +2005,7 @@ const SCREENS = {
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
-      <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
+      <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${Object.values(save.tagsFound || {}).reduce((a, v) => a + v.length, 0)}/48 tags secrets</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
       <div class="keys">
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
         <b>E</b><span>Voiture, boutique, tunnel, payer un agent</span>
@@ -2057,6 +2071,11 @@ const SCREENS = {
       ${tab === 'w' ? '<p class="legend"><span class="k1"></span>Dégâts <span class="k2"></span>Cadence</p>' : ''}
     </div>`;
   },
+  break: ({ h }) => `<div class="wrap narrow center-col">
+      <p class="eyebrow">Pause conseillée</p><h2 class="title">Ça fait ${h} heure${h > 1 ? 's' : ''} que tu joues</h2>
+      <p class="lead">Comme au volant : une pause toutes les heures, c'est mieux. Lève-toi, bois un verre d'eau, repose tes yeux quelques minutes. Ta partie t'attend.</p>
+      <div class="col"><button class="btn primary" data-quit="1">Faire une pause</button><button class="btn" data-resume="1">Continuer encore un peu</button></div>
+    </div>`,
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
@@ -2244,6 +2263,8 @@ function tick(dt) {
     S.tod = ((S.tod || 0) + gdt / 480) % 1;
     const rot = touch.on && innerHeight > innerWidth && !save.portraitOk; if (!!S.rot !== rot) { S.rot = rot; $('rotate').hidden = !rot; if (rot && save.cam) {} }
     if (rot) gdt = 0;
+    if (gdt > 0 && !S.cine) { S.session = (S.session || 0) + dt; const td = today(); if (!save.playDay || save.playDay.d !== td) save.playDay = { d: td, s: 0 }; save.playDay.s += dt;
+      if (!S.nextBreak) S.nextBreak = 3600; if (S.session >= S.nextBreak) { S.nextBreak += 3600; S.mode = 'pause'; if (PORTAL) PORTAL.stop(); au('duck', true); showScreen('break', { h: Math.round(S.session / 3600) }); persist(); } }
     if (gdt > 0) update(gdt); updHud(dt); updTips(gdt); monitorFps(dt);
   }
   if (AU && AU.ready) { let sd = 1e9; if (S.mode === 'play') for (const c of cars) if (c.kind === 'police' && c.ai === 'police') sd = Math.min(sd, dist(c.x, c.y, P.x, P.y)); var hd = heli ? dist(heli.x, heli.y, P.x, P.y) : 1e9; au('setIntensity', S.mode === 'play' && stars() > 0 ? 1 : 0); AU.update({ playing: S.mode === 'play', inCar: !!P.car, speed: P.car ? P.car.v : 0, nitro: P.nitro > 0, drift: !!(keys.Space || touch.shoot), sirenDist: sd, heliDist: hd, rain: !!S.rain }, dt); }
