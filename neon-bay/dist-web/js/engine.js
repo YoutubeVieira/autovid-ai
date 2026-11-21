@@ -1047,7 +1047,10 @@ function updHud(dt) {
     setText(hud.sN, 'sn', 'Étape ' + (L.idx + 1) + '/10 · ' + st.label);
     setText(hud.sD, 'sd', st.needCar && !P.car ? stepDesc(st) + ' (monte dans une voiture : E)' : stepDesc(st));
     const t = st.time !== null ? Math.max(0, Math.ceil(st.time)) : null;
-    setText(hud.sC, 'sc', t === null ? '' : `${(t / 60) | 0}:${String(t % 60).padStart(2, '0')}`);
+    const km = gps.len ? (gps.len / 1000 * .5).toFixed(1).replace('.', ',') + ' km' : '', eta = gps.len ? Math.ceil(gps.len / (P.car ? 300 : 150)) : 0;
+    const late = t !== null && eta > t && !st.survive;
+    setText(hud.sC, 'sc', (t === null ? '' : `${(t / 60) | 0}:${String(t % 60).padStart(2, '0')}`) + (km ? (t === null ? '' : ' · ') + km + ' · ~' + eta + ' s' : ''));
+    if (last.late !== late) { last.late = late; hud.sC.style.color = late ? 'var(--danger)' : ''; }
     if (last.dots !== L.idx) { last.dots = L.idx; hud.dots.innerHTML = Array.from({ length: 10 }, (_, i) => `<i class="${i < L.idx ? 'd' : i === L.idx ? 'c' : ''}"></i>`).join(''); }
   }
   const vipOn = !!(vip && vip.hp > 0 && !vip.done);
@@ -1357,6 +1360,34 @@ function render(dt) {
   drawMini(target);
 }
 const mini = $('mini'), mctx = mini.getContext('2d');
+// ---------- GPS : chemin par les routes jusqu'à l'objectif ----------
+const gps = { path: [], len: 0, key: '', t: 0 };
+function gpsCompute(sx, sy, tx, ty) {
+  const s0 = [Math.floor(sx / T), Math.floor(sy / T)], g0 = [Math.floor(tx / T), Math.floor(ty / T)];
+  const idx = (x, y) => y * N + x, cost = t => t === ROAD ? 1 : (t === WALK || t === PAD || t === SHOP || t === GARAGE || t === TUNNEL || t === PLAZA || t === PARK) ? 4 : 0;
+  const open = [[0, s0[0], s0[1]]], gS = new Float32Array(N * N).fill(1e9), from = new Int32Array(N * N).fill(-1), closed = new Uint8Array(N * N);
+  gS[idx(...s0)] = 0; let found = false, guard = 0;
+  while (open.length && guard++ < 9000) {
+    let bi = 0; for (let i = 1; i < open.length; i++) if (open[i][0] < open[bi][0]) bi = i;
+    const [, x, y] = open.splice(bi, 1)[0], k = idx(x, y); if (closed[k]) continue; closed[k] = 1;
+    if (x === g0[0] && y === g0[1]) { found = true; break; }
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue; const nk = idx(nx, ny); const c = (nx === g0[0] && ny === g0[1]) ? 1 : cost(world.map[nk]); if (!c || closed[nk]) continue;
+      const ng = gS[k] + c; if (ng < gS[nk]) { gS[nk] = ng; from[nk] = k; open.push([ng + Math.abs(nx - g0[0]) + Math.abs(ny - g0[1]), nx, ny]); } }
+  }
+  if (!found) return [];
+  const out = []; let k = idx(...g0); while (k >= 0) { out.push({ x: (k % N + .5) * T, y: (Math.floor(k / N) + .5) * T }); k = from[k]; }
+  out.reverse(); out[0] = { x: sx, y: sy }; out[out.length - 1] = { x: tx, y: ty };
+  // on ne garde que les virages
+  const simp = [out[0]]; for (let i = 1; i < out.length - 1; i++) { const a = simp[simp.length - 1], b = out[i], c = out[i + 1]; if (Math.sign(b.x - a.x) !== Math.sign(c.x - b.x) || Math.sign(b.y - a.y) !== Math.sign(c.y - b.y)) simp.push(b); } simp.push(out[out.length - 1]);
+  return simp;
+}
+function gpsUpdate(target, dt) {
+  gps.t -= dt;
+  if (!target) { gps.path = []; gps.len = 0; return; }
+  const px = P.car ? P.car.x : P.x, py = P.car ? P.car.y : P.y, key = Math.floor(px / T) + ',' + Math.floor(py / T) + '>' + Math.floor(target.x / T) + ',' + Math.floor(target.y / T);
+  if (key !== gps.key && gps.t <= 0) { gps.key = key; gps.t = .35; gps.path = gpsCompute(px, py, target.x, target.y); }
+  if (gps.path.length) { gps.path[0] = { x: px, y: py }; let l = 0; for (let i = 1; i < gps.path.length; i++) l += dist(gps.path[i - 1].x, gps.path[i - 1].y, gps.path[i].x, gps.path[i].y); gps.len = l; }
+}
 function drawMini(target) {
   const s = mini.width / W; mctx.drawImage(world.mm, 0, 0, mini.width, mini.height);
   const dot = (x, y, c, r) => { mctx.fillStyle = c; mctx.beginPath(); mctx.arc(x * s, y * s, r, 0, TAU); mctx.fill(); };
@@ -1367,6 +1398,7 @@ function drawMini(target) {
   for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, '#ff4d5e', 2);
   for (const c of cars) if (c.ai === 'gang' && !c.wreck) dot(c.x, c.y, '#ff4d5e', 3);
   if (heli) dot(heli.x, heli.y, '#ffffff', 4);
+  if (gps.path.length > 1) { const s2 = mini.width / W; mctx.strokeStyle = '#ffd23f'; mctx.lineWidth = 2.4; mctx.beginPath(); gps.path.forEach((q, i) => i ? mctx.lineTo(q.x * s2, q.y * s2) : mctx.moveTo(q.x * s2, q.y * s2)); mctx.stroke(); }
   if (target) dot(target.x, target.y, '#21e6ff', 4.5);
   dot(P.x, P.y, '#ffffff', 3.5);
 }
@@ -1773,8 +1805,24 @@ function makeChar(o) {
   g.userData = { root, pelvis, chest, neck, legs, arms, body: chest, headJ, detail, gun: !!o.gun, gunMesh, gunId: o.gunId || 'pistol', gunSkin: o.gunSkin, ls: -1, ph: Math.random() * 6, spd: 0, amt: 0, fall: 0, recoil: 0, hurt: 0 };
   return g;
 }
+function makeGlbChar(md) {
+  const g = new THREE.Group(); g.add(md.scene); md.scene.scale.setScalar(md.scale); md.scene.rotation.y = PI / 2;
+  const shd = new THREE.Mesh(new THREE.CircleGeometry(10, 14), bmat('#000000', .35)); shd.rotation.x = -PI / 2; shd.position.y = .3; g.add(shd);
+  let gunMesh = null; if (md.hand) { gunMesh = makeGun(save.weapon === 'fists' ? 'pistol' : save.weapon, wup(save.weapon).skin || 'black'); if (gunMesh) { gunMesh.scale.setScalar(1 / md.scale * 1.4); gunMesh.rotation.set(0, 0, -PI / 2); md.hand.add(gunMesh); } }
+  g.userData = { glb: md, gunMesh, gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black', ls: -1, spd: 0, cur: null, detail: [] };
+  return g;
+}
+function poseGlb(m, x, y, a, step, ko, punching) {
+  const u = m.userData, md = u.glb; m.position.set(x, 0, y); m.rotation.set(0, -a, 0);
+  const ds = step - (u.ls < 0 ? step : u.ls); u.ls = step; u.spd += (Math.min(8, Math.abs(ds) * 60) - u.spd) * .2;
+  const want = ko ? 'death' : punching ? 'punch' : u.spd > 4.5 ? 'run' : u.spd > .6 ? 'walk' : 'idle';
+  const act = md.acts[want] || md.acts.idle;
+  if (act && u.cur !== act) { if (u.cur) u.cur.fadeOut(.2); act.reset().fadeIn(.2).play(); u.cur = act; }
+  md.mixer.update(Math.min(.05, R3.dt || .016));
+}
 function poseChar(m, x, y, a, step, ko, aim, fx) {
   const u = m.userData; fx = fx || {};
+  if (u.glb) return poseGlb(m, x, y, a, step, ko, S.time - (P.lastShot || -9) < .3 && save.weapon === 'fists');
   const ds = step - (u.ls < 0 ? step : u.ls); u.ls = step;
   u.spd += (Math.min(8, Math.abs(ds) * 60) - u.spd) * .2;
   const moving = Math.abs(ds) > .0001; u.amt += ((moving ? 1 : 0) - u.amt) * .25;
@@ -1987,7 +2035,7 @@ function xray(m) {
     R3.hidden = hid || inside;
   }
   const h = !!R3.hidden;
-  if (m.userData.xr !== h) { m.userData.xr = h; m.traverse(o => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) { o.material.depthTest = !h; o.material.transparent = h; o.material.opacity = h ? .85 : 1; o.renderOrder = h ? 20 : 0; o.material.needsUpdate = true; } }); }
+  if (m.userData.xr !== h) { m.userData.xr = h; m.traverse(o => { if (o.isMesh && o.material && !o.material.isMeshBasicMaterial) { o.material.depthTest = !h; o.material.transparent = h; o.material.opacity = h ? .85 : 1; o.renderOrder = h ? 20 : 0; o.material.needsUpdate = true; } }); }
 }
 function hpBar(parent, y, w) {
   const bg = new THREE.Mesh(new THREE.PlaneGeometry(w, 3.5), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .6, depthTest: false }));
@@ -2005,6 +2053,7 @@ function sync(e, make, pose) {
 }
 function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); }
 function render3D(dt) {
+  R3.dt = dt;
   if (R3.world !== world) build3DWorld();
   resize3D();
   const playing = S.mode !== 'menu' && L;
@@ -2057,7 +2106,8 @@ function render3D(dt) {
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar({ shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
   if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
-  if (playing && !P.car) sync(P, () => { const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); });
+  if (playing && !P.car && P._m && !!P._m.userData.glb !== (save.outfit.body === 'robot' && !!R3.models.robot)) P._m = null;
+  if (playing && !P.car) sync(P, () => { if (save.outfit.body === 'robot' && R3.models.robot) return makeGlbChar(R3.models.robot); const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); });
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
   if (playing) { const got = (save.tagsFound || {})[world.region.id] || []; world.tags.forEach((tg, i) => { if (got.includes(i) || !near(tg.x, tg.y)) return; sync(tg, () => { const g2 = new THREE.Group(); const col = world.region.pal.neon[i % world.region.pal.neon.length]; const d = new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), new THREE.MeshBasicMaterial({ color: col })); d.position.y = 22; g2.add(d); const h2 = new THREE.Mesh(new THREE.CircleGeometry(18, 18), bmat(col, .35, true)); h2.rotation.x = -PI / 2; h2.position.y = .8; g2.add(h2); g2.userData.d = d; return g2; }, (m, e) => { m.position.set(e.x, 0, e.y); m.userData.d.rotation.y = S.time * 2.5; m.userData.d.position.y = 22 + Math.sin(S.time * 3 + e.x) * 3; }); }); }
@@ -2089,9 +2139,19 @@ function render3D(dt) {
   envFx(dt, playing);
   // cible de mission
   const st = playing && L.step, target = st ? stepTarget(st) : null;
+  gpsUpdate(playing ? target : null, dt);
+  if (!R3.gpsM) { R3.gpsM = new THREE.InstancedMesh(new THREE.ConeGeometry(7, 16, 3).rotateZ(-PI / 2), new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: .85, depthWrite: false }), 260); R3.gpsM.frustumCulled = false; R3.gpsM.instanceMatrix.setUsage(THREE.DynamicDrawUsage); R3.scene.add(R3.gpsM); }
+  { let n2 = 0; const path = gps.path, off = (S.time * 90) % 46, qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -PI / 2), qflat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -PI / 2);
+    let acc = 0;
+    for (let i = 1; i < path.length && n2 < 260; i++) { const a2 = path[i - 1], b2 = path[i], L2 = dist(a2.x, a2.y, b2.x, b2.y), ang = Math.atan2(b2.y - a2.y, b2.x - a2.x);
+      for (let d2 = (off - acc % 46 + 46) % 46; d2 < L2 && n2 < 260; d2 += 46) { const x = a2.x + Math.cos(ang) * d2, y = a2.y + Math.sin(ang) * d2; if (dist(x, y, P.x, P.y) < 40) continue;
+        R3.v.set(x, 2, y); R3.q.setFromAxisAngle(R3.up, -ang); R3.s.set(1, .25, 1); R3.m4.compose(R3.v, R3.q, R3.s); R3.gpsM.setMatrixAt(n2++, R3.m4); }
+      acc += L2; }
+    R3.q.identity(); R3.s.set(1, 1, 1); R3.gpsM.count = n2; R3.gpsM.instanceMatrix.needsUpdate = true;
+    const urgent = st && st.time !== null && !st.survive && gps.len / (P.car ? 300 : 150) > st.time * .8; R3.gpsM.material.color.set(urgent ? 0xff4d5e : 0xffd23f); }
   R3.ring.visible = R3.beam.visible = !!target; if (target && Math.hypot(target.x - R3.cam.position.x, target.y - R3.cam.position.z) < 150) R3.beam.visible = false; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
-  R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200);
+  R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200 && gps.path.length < 2);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
   if (!R3.lockRet) { const grp = new THREE.Group(), m2 = new THREE.MeshBasicMaterial({ color: 0xff2e4d, depthTest: false, transparent: true }); for (let k = 0; k < 4; k++) { const c2 = new THREE.Group(); c2.rotation.y = k * PI / 2; const b1 = new THREE.Mesh(bx(10, 1.6, 1.6), m2); b1.position.set(16, 0, 11); const b2 = new THREE.Mesh(bx(1.6, 1.6, 10), m2); b2.position.set(21, 0, 6); c2.add(b1, b2); grp.add(c2); } const dot = new THREE.Mesh(new THREE.RingGeometry(3, 4.2, 16), new THREE.MeshBasicMaterial({ color: 0xff2e4d, depthTest: false, side: THREE.DoubleSide })); dot.rotation.x = -PI / 2; grp.add(dot); grp.traverse(o2 => o2.renderOrder = 30); R3.scene.add(grp); R3.lockRet = grp; }
   { const lt = playing && P.lock && lockAlive(P.lock) ? P.lock : null; R3.lockRet.visible = !!lt; if (lt) { const k2 = Math.min(1, (S.time - (P.lockT || 0)) * 4), sc = 2.2 - 1.2 * k2, hy = lt === heli ? 150 : lt.hp === undefined ? 14 : 30; R3.lockRet.position.set(lt.x, hy, lt.y); R3.lockRet.scale.setScalar(sc * (lt === heli ? 2 : lt.hp === undefined ? 1.6 : 1)); R3.lockRet.rotation.y = S.time * 1.5; } }
@@ -2446,10 +2506,21 @@ world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
 if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); I18.dom(document.getElementById('rotate')); }
 init3D();
+// modèles .glb animés (optionnels)
+R3.models = {};
+if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries(D.MODELS)) {
+  try { new THREE.GLTFLoader().load(url, gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = false; } });
+    const mixer = new THREE.AnimationMixer(scene), find = re => { const c = gl.animations.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
+    const acts = { idle: find(/idle/i), walk: find(/walk(?!jump)/i), run: find(/run/i), punch: find(/punch|attack/i), death: find(/death|die/i) };
+    if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
+    let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
+    const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h }; P._m = null; }, undefined, () => {}); } catch (e) {}
+}
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

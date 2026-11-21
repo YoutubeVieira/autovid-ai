@@ -231,6 +231,13 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 .wup .wh{display:flex;justify-content:space-between}.wup .wh b{font-family:var(--display);font-weight:400;font-size:13px}.wup .wh span{color:var(--amber);letter-spacing:2px}
 .stat2{height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}.stat2 i{display:block;height:100%}
 @media (max-width:700px){.armory{grid-template-columns:1fr}}
+/* tous les messages restent en haut, jamais devant les commandes ni les personnages */
+#prompt{top:calc(98px + env(safe-area-inset-top,0px))!important;bottom:auto!important;font-size:13px!important;max-width:calc(100vw - 360px);overflow:hidden;text-overflow:ellipsis}
+#toast{top:calc(132px + env(safe-area-inset-top,0px))!important;transform:translate(-50%,0)!important}
+#tip{top:calc(162px + env(safe-area-inset-top,0px))!important}
+#banner{top:30%!important}
+@media (max-height:500px) and (orientation:landscape){#prompt{top:calc(74px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 300px)}#toast{top:calc(102px + env(safe-area-inset-top,0px))!important;font-size:13px}#tip{top:calc(126px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 320px)}}
+@media (max-width:760px) and (orientation:portrait){#prompt{top:calc(150px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 32px)}#toast{top:calc(180px + env(safe-area-inset-top,0px))!important}#tip{top:calc(212px + env(safe-area-inset-top,0px))!important}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
 </style>
 </head>
@@ -278,6 +285,7 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 <div id="screen"></div>
 
 <script src="vendor/three.min.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n-dict.js"></script>
 <script src="js/i18n.js"></script>

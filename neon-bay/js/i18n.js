@@ -41,6 +41,7 @@ window.NB_I18N = (() => {
     'Atelier': { en: 'Workshop', es: 'Taller', pt: 'Oficina' }, 'Dégâts': { en: 'Damage', es: 'Daño', pt: 'Dano' }, 'Chargeur': { en: 'Magazine', es: 'Cargador', pt: 'Pente' }, 'Précision': { en: 'Accuracy', es: 'Precisión', pt: 'Precisão' }, 'Peinture': { en: 'Paint', es: 'Pintura', pt: 'Pintura' }, 'Maximum': { en: 'Maxed', es: 'Máximo', pt: 'Máximo' },
     'Noir mat': { en: 'Matte black', es: 'Negro mate', pt: 'Preto fosco' }, 'Chrome': { en: 'Chrome', es: 'Cromo', pt: 'Cromado' }, 'Camouflage': { en: 'Camo', es: 'Camuflaje', pt: 'Camuflado' }, 'Cyan néon': { en: 'Neon cyan', es: 'Cian neón', pt: 'Ciano neon' }, 'Or': { en: 'Gold', es: 'Oro', pt: 'Ouro' },
     'CIBLE': { en: 'LOCK', es: 'FIJAR', pt: 'MIRA' }, 'Cible verrouillée': { en: 'Target locked', es: 'Objetivo fijado', pt: 'Alvo travado' }, 'Aucune cible à portée': { en: 'No target in range', es: 'Ningún objetivo a tiro', pt: 'Nenhum alvo ao alcance' },
+    'Corps': { en: 'Body', es: 'Cuerpo', pt: 'Corpo' }, 'Humain': { en: 'Human', es: 'Humano', pt: 'Humano' }, 'Robot animé': { en: 'Animated robot', es: 'Robot animado', pt: 'Robô animado' },
   };
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour

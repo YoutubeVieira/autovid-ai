@@ -164,6 +164,7 @@ window.NB_DATA = (() => {
     skin: { label: 'Teint', items: [['t1', 'Clair', 0, '#f2d3b3'], ['t2', 'Mat', 0, '#e0b48c'], ['t3', 'Hâlé', 0, '#c68b59'], ['t4', 'Brun', 0, '#8d5a3b'], ['t5', 'Foncé', 0, '#5c3a24']] },
     shoes: { label: 'Baskets', items: [['white', 'Blanches', 0, '#ffffff'], ['black', 'Noires', 300, '#0c0b12'], ['red', 'Rouges', 800, '#c8102e'], ['gold', 'Dorées', 5000, '#d4a017']] },
     chain: { label: 'Chaîne', items: [['none', 'Aucune', 0, false], ['gold', 'Chaîne en or', 6000, true]] },
+    body: { label: 'Corps', items: [['human', 'Humain', 0, null], ['robot', 'Robot animé', 8000, 'robot']] },
   };
 
   // ---------- SONS EN FICHIERS (facultatif) ----------
@@ -177,5 +178,8 @@ window.NB_DATA = (() => {
     // explosion: 'audio/explosion.ogg',
   };
 
-  return { SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
+  // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
+  const MODELS = { robot: 'models/robot.glb' };
+
+  return { MODELS, SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();
