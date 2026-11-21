@@ -1088,6 +1088,7 @@ function fade(t) { hud.fade.textContent = TR(t); hud.fade.style.opacity = 1; set
 function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = TR(v); } }
 function setW(el, k, v) { if (last[k] !== v) { last[k] = v; el.style.width = v + '%'; } }
 function updHud(dt) {
+  last.hb = (last.hb || 0) - dt; if (last.hb <= 0) { last.hb = .5; const r = hud.step.getBoundingClientRect(); const v = r.height && r.top < innerHeight / 2 ? Math.round(r.bottom) : 0; if (v !== last.hbv) { last.hbv = v; if (v) document.body.style.setProperty('--hudB', v + 'px'); else document.body.style.removeProperty('--hudB'); } }
   setText(hud.money, 'm', fmt(save.money));
   const s = stars(); if (last.s !== s) { last.s = s; starEls.forEach((e, i) => e.classList.toggle('on', i < s)); }
   const seen = s > 0 && S.unseen < .5; if (last.seen !== seen) { last.seen = seen; hud.stars.classList.toggle('blink', seen); }
@@ -2272,6 +2273,12 @@ function render3D(dt) {
     cam.x = px; cam.y = pz; cam.z = 400;
     ccx = px + fx * 420; ccz = pz + fz * 420;
   }
+  if (S.screen === 'intro' && R3.introStart) {
+    const t = (performance.now() - R3.introStart) / 1000, c = W / 2, sh = Math.min(5, Math.floor(t / OPEN_SHOT)), u = Math.min(1, (t % OPEN_SHOT) / OPEN_SHOT), e = u * u * (3 - 2 * u);
+    const S5 = [[c - 1100 + e * 600, 22, c + 18, c - 600 + e * 600, 26, c + 18], [c + 300, 170 + e * 300, c + 520, c - 80, 40, c - 60], [c - 620 + e * 420, 150 - e * 40, c - 420, c + 220, 90, c + 60], [c + 380 - e * 260, 60, c - 260 + e * 120, c - 60, 30, c + 120], [c + Math.cos(.4 + e * 1.1) * 1300, 560, c + Math.sin(.4 + e * 1.1) * 1300, c, 0, c], [c, 980 - e * 120, c + 520, c, 0, c]][sh];
+    R3.cam.position.set(S5[0], S5[1], S5[2]); R3.cam.lookAt(S5[3], S5[4], S5[5]); if (R3.cam.fov !== 55) { R3.cam.fov = 55; R3.cam.updateProjectionMatrix(); R3.mode = 'intro'; }
+    ccx = S5[3]; ccz = S5[5];
+  }
   const near = (x, y) => Math.abs(x - ccx) < 1150 && Math.abs(y - ccz) < 1150;
   const hideOwn = mode === 'car' && P.car;
   R3.seen.clear();
@@ -2347,8 +2354,37 @@ function render3D(dt) {
 // ---------- écrans ----------
 const screenEl = $('screen');
 let shopReturn = null;
+// ---------- introduction (premier lancement) ----------
+const OPEN_SHOT = 4.6;
+const OPEN_LINES = [
+  ['Néon Bay · 2 h du matin', 'Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.'],
+  ['Le cousin Dre', 'Il tient trois coins de rue. Les Vipères veulent tout le reste, et la police regarde ailleurs… contre paiement.'],
+  ['La règle', 'Ici, on monte en rendant des services. Livrer, voler, escorter, disparaître dans les tunnels.'],
+  ['Au-delà de la baie', 'Porto Lumi, Sierra Verde, Morro Azul. Chaque ville a ses gangs, ses règles et ses flics à acheter.'],
+  ['Trente nuits', 'Une seule question : jusqu’où tu montes ?'],
+];
+let openTimers = [];
+function playOpening() {
+  openTimers.forEach(clearTimeout); openTimers = [];
+  au('init'); au('setMusic', 'usa'); au('setIntensity', .4);
+  R3.introStart = performance.now(); document.body.classList.add('opening');
+  const cap = screenEl.querySelector('.op-cap'), ttl = screenEl.querySelector('.op-ttl'), txt = screenEl.querySelector('.op-txt'), bar = screenEl.querySelector('.op-bar i');
+  OPEN_LINES.forEach((ln, i) => openTimers.push(setTimeout(() => {
+    if (S.screen !== 'intro') return; cap.classList.remove('in'); void cap.offsetWidth; ttl.textContent = TR(ln[0]); txt.textContent = TR(ln[1]); cap.classList.add('in');
+    bar.style.width = ((i + 1) / (OPEN_LINES.length + 1) * 100) + '%';
+    if (i === 0) narrate('usa', ''); setTimeout(() => say(TR(ln[1]), VLOC[(I18 && I18.lang) || 'fr'] || 'fr-FR', 1.02), i === 0 ? 1400 : 200);
+  }, 600 + i * OPEN_SHOT * 1000)));
+  openTimers.push(setTimeout(() => { if (S.screen !== 'intro') return; cap.classList.remove('in'); screenEl.querySelector('.op-logo').classList.add('in'); bar.style.width = '100%'; au('step'); }, 600 + OPEN_LINES.length * OPEN_SHOT * 1000));
+  openTimers.push(setTimeout(endOpening, 600 + OPEN_LINES.length * OPEN_SHOT * 1000 + 3200));
+}
+function endOpening() {
+  openTimers.forEach(clearTimeout); openTimers = []; R3.introStart = 0; R3.mode = null; document.body.classList.remove('opening');
+  try { if (canVoice()) speechSynthesis.cancel(); } catch (e) {}
+  save.seenOpen = 1; persist(); au('setMusic', 'menu'); au('setIntensity', 0); if (S.screen === 'intro') showScreen('home');
+}
 function showScreen(name, data) {
   S.screen = name;
+  document.body.classList.toggle('intro-scr', name === 'intro');
   const hudOn = !name || name === 'pause';
   document.body.classList.toggle('playing', !name);
   touchEl.hidden = !(touch.on && !name);
@@ -2362,6 +2398,13 @@ function showScreen(name, data) {
 }
 const money = () => `<span class="pill money">${fmt(save.money)}</span>`;
 const SCREENS = {
+  intro: () => `<div class="opening-wrap">
+      <i class="lb top"></i><i class="lb bot"></i>
+      <div class="op-start"><h1 class="logo">NÉON<br><span>BAY</span></h1><p>Une histoire de crime en 30 nuits, de Néon Bay aux favelas de Morro Azul.</p><button class="btn primary" data-opening="1">Commencer l'histoire</button><button class="btn small ghost" data-opskip="1">Passer l'introduction</button></div>
+      <div class="op-cap"><small class="op-ttl"></small><p class="op-txt"></p></div>
+      <div class="op-logo"><h1 class="logo">NÉON<br><span>BAY</span></h1><p>Niveau 1 · Nouveau en ville</p></div>
+      <button class="op-skip" data-opskip="1">Passer ›</button><div class="op-bar"><i></i></div>
+    </div>`,
   home: () => {
     const done = Object.keys(save.done).length;
     return `<div class="wrap home">
@@ -2371,6 +2414,7 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         <button class="btn" data-go="trophies">Succès</button>
+        <button class="btn" data-go="intro">Introduction</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
@@ -2634,6 +2678,8 @@ screenEl.addEventListener('click', e => {
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
+  if (ds.opening) { screenEl.querySelector('.op-start').hidden = true; playOpening(); return; }
+  if (ds.opskip) { endOpening(); if (S.screen === 'intro') showScreen('home'); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
@@ -2726,7 +2772,7 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
-showScreen('home');
+showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
 window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

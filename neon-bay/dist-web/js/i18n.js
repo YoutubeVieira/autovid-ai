@@ -13,6 +13,22 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    "Néon Bay · 2 h du matin": { en: "Neon Bay · 2 a.m.", es: "Neon Bay · 2 de la madrugada", pt: "Neon Bay · 2 da manhã" },
+    "Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.": { en: "You step off the bus with forty dollars and a number scribbled on a ticket.", es: "Bajas del autobús con cuarenta dólares y un número garabateado en un boleto.", pt: "Você desce do ônibus com quarenta dólares e um número rabiscado num bilhete." },
+    "Le cousin Dre": { en: "Cousin Dre", es: "El primo Dre", pt: "O primo Dre" },
+    "Il tient trois coins de rue. Les Vipères veulent tout le reste, et la police regarde ailleurs… contre paiement.": { en: "He runs three street corners. The Vipers want everything else, and the cops look the other way… for a price.", es: "Controla tres esquinas. Las Víboras quieren todo lo demás, y la policía mira hacia otro lado… por un precio.", pt: "Ele comanda três esquinas. As Víboras querem todo o resto, e a polícia finge que não vê… por um preço." },
+    "La règle": { en: "The rule", es: "La regla", pt: "A regra" },
+    "Ici, on monte en rendant des services. Livrer, voler, escorter, disparaître dans les tunnels.": { en: "Here, you rise by doing favors. Deliver, steal, escort, vanish into the tunnels.", es: "Aquí se sube haciendo favores. Entregar, robar, escoltar, desaparecer por los túneles.", pt: "Aqui você sobe fazendo favores. Entregar, roubar, escoltar, sumir pelos túneis." },
+    "Au-delà de la baie": { en: "Beyond the bay", es: "Más allá de la bahía", pt: "Além da baía" },
+    "Porto Lumi, Sierra Verde, Morro Azul. Chaque ville a ses gangs, ses règles et ses flics à acheter.": { en: "Porto Lumi, Sierra Verde, Morro Azul. Every city has its gangs, its rules and its cops for sale.", es: "Porto Lumi, Sierra Verde, Morro Azul. Cada ciudad tiene sus pandillas, sus reglas y sus policías comprables.", pt: "Porto Lumi, Sierra Verde, Morro Azul. Cada cidade tem suas gangues, suas regras e seus policiais à venda." },
+    "Trente nuits": { en: "Thirty nights", es: "Treinta noches", pt: "Trinta noites" },
+    "Une seule question : jusqu’où tu montes ?": { en: "Just one question: how high will you rise?", es: "Una sola pregunta: ¿hasta dónde vas a subir?", pt: "Uma só pergunta: até onde você vai subir?" },
+    "Une histoire de crime en 30 nuits, de Néon Bay aux favelas de Morro Azul.": { en: "A crime story in 30 nights, from Neon Bay to the favelas of Morro Azul.", es: "Una historia de crimen en 30 noches, de Neon Bay a las favelas de Morro Azul.", pt: "Uma história de crime em 30 noites, de Neon Bay às favelas do Morro Azul." },
+    "Commencer l'histoire": { en: "Start the story", es: "Empezar la historia", pt: "Começar a história" },
+    "Passer l'introduction": { en: "Skip intro", es: "Saltar la introducción", pt: "Pular a introdução" },
+    "Passer ›": { en: "Skip ›", es: "Saltar ›", pt: "Pular ›" },
+    "Introduction": { en: "Intro", es: "Introducción", pt: "Introdução" },
+    "Niveau 1 · Nouveau en ville": { en: "Level 1 · New in town", es: "Nivel 1 · Nuevo en la ciudad", pt: "Nível 1 · Novo na cidade" },
     'les gardiens': { en: 'the guards', es: 'los guardias', pt: 'os guardas' },
     'Évasion': { en: 'Jailbreak', es: 'Fuga', pt: 'Fuga' }, 'Libérateur': { en: 'Liberator', es: 'Libertador', pt: 'Libertador' }, 'Alarme ! Neutralise les gardiens': { en: 'Alarm! Take out the guards', es: '¡Alarma! Neutraliza a los guardias', pt: 'Alarme! Neutralize os guardas' },
     'Voix off activée': { en: 'Voice-over on', es: 'Voz en off activada', pt: 'Narração ativada' },

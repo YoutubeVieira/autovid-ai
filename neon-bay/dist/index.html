@@ -142,7 +142,7 @@ body.touch .keys{display:none}
 .steps li::before{content:counter(s);font-family:var(--display);color:var(--acc,var(--cyan));margin-right:8px;font-size:12px}
 .info{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
 .info b{color:var(--ink)}
-.tabs{display:flex;gap:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{font-family:var(--display);font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer}
 .tabs button.on{background:var(--cyan);color:#06121a;border-color:transparent}
 .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
@@ -244,6 +244,34 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 @media (max-height:500px) and (orientation:landscape){#prompt{top:calc(88px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 300px)}#toast{top:calc(116px + env(safe-area-inset-top,0px))!important;font-size:13px}#tip{top:calc(140px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 320px)}}
 @media (max-width:760px) and (orientation:portrait){#prompt{top:calc(150px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 32px)}#toast{top:calc(180px + env(safe-area-inset-top,0px))!important}#tip{top:calc(212px + env(safe-area-inset-top,0px))!important}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
+
+/* introduction */
+body.intro-scr #screen{background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(5,4,12,.55) 100%);padding:0;overflow:hidden}
+.opening-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center}
+.opening-wrap .lb{position:absolute;left:0;right:0;height:0;background:#000;transition:height .8s ease;z-index:1}
+.opening-wrap .lb.top{top:0}.opening-wrap .lb.bot{bottom:0}
+body.opening .opening-wrap .lb{height:11vh}
+.op-start{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 26px;max-width:560px;background:rgba(8,6,18,.72);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(6px)}
+.op-start p{font-size:15px;color:var(--ink);opacity:.9;text-shadow:0 2px 8px #000}
+.op-start .btn.ghost{background:transparent;border-color:transparent;opacity:.75}
+.op-cap{position:absolute;left:50%;bottom:calc(11vh + 26px);transform:translate(-50%,12px);width:min(720px,calc(100vw - 32px));opacity:0;transition:opacity .7s,transform .7s;z-index:2;text-shadow:0 2px 10px #000}
+.op-cap.in{opacity:1;transform:translate(-50%,0)}
+.op-ttl{display:block;font-family:var(--display);font-size:clamp(12px,1.8vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+.op-txt{font-size:clamp(16px,2.6vw,24px);line-height:1.35;color:#fff;font-weight:600}
+.op-logo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.92);transition:opacity 1s,transform 1.4s;z-index:2;pointer-events:none}
+.op-logo.in{opacity:1;transform:scale(1)}.op-logo p{font-family:var(--display);color:var(--gold);letter-spacing:.1em;margin-top:8px}
+.op-skip{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));top:calc(11vh + 12px);z-index:3;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:6px 14px;font:600 13px var(--body,inherit);display:none}
+body.opening .op-skip{display:block}
+.op-bar{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:3;display:none}body.opening .op-bar{display:block}
+.op-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--magenta),var(--cyan));transition:width 1s linear}
+@media (max-height:500px){body.opening .opening-wrap .lb{height:8vh}.op-cap{bottom:calc(8vh + 14px)}.op-skip{top:calc(8vh + 8px)}.op-start .logo{font-size:44px}}
+
+/* audit mise en page : messages toujours sous le bloc objectif, cibles tactiles >= 44 px */
+body.playing #prompt{top:calc(var(--hudB,98px) + 6px)!important}
+body.playing #toast{top:calc(var(--hudB,98px) + 40px)!important}
+body.playing #tip{top:calc(var(--hudB,98px) + 72px)!important}
+#bCam,#bPause{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+#bCam{right:calc(84px + env(safe-area-inset-right,0px))}
 </style>
 </head>
 <body>
@@ -5963,6 +5991,22 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    "Néon Bay · 2 h du matin": { en: "Neon Bay · 2 a.m.", es: "Neon Bay · 2 de la madrugada", pt: "Neon Bay · 2 da manhã" },
+    "Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.": { en: "You step off the bus with forty dollars and a number scribbled on a ticket.", es: "Bajas del autobús con cuarenta dólares y un número garabateado en un boleto.", pt: "Você desce do ônibus com quarenta dólares e um número rabiscado num bilhete." },
+    "Le cousin Dre": { en: "Cousin Dre", es: "El primo Dre", pt: "O primo Dre" },
+    "Il tient trois coins de rue. Les Vipères veulent tout le reste, et la police regarde ailleurs… contre paiement.": { en: "He runs three street corners. The Vipers want everything else, and the cops look the other way… for a price.", es: "Controla tres esquinas. Las Víboras quieren todo lo demás, y la policía mira hacia otro lado… por un precio.", pt: "Ele comanda três esquinas. As Víboras querem todo o resto, e a polícia finge que não vê… por um preço." },
+    "La règle": { en: "The rule", es: "La regla", pt: "A regra" },
+    "Ici, on monte en rendant des services. Livrer, voler, escorter, disparaître dans les tunnels.": { en: "Here, you rise by doing favors. Deliver, steal, escort, vanish into the tunnels.", es: "Aquí se sube haciendo favores. Entregar, robar, escoltar, desaparecer por los túneles.", pt: "Aqui você sobe fazendo favores. Entregar, roubar, escoltar, sumir pelos túneis." },
+    "Au-delà de la baie": { en: "Beyond the bay", es: "Más allá de la bahía", pt: "Além da baía" },
+    "Porto Lumi, Sierra Verde, Morro Azul. Chaque ville a ses gangs, ses règles et ses flics à acheter.": { en: "Porto Lumi, Sierra Verde, Morro Azul. Every city has its gangs, its rules and its cops for sale.", es: "Porto Lumi, Sierra Verde, Morro Azul. Cada ciudad tiene sus pandillas, sus reglas y sus policías comprables.", pt: "Porto Lumi, Sierra Verde, Morro Azul. Cada cidade tem suas gangues, suas regras e seus policiais à venda." },
+    "Trente nuits": { en: "Thirty nights", es: "Treinta noches", pt: "Trinta noites" },
+    "Une seule question : jusqu’où tu montes ?": { en: "Just one question: how high will you rise?", es: "Una sola pregunta: ¿hasta dónde vas a subir?", pt: "Uma só pergunta: até onde você vai subir?" },
+    "Une histoire de crime en 30 nuits, de Néon Bay aux favelas de Morro Azul.": { en: "A crime story in 30 nights, from Neon Bay to the favelas of Morro Azul.", es: "Una historia de crimen en 30 noches, de Neon Bay a las favelas de Morro Azul.", pt: "Uma história de crime em 30 noites, de Neon Bay às favelas do Morro Azul." },
+    "Commencer l'histoire": { en: "Start the story", es: "Empezar la historia", pt: "Começar a história" },
+    "Passer l'introduction": { en: "Skip intro", es: "Saltar la introducción", pt: "Pular a introdução" },
+    "Passer ›": { en: "Skip ›", es: "Saltar ›", pt: "Pular ›" },
+    "Introduction": { en: "Intro", es: "Introducción", pt: "Introdução" },
+    "Niveau 1 · Nouveau en ville": { en: "Level 1 · New in town", es: "Nivel 1 · Nuevo en la ciudad", pt: "Nível 1 · Novo na cidade" },
     'les gardiens': { en: 'the guards', es: 'los guardias', pt: 'os guardas' },
     'Évasion': { en: 'Jailbreak', es: 'Fuga', pt: 'Fuga' }, 'Libérateur': { en: 'Liberator', es: 'Libertador', pt: 'Libertador' }, 'Alarme ! Neutralise les gardiens': { en: 'Alarm! Take out the guards', es: '¡Alarma! Neutraliza a los guardias', pt: 'Alarme! Neutralize os guardas' },
     'Voix off activée': { en: 'Voice-over on', es: 'Voz en off activada', pt: 'Narração ativada' },
@@ -7672,6 +7716,7 @@ function fade(t) { hud.fade.textContent = TR(t); hud.fade.style.opacity = 1; set
 function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = TR(v); } }
 function setW(el, k, v) { if (last[k] !== v) { last[k] = v; el.style.width = v + '%'; } }
 function updHud(dt) {
+  last.hb = (last.hb || 0) - dt; if (last.hb <= 0) { last.hb = .5; const r = hud.step.getBoundingClientRect(); const v = r.height && r.top < innerHeight / 2 ? Math.round(r.bottom) : 0; if (v !== last.hbv) { last.hbv = v; if (v) document.body.style.setProperty('--hudB', v + 'px'); else document.body.style.removeProperty('--hudB'); } }
   setText(hud.money, 'm', fmt(save.money));
   const s = stars(); if (last.s !== s) { last.s = s; starEls.forEach((e, i) => e.classList.toggle('on', i < s)); }
   const seen = s > 0 && S.unseen < .5; if (last.seen !== seen) { last.seen = seen; hud.stars.classList.toggle('blink', seen); }
@@ -8856,6 +8901,12 @@ function render3D(dt) {
     cam.x = px; cam.y = pz; cam.z = 400;
     ccx = px + fx * 420; ccz = pz + fz * 420;
   }
+  if (S.screen === 'intro' && R3.introStart) {
+    const t = (performance.now() - R3.introStart) / 1000, c = W / 2, sh = Math.min(5, Math.floor(t / OPEN_SHOT)), u = Math.min(1, (t % OPEN_SHOT) / OPEN_SHOT), e = u * u * (3 - 2 * u);
+    const S5 = [[c - 1100 + e * 600, 22, c + 18, c - 600 + e * 600, 26, c + 18], [c + 300, 170 + e * 300, c + 520, c - 80, 40, c - 60], [c - 620 + e * 420, 150 - e * 40, c - 420, c + 220, 90, c + 60], [c + 380 - e * 260, 60, c - 260 + e * 120, c - 60, 30, c + 120], [c + Math.cos(.4 + e * 1.1) * 1300, 560, c + Math.sin(.4 + e * 1.1) * 1300, c, 0, c], [c, 980 - e * 120, c + 520, c, 0, c]][sh];
+    R3.cam.position.set(S5[0], S5[1], S5[2]); R3.cam.lookAt(S5[3], S5[4], S5[5]); if (R3.cam.fov !== 55) { R3.cam.fov = 55; R3.cam.updateProjectionMatrix(); R3.mode = 'intro'; }
+    ccx = S5[3]; ccz = S5[5];
+  }
   const near = (x, y) => Math.abs(x - ccx) < 1150 && Math.abs(y - ccz) < 1150;
   const hideOwn = mode === 'car' && P.car;
   R3.seen.clear();
@@ -8931,8 +8982,37 @@ function render3D(dt) {
 // ---------- écrans ----------
 const screenEl = $('screen');
 let shopReturn = null;
+// ---------- introduction (premier lancement) ----------
+const OPEN_SHOT = 4.6;
+const OPEN_LINES = [
+  ['Néon Bay · 2 h du matin', 'Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.'],
+  ['Le cousin Dre', 'Il tient trois coins de rue. Les Vipères veulent tout le reste, et la police regarde ailleurs… contre paiement.'],
+  ['La règle', 'Ici, on monte en rendant des services. Livrer, voler, escorter, disparaître dans les tunnels.'],
+  ['Au-delà de la baie', 'Porto Lumi, Sierra Verde, Morro Azul. Chaque ville a ses gangs, ses règles et ses flics à acheter.'],
+  ['Trente nuits', 'Une seule question : jusqu’où tu montes ?'],
+];
+let openTimers = [];
+function playOpening() {
+  openTimers.forEach(clearTimeout); openTimers = [];
+  au('init'); au('setMusic', 'usa'); au('setIntensity', .4);
+  R3.introStart = performance.now(); document.body.classList.add('opening');
+  const cap = screenEl.querySelector('.op-cap'), ttl = screenEl.querySelector('.op-ttl'), txt = screenEl.querySelector('.op-txt'), bar = screenEl.querySelector('.op-bar i');
+  OPEN_LINES.forEach((ln, i) => openTimers.push(setTimeout(() => {
+    if (S.screen !== 'intro') return; cap.classList.remove('in'); void cap.offsetWidth; ttl.textContent = TR(ln[0]); txt.textContent = TR(ln[1]); cap.classList.add('in');
+    bar.style.width = ((i + 1) / (OPEN_LINES.length + 1) * 100) + '%';
+    if (i === 0) narrate('usa', ''); setTimeout(() => say(TR(ln[1]), VLOC[(I18 && I18.lang) || 'fr'] || 'fr-FR', 1.02), i === 0 ? 1400 : 200);
+  }, 600 + i * OPEN_SHOT * 1000)));
+  openTimers.push(setTimeout(() => { if (S.screen !== 'intro') return; cap.classList.remove('in'); screenEl.querySelector('.op-logo').classList.add('in'); bar.style.width = '100%'; au('step'); }, 600 + OPEN_LINES.length * OPEN_SHOT * 1000));
+  openTimers.push(setTimeout(endOpening, 600 + OPEN_LINES.length * OPEN_SHOT * 1000 + 3200));
+}
+function endOpening() {
+  openTimers.forEach(clearTimeout); openTimers = []; R3.introStart = 0; R3.mode = null; document.body.classList.remove('opening');
+  try { if (canVoice()) speechSynthesis.cancel(); } catch (e) {}
+  save.seenOpen = 1; persist(); au('setMusic', 'menu'); au('setIntensity', 0); if (S.screen === 'intro') showScreen('home');
+}
 function showScreen(name, data) {
   S.screen = name;
+  document.body.classList.toggle('intro-scr', name === 'intro');
   const hudOn = !name || name === 'pause';
   document.body.classList.toggle('playing', !name);
   touchEl.hidden = !(touch.on && !name);
@@ -8946,6 +9026,13 @@ function showScreen(name, data) {
 }
 const money = () => `<span class="pill money">${fmt(save.money)}</span>`;
 const SCREENS = {
+  intro: () => `<div class="opening-wrap">
+      <i class="lb top"></i><i class="lb bot"></i>
+      <div class="op-start"><h1 class="logo">NÉON<br><span>BAY</span></h1><p>Une histoire de crime en 30 nuits, de Néon Bay aux favelas de Morro Azul.</p><button class="btn primary" data-opening="1">Commencer l'histoire</button><button class="btn small ghost" data-opskip="1">Passer l'introduction</button></div>
+      <div class="op-cap"><small class="op-ttl"></small><p class="op-txt"></p></div>
+      <div class="op-logo"><h1 class="logo">NÉON<br><span>BAY</span></h1><p>Niveau 1 · Nouveau en ville</p></div>
+      <button class="op-skip" data-opskip="1">Passer ›</button><div class="op-bar"><i></i></div>
+    </div>`,
   home: () => {
     const done = Object.keys(save.done).length;
     return `<div class="wrap home">
@@ -8955,6 +9042,7 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         <button class="btn" data-go="trophies">Succès</button>
+        <button class="btn" data-go="intro">Introduction</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
       </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
@@ -9218,6 +9306,8 @@ screenEl.addEventListener('click', e => {
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
+  if (ds.opening) { screenEl.querySelector('.op-start').hidden = true; playOpening(); return; }
+  if (ds.opskip) { endOpening(); if (S.screen === 'intro') showScreen('home'); return; }
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
@@ -9310,7 +9400,7 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
-showScreen('home');
+showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
 window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

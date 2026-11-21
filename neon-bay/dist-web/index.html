@@ -146,7 +146,7 @@ body.touch .keys{display:none}
 .steps li::before{content:counter(s);font-family:var(--display);color:var(--acc,var(--cyan));margin-right:8px;font-size:12px}
 .info{display:flex;flex-direction:column;gap:4px;font-size:15px;color:var(--muted)}
 .info b{color:var(--ink)}
-.tabs{display:flex;gap:6px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
 .tabs button{font-family:var(--display);font-size:13px;background:transparent;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer}
 .tabs button.on{background:var(--cyan);color:#06121a;border-color:transparent}
 .items{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
@@ -248,6 +248,34 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 @media (max-height:500px) and (orientation:landscape){#prompt{top:calc(88px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 300px)}#toast{top:calc(116px + env(safe-area-inset-top,0px))!important;font-size:13px}#tip{top:calc(140px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 320px)}}
 @media (max-width:760px) and (orientation:portrait){#prompt{top:calc(150px + env(safe-area-inset-top,0px))!important;max-width:calc(100vw - 32px)}#toast{top:calc(180px + env(safe-area-inset-top,0px))!important}#tip{top:calc(212px + env(safe-area-inset-top,0px))!important}}
 @media (prefers-reduced-motion:reduce){#stars.blink span.on{animation:none}}
+
+/* introduction */
+body.intro-scr #screen{background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(5,4,12,.55) 100%);padding:0;overflow:hidden}
+.opening-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center}
+.opening-wrap .lb{position:absolute;left:0;right:0;height:0;background:#000;transition:height .8s ease;z-index:1}
+.opening-wrap .lb.top{top:0}.opening-wrap .lb.bot{bottom:0}
+body.opening .opening-wrap .lb{height:11vh}
+.op-start{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;padding:22px 26px;max-width:560px;background:rgba(8,6,18,.72);border:1px solid rgba(255,255,255,.08);border-radius:18px;backdrop-filter:blur(6px)}
+.op-start p{font-size:15px;color:var(--ink);opacity:.9;text-shadow:0 2px 8px #000}
+.op-start .btn.ghost{background:transparent;border-color:transparent;opacity:.75}
+.op-cap{position:absolute;left:50%;bottom:calc(11vh + 26px);transform:translate(-50%,12px);width:min(720px,calc(100vw - 32px));opacity:0;transition:opacity .7s,transform .7s;z-index:2;text-shadow:0 2px 10px #000}
+.op-cap.in{opacity:1;transform:translate(-50%,0)}
+.op-ttl{display:block;font-family:var(--display);font-size:clamp(12px,1.8vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+.op-txt{font-size:clamp(16px,2.6vw,24px);line-height:1.35;color:#fff;font-weight:600}
+.op-logo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.92);transition:opacity 1s,transform 1.4s;z-index:2;pointer-events:none}
+.op-logo.in{opacity:1;transform:scale(1)}.op-logo p{font-family:var(--display);color:var(--gold);letter-spacing:.1em;margin-top:8px}
+.op-skip{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));top:calc(11vh + 12px);z-index:3;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:6px 14px;font:600 13px var(--body,inherit);display:none}
+body.opening .op-skip{display:block}
+.op-bar{position:absolute;left:0;right:0;bottom:0;height:3px;z-index:3;display:none}body.opening .op-bar{display:block}
+.op-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--magenta),var(--cyan));transition:width 1s linear}
+@media (max-height:500px){body.opening .opening-wrap .lb{height:8vh}.op-cap{bottom:calc(8vh + 14px)}.op-skip{top:calc(8vh + 8px)}.op-start .logo{font-size:44px}}
+
+/* audit mise en page : messages toujours sous le bloc objectif, cibles tactiles >= 44 px */
+body.playing #prompt{top:calc(var(--hudB,98px) + 6px)!important}
+body.playing #toast{top:calc(var(--hudB,98px) + 40px)!important}
+body.playing #tip{top:calc(var(--hudB,98px) + 72px)!important}
+#bCam,#bPause{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
+#bCam{right:calc(84px + env(safe-area-inset-right,0px))}
 </style>
 </head>
 <body>
