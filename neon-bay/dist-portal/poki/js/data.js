@@ -140,12 +140,17 @@ window.NB_DATA = (() => {
     { id: 'sniper', name: 'Fusil de précision', price: 15000, lvl: 11, rate: 1.1, dmg: 130, spread: 0, pellets: 1, speed: 1400, life: 1.1, mag: 5, reload: 2.0, reserve: 30, desc: 'Une balle, un ennemi.' },
     { id: 'rocket', name: 'Lance-roquettes', price: 30000, lvl: 15, rate: 1.2, dmg: 90, spread: 0, pellets: 1, speed: 520, life: 1.3, explosive: true, mag: 1, reload: 2.2, reserve: 8, desc: 'Explose voitures et groupes.' },
     { id: 'minigun', name: 'Minigun', price: 70000, lvl: 24, rate: .045, dmg: 14, spread: .15, pellets: 1, speed: 820, life: .7, mag: 150, reload: 3.0, reserve: 600, desc: 'Un mur de balles.' },
+    { id: 'lmg', name: 'Mitrailleuse lourde', price: 22000, lvl: 13, rate: .075, dmg: 24, spread: .09, pellets: 1, speed: 860, life: .8, mag: 100, reload: 2.6, reserve: 400, desc: 'Gros chargeur, gros dégâts. Touche 9.' },
+    { id: 'gl', name: 'Lance-grenades', price: 40000, lvl: 18, rate: .55, dmg: 70, spread: .03, pellets: 1, speed: 560, life: .9, explosive: true, mag: 6, reload: 2.4, reserve: 30, desc: 'Six explosions à la suite. Touche 0.' },
+    { id: 'rail', name: 'Fusil à impulsion', price: 120000, lvl: 27, rate: .9, dmg: 260, spread: 0, pellets: 1, speed: 1800, life: 1.2, mag: 4, reload: 2.2, reserve: 24, desc: 'Prototype ultime : 260 dégâts par tir.' },
   ];
 
   const GEAR = [
     { id: 'armor1', name: 'Gilet pare-balles', price: 1000, lvl: 1, kind: 'armor', value: 50, desc: '50 points d’armure au début de chaque niveau.' },
     { id: 'armor2', name: 'Gilet renforcé', price: 6000, lvl: 6, kind: 'armor', value: 100, desc: '100 points d’armure.' },
     { id: 'armor3', name: 'Armure tactique', price: 20000, lvl: 14, kind: 'armor', value: 150, desc: '150 points d’armure.' },
+    { id: 'armor4', name: 'Exosquelette', price: 45000, lvl: 20, kind: 'armor', value: 250, desc: '250 points d’armure.' },
+    { id: 'armor5', name: 'Armure lourde', price: 90000, lvl: 27, kind: 'armor', value: 400, desc: '400 points d’armure : presque un tank.' },
     { id: 'medkit', name: 'Trousse de soins', price: 400, lvl: 1, kind: 'medkit', max: 5, desc: '+50 santé (touche H). Max 5.' },
     { id: 'nitro', name: 'Nitro x3', price: 600, lvl: 2, kind: 'nitro', max: 9, desc: 'Boost en voiture (touche N). Max 9.' },
     { id: 'carArmor', name: 'Blindage de voiture', price: 5000, lvl: 5, kind: 'perk', desc: 'Tes voitures prennent 2 fois moins de dégâts.' },

@@ -158,6 +158,13 @@ const PEDC = ['#ffcf99', '#e0a070', '#8d5a3b', '#f2d3b3', '#5c3a24', '#c68b59'];
 const SHIRT = ['#ff2e93', '#21e6ff', '#ffb627', '#a6ff4d', '#ffffff', '#9d7bff', '#ff6b3d'];
 const lvl = () => L ? L.n : 1;
 // facilité des premiers niveaux : 0,5 au niveau 1, puis on remonte jusqu'à 1 au niveau 11
+const DIFF = [['Facile', .55, .7, .75, .8, 1.35], ['Normal', 1, 1, 1, 1, 1], ['Difficile', 1.4, 1.3, 1.2, 1.3, .85], ['Légende', 1.9, 1.6, 1.4, 1.7, .75]];
+const dif = () => { const d = DIFF[save.diff == null ? 1 : save.diff] || DIFF[1]; return { name: d[0], dmg: d[1], hp: d[2], cnt: d[3], pay: d[4], time: d[5] }; };
+const TRAIN = [['end', 'Endurance', '+15 santé max par séance', '#ff2e93'], ['aim', 'Tir', 'Tirs plus précis (-12 %) et rechargement plus rapide (-8 %)', '#21e6ff'], ['str', 'Force', 'Coups de poing +25 % et dégâts reçus -5 %', '#a6ff4d']];
+const trainLv = k => (save.train && save.train[k]) || 0;
+const trainCost = lv => Math.round(1500 * Math.pow(2.2, lv) / 100) * 100;
+const trainNeed = lv => lv * 4 + 1;
+const maxHp = () => 100 + 15 * trainLv('end');
 const ez = () => { const n = lvl(); return n >= 11 ? 1 : .5 + .05 * (n - 1); };
 // qualité graphique : auto (selon les images par seconde), haute, moyenne, basse
 const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, label: 'Haute' }, medium: { pr: 1.25, peds: 24, traffic: 13, lod: 600, fx: true, label: 'Moyenne' }, low: { pr: 1, peds: 14, traffic: 8, lod: 350, fx: false, label: 'Basse' } };
@@ -432,7 +439,7 @@ function updPed(p, dt) {
 // ---------- ennemis ----------
 function mkEnemy(x, y, faction, boss, group) {
   const n = lvl();
-  const hp = (boss ? 380 + n * 55 : 38 + n * 5) * (.6 + .4 * ez());
+  const hp = (boss ? 380 + n * 55 : 38 + n * 5) * (.6 + .4 * ez()) * dif().hp;
   return { role: !boss && Math.random() < .3 ? 'flank' : 'cover', mode: 'move', modeT: rnd(1, 2), look: faction.look || null, x, y, a: rnd(TAU), hp, max: hp, color: faction.color, boss: boss || null, group, alert: false, cd: rnd(1, 2), strafe: Math.random() < .5 ? 1 : -1, step: 0, st: rnd(2) };
 }
 function hitEnemy(e, dmg) {
@@ -517,6 +524,7 @@ function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.
 // ---------- joueur ----------
 function hurt(n) {
   if (S.dead > 0 || S.mode !== 'play') return;
+  n *= dif().dmg * (1 - .05 * trainLv('str'));
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
   S.hp -= n; P.hitT = S.time; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
@@ -585,7 +593,7 @@ function startReload() {
   const w = wepDef(save.weapon), am = P.ammo && P.ammo[w.id];
   if (!w.mag || !am || P.reload > 0 || am.mag >= w.mag) return;
   if (am.res <= 0) { msg('Plus de munitions : ramasse des caisses ou change d\u2019arme'); au('deny'); return; }
-  P.reload = w.reload; P.reloadW = w.id; au('click'); msg('Rechargement…');
+  P.reload = w.reload * (1 - .08 * trainLv('aim')); P.reloadW = w.id; au('click'); msg('Rechargement…');
 }
 function finishReload() {
   const w = wepDef(P.reloadW), am = P.ammo[w.id]; if (!am) return;
@@ -599,7 +607,7 @@ function melee() {
   P.cd = wepDef('fists').rate; P.punch = .25; P.lastShot = S.time;
   if (!best) { au('click'); return; }
   P.a = Math.atan2(best.y - P.y, best.x - P.x);
-  if (kind === 'e') { hitEnemy(best, wepDef('fists').dmg); best.x += Math.cos(P.a) * 10; best.y += Math.sin(P.a) * 10; } else koPed(best, true);
+  if (kind === 'e') { hitEnemy(best, wepDef('fists').dmg * (1 + .25 * trainLv('str'))); best.x += Math.cos(P.a) * 10; best.y += Math.sin(P.a) * 10; } else koPed(best, true);
   au('hit', 0); vib(25); sparks(best.x, best.y, 4);
 }
 function fire() {
@@ -619,7 +627,7 @@ function fire() {
     if (best) a = Math.atan2(best.y - P.y, best.x - P.x);
   }
   for (let k = 0; k < w.pellets; k++) {
-    const aa = a + rnd(-w.spread, w.spread);
+    const sp = w.spread * (1 - .12 * trainLv('aim')), aa = a + rnd(-sp, sp);
     bullets.push({ x: P.x + Math.cos(aa) * 12, y: P.y + Math.sin(aa) * 12, vx: Math.cos(aa) * w.speed, vy: Math.sin(aa) * w.speed, life: w.life, dmg: w.dmg, from: 'player', explosive: w.explosive });
   }
   parts.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14, vx: 0, vy: 0, life: .06, max: .06, r: w.explosive ? 10 : 7, col: '#fff2a8' });
@@ -661,7 +669,7 @@ function cycleWeapon(dir = 1) {
   save.weapon = owned[(i + dir + owned.length) % owned.length].id;
   msg(wepDef(save.weapon).name);
 }
-function useMedkit() { if (S.mode !== 'play') return; if (save.medkits <= 0) { msg('Plus de trousse de soins (boutique)'); return; } if (S.hp >= 100) { msg('Santé déjà au maximum'); return; } save.medkits--; S.hp = Math.min(100, S.hp + 50); toast('+50 santé'); }
+function useMedkit() { if (S.mode !== 'play') return; if (save.medkits <= 0) { msg('Plus de trousse de soins (boutique)'); return; } if (S.hp >= maxHp()) { msg('Santé déjà au maximum'); return; } save.medkits--; S.hp = Math.min(maxHp(), S.hp + 50); toast('+50 santé'); }
 function useNitro() { if (S.mode !== 'play' || !P.car) return; if (P.nitro > 0) return; if (save.nitro <= 0) { msg('Plus de nitro (boutique)'); return; } save.nitro--; P.nitro = 2.5; }
 
 // ---------- étapes de mission ----------
@@ -709,7 +717,7 @@ function makeStep(type, n, idx) {
     }
     case 'elim': case 'boss': {
       const c = randWalk(1000, 1900, P.x, P.y);
-      const count = Math.max(2, Math.round((type === 'boss' ? Math.min(10, 2 + Math.floor(n / 3)) : Math.min(14, 3 + Math.floor(n / 2.5))) * (.6 + .4 * ez())));
+      const count = Math.max(2, Math.round((type === 'boss' ? Math.min(10, 2 + Math.floor(n / 3)) : Math.min(14, 3 + Math.floor(n / 2.5))) * (.6 + .4 * ez()) * dif().cnt));
       const boss = spawnGroup(c.x, c.y, count, f, g, type === 'boss' ? (L.def.boss || 'le chef') : null);
       if (n >= 4) for (let k = 0; k < 1 + Math.floor(n / 12); k++) spawnGangCar(c.x, c.y, f, g);
       st.center = c; st.boss = boss;
@@ -772,17 +780,17 @@ function makeStep(type, n, idx) {
 }
 const stepDesc = st => typeof st.desc === 'function' ? st.desc() : st.desc;
 const stepTarget = st => st.dyn ? st.dyn() : st.target;
-const stepReward = n => 100 + n * 60;
-const levelBonus = n => 1000 + n * 800;
+const stepReward = n => Math.round((100 + n * 60) * dif().pay / 10) * 10;
+const levelBonus = n => Math.round((1000 + n * 800) * dif().pay / 50) * 50;
 
 // ---------- niveaux ----------
 function regionOf(n) { return D.REGIONS.find(r => n >= r.from && n <= r.to); }
 function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium || !!PORTAL); }
-function startLevel(n) {
+function startLevel(n, from = 0) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
   cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
-  S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = 100; S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
+  S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = maxHp(); S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
   P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0;
   if (!save.owned[save.weapon]) save.weapon = 'pistol';
   grenades.length = 0; skids.length = 0; skidI = 0;
@@ -793,14 +801,14 @@ function startLevel(n) {
   for (let k = 0; k < 3; k++) { const p = freeNear(P.x + 60, P.y + 40, 80); parkedCar(p.x, p.y); }
   for (let i = 0; i < 25; i++) spawnPed();
   for (let i = 0; i < 14; i++) spawnTraffic();
-  L = { n, def: D.LEVELS[n - 1], region, idx: -1, earned: 0, time: 0, step: null, kos: 0 };
+  L = { n, def: D.LEVELS[n - 1], region, idx: from - 1, cp: from, earned: 0, time: 0, step: null, kos: 0 };
   S.tod = ((n * .23) % 1) * .6 + .7; if (S.tod > 1) S.tod -= 1;
   S.rain = n > 1 && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25);
   save.seenIntro = save.seenIntro || {}; const firstIntro = !save.seenIntro[n]; save.seenIntro[n] = 1;
-  S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, L.def.t, firstIntro ? L.def.s : '');
+  S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, from ? 'Reprise à l’étape ' + (from + 1) : L.def.t, firstIntro ? L.def.s : '');
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
-  if (n === 1) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
+  if (n === 1 && !from) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   try { if (touch.on && screen.orientation && screen.orientation.lock && (document.fullscreenElement || document.webkitFullscreenElement)) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   nextStep();
@@ -818,7 +826,7 @@ function nextStep() {
 function updLevel(dt) {
   const st = L.step; if (!st) return;
   L.time += dt;
-  if (st.time !== null && !st.assisted) { st.assisted = true; if (!st.survive) st.time = Math.round(st.time * (1 + .2 * assist()) * (2 - ez())); else st.time = Math.round(st.time * (.6 + .4 * ez())); }
+  if (st.time !== null && !st.assisted) { st.assisted = true; if (!st.survive) st.time = Math.round(st.time * (1 + .2 * assist()) * (2 - ez()) * dif().time); else st.time = Math.round(st.time * (.6 + .4 * ez()) / dif().time); }
   if (st.time !== null) {
     st.time -= dt;
     if (st.time <= 0) { if (st.survive) { nextStep(); return; } failLevel('Temps écoulé'); return; }
@@ -843,9 +851,10 @@ function completeLevel() {
 function failLevel(reason) {
   if (S.mode !== 'play') return;
   save.fails = save.fails || {}; save.fails[L.n] = (save.fails[L.n] || 0) + 1;
+  const cp = L.idx >= 5 || L.cp ? 5 : 0;
   S.mode = 'result'; if (PORTAL) PORTAL.stop(); persist(); au('fail'); vib(300); au('setMusic', null);
   showBanner(reason.includes('K.O') ? 'K.O.' : reason.includes('Arrêté') ? 'ARRÊTÉ' : 'ÉCHEC');
-  setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned }), 1100);
+  setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned, cp }), 1100);
 }
 
 // ---------- progression : succès, défis du jour, conseils ----------
@@ -953,7 +962,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyT') radioNext();
     else if (e.code === 'Tab' || e.code === 'KeyL') { e.preventDefault && e.preventDefault(); lockNext(); }
     else if (e.code === 'KeyR') startReload();
-    else if (/^Digit[1-8]$/.test(e.code)) { const w = D.WEAPONS[+e.code.slice(5) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
+    else if (/^Digit[0-9]$/.test(e.code)) { const w = D.WEAPONS[(+e.code.slice(5) || 10) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
     else if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
   } else if (S.mode === 'pause' && (e.code === 'Escape' || e.code === 'KeyP')) resumeGame();
 });
@@ -1037,8 +1046,8 @@ function updHud(dt) {
   setText(hud.money, 'm', fmt(save.money));
   const s = stars(); if (last.s !== s) { last.s = s; starEls.forEach((e, i) => e.classList.toggle('on', i < s)); }
   const seen = s > 0 && S.unseen < .5; if (last.seen !== seen) { last.seen = seen; hud.stars.classList.toggle('blink', seen); }
-  setW(hud.hp, 'hp', Math.max(0, Math.round(S.hp)));
-  setW(hud.armor, 'ar', armorMax() ? Math.round(P.armor / 150 * 100) : 0);
+  setW(hud.hp, 'hp', Math.max(0, Math.round(S.hp / maxHp() * 100)));
+  setW(hud.armor, 'ar', armorMax() ? Math.round(P.armor / armorMax() * 100) : 0);
   { const w = wepDef(save.weapon), am = P.ammo && P.ammo[w.id]; setText(hud.wep, 'w', w.name + (am ? ` ${am.mag}/${w.mag} · ${am.res === Infinity ? '∞' : am.res}` : '') + (P.reload > 0 ? ' · recharge…' : '')); }
   { const m = Math.floor(((S.tod || 0) * 1440)), hh = Math.floor(m / 60), mm = m % 60; setText($('clock'), 'clk', String(hh).padStart(2, '0') + ':' + String(mm - mm % 5).padStart(2, '0') + (S.rain ? ' · pluie' : '')); }
   setText(hud.inv, 'inv', 'Soins ' + save.medkits + ' · Nitro ' + save.nitro);
@@ -1052,6 +1061,10 @@ function updHud(dt) {
     const late = t !== null && eta > t && !st.survive;
     setText(hud.sC, 'sc', (t === null ? '' : `${(t / 60) | 0}:${String(t % 60).padStart(2, '0')}`) + (km ? (t === null ? '' : ' · ') + km + ' · ~' + eta + ' s' : ''));
     if (last.late !== late) { last.late = late; hud.sC.style.color = late ? 'var(--danger)' : ''; }
+    { if (last.pIdx !== L.idx) { last.pIdx = L.idx; L.g0 = 0; L.t0 = st.time; }
+      let fr = 0; if (st.survive && L.t0) fr = 1 - Math.max(0, st.time) / L.t0; else if (gps.len) { L.g0 = Math.max(L.g0 || 0, gps.len); fr = 1 - gps.len / L.g0; }
+      const pr = Math.max(0, Math.min(1, (L.idx + Math.max(0, Math.min(.95, fr))) / 10)), pc = Math.round(pr * 100);
+      if (last.pc !== pc) { last.pc = pc; $('progFill').style.width = pc + '%'; $('progMe').style.left = pc + '%'; setText($('progPct'), 'pp', pc + ' %'); } }
     if (last.dots !== L.idx) { last.dots = L.idx; hud.dots.innerHTML = Array.from({ length: 10 }, (_, i) => `<i class="${i < L.idx ? 'd' : i === L.idx ? 'c' : ''}"></i>`).join(''); }
   }
   const vipOn = !!(vip && vip.hp > 0 && !vip.done);
@@ -1185,7 +1198,7 @@ function update(dt) {
     let near = false; for (const c of cars) if (c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, P.x, P.y) < (P.car ? 62 : 56) && Math.abs(c.v) < 90) { near = true; break; }
     if (near && (!P.car || Math.abs(P.car.v) < 30)) S.bust += dt * (P.car ? .6 : 1); else S.bust = Math.max(0, S.bust - dt);
     if (S.bust > 1.6 + (1 - ez()) * 3) failLevel('Arrêté par la police');
-  } else { S.bust = 0; if (S.hp < 100) S.hp = Math.min(100, S.hp + dt * (1.5 + (1 - ez()) * 6)); }
+  } else { S.bust = 0; if (S.hp < maxHp()) S.hp = Math.min(maxHp(), S.hp + dt * (1.5 + (1 - ez()) * 6)); }
   // nettoyage
   for (const c of cars) if (c.ai === 'block') { c.ttl -= dt; if (c.ttl <= 0 || stars() === 0) c.ai = 'leave'; }
   cars = cars.filter(c => { if (c === P.car || c.keep) return true; const d = dist(c.x, c.y, P.x, P.y); if (c.ai === 'leave' && d > 800) return false; return d < (c.ai ? 1700 : 2600); });
@@ -1720,9 +1733,12 @@ function makeGun(id, skin) {
     case 'sniper': add(bx(13, 2.6, 1.6), body, 1.5, 1, 0); barrel(18, .5, 16, 1.3); add(cyl(1.2, 1.2, 8, 10), dark, 2, 3.8, 0, PI / 2); add(bx(7, 3, 1.4), body, -7, .4, 0, -.1); add(bx(1.8, 3.4, 1.2), dark, -1, -1.4, 0, .3); add(bx(1.4, 4, 1.2), dark, 4, -1.4, 0); break;
     case 'rocket': { const t = add(cyl(2.3, 2.3, 26, 12), body, 6, 2.5, 0); t.rotation.z = PI / 2; add(cyl(2.8, 2.3, 3, 12), dark, 19.5, 2.5, 0, PI / 2); add(bx(2, 4, 1.4), dark, 0, -.8, 0, .2); add(bx(3, 2, 1.2), dark, 4, 5.4, 0); break; }
     case 'minigun': for (let k = 0; k < 6; k++) { const a = k / 6 * TAU, b = barrel(16, .45, 12, 1.4 + Math.sin(a) * 1.4); b.position.z = Math.cos(a) * 1.4; } add(bx(8, 4.5, 4), body, 1, 1.4, 0); add(cyl(2.6, 2.6, 1.5, 10), dark, 5, 1.4, 0, PI / 2); add(bx(2, 4, 1.4), dark, -2, -1.6, 0, .2); add(bx(5, 1.2, 1.2), dark, 1, 4.6, 0); break;
+    case 'lmg': add(bx(14, 3.4, 2), body, 2, 1.2, 0); barrel(10, .7, 13, 1.5); add(cyl(2.4, 2.4, 2.4, 12), dark, 3, -1.6, 0, PI / 2).rotation.x = PI / 2; add(bx(6, 2.6, 1.4), body, -7, .8, 0, -.08); add(bx(1.8, 3.4, 1.2), dark, -1.5, -1.3, 0, .3); add(bx(1, 4, 1), dark, 15, -1.2, 0, .5); add(bx(5, 1.2, 1.2), dark, 2, 3.4, 0); break;
+    case 'gl': { const t = add(cyl(1.8, 1.8, 10, 12), body, 7, 1.8, 0); t.rotation.z = PI / 2; const d = add(cyl(3, 3, 5, 6), dark, 2, 1.2, 0); d.rotation.x = PI / 2; add(bx(1.8, 4, 1.4), dark, -1, -1.6, 0, .25); add(bx(6, 2.4, 1.4), body, -5.5, .6, 0, -.1); break; }
+    case 'rail': { add(bx(16, 3, 2), body, 3, 1.2, 0); barrel(14, .6, 16, 1.4); const glow = mat('#21e6ff', '#21e6ff'); for (let k = 0; k < 4; k++) { const r = add(cyl(1.3, 1.3, .8, 10), glow, 9 + k * 3, 1.4, 0); r.rotation.z = PI / 2; } add(bx(7, 3, 1.4), body, -7, .5, 0, -.1); add(bx(1.8, 3.4, 1.2), dark, -1, -1.4, 0, .3); add(cyl(1.1, 1.1, 7, 10), dark, 2, 3.8, 0, PI / 2); break; }
     default: return null;
   }
-  g.userData.twoHand = ['shotgun', 'rifle', 'sniper', 'rocket', 'minigun', 'uzi'].includes(id);
+  g.userData.twoHand = ['shotgun', 'rifle', 'sniper', 'rocket', 'minigun', 'uzi', 'lmg', 'gl', 'rail'].includes(id);
   return g;
 }
 // ---- personnages articulés : bassin, taille, cou, épaules, coudes, poignets, hanches, genoux, chevilles
@@ -2206,7 +2222,7 @@ const SCREENS = {
         <button class="btn" data-go="trophies">Succès</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -2215,7 +2231,7 @@ const SCREENS = {
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
         <b>E</b><span>Voiture, boutique, tunnel, payer un agent</span>
         <b>Espace / clic</b><span>Tirer · frein à main en voiture</span>
-        <b>Q / molette / 1-8 · R</b><span>Changer d'arme · recharger</span>
+        <b>Q / molette / 1-0 · R</b><span>Changer d'arme · recharger</span>
         <b>B</b><span>Soudoyer la police</span>
         <b>H · N / Maj</b><span>Trousse de soins · nitro</span>
         <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
@@ -2246,6 +2262,7 @@ const SCREENS = {
     </div>`;
   },
   brief: ({ n }) => {
+    briefN = n;
     const l = D.LEVELS[n - 1], r = regionOf(n);
     const recW = D.WEAPONS.filter(w => w.lvl <= n && w.price > 0).slice(-1)[0];
     return `<div class="wrap narrow" style="--acc:${r.accent}">
@@ -2255,7 +2272,7 @@ const SCREENS = {
       <p class="lead">${esc(l.s)}</p>
       <ol class="steps">${l.steps.map(s => `<li>${D.STEP_LABEL[s]}</li>`).join('')}</ol>
       <div class="info"><span>Récompense : <b>${fmt(levelBonus(n))}</b> + ${fmt(stepReward(n))} par étape</span>${save.fails && save.fails[n] >= 2 ? '<span class="assist">Aide activée : plus de temps et ennemis moins dangereux</span>' : ''}${l.boss ? `<span>Chef à abattre : <b>${esc(l.boss)}</b></span>` : ''}${recW && !save.owned[recW.id] ? `<span>Conseillé : ${recW.name}</span>` : ''}</div>
-      <div class="row"><button class="btn primary" data-start="${n}">Commencer</button><button class="btn" data-go="shop" data-ret="brief:${n}">Boutique</button></div>
+      <div class="row"><button class="btn primary" data-start="${n}">Commencer</button><button class="btn" data-diff="1">Difficulté : ${dif().name}</button><button class="btn" data-go="shop" data-ret="brief:${n}">Boutique</button></div>
     </div>`;
   },
   shop: ({ inGame, tab = 'w' }) => {
@@ -2273,8 +2290,8 @@ const SCREENS = {
     };
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-back="1">${inGame ? '← Reprendre' : '← Retour'}</button><h2>Boutique</h2>${money()}</div>
-      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'a' ? 'on' : ''}" data-tab="a">Atelier</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
-      ${tab === 'a' ? armoryHtml() : tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
+      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'a' ? 'on' : ''}" data-tab="a">Atelier</button><button class="${tab === 't' ? 'on' : ''}" data-tab="t">Entraînement</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
+      ${tab === 'a' ? armoryHtml() : tab === 't' ? trainHtml() : tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
       ${tab === 'w' ? '<p class="legend"><span class="k1"></span>Dégâts <span class="k2"></span>Cadence</p>' : ''}
     </div>`;
   },
@@ -2286,7 +2303,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2307,7 +2324,7 @@ const SCREENS = {
     return `<div class="wrap narrow center-col" style="--acc:${r.accent}">
       <p class="eyebrow">Niveau ${d.n}</p><h2 class="title big fail">ÉCHEC</h2>
       <p class="lead">${esc(d.reason)}. L'argent gagné pendant la tentative est conservé (${fmt(d.earned)}).</p>
-      <div class="col"><button class="btn primary" data-start="${d.n}">Réessayer</button><button class="btn" data-go="shop" data-ret="brief:${d.n}">Boutique</button><button class="btn" data-go="map">Carte</button></div>
+      <div class="col">${d.cp ? `<button class="btn primary" data-start="${d.n}" data-from="${d.cp}">Reprendre à l'étape ${d.cp + 1}</button><button class="btn" data-start="${d.n}">Recommencer depuis le début</button>` : `<button class="btn primary" data-start="${d.n}">Réessayer</button>`}<button class="btn" data-go="shop" data-ret="brief:${d.n}">Boutique</button><button class="btn" data-go="map">Carte</button></div>
     </div>`;
   },
   unlock: ({ msg: m }) => {
@@ -2329,6 +2346,21 @@ const SCREENS = {
     </div>`;
   },
 };
+function trainHtml() {
+  return `<div class="items train">${TRAIN.map(([k, name, desc, col]) => { const lv = trainLv(k), max = lv >= 5, cost = trainCost(lv), need = trainNeed(lv), locked = !max && save.maxLevel < need;
+    const pips = Array.from({ length: 5 }, (_, i) => `<i style="background:${i < lv ? col : 'rgba(255,255,255,.14)'}"></i>`).join('');
+    const btn = max ? '<span class="eq">Maximum</span>' : locked ? `<span class="lock">Niveau ${need}</span>` : `<button class="btn small ${save.money >= cost ? 'primary' : ''}" data-train="${k}">S'entraîner · ${fmt(cost)}</button>`;
+    return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${name} · ${lv}/5</h4><p>${desc}</p><div class="pips">${pips}</div></div>${btn}</div>`; }).join('')}</div>
+    <p class="legend">Chaque séance te rend plus fort pour toujours. Santé max : ${maxHp()}.</p>`;
+}
+function train(k) {
+  const lv = trainLv(k), cost = trainCost(lv), t = TRAIN.find(x => x[0] === k);
+  if (!t || lv >= 5 || save.maxLevel < trainNeed(lv)) return;
+  if (save.money < cost) { au('click'); flashNote('Pas assez d’argent'); return; }
+  save.money -= cost; save.train = Object.assign({}, save.train, { [k]: lv + 1 }); if (k === 'end' && S.mode === 'shop') S.hp = maxHp();
+  persist(); au('cash'); vib([30, 40, 30]); flashNote('Séance terminée · ' + t[1] + ' ' + (lv + 1) + '/5');
+  showScreen('shop', shopState);
+}
 function armoryHtml() {
   const owned = D.WEAPONS.filter(w => !w.melee && save.owned[w.id]);
   if (!shopState.aw || !save.owned[shopState.aw] || WBASE(shopState.aw).melee) shopState.aw = save.weapon !== 'fists' ? save.weapon : 'pistol';
@@ -2413,6 +2445,7 @@ function toggleFull() {
     if (r && r.then) r.then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(() => {}); } catch (e) {} }).catch(() => flashNote('Plein écran indisponible ici'));
   } catch (e) { flashNote('Plein écran indisponible ici'); }
 }
+let briefN = 0;
 let shopState = { inGame: false, tab: 'w', ret: 'home' };
 function openShop(inGame, ret) { shopState = { inGame, tab: 'w', ret: ret || (S.screen || 'home') }; if (inGame) { S.mode = 'shop'; if (L) L.bought = true; } showScreen('shop', shopState); }
 function buy(id) {
@@ -2440,6 +2473,8 @@ screenEl.addEventListener('click', e => {
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
   if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
   if (ds.photo) { takePhoto(); return; }
+  if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
+  if (ds.train) { train(ds.train); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
@@ -2448,7 +2483,7 @@ screenEl.addEventListener('click', e => {
   if (ds.go === 'shop') { openShop(false, ds.ret || S.screen); return; }
   if (ds.go) { if (ds.go === 'map') { S.mode = 'menu'; L = null; au('setMusic', 'menu'); } showScreen(ds.go); return; }
   if (ds.lvl) { goLevel(+ds.lvl); return; }
-  if (ds.start) { const n = +ds.start; if (canPlay(n)) { if (PORTAL && S.levelsStarted) PORTAL.breakAd().then(() => startLevel(n)); else startLevel(n); } else goLevel(n); return; }
+  if (ds.start) { const n = +ds.start, fr = +ds.from || 0; if (canPlay(n)) { if (PORTAL && S.levelsStarted) PORTAL.breakAd().then(() => startLevel(n, fr)); else startLevel(n, fr); } else goLevel(n); return; }
   if (ds.rewarded) { b.disabled = true; PORTAL.rewarded().then(ok => { if (ok) { save.money += +ds.rewarded; persist(); au('cash'); flashNote('+' + fmt(+ds.rewarded)); b.remove(); } else b.disabled = false; }); return; }
   if (ds.tab) { shopState.tab = ds.tab; showScreen('shop', shopState); if (ds.tab === 'o') drawOutfitPreview(); if (ds.tab === 'a') mountGunView(); return; }
   if (ds.aw) { shopState.aw = ds.aw; showScreen('shop', shopState); mountGunView(); return; }
@@ -2539,5 +2574,5 @@ if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen('home');
 requestAnimationFrame(frame);
-window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

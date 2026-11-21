@@ -72,6 +72,9 @@ window.NB_AUDIO = (() => {
     sniper: d => { noise(d, now(), .02, 'highpass', 6000, .7, 1.1); noise(d, now(), .5, 'lowpass', 3500, .6, 1, .001, 400); tone(d, now(), 'sine', 220, 30, .4, .9); },
     rocket: d => { noise(d, now(), .7, 'bandpass', 500, .8, .7, .02, 2600); tone(d, now(), 'sawtooth', 90, 200, .5, .2); },
     minigun: d => { noise(d, now(), .045, 'bandpass', 2600, 1, .55); },
+    lmg: d => { noise(d, now(), .02, 'highpass', 4200, .7, 1); noise(d, now(), .14, 'bandpass', 2000, 1, .95); tone(d, now(), 'sine', 120, 40, .12, .8); },
+    gl: d => { noise(d, now(), .18, 'lowpass', 900, .7, .9); tone(d, now(), 'sine', 90, 40, .2, 1); },
+    rail: d => { tone(d, now(), 'sawtooth', 2400, 120, .35, .5); tone(d, now(), 'sine', 600, 60, .45, .7); noise(d, now(), .3, 'highpass', 3000, .7, .5); },
     enemy: d => { noise(d, now(), .12, 'bandpass', 1300, .8, .7); tone(d, now(), 'sine', 150, 50, .08, .4); },
   };
   let lastShot = 0;

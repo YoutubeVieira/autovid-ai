@@ -11,8 +11,8 @@ import base64
 import math
 import os
 
+import bpy  # noqa: F401  (must come before bmesh / mathutils)
 import bmesh
-import bpy
 from mathutils import Vector
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -200,6 +200,7 @@ def flat(obj):
 def join(objs, name=None):
     """Join mesh objects into objs[0] (no bpy.ops) keeping materials."""
     target = objs[0]
+    bpy.context.view_layer.update()
     bm = bmesh.new()
     mats = []
     for o in objs:
