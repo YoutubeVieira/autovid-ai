@@ -8,139 +8,110 @@
    "tries": [
     {
      "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "goto",
-     "idx": 0,
-     "time": 32,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 5,
+     "time": 309,
      "from": 0
     },
     {
      "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "goto",
-     "idx": 0,
-     "time": 68,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "goto",
-     "idx": 0,
-     "time": 107,
-     "from": 0
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 7,
+     "time": 102,
+     "from": 5
     }
    ],
    "ok": false,
-   "time": 207,
+   "time": 411,
    "stars": 0,
-   "money": 1401
+   "money": 3020
   },
   {
    "n": 2,
    "tries": [
     {
      "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "race",
-     "idx": 3,
-     "time": 137,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 1,
+     "time": 71,
      "from": 0
     },
     {
      "ok": false,
-     "reason": "Temps écoulé",
-     "step": "race",
-     "idx": 3,
-     "time": 155,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "race",
-     "idx": 3,
-     "time": 145,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 1,
+     "time": 54,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 437,
+   "time": 125,
    "stars": 0,
-   "money": 4404
+   "money": 2715
   },
   {
    "n": 3,
    "tries": [
     {
      "ok": false,
-     "reason": "Arrêté par la police",
+     "reason": "Tu as été mis K.O.",
      "step": "escape",
      "idx": 6,
-     "time": 321,
+     "time": 496,
      "from": 0
     },
     {
      "ok": false,
-     "reason": "Arrêté par la police",
+     "reason": "Tu as été mis K.O.",
      "step": "escape",
      "idx": 6,
-     "time": 93,
-     "from": 5
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "destroy",
-     "idx": 8,
-     "time": 206,
+     "time": 158,
      "from": 5
     }
    ],
    "ok": false,
-   "time": 620,
+   "time": 654,
    "stars": 0,
-   "money": 4519
+   "money": 5084
   },
   {
    "n": 4,
    "tries": [
     {
      "ok": false,
-     "reason": "MC Ozone n’a pas survécu",
+     "reason": "Temps écoulé",
      "step": "escort",
      "idx": 0,
-     "time": 38,
+     "time": 126,
      "from": 0
     },
     {
-     "ok": true,
-     "time": 394,
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "goto",
+     "idx": 3,
+     "time": 214,
      "from": 0
     }
    ],
-   "ok": true,
-   "time": 432,
-   "stars": 3,
-   "money": 9855
+   "ok": false,
+   "time": 340,
+   "stars": 0,
+   "money": 3642
   },
   {
    "n": 5,
    "tries": [
     {
      "ok": false,
-     "reason": "Arrêté par la police",
+     "reason": "Tu as été mis K.O.",
      "step": "destroy",
      "idx": 1,
-     "time": 166,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "destroy",
-     "idx": 1,
-     "time": 110,
+     "time": 226,
      "from": 0
     },
     {
@@ -148,14 +119,14 @@
      "reason": "Tu as été mis K.O.",
      "step": "destroy",
      "idx": 1,
-     "time": 142,
+     "time": 170,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 418,
+   "time": 396,
    "stars": 0,
-   "money": 11047
+   "money": 4130
   },
   {
    "n": 6,
@@ -165,104 +136,64 @@
      "reason": "Tyrell n’a pas survécu",
      "step": "jailbreak",
      "idx": 1,
-     "time": 81,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tyrell n’a pas survécu",
-     "step": "jailbreak",
-     "idx": 1,
-     "time": 80,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "jailbreak",
-     "idx": 1,
-     "time": 98,
-     "from": 0
-    }
-   ],
-   "ok": false,
-   "time": 259,
-   "stars": 0,
-   "money": 4557
-  },
-  {
-   "n": 7,
-   "tries": [
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "destroy",
-     "idx": 2,
-     "time": 221,
+     "time": 85,
      "from": 0
     },
     {
      "ok": false,
      "reason": "Tu as été mis K.O.",
-     "step": "destroy",
-     "idx": 2,
-     "time": 216,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "destroy",
-     "idx": 2,
-     "time": 92,
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 214,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 529,
+   "time": 299,
    "stars": 0,
-   "money": 8837
-  },
-  {
-   "n": 8,
-   "tries": [
-    {
-     "ok": false,
-     "reason": "MC Ozone n’a pas survécu",
-     "step": "escort",
-     "idx": 1,
-     "time": 73,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Arrêté par la police",
-     "step": "collect",
-     "idx": 3,
-     "time": 199,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Temps écoulé",
-     "step": "escort",
-     "idx": 1,
-     "time": 141,
-     "from": 0
-    }
-   ],
-   "ok": false,
-   "time": 413,
-   "stars": 0,
-   "money": 10066
+   "money": 1883
   }
  ],
- "totalGame": 3315,
- "attempts": 23,
+ "totalGame": 2225,
+ "attempts": 12,
+ "timing": [
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 95,
+   "route": 3328,
+   "need": 35
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 73,
+   "route": 2806,
+   "need": 39
+  },
+  {
+   "n": 3,
+   "idx": 4,
+   "type": "garage",
+   "time": 76,
+   "route": 1920,
+   "need": 25
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 82,
+   "route": 6575,
+   "need": 80
+  }
+ ],
  "gameErrors": 0,
  "gameError1": "",
  "errors": [],
- "wall": 24,
+ "wall": 14,
  "profile": {
   "diff": 0,
   "aimErr": 0.26,

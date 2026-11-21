@@ -7136,9 +7136,9 @@ function updEnemy(e, dt) {
   // grenades à partir du niveau 8
   if (n >= 8 && !e.boss && d > 150 && d < 380 && Math.random() < dt * (.03 + n * .002) && los(e.x, e.y, tx, ty)) throwGrenade(e, tx, ty);
   e.cd -= dt;
-  if (e.cd <= 0 && d < 520 && shootersNow < 4 && los(e.x, e.y, tx, ty)) {
+  if (e.cd <= 0 && d < 520 && shootersNow < 3 && los(e.x, e.y, tx, ty)) {
     shootersNow++; e.firedT = S.time;
-    const spread = Math.max(.05, .32 - n * .009) + (1 - ez()) * .35, a = e.a + rnd(-spread, spread);
+    const spread = Math.max(.05, .32 - n * .009) + (1 - ez()) * .35 + d / 2600, a = e.a + rnd(-spread, spread);
     const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist()) * ez();
     const shots = e.boss && n >= 15 ? 3 : 1;
     { const [pn, vl] = spatial(e.x, e.y); if (vl > .05) au('shot', 'enemy', pn, vl * .8); }
@@ -7841,7 +7841,7 @@ function update(dt) {
   if (P.punch > 0) P.punch -= dt;
   updHeli(dt); updRoadblocks(dt);
   for (const p of peds) updPed(p, dt);
-  shootersNow = Math.max(0, shootersNow - dt * 6);
+  shootersNow = Math.max(0, shootersNow - dt * [1.5, 2.2, 3, 4][save.diff == null ? 1 : save.diff]); // jetons d'attaque : cadence de tir du groupe limitée
   for (const e of enemies) updEnemy(e, dt);
   updGrenades(dt);
   updVip(dt);

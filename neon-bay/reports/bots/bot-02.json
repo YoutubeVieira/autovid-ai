@@ -8,33 +8,25 @@
    "tries": [
     {
      "ok": false,
-     "reason": "Temps écoulé",
-     "step": "deliver",
-     "idx": 4,
-     "time": 112,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "steal",
-     "idx": 1,
-     "time": 154,
-     "from": 0
-    },
-    {
-     "ok": false,
      "reason": "Tu as été mis K.O.",
      "step": "goto",
      "idx": 0,
-     "time": 108,
+     "time": 243,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 2,
+     "time": 89,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 374,
+   "time": 332,
    "stars": 0,
-   "money": 5536
+   "money": 3896
   },
   {
    "n": 2,
@@ -44,7 +36,7 @@
      "reason": "Temps écoulé",
      "step": "race",
      "idx": 3,
-     "time": 152,
+     "time": 155,
      "from": 0
     },
     {
@@ -52,22 +44,14 @@
      "reason": "Temps écoulé",
      "step": "race",
      "idx": 3,
-     "time": 176,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Temps écoulé",
-     "step": "escape",
-     "idx": 7,
-     "time": 412,
+     "time": 102,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 740,
+   "time": 257,
    "stars": 0,
-   "money": 4518
+   "money": 3529
   },
   {
    "n": 3,
@@ -75,65 +59,49 @@
     {
      "ok": false,
      "reason": "Tu as été mis K.O.",
-     "step": "goto",
-     "idx": 0,
-     "time": 200,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "garage",
-     "idx": 4,
-     "time": 137,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
      "step": "collect",
      "idx": 2,
-     "time": 150,
+     "time": 249,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 4,
+     "time": 147,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 487,
+   "time": 396,
    "stars": 0,
-   "money": 5215
+   "money": 4815
   },
   {
    "n": 4,
    "tries": [
     {
      "ok": false,
-     "reason": "MC Ozone n’a pas survécu",
-     "step": "escort",
-     "idx": 0,
-     "time": 56,
-     "from": 0
-    },
-    {
-     "ok": false,
      "reason": "Temps écoulé",
      "step": "race",
      "idx": 1,
-     "time": 135,
+     "time": 92,
      "from": 0
     },
     {
      "ok": false,
      "reason": "Tu as été mis K.O.",
-     "step": "race",
-     "idx": 1,
-     "time": 98,
+     "step": "goto",
+     "idx": 3,
+     "time": 262,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 289,
+   "time": 354,
    "stars": 0,
-   "money": 4805
+   "money": 5743
   },
   {
    "n": 5,
@@ -141,17 +109,9 @@
     {
      "ok": false,
      "reason": "Tu as été mis K.O.",
-     "step": "destroy",
-     "idx": 1,
-     "time": 186,
-     "from": 0
-    },
-    {
-     "ok": false,
-     "reason": "Tu as été mis K.O.",
-     "step": "destroy",
-     "idx": 1,
-     "time": 132,
+     "step": "escape",
+     "idx": 2,
+     "time": 232,
      "from": 0
     },
     {
@@ -159,96 +119,97 @@
      "reason": "Tu as été mis K.O.",
      "step": "escape",
      "idx": 2,
-     "time": 210,
+     "time": 151,
      "from": 0
     }
    ],
    "ok": false,
-   "time": 528,
+   "time": 383,
    "stars": 0,
-   "money": 9357
+   "money": 6512
+  },
+  {
+   "n": 6,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tyrell n’a pas survécu",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 87,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 125,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 212,
+   "stars": 0,
+   "money": 4061
   }
  ],
- "totalGame": 2418,
- "attempts": 15,
+ "totalGame": 1934,
+ "attempts": 12,
  "timing": [
   {
    "n": 1,
    "idx": 2,
    "type": "garage",
-   "time": 56,
-   "route": 1474,
-   "need": 26
-  },
-  {
-   "n": 1,
-   "idx": 4,
-   "type": "deliver",
-   "time": 62,
-   "route": 3770,
-   "need": 61
-  },
-  {
-   "n": 2,
-   "idx": 3,
-   "type": "race",
-   "time": 61,
-   "route": 5636,
-   "need": 93
+   "time": 63,
+   "route": 2306,
+   "need": 37
   },
   {
    "n": 2,
    "idx": 3,
    "type": "race",
    "time": 64,
-   "route": 6018,
-   "need": 94
+   "route": 6145,
+   "need": 96
   },
   {
    "n": 2,
    "idx": 3,
    "type": "race",
-   "time": 70,
-   "route": 5175,
-   "need": 74
-  },
-  {
-   "n": 2,
-   "idx": 5,
-   "type": "deliver",
-   "time": 61,
-   "route": 2508,
-   "need": 41
+   "time": 59,
+   "route": 5387,
+   "need": 92
   },
   {
    "n": 3,
    "idx": 4,
    "type": "garage",
-   "time": 60,
-   "route": 2565,
-   "need": 43
+   "time": 63,
+   "route": 3012,
+   "need": 48
   },
   {
    "n": 4,
    "idx": 1,
    "type": "race",
-   "time": 59,
-   "route": 6440,
-   "need": 109
+   "time": 53,
+   "route": 5122,
+   "need": 97
   },
   {
    "n": 4,
    "idx": 1,
    "type": "race",
-   "time": 68,
-   "route": 5913,
-   "need": 87
+   "time": 57,
+   "route": 5782,
+   "need": 102
   }
  ],
  "gameErrors": 0,
  "gameError1": "",
  "errors": [],
- "wall": 17,
+ "wall": 14,
  "profile": {
   "diff": 1,
   "aimErr": 0.12,
