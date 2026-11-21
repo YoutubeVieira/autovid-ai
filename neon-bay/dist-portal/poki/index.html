@@ -47,6 +47,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #prog .fl{width:14px;height:12px;flex:none;background:repeating-conic-gradient(#fff 0 25%,#111 0 50%) 0 0/6px 6px;border-radius:2px}
 #progPct{font-family:var(--display);font-size:11px;min-width:30px;text-align:right;color:var(--lime)}
 @media (max-width:760px){#prog{margin-top:3px}#progPct{font-size:10px;min-width:26px}}
+.item .contract{color:var(--lime);font-size:12px;margin-top:4px}
 .train .pips{display:flex;gap:4px;margin-top:6px}.train .pips i{width:22px;height:6px;border-radius:3px}
 #dots{display:flex;gap:4px;justify-content:center;margin-top:6px}
 #dots i{width:16px;height:4px;border-radius:2px;background:rgba(255,255,255,.15)}
@@ -293,6 +294,7 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/postfx.js"></script>
+<script src="vendor/SkeletonUtils.js"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n-dict.js"></script>
 <script src="js/i18n.js"></script>

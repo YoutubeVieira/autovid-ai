@@ -13,6 +13,10 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    'les gardiens': { en: 'the guards', es: 'los guardias', pt: 'os guardas' },
+    'Évasion': { en: 'Jailbreak', es: 'Fuga', pt: 'Fuga' }, 'Libérateur': { en: 'Liberator', es: 'Libertador', pt: 'Libertador' }, 'Alarme ! Neutralise les gardiens': { en: 'Alarm! Take out the guards', es: '¡Alarma! Neutraliza a los guardias', pt: 'Alarme! Neutralize os guardas' },
+    'Voix off activée': { en: 'Voice-over on', es: 'Voz en off activada', pt: 'Narração ativada' },
+    'Gratuit': { en: 'Free', es: 'Gratis', pt: 'Grátis' }, 'Gratuit si tu réussis :': { en: 'Free if you complete:', es: 'Gratis si completas:', pt: 'Grátis se você concluir:' }, 'Arme gagnée gratuitement': { en: 'Weapon earned for free', es: 'Arma ganada gratis', pt: 'Arma ganha de graça' },
     'Recommencer depuis le début': { en: 'Start over', es: 'Empezar de nuevo', pt: 'Recomeçar do início' },
     'Entraînement': { en: 'Training', es: 'Entrenamiento', pt: 'Treino' }, 'Endurance': { en: 'Stamina', es: 'Resistencia', pt: 'Resistência' }, 'Tir': { en: 'Shooting', es: 'Puntería', pt: 'Mira' }, 'Force': { en: 'Strength', es: 'Fuerza', pt: 'Força' },
     'Facile': { en: 'Easy', es: 'Fácil', pt: 'Fácil' }, 'Normal': { en: 'Normal', es: 'Normal', pt: 'Normal' }, 'Difficile': { en: 'Hard', es: 'Difícil', pt: 'Difícil' }, 'Légende': { en: 'Legend', es: 'Leyenda', pt: 'Lenda' },
@@ -132,6 +136,12 @@ window.NB_I18N = (() => {
     [/^Chaque séance te rend plus fort pour toujours\. Santé max : (\d+)\.$/, { en: 'Every session makes you stronger for good. Max health: $1.', es: 'Cada sesión te hace más fuerte para siempre. Salud máxima: $1.', pt: 'Cada treino te deixa mais forte para sempre. Saúde máxima: $1.' }],
     [/^Reprendre à l'étape (\d+)$/, { en: 'Resume at step $1', es: 'Continuar en la etapa $1', pt: 'Continuar na etapa $1' }],
     [/^Reprise à l’étape (\d+)$/, { en: 'Resuming at step $1', es: 'Reanudando en la etapa $1', pt: 'Retomando na etapa $1' }],
+    [/^Voix off : (oui|non)$/, { en: 'Voice-over: $1', es: 'Voz en off: $1', pt: 'Narração: $1' }],
+    [/^Fais évader (.+) de la prison$/, { en: 'Break $1 out of prison', es: 'Saca a $1 de la cárcel', pt: 'Tire $1 da prisão' }],
+    [/^Neutralise les gardiens \((\d+) restants\)$/, { en: 'Take out the guards ($1 left)', es: 'Neutraliza a los guardias (quedan $1)', pt: 'Neutralize os guardas (restam $1)' }],
+    [/^Emmène (.+) en lieu sûr avant les renforts$/, { en: 'Get $1 to safety before backup arrives', es: 'Lleva a $1 a un lugar seguro antes de los refuerzos', pt: 'Leve $1 para um lugar seguro antes dos reforços' }],
+    [/^(.+) est libre : emmène-le$/, { en: '$1 is free: get him out', es: '$1 está libre: sácalo de aquí', pt: '$1 está livre: tire ele daqui' }],
+    [/^Fais évader (\d+) prisonniers$/, { en: 'Break out $1 prisoners', es: 'Libera a $1 prisioneros', pt: 'Liberte $1 prisioneiros' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],

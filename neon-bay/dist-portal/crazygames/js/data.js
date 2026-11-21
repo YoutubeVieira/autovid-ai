@@ -95,7 +95,7 @@ window.NB_DATA = (() => {
     { t: 'Guerre de territoire', s: "Les Vipères débordent sur le quartier de Dre. Reprends les coins de rue un par un.", steps: ['goto', 'elim', 'collect', 'steal', 'garage', 'elim', 'escape', 'bribe', 'destroy', 'elim'] },
     { t: 'Clip sous haute tension', s: "Le tournage du clip d'Ozone tourne mal : des tireurs, des flics, et un réalisateur qui ne veut pas arrêter.", steps: ['escort', 'race', 'elim', 'goto', 'survive', 'tunnel', 'escort', 'collect', 'deliver', 'elim'] },
     { t: 'Le convoi des Vipères', s: "Un convoi de marchandise traverse la ville cette nuit. Détruis-le et va chercher leur chef, Snake.", steps: ['goto', 'destroy', 'escape', 'buy', 'collect', 'elim', 'steal', 'garage', 'destroy', 'boss'], boss: 'Snake' },
-    { t: 'Le flic corrompu', s: "L'inspecteur Kowalski vend des infos à tout le monde. Paie-le, utilise-le, puis débarrasse-toi de ceux qui l'ont acheté avant toi.", steps: ['bribe', 'goto', 'deliver', 'elim', 'escape', 'bribe', 'tunnel', 'collect', 'race', 'elim'] },
+    { t: 'Le flic corrompu', s: "L'inspecteur Kowalski vend des infos à tout le monde. Paie-le, utilise-le, puis débarrasse-toi de ceux qui l'ont acheté avant toi.", steps: ['bribe', 'jailbreak', 'deliver', 'elim', 'escape', 'bribe', 'tunnel', 'collect', 'race', 'elim'] },
     { t: 'Docks en feu', s: "Le Crew du Port contrôle tout ce qui entre par la mer. Il est temps de leur montrer qui commande.", steps: ['goto', 'elim', 'destroy', 'collect', 'survive', 'steal', 'garage', 'escape', 'elim', 'destroy'] },
     { t: 'Le roi du port', s: "Big Marlow, le patron du Crew du Port, t'attend sur les quais. Après lui, Néon Bay est à toi.", steps: ['buy', 'escort', 'elim', 'collect', 'bribe', 'race', 'destroy', 'survive', 'tunnel', 'boss'], boss: 'Big Marlow' },
     // ---- Porto Lumi (Italie)
@@ -103,7 +103,7 @@ window.NB_DATA = (() => {
     { t: 'La trattoria', s: "Nonna Lia refuse de payer la protection des Varga. Ses lasagnes valent bien un coup de main.", steps: ['goto', 'elim', 'escort', 'deliver', 'collect', 'escape', 'bribe', 'elim', 'race', 'elim'] },
     { t: 'Le vin de la Famiglia', s: "Les Varga cachent leurs affaires dans des caisses de vin. Intercepte la livraison.", steps: ['steal', 'garage', 'destroy', 'collect', 'escape', 'deliver', 'elim', 'tunnel', 'survive', 'destroy'] },
     { t: 'Le Consigliere', s: "Le conseiller des Moretti veut changer de camp. Fais-le traverser la ville vivant.", steps: ['escort', 'elim', 'race', 'bribe', 'escort', 'collect', 'escape', 'tunnel', 'deliver', 'elim'] },
-    { t: 'Les canaux', s: "Sous Porto Lumi passent de vieux tunnels de contrebandiers. Celui qui les contrôle contrôle la ville.", steps: ['goto', 'tunnel', 'collect', 'elim', 'destroy', 'escape', 'steal', 'garage', 'race', 'elim'] },
+    { t: 'Les canaux', s: "Sous Porto Lumi passent de vieux tunnels de contrebandiers. Celui qui les contrôle contrôle la ville.", steps: ['jailbreak', 'tunnel', 'collect', 'elim', 'destroy', 'escape', 'steal', 'garage', 'race', 'elim'] },
     { t: 'Trahison à la villa', s: "Don Varga t'invite à dîner. C'est un piège, et tout le monde le sait.", steps: ['goto', 'elim', 'survive', 'escape', 'bribe', 'collect', 'deliver', 'destroy', 'elim', 'boss'], boss: 'Don Varga' },
     { t: 'Le casino Lumi', s: "Le coffre du casino Moretti est plein. Le préfet de police aussi aime l'argent.", steps: ['bribe', 'collect', 'elim', 'race', 'steal', 'garage', 'escape', 'destroy', 'survive', 'elim'] },
     { t: 'Le Parrain', s: "Il ne reste qu'un homme entre toi et le contrôle de Porto Lumi : Don Moretti.", steps: ['buy', 'escort', 'elim', 'destroy', 'collect', 'tunnel', 'survive', 'escape', 'elim', 'boss'], boss: 'Don Moretti' },
@@ -112,14 +112,14 @@ window.NB_DATA = (() => {
     { t: 'La plantation', s: "Los Lobos ont pris la plantation de café de la famille de Rosa. Reprends-la.", steps: ['goto', 'elim', 'destroy', 'collect', 'survive', 'steal', 'garage', 'escape', 'race', 'elim'] },
     { t: 'Le pont de la rivière', s: "Le seul pont de la vallée sert de péage aux Lobos. Coupe leur route.", steps: ['destroy', 'elim', 'escape', 'tunnel', 'collect', 'bribe', 'deliver', 'survive', 'destroy', 'elim'] },
     { t: "L'hacienda", s: "El Lobo se cache dans son hacienda, protégé par ses hommes et par un colonel bien payé.", steps: ['goto', 'bribe', 'elim', 'collect', 'escort', 'elim', 'escape', 'race', 'destroy', 'boss'], boss: 'El Lobo' },
-    { t: 'Le laboratoire caché', s: "Le Cartel del Cóndor a un repaire sous la jungle. On y entre par les tunnels.", steps: ['tunnel', 'elim', 'collect', 'destroy', 'survive', 'escape', 'steal', 'garage', 'elim', 'elim'] },
+    { t: 'Le laboratoire caché', s: "Le Cartel del Cóndor a un repaire sous la jungle. On y entre par les tunnels.", steps: ['tunnel', 'elim', 'jailbreak', 'destroy', 'survive', 'escape', 'steal', 'garage', 'elim', 'elim'] },
     { t: 'Fuite par la jungle', s: "Le Cóndor a mis ta tête à prix. Rosa doit rejoindre son avion avant l'aube.", steps: ['escort', 'survive', 'race', 'elim', 'tunnel', 'escape', 'collect', 'destroy', 'deliver', 'elim'] },
     { t: 'Le Cóndor', s: "Le chef du cartel t'attend. Après ça, tu quittes la Colombie, ou tu la diriges.", steps: ['buy', 'elim', 'destroy', 'collect', 'bribe', 'survive', 'escort', 'escape', 'elim', 'boss'], boss: 'El Cóndor' },
     // ---- Morro Azul (Brésil)
     { t: 'Bienvenue au morro', s: "Rosa te dépose à Morro Azul. Dans les ruelles des favelas, il faut gagner le respect avant tout.", steps: ['goto', 'bribe', 'collect', 'elim', 'race', 'steal', 'garage', 'escape', 'tunnel', 'elim'] },
     { t: 'Le baile funk', s: "DJ Favelinha organise le plus gros baile de l'année, mais le Bonde do Trovão veut tout arrêter.", steps: ['escort', 'elim', 'collect', 'survive', 'deliver', 'escape', 'race', 'destroy', 'escort', 'elim'] },
     { t: 'Le téléphérique', s: "Le téléphérique relie le morro à la ville. Le Trovão y fait passer ses affaires.", steps: ['goto', 'elim', 'tunnel', 'collect', 'destroy', 'escape', 'bribe', 'survive', 'race', 'elim'] },
-    { t: 'Guerre des bondes', s: "Les deux gangs du morro se font la guerre. Frappe le Trovão à la tête.", steps: ['elim', 'destroy', 'elim', 'collect', 'escape', 'survive', 'steal', 'garage', 'elim', 'boss'], boss: 'Trovão' },
+    { t: 'Guerre des bondes', s: "Les deux gangs du morro se font la guerre. Frappe le Trovão à la tête.", steps: ['elim', 'destroy', 'elim', 'jailbreak', 'escape', 'survive', 'steal', 'garage', 'elim', 'boss'], boss: 'Trovão' },
     { t: 'La plage', s: "Une cargaison du Comando Sombra arrive par la plage de Copa Azul cette nuit.", steps: ['race', 'deliver', 'elim', 'escort', 'collect', 'escape', 'tunnel', 'destroy', 'survive', 'elim'] },
     { t: 'Tout le monde te cherche', s: "Police, gangs, cartel : toute la ville est à tes trousses. Tiens bon.", steps: ['survive', 'escape', 'bribe', 'elim', 'collect', 'tunnel', 'destroy', 'escort', 'survive', 'elim'] },
     { t: 'Le dernier coup', s: "Sombra, le chef du Comando, contrôle tout Morro Azul. Le dernier coup, le plus gros.", steps: ['buy', 'elim', 'destroy', 'collect', 'escort', 'survive', 'tunnel', 'escape', 'elim', 'boss'], boss: 'Sombra' },
@@ -128,7 +128,7 @@ window.NB_DATA = (() => {
   const STEP_LABEL = {
     goto: 'Rendez-vous', steal: 'Vol de voiture', garage: 'Garage', buy: 'Équipement', deliver: 'Livraison',
     collect: 'Récupération', elim: 'Fusillade', boss: 'Chef de gang', escape: 'Fuite', survive: 'Survie',
-    tunnel: 'Tunnel', bribe: 'Corruption', escort: 'Escorte', destroy: 'Convoi', race: 'Course',
+    tunnel: 'Tunnel', bribe: 'Corruption', escort: 'Escorte', destroy: 'Convoi', race: 'Course', jailbreak: 'Évasion',
   };
 
   const WEAPONS = [
@@ -184,7 +184,7 @@ window.NB_DATA = (() => {
   };
 
   // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
-  const MODELS = { robot: 'models/robot.glb' };
+  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb' };
 
   return { MODELS, SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();

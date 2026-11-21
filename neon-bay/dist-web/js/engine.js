@@ -148,6 +148,7 @@ function freeNear(cx, cy, r) { for (let k = 0; k < 60; k++) { const x = cx + rnd
 // ---------- état ----------
 const S = { heat: 0, hp: 100, unseen: 0, bust: 0, time: 0, mode: 'menu', dead: 0, spawnPol: 0, msgCd: 0, tunnelCd: 0 };
 const P = { x: 0, y: 0, a: 0, car: null, cd: 0, hurt: 0, armor: 0, step: 0, nitro: 0 };
+let booms = [], scorch = [], prison = null, inmates = [];
 let cars = [], peds = [], bullets = [], parts = [], picks = [], enemies = [], cases = [], vip = null, agent = null;
 let L = null; // niveau en cours
 const cam = { x: 0, y: 0, z: 1 };
@@ -266,6 +267,8 @@ const skids = []; let skidI = 0;
 function skid(x, y, a) { const last = skids[(skidI + 399) % 400]; if (last && Math.abs(last.x - x) + Math.abs(last.y - y) < 6) return; skids[skidI] = { x, y, a, t: S.time }; skidI = (skidI + 1) % 400; }
 function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) explode(c); }
 function explosionAt(x, y, r, dmg, byPlayer) {
+  booms.push({ x, y, r, t: 0, seed: Math.random() * 100 }); if (booms.length > 8) booms.shift();
+  scorch.push({ x, y, r: r * .55, t: 0 }); if (scorch.length > 14) scorch.shift();
   shake = Math.max(shake, 14); { const [pn, vl] = spatial(x, y); if (vl > 0) au('boom', pn, vl); if (vl > .35) vib(Math.round(80 + vl * 160)); }
   for (let i = 0; i < 34; i++) parts.push({ x, y, vx: rnd(-260, 260), vy: rnd(-260, 260), life: rnd(.4, 1), max: 1, r: rnd(4, 12), col: pick(['#ffb627', '#ff6b3d', '#ff2e93', '#fff2a8']) });
   for (let i = 0; i < 10; i++) puff(x + rnd(-20, 20), y + rnd(-20, 20), '#3b3550', 1.6);
@@ -681,6 +684,18 @@ function spawnGroup(cx, cy, count, f, group, bossName) {
   if (bossName) { const p = freeNear(cx, cy, 60); const b = mkEnemy(p.x, p.y, f, bossName, group); enemies.push(b); return b; }
   return null;
 }
+const GUARDS = { name: 'les gardiens', color: '#6b8cff', look: { shirt: '#3a4a66', sleeve: '#3a4a66', pants: '#1a2233', hat: '#1a2233', jacket: null } };
+const INMATE_LOOK = { shirt: '#ff5a00', sleeve: '#ff5a00', pants: '#ff5a00', skin: '#8d5a3b', hair: '#111111', longSleeve: true };
+const INMATE = { usa: 'Tyrell', ita: 'Nino', col: 'El Flaco', bra: 'Biel' };
+function updInmates(dt) {
+  if (!prison) return;
+  for (const m of inmates) {
+    if (m.free) { m.ft = (m.ft || 0) + dt; const sp = 190; m.x += Math.cos(m.a) * sp * dt; m.y += Math.sin(m.a) * sp * dt; m.step += sp * dt * .25; continue; }
+    m.t -= dt; if (m.t <= 0) { m.t = rnd(1.5, 4); m.a = rnd(TAU); m.stop = Math.random() < .35; }
+    if (!m.stop) { const nx = m.x + Math.cos(m.a) * 40 * dt, ny = m.y + Math.sin(m.a) * 40 * dt; if (Math.abs(nx - prison.x) < 85 && ny - prison.y < 70 && ny - prison.y > -20) { m.x = nx; m.y = ny; m.step += 40 * dt * .25; } else m.a += PI; }
+  }
+  inmates = inmates.filter(m => !m.free || m.ft < 7);
+}
 function makeStep(type, n, idx) {
   const st = { type, label: D.STEP_LABEL[type], target: null, time: null, survive: false, desc: '' };
   const g = 'g' + idx;
@@ -760,6 +775,26 @@ function makeStep(type, n, idx) {
       };
       break;
     }
+    case 'jailbreak': {
+      const c = randWalk(1300, 2200, P.x, P.y), vn = INMATE[world.region.id] || 'Tyrell';
+      prison = { x: c.x, y: c.y, open: false, t: 0 }; inmates = [];
+      for (let k = 0; k < 7; k++) inmates.push({ x: c.x + rnd(-70, 70), y: c.y + rnd(-15, 60), a: rnd(TAU), step: rnd(9), t: rnd(3), skin: pick(PEDC) });
+      st.gate = { x: c.x, y: c.y + 100 }; st.phase = 0;
+      st.desc = () => st.phase === 0 ? 'Fais évader ' + vn + ' de la prison' : st.phase === 1 ? 'Neutralise les gardiens (' + enemies.filter(e => e.group === g && e.hp > 0).length + ' restants)' : 'Emmène ' + vn + ' en lieu sûr avant les renforts';
+      st.dyn = () => st.phase === 0 ? st.gate : st.phase === 1 ? (nearestOf(enemies.filter(e => e.group === g && e.hp > 0)) || st.gate) : st.dest;
+      st.check = () => {
+        if (st.phase === 0 && dist(P.x, P.y, st.gate.x, st.gate.y) < 90) { st.phase = 1; addHeat(2.2); au('alarm'); shake = Math.max(shake, 6); toast('Alarme ! Neutralise les gardiens'); spawnGroup(c.x, c.y + 20, 3 + Math.floor(n / 4), GUARDS, g); return false; }
+        if (st.phase === 1 && !enemies.some(e => e.group === g && e.hp > 0)) {
+          st.phase = 2; prison.open = true; for (const m of inmates) { m.free = true; m.a = Math.atan2(m.y - c.y, m.x - c.x) + rnd(-.6, .6); }
+          vip = { x: c.x, y: c.y + 70, a: 0, hp: 100 + n * 5, max: 100 + n * 5, name: vn, full: vn, following: true, inCar: null, step: 0, look: INMATE_LOOK };
+          st.dest = randWalk(1800, 2800, c.x, c.y); st.time = Math.round(dist(c.x, c.y, st.dest.x, st.dest.y) / 200 + 45); st.assisted = false;
+          toast(vn + ' est libre : emmène-le'); track('jailbreaks'); return false;
+        }
+        if (st.phase === 2 && vip) { const vx = vip.inCar ? vip.inCar.x : vip.x, vy = vip.inCar ? vip.inCar.y : vip.y; if (dist(vx, vy, st.dest.x, st.dest.y) < 75) { vip.following = false; vip.done = true; return true; } }
+        return false;
+      };
+      break;
+    }
     case 'destroy': {
       const count = 2 + Math.floor(n / 10); st.cars = [];
       for (let k = 0; k < count; k++) { const c = spawnTraffic() || (() => { const p = randWalk(900, 1500, P.x, P.y); const cc = mkCar(p.x, p.y, 0, 'civ'); cars.push(cc); return cc; })(); c.ai = c.ai ? 'convoy' : null; c.color = '#141018'; c.mark = true; c.keep = true; c.hp = 120 + n * 10; c.convoy = true; st.cars.push(c); }
@@ -789,7 +824,7 @@ function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium || !
 function startLevel(n, from = 0) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
-  cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
+  booms = []; scorch = []; prison = null; inmates = []; cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
   S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = maxHp(); S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
   P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0;
   if (!save.owned[save.weapon]) save.weapon = 'pistol';
@@ -806,6 +841,7 @@ function startLevel(n, from = 0) {
   S.rain = n > 1 && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25);
   save.seenIntro = save.seenIntro || {}; const firstIntro = !save.seenIntro[n]; save.seenIntro[n] = 1;
   S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, from ? 'Reprise à l’étape ' + (from + 1) : L.def.t, firstIntro ? L.def.s : '');
+  if (firstIntro) narrate(region.id, L.def.s); else if (canVoice()) try { speechSynthesis.cancel(); } catch (e) {}
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
   if (n === 1 && !from) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
@@ -865,6 +901,7 @@ const ACH = [
   { id: 'esc50', name: 'Insaisissable', key: 'escapes', goal: 50, r: 5000 },
   { id: 'kill50', name: 'Tireur', key: 'kills', goal: 50, r: 1000 },
   { id: 'kill500', name: 'Nettoyeur', key: 'kills', goal: 500, r: 8000 },
+  { id: 'jail3', name: 'Libérateur', key: 'jailbreaks', goal: 3, r: 4000 },
   { id: 'tun10', name: 'La taupe', key: 'tunnels', goal: 10, r: 800 },
   { id: 'bribe5', name: 'Bon payeur', key: 'bribes', goal: 5, r: 800 },
   { id: 'boom25', name: 'Artificier', key: 'explosions', goal: 25, r: 1500 },
@@ -878,7 +915,7 @@ const ACH = [
   { id: 'lvl23', name: 'Maître de Sierra Verde', key: 'levelsDone', goal: 23, r: 9000 },
   { id: 'lvl30', name: 'Légende de Morro Azul', key: 'levelsDone', goal: 30, r: 15000 },
 ];
-const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets' };
+const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets', jailbreaks: 'Fais évader {n} prisonniers' };
 const DAILY_POOL = [['escapes', 3], ['carsStolen', 5], ['kills', 20], ['tunnels', 2], ['cashPicked', 400], ['explosions', 4], ['levelsPlayed', 1], ['bribes', 1]];
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 function ensureDaily() {
@@ -903,12 +940,20 @@ function track(key, n = 1) {
   }
   save.ach = save.ach || {};
   for (const a of ACH) if (a.key === key && !save.ach[a.id] && save.stats[key] >= a.goal) { save.ach[a.id] = Date.now(); save.money += a.r; reward('Succès débloqué', a.name, a.r); }
+  checkContracts();
+}
+// contrats d'armes : chaque arme payante peut aussi se gagner gratuitement en jouant
+const CONTRACTS = { uzi: ['kills', 15], shotgun: ['carsStolen', 12], rifle: ['kills', 80], sniper: ['escapes', 12], rocket: ['explosions', 25], minigun: ['kills', 400], lmg: ['levelsDone', 12], gl: ['explosions', 80], rail: ['threeStars', 25] };
+const contractTxt = id => { const c = CONTRACTS[id]; if (!c) return ''; const have = Math.min(c[1], (save.stats || {})[c[0]] || 0); return STAT_LABEL[c[0]].replace('{n}', c[1]) + ' (' + have + '/' + c[1] + ')'; };
+function checkContracts() {
+  for (const [id, [key, goal]] of Object.entries(CONTRACTS)) { const w = D.WEAPONS.find(x => x.id === id); if (!w || save.owned[id] || save.maxLevel < w.lvl || ((save.stats || {})[key] || 0) < goal) continue;
+    save.owned[id] = true; reward('Arme gagnée gratuitement', w.name, 0); persist(); }
 }
 let rewardQ = [];
 function reward(title, name, r) { rewardQ.push({ title, name, r }); if (rewardQ.length === 1) showReward(); }
 function showReward() {
   const it = rewardQ[0]; if (!it) return;
-  const el = $('reward'); el.innerHTML = `<b>${esc(TR(it.title))}</b><span>${esc(TR(it.name))}</span><i>+${fmt(it.r)}</i>`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
+  const el = $('reward'); el.innerHTML = `<b>${esc(TR(it.title))}</b><span>${esc(TR(it.name))}</span>${it.r ? `<i>+${fmt(it.r)}</i>` : `<i>${esc(TR('Gratuit'))}</i>`}`; el.hidden = false; el.classList.remove('in'); void el.offsetWidth; el.classList.add('in');
   au('win'); vib([40, 30, 40]);
   setTimeout(() => { el.classList.remove('in'); setTimeout(() => { el.hidden = true; rewardQ.shift(); showReward(); }, 350); }, 2600);
 }
@@ -1204,11 +1249,13 @@ function update(dt) {
   cars = cars.filter(c => { if (c === P.car || c.keep) return true; const d = dist(c.x, c.y, P.x, P.y); if (c.ai === 'leave' && d > 800) return false; return d < (c.ai ? 1700 : 2600); });
   peds = peds.filter(p => (p.state !== 'ko' || p.ko > 0) && dist(p.x, p.y, P.x, P.y) < 1300);
   enemies = enemies.filter(e => e.hp > 0 || (e.dead = (e.dead || 0) + dt) < 8);
+  for (const b of booms) b.t += dt; booms = booms.filter(b => b.t < 3.2); for (const sc of scorch) sc.t += dt;
   for (const p of parts) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .92; p.vy *= .92; if (p.grow) p.r += p.grow * dt; }
   parts = parts.filter(p => p.life > 0); if (parts.length > 600) parts.splice(0, parts.length - 600);
   if (L) updLevel(dt);
 }
 function updVip(dt) {
+  updInmates(dt);
   if (!vip || vip.hp <= 0) return;
   if (vip.inCar) { if (vip.inCar !== P.car) { const c = vip.inCar; vip.inCar = null; vip.x = c.x + 24; vip.y = c.y; } else { vip.x = vip.inCar.x; vip.y = vip.inCar.y; return; } }
   if (!vip.following) return;
@@ -1822,6 +1869,22 @@ function makeChar(o) {
   g.userData = { root, pelvis, chest, neck, legs, arms, body: chest, headJ, detail, gun: !!o.gun, gunMesh, gunId: o.gunId || 'pistol', gunSkin: o.gunSkin, ls: -1, ph: Math.random() * 6, spd: 0, amt: 0, fall: 0, recoil: 0, hurt: 0 };
   return g;
 }
+// matériaux glTF -> Phong (même éclairage que le reste de la ville, plus léger sur mobile)
+function glbMat(m, skin) {
+  const n = m.name || '', em = m.emissive && (m.emissive.r + m.emissive.g + m.emissive.b) > .05;
+  const shiny = /paint|glass|chrome|rim|metal|trim/i.test(n);
+  const p = new THREE.MeshPhongMaterial({ color: m.color ? m.color.clone() : 0xffffff, emissive: em ? m.emissive.clone() : 0x000000, shininess: /glass/i.test(n) ? 90 : shiny ? 50 : 8, specular: shiny ? 0x666666 : 0x111111, skinning: !!skin, transparent: m.transparent, opacity: m.opacity });
+  p.name = n; return p;
+}
+const HUMAN_GLB = () => qLevel !== 'low' && THREE.SkeletonUtils && R3.models.human_m && R3.models.human_f;
+function makeHuman(md, col) {
+  const sc = THREE.SkeletonUtils.clone(md.scene);
+  sc.traverse(o => { if (o.isMesh) { o.frustumCulled = false; const c = col[o.material.name]; if (c) { o.material = o.material.clone(); o.material.color.set(c); } } });
+  const mixer = new THREE.AnimationMixer(sc), find = re => { const c = md.anims.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
+  const acts = { idle: find(/idle/i), walk: find(/walk/i), run: find(/run/i), punch: find(/punch/i), death: find(/death/i) };
+  if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
+  const m = makeGlbChar({ scene: sc, mixer, acts, hand: null, scale: md.scale }); m.userData.human = true; return m;
+}
 function makeGlbChar(md) {
   const g = new THREE.Group(); g.add(md.scene); md.scene.scale.setScalar(md.scale); md.scene.rotation.y = PI / 2;
   const shd = new THREE.Mesh(new THREE.CircleGeometry(10, 14), bmat('#000000', .35)); shd.rotation.x = -PI / 2; shd.position.y = .3; g.add(shd);
@@ -1884,8 +1947,16 @@ function makeCar3(c) {
   add(bx(46, .5, 24), bmat('#000000', .35), 1, .3, 0);
   const wheels = (fx, rx, w = 22) => { add(bx(9, 9, w), tyre, fx, 5, 0); add(bx(9, 9, w), tyre, rx, 5, 0); };
   const lights = (fx, rx, y = 10, wd = 15) => { add(bx(1, 3, wd), mat('#fff6cc', '#fff2b0'), fx, y, 0); add(bx(1, 3, wd), mat('#ff2e4d', '#ff2e4d'), rx, y, 0); };
-  let front = 21;
-  if (type === 'scooter') {
+  let front = 21, roofY = 25.5;
+  const mk = { sedan: 'car_sedan', taxi: 'car_sedan', small: 'car_sedan', muscle: 'car_sports', convertible: 'car_sports', sports: 'car_sports', jeep: 'car_suv', pickup: 'car_suv', suv: 'car_suv', van: 'car_van' }[type], md = mk && qLevel !== 'low' && R3.models[mk];
+  const wheelsL = [];
+  if (md) {
+    const sc = md.scene.clone(true), k = (type === 'van' ? 44 : type === 'small' ? 36 : 42) / md.size.x; sc.scale.setScalar(k); g.add(sc);
+    sc.traverse(o => { if (o.isMesh && o.material && /paint/i.test(o.material.name)) paint.push(o); if (/^Wheel/i.test(o.name)) wheelsL.push(o); });
+    for (const pm of paint) pm.material = mat(c.color);
+    front = md.size.x * k / 2; roofY = md.size.y * k + 1.5;
+    if (type === 'taxi') add(bx(8, 4, 12), mat('#ffd23f', '#806000'), -4, roofY + .5, 0);
+  } else if (type === 'scooter') {
     P2(bx(24, 7, 7), 0, 9, 0); add(cyl(4.5, 4.5, 3, 10), tyre, 10, 4.5, 0).rotation.x = PI / 2; add(cyl(4.5, 4.5, 3, 10), tyre, -10, 4.5, 0).rotation.x = PI / 2;
     add(bx(3, 12, 3), chrome, 11, 16, 0); add(bx(2, 2, 14), chrome, 11, 22, 0); add(bx(10, 2.5, 6), mat('#1a1a1a'), -3, 14, 0);
     add(bx(1, 3, 4), mat('#fff6cc', '#fff2b0'), 12.6, 15, 0); front = 12;
@@ -1921,10 +1992,10 @@ function makeCar3(c) {
     wheels(13, -13); lights(21.2, -21.2);
     if (type === 'taxi') { add(bx(8, 4, 12), mat('#ffd23f', '#806000'), -4, 26, 0); add(bx(42.2, 2, 20.2), mat('#111111'), 0, 11, 0); }
   }
-  const u = { paint, color: c.color, wreck: false };
+  const u = { paint, color: c.color, wreck: false, wheels: wheelsL, wr: md ? .34 * (type === 'van' ? 44 : 42) / md.size.x : 4.5 };
   if (c.kind === 'police') {
-    add(bx(12, 9.2, 20.4), mat('#1b1f4a'), -2, 9, 0);
-    u.r = add(bx(4, 3, 7), mat('#ff2e4d'), -4, 25.5, -4); u.b = add(bx(4, 3, 7), mat('#2e6bff'), -4, 25.5, 4);
+    if (!md) add(bx(12, 9.2, 20.4), mat('#1b1f4a'), -2, 9, 0);
+    u.r = add(bx(4, 3, 7), mat('#ff2e4d'), -4, roofY, -4); u.b = add(bx(4, 3, 7), mat('#2e6bff'), -4, roofY, 4);
     u.glow = add(new THREE.CircleGeometry(48, 20), bmat('#ff2e4d', .18, true), 0, .8, 0); u.glow.rotation.x = -PI / 2;
   }
   const cone = new THREE.Mesh(new THREE.CircleGeometry(150, 14, -.33, .66), R3.coneMat || (R3.coneMat = bmat('#fff0c0', .1, true).clone()));
@@ -1941,6 +2012,68 @@ function poseCar(m, c) {
   if (!c.wreck && u.color !== c.color) { u.color = c.color; for (const pm of u.paint) pm.material = mat(c.color); }
   if (u.r && !c.wreck) { const f = Math.sin((S.time + c.flash) * 14) > 0; u.r.material = f ? mat('#ff2e4d', '#ff2e4d') : mat('#401018'); u.b.material = f ? mat('#10183a') : mat('#2e6bff', '#2e6bff'); u.glow.material = bmat(f ? '#ff2e4d' : '#2e6bff', .2, true); }
   if (u.mk) { u.mk.visible = c.mark && !c.wreck; u.mk.position.set(0, 40 + Math.sin(S.time * 5) * 4, 0); }
+  if (u.wheels.length && !c.wreck) { const da = (c.v || 0) * (R3.dt || .016) / u.wr; for (const w of u.wheels) w.rotation.z -= da; }
+}
+// ---- explosions 3D : flash, boule de feu, onde de choc, débris, colonne de fumée, trace noire au sol
+function makePrison() {
+  const g = new THREE.Group(), add = (geo, m, x, y, z) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
+  const conc = mat('#8a8a90'), dark = mat('#2a2a30'), steel = mat('#4a4f5a'), yard = mat('#6f6c66');
+  add(bx(240, .6, 180), yard, 0, .4, 20).receiveShadow = true;
+  // murs d'enceinte avec portail au sud
+  add(bx(240, 30, 8), conc, 0, 15, -70); add(bx(8, 30, 180), conc, -120, 15, 20); add(bx(8, 30, 180), conc, 120, 15, 20);
+  add(bx(95, 30, 8), conc, -72, 15, 110); add(bx(95, 30, 8), conc, 72, 15, 110);
+  for (const z of [-70, 110]) add(cyl(1.2, 1.2, 240, 6), mat('#9aa0aa'), 0, 33, z).rotation.z = PI / 2;
+  const gate = new THREE.Group(); for (let i = 0; i < 9; i++) { const b = new THREE.Mesh(bx(1.6, 28, 1.6), steel); b.position.set(-22 + i * 5.5, 14, 0); gate.add(b); } const gb = new THREE.Mesh(bx(50, 2, 2), steel); gb.position.y = 27; gate.add(gb); gate.position.set(0, 0, 110); g.add(gate);
+  // bâtiment des cellules
+  add(bx(170, 40, 50), mat('#a7a39a'), 0, 20, -35); add(bx(174, 3, 54), dark, 0, 41, -35);
+  for (let i = 0; i < 12; i++) for (const y of [12, 28]) { add(bx(8, 7, 1), dark, -77 + i * 14, y, -9.4); for (let k = 0; k < 3; k++) add(bx(.8, 7, 1.4), steel, -79.5 + i * 14 + k * 2.5, y, -8.6); }
+  add(bx(30, 12, 2), mat('#d8d8d0'), 0, 48, -35);
+  // miradors avec projecteurs
+  const spots = [];
+  for (const [x, z] of [[-118, -68], [118, -68], [-118, 108], [118, 108]]) {
+    add(bx(6, 64, 6), conc, x, 32, z); add(bx(22, 12, 22), dark, x, 68, z); add(bx(26, 2, 26), conc, x, 75, z);
+    const sp = new THREE.Mesh(new THREE.ConeGeometry(34, 120, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff6d0, transparent: true, opacity: .1, depthWrite: false, side: THREE.DoubleSide }));
+    sp.geometry.translate(0, -60, 0); const piv = new THREE.Group(); piv.position.set(x, 66, z); piv.add(sp); g.add(piv); spots.push(piv);
+  }
+  const sign = new THREE.Mesh(bx(60, 10, 2), mat('#1b1f4a', '#101530')); sign.position.set(0, 40, 112); g.add(sign);
+  g.userData = { gate, spots }; return g;
+}
+function posePrison(g, e) {
+  const u = g.userData; g.position.set(e.x, 0, e.y);
+  u.gate.position.x += ((e.open ? 50 : 0) - u.gate.position.x) * .05;
+  u.spots.forEach((p, i) => { p.rotation.set(.75 + Math.sin(S.time * .7 + i) * .2, S.time * .5 + i * 1.6, 0); });
+}
+function makeBoom() {
+  const g = new THREE.Group(), add = (geo, m) => { const me = new THREE.Mesh(geo, m); g.add(me); return me; };
+  const fm = c => { const m = new THREE.MeshBasicMaterial({ color: c, transparent: true, depthWrite: false }); m.toneMapped = false; return m; };
+  const u = { core: add(sph(1, 14, 10), fm(0xffe08a)), fire: [], ring: add(new THREE.RingGeometry(.8, 1, 40), fm(0xffd9a0)), smoke: [], deb: [] };
+  u.ring.rotation.x = -PI / 2;
+  for (let i = 0; i < 6; i++) u.fire.push(add(sph(1, 10, 8), fm(i % 3 === 0 ? 0xffa21a : i % 3 === 1 ? 0xff5a00 : 0xd8340a)));
+  const sm = new THREE.MeshLambertMaterial({ color: 0x2b2733, transparent: true, depthWrite: false });
+  for (let i = 0; i < 9; i++) { const m = add(sph(1, 9, 7), sm.clone()); u.smoke.push(m); }
+  for (let i = 0; i < 10; i++) { const m = add(bx(3, 1.5, 2.2), mat(i % 3 ? '#1c1a22' : '#5a4a3a')); u.deb.push(m); }
+  g.userData = u; return g;
+}
+function poseBoom(g, b) {
+  const u = g.userData, t = b.t, r = b.r, R1 = (k) => { const v = Math.sin(b.seed * 12.9898 + k * 78.233) * 43758.5453; return v - Math.floor(v); };
+  g.position.set(b.x, 0, b.y);
+  const fl = Math.max(0, 1 - t / .18); u.core.visible = fl > 0; u.core.scale.setScalar(r * (.25 + .35 * (1 - fl))); u.core.position.y = 14; u.core.material.opacity = fl;
+  const fe = clamp(t / .45, 0, 1), fa = Math.max(0, 1 - Math.max(0, t - .25) / .6);
+  u.fire.forEach((m, i) => { m.visible = fa > 0; const a = R1(i) * TAU, d = r * .22 * fe * (.6 + R1(i + 9)); m.position.set(Math.cos(a) * d, 10 + fe * r * (.12 + .25 * R1(i + 3)) + t * 30, Math.sin(a) * d); m.scale.setScalar(r * (.12 + .2 * fe) * (.7 + .5 * R1(i + 5))); m.material.opacity = fa * .95; });
+  const rg = clamp(t / .5, 0, 1); u.ring.visible = rg < 1; u.ring.position.y = 1.2; u.ring.scale.setScalar(r * 1.5 * rg + 1); u.ring.material.opacity = (1 - rg) * .7;
+  u.smoke.forEach((m, i) => { const st = t - .12 - i * .05; m.visible = st > 0; if (st <= 0) return; const a = R1(i + 20) * TAU, d = r * .18 * (.4 + R1(i + 30)) + st * 8; m.position.set(Math.cos(a) * d, 18 + st * (26 + 14 * R1(i + 40)) + i * 3, Math.sin(a) * d); m.scale.setScalar(r * (.1 + .09 * st) * (.8 + .5 * R1(i + 50))); m.material.opacity = clamp((3 - t) / 1.6, 0, 1) * .62; });
+  u.deb.forEach((m, i) => { const a = R1(i + 60) * TAU, sp = 90 + 140 * R1(i + 70), up = 120 + 120 * R1(i + 80), tt = Math.min(t, 1.4); const y = Math.max(1, 6 + up * tt - 260 * tt * tt); m.position.set(Math.cos(a) * sp * tt, y, Math.sin(a) * sp * tt); m.rotation.set(tt * 9 * R1(i), tt * 7, tt * 5 * R1(i + 1)); });
+}
+function drawBooms() {
+  R3.boomPool = R3.boomPool || [];
+  while (R3.boomPool.length < booms.length) { const g = makeBoom(); R3.boomPool.push(g); R3.scene.add(g); }
+  R3.boomPool.forEach((g, i) => { const b = booms[i]; g.visible = !!b; if (b) poseBoom(g, b); });
+  if (!R3.boomLight) { R3.boomLight = new THREE.PointLight(0xffa040, 0, 560, 2); R3.scene.add(R3.boomLight); }
+  { const b = booms[booms.length - 1]; R3.boomLight.intensity = b ? Math.max(0, 3.2 * (1 - b.t / .7)) : 0; if (b) R3.boomLight.position.set(b.x, 30, b.y); }
+  if (!R3.scorch) { R3.scorch = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 20), new THREE.MeshBasicMaterial({ color: 0x0a0806, transparent: true, opacity: .55, depthWrite: false }), 14); R3.scorch.frustumCulled = false; R3.scene.add(R3.scorch); }
+  const o = R3.tmpO || (R3.tmpO = new THREE.Object3D());
+  scorch.forEach((sc, i) => { o.position.set(sc.x, .5 + i * .01, sc.y); o.rotation.set(-PI / 2, 0, 0); o.scale.setScalar(sc.r * Math.min(1, sc.t * 6)); o.updateMatrix(); R3.scorch.setMatrixAt(i, o.matrix); });
+  R3.scorch.count = scorch.length; R3.scorch.instanceMatrix.needsUpdate = true;
 }
 // ---- objets simples
 function makeProp(kind) {
@@ -1976,6 +2109,21 @@ function poseHeli(m, h) {
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
 function showCine(sub, title, story) { document.body.classList.add('cine'); const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); const sp = el.querySelector('p.story'); if (sp) { sp.textContent = story ? TR(story) : ''; sp.hidden = !story; } el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+// voix off : synthèse vocale du téléphone/PC (gratuite, hors ligne si la voix est installée), accent du pays visité
+const VOICE_HI = { usa: ['en-US', 'Welcome to Neon Bay.'], ita: ['it-IT', 'Benvenuto a Porto Lumi.'], col: ['es-CO', 'Bienvenido a Sierra Verde, parcero.'], bra: ['pt-BR', 'Bem-vindo ao Morro Azul, mano.'] };
+const VLOC = { fr: 'fr-FR', en: 'en-US', es: 'es-ES', pt: 'pt-BR' };
+const canVoice = () => { try { return 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function'; } catch (e) { return false; } };
+function say(text, tag, rate = 1, pitch = 1) {
+  if (!canVoice() || save.voice === false || (AU && AU.prefs && !AU.prefs.sfx)) return;
+  const vs = speechSynthesis.getVoices(), base = tag.split('-')[0], norm = l => (l || '').replace('_', '-');
+  const v = vs.find(x => norm(x.lang) === tag) || vs.find(x => norm(x.lang).startsWith(base));
+  if (!v && vs.length) return; // pas de voix dans cette langue : on n'impose pas un mauvais accent
+  const u = new SpeechSynthesisUtterance(text); u.lang = tag; if (v) u.voice = v; u.rate = rate; u.pitch = pitch; u.volume = .95; speechSynthesis.speak(u);
+}
+function narrate(rid, story) {
+  try { if (!canVoice()) return; speechSynthesis.cancel(); const hi = VOICE_HI[rid]; if (hi) say(hi[1], hi[0], .98, .9);
+    if (story) { const lg = (I18 && I18.lang) || 'fr'; let tag = VLOC[lg] || 'fr-FR'; if (lg === 'es' && rid === 'col') tag = 'es-CO'; say(TR(story), tag, 1.04); } } catch (e) {}
+}
 function hideCine() { document.body.classList.remove('cine'); const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
@@ -2128,11 +2276,13 @@ function render3D(dt) {
   const hideOwn = mode === 'car' && P.car;
   R3.seen.clear();
   for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
-  for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
+  for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; if (HUMAN_GLB() && Math.random() < .75) return makeHuman(f ? R3.models.human_f : R3.models.human_m, { Skin: e.skin, Shirt: e.shirt, Pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a', '#c2a878']), Shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']), Hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a']) }); return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
   for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
     (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
-  if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar({ shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
+  if (prison && near(prison.x, prison.y)) sync(prison, makePrison, posePrison);
+  for (const m of inmates) if (near(m.x, m.y)) sync(m, e => makeChar(Object.assign({}, INMATE_LOOK, { skin: e.skin, hair: pick(['#111111', '#3b2414', null]) })), (mm, e) => poseChar(mm, e.x, e.y, e.a, e.step, false));
+  if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar(vip.look || { shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
   if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
   if (playing && !P.car && P._m && !!P._m.userData.glb !== (save.outfit.body === 'robot' && !!R3.models.robot)) P._m = null;
   if (playing && !P.car) sync(P, () => { if (save.outfit.body === 'robot' && R3.models.robot) return makeGlbChar(R3.models.robot); const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); });
@@ -2164,6 +2314,7 @@ function render3D(dt) {
     pos.setXYZ(n, p.x, p.grow ? 12 + f * 40 : 8 + (p.r > 6 ? f * 30 : 4), p.y); colA.setXYZ(n, cc.r * a, cc.g * a, cc.b * a); n++; }
   R3.pts.geometry.setDrawRange(0, n); pos.needsUpdate = true; colA.needsUpdate = true;
   R3.smoke.geometry.setDrawRange(0, ns); spos.needsUpdate = true; scol.needsUpdate = true;
+  drawBooms();
   envFx(dt, playing);
   // cible de mission
   const st = playing && L.step, target = st ? stepTarget(st) : null;
@@ -2222,7 +2373,7 @@ const SCREENS = {
         <button class="btn" data-go="trophies">Succès</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -2276,6 +2427,7 @@ const SCREENS = {
     </div>`;
   },
   shop: ({ inGame, tab = 'w' }) => {
+    checkContracts();
     const n = Math.max(save.maxLevel, 1);
     const card = (it, isW) => {
       const owned = isW ? save.owned[it.id] : it.kind === 'armor' ? save.armor >= it.value : it.kind === 'perk' ? save.perks[it.id] : false;
@@ -2286,7 +2438,8 @@ const SCREENS = {
       else if (owned) btn = `<span class="eq">Acheté</span>`;
       else { const cnt = it.kind === 'medkit' ? ` (${save.medkits}/${it.max})` : it.kind === 'nitro' ? ` (${save.nitro}/${it.max})` : ''; btn = `<button class="btn small ${save.money >= it.price ? 'primary' : ''}" data-buy="${it.id}">${fmt(it.price)}${cnt}</button>`; }
       const stat = isW ? `<div class="stat"><i style="width:${Math.min(100, it.dmg * it.pellets / 1.4)}%"></i></div><div class="stat r"><i style="width:${Math.min(100, 8 / it.rate)}%"></i></div>` : '';
-      return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${it.name}</h4><p>${it.desc}</p>${stat}</div>${btn}</div>`;
+      const ct = isW && !owned && CONTRACTS[it.id] ? `<p class="contract">${esc(TR('Gratuit si tu réussis :'))} ${esc(TR(contractTxt(it.id).replace(/ \(\d+\/\d+\)$/, '')))} ${contractTxt(it.id).match(/\(\d+\/\d+\)$/)[0]}</p>` : '';
+      return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${it.name}</h4><p>${it.desc}</p>${ct}${stat}</div>${btn}</div>`;
     };
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-back="1">${inGame ? '← Reprendre' : '← Retour'}</button><h2>Boutique</h2>${money()}</div>
@@ -2303,7 +2456,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button><button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2475,6 +2628,7 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.voice) { save.voice = save.voice === false; persist(); if (save.voice) say(TR('Voix off activée'), VLOC[(I18 && I18.lang) || 'fr']); else try { speechSynthesis.cancel(); } catch (e) {} showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
@@ -2558,13 +2712,13 @@ if (R3.ok) setupPost();
 // modèles .glb animés (optionnels)
 R3.models = {};
 if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries(D.MODELS)) {
-  const onGl = gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = false; } });
+  const onGl = gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = !o.isSkinnedMesh && k !== 'robot'; if (k !== 'robot' && o.material) o.material = glbMat(o.material, o.isSkinnedMesh); } });
     const mixer = new THREE.AnimationMixer(scene), find = re => { const c = gl.animations.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
     const acts = { idle: find(/idle/i), walk: find(/walk(?!jump)/i), run: find(/run/i), punch: find(/punch|attack/i), death: find(/death|die/i) };
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
     let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
     const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
-    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h }; P._m = null; };
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k === 'robot') P._m = null; };
   // secours : si le .glb ne peut pas être servi, on charge sa copie en JavaScript (base64)
   const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
   try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }

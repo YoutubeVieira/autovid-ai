@@ -108,6 +108,7 @@ window.NB_AUDIO = (() => {
     notes.forEach((f, i) => tone(d, now() + i * step, type, f, f, len, .6));
   }
   const lock = () => blips([1400, 1400, 1900], 'square', .06, .25, .05);
+  const alarm = () => { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .5); for (let k = 0; k < 4; k++) tone(d, now() + k * .55, 'sawtooth', 620, 980, .5, .35); };
   const cash = () => { if (!playFile('cash', sfxBus, 0, .7)) blips([988, 1319], 'square', .06, .55, .1); };
   const pickup = () => blips([660, 880, 1175], 'triangle', .05, .6);
   const step = () => blips([523, 659, 784, 1047], 'triangle', .08, .6, .14);
@@ -308,6 +309,6 @@ window.NB_AUDIO = (() => {
     return out.buffer;
   }
   function setMute(m) { if (ctx) master.gain.setTargetAtTime(m ? 0 : .9, now(), .05); }
-  const api = { lock, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  const api = { lock, alarm, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
   return api;
 })();
