@@ -13,6 +13,9 @@ const head = `<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\
 html = head + html.replace(/<\/style>/, '</style>\n</head>\n<body>') +
   `\n<script>if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));</script>\n</body>\n</html>\n`;
 fs.writeFileSync(path.join(out, 'index.html'), html);
+// Néon Studio : éditeur d'animations et de cinématiques
+{ const st = fs.readFileSync(path.join(root, 'studio.html'), 'utf8');
+  fs.writeFileSync(path.join(out, 'studio.html'), `<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n` + st.replace(/<\/style>/, '</style>\n</head>\n<body>') + '\n</body>\n</html>\n'); }
 // lien de vérification Android (à remplir avec l'empreinte donnée par la Play Console)
 const al = path.join(root, 'android', 'assetlinks.json');
 if (fs.existsSync(al)) { fs.mkdirSync(path.join(out, '.well-known'), { recursive: true }); fs.copyFileSync(al, path.join(out, '.well-known', 'assetlinks.json')); }
