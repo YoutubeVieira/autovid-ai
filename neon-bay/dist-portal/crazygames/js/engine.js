@@ -685,6 +685,23 @@ function spawnGroup(cx, cy, count, f, group, bossName) {
   if (bossName) { const p = freeNear(cx, cy, 60); const b = mkEnemy(p.x, p.y, f, bossName, group); enemies.push(b); return b; }
   return null;
 }
+const FREE_JOBS = ['goto', 'deliver', 'race', 'steal', 'collect', 'elim', 'destroy', 'escort', 'garage'];
+// propriétés : revenu plafonné, versé quand on joue (fin de niveau, ou tous les 3 boulots en balade libre), jamais pendant l'absence
+const PROPS = {
+  usa: [['laverie', 'Laverie Néon', 12000, 800], ['club', 'Club Velvet', 25000, 1800], ['garage', 'Garage de Dre', 45000, 3500], ['penthouse', 'Penthouse Marina', 80000, 6500]],
+  ita: [['pizzeria', 'Pizzeria del Porto', 18000, 1200], ['bar', 'Bar Lumi', 37000, 2700], ['chantier', 'Chantier naval', 66000, 5200], ['villa', 'Villa sur la colline', 120000, 9800]],
+  col: [['cafe', 'Café de la place', 26000, 1750], ['salsa', 'Discothèque Salsa', 55000, 4000], ['plantation', 'Plantation de café', 99000, 7700], ['hacienda', 'Hacienda', 176000, 14300]],
+  bra: [['acai', 'Barraca de açaí', 36000, 2400], ['baile', 'Salle de baile funk', 75000, 5400], ['motos', 'Atelier de motos', 135000, 10500], ['cobertura', 'Penthouse face à la mer', 240000, 19500]],
+};
+const propIncome = () => { let t = 0; for (const [rid, list] of Object.entries(PROPS)) for (const p of list) if ((save.props || {})[rid + ':' + p[0]]) t += p[3]; return t; };
+function payProperties(k = 1) { const inc = Math.round(propIncome() * k); if (!inc) return 0; save.money += inc; if (L) L.earned += inc; toast('Revenus de tes propriétés : +' + fmt(inc)); au('cash'); return inc; }
+function propsHtml() {
+  const n = Math.max(save.maxLevel, 1);
+  return `<p class="legend">Revenus actuels : ${fmt(propIncome())} par niveau terminé (et un tiers tous les 3 boulots en balade libre).</p>` + D.REGIONS.map(r => `<h4 class="ph">${r.name}</h4><div class="items">${(PROPS[r.id] || []).map(p => { const key = r.id + ':' + p[0], own = (save.props || {})[key], locked = r.from > n;
+    const btn = own ? '<span class="eq">À toi</span>' : locked ? `<span class="lock">Niveau ${r.from}</span>` : `<button class="btn small ${save.money >= p[2] ? 'primary' : ''}" data-prop="${key}">${fmt(p[2])}</button>`;
+    return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${p[1]}</h4><p>+${fmt(p[3])} par niveau terminé</p></div>${btn}</div>`; }).join('')}</div>`).join('');
+}
+function buyProp(key) { const [rid, id] = key.split(':'), p = (PROPS[rid] || []).find(x => x[0] === id); if (!p || (save.props || {})[key]) return; if (save.money < p[2]) { au('click'); flashNote('Pas assez d’argent'); return; } save.money -= p[2]; save.props = Object.assign({}, save.props, { [key]: Date.now() }); persist(); au('cash'); vib([30, 40, 60]); flashNote(p[1] + ' est à toi'); track('props'); showScreen('shop', shopState); }
 const GUARDS = { name: 'les gardiens', color: '#6b8cff', look: { shirt: '#3a4a66', sleeve: '#3a4a66', pants: '#1a2233', hat: '#1a2233', jacket: null } };
 const INMATE_LOOK = { shirt: '#ff5a00', sleeve: '#ff5a00', pants: '#ff5a00', skin: '#8d5a3b', hair: '#111111', longSleeve: true };
 const INMATE = { usa: 'Tyrell', ita: 'Nino', col: 'El Flaco', bra: 'Biel' };
@@ -824,7 +841,7 @@ const levelBonus = n => Math.round((1000 + n * 800) * dif().pay / 50) * 50;
 // ---------- niveaux ----------
 function regionOf(n) { return D.REGIONS.find(r => n >= r.from && n <= r.to); }
 function canPlay(n) { return n <= save.maxLevel && (n === 1 || save.premium || !!PORTAL); }
-function startLevel(n, from = 0) {
+function startLevel(n, from = 0, free = false) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
   booms = []; scorch = []; prison = null; inmates = []; cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
@@ -839,15 +856,16 @@ function startLevel(n, from = 0) {
   for (let k = 0; k < 3; k++) { const p = freeNear(P.x + 60, P.y + 40, 80); parkedCar(p.x, p.y); }
   for (let i = 0; i < 25; i++) spawnPed();
   for (let i = 0; i < 14; i++) spawnTraffic();
-  L = { n, def: D.LEVELS[n - 1], region, idx: from - 1, cp: from, earned: 0, time: 0, step: null, kos: 0 };
+  L = { n, free, jobs: 0, def: free ? { t: 'Balade libre', s: '', steps: [] } : D.LEVELS[n - 1], region, idx: from - 1, cp: from, earned: 0, time: 0, step: null, kos: 0 };
   S.tod = ((n * .23) % 1) * .6 + .7; if (S.tod > 1) S.tod -= 1;
   S.rain = n > 1 && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25);
-  save.seenIntro = save.seenIntro || {}; const firstIntro = !save.seenIntro[n]; save.seenIntro[n] = 1;
-  S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, from ? 'Reprise à l’étape ' + (from + 1) : L.def.t, firstIntro ? L.def.s : '');
-  if (firstIntro) narrate(region.id, L.def.s); else if (canVoice()) try { speechSynthesis.cancel(); } catch (e) {}
+  save.seenIntro = save.seenIntro || {}; const firstIntro = !save.seenIntro[n]; if (!free) save.seenIntro[n] = 1;
+  if (free) { S.cine = { type: 'intro', t: 0, dur: 3 }; showCine(region.name + ' · ' + region.country, 'Balade libre', ''); }
+  else { S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, from ? 'Reprise à l’étape ' + (from + 1) : L.def.t, firstIntro ? L.def.s : ''); }
+  if (firstIntro && !free) narrate(region.id, L.def.s); else if (canVoice()) try { speechSynthesis.cancel(); } catch (e) {}
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
-  if (n === 1 && !from) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
+  if (n === 1 && !from && !free) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
   try { if (touch.on && screen.orientation && screen.orientation.lock && (document.fullscreenElement || document.webkitFullscreenElement)) screen.orientation.lock('landscape').catch(() => {}); } catch (e) {}
   S.mode = 'play'; showScreen(null); S.levelsStarted = (S.levelsStarted || 0) + 1; if (PORTAL) PORTAL.start();
   nextStep();
@@ -856,6 +874,7 @@ function nearestFreeCar() { let b = null, bd = 400; for (const c of cars) { if (
 function nextStep() {
   if (L.step) { if (L.idx < 9) { au('step'); vib([30, 50, 30]); } const r = stepReward(L.n); save.money += r; L.earned += r; if (L.idx >= 0) toast('Étape ' + (L.idx + 1) + '/10 réussie · +' + fmt(r)); }
   L.idx++;
+  if (L.free) { if (L.step) { L.jobs++; track('freeJobs'); if (L.jobs % 3 === 0) payProperties(.35); } if (agent && agent.paid) agent = null; if (vip && (vip.done || vip.hp <= 0)) vip = null; L.step = makeStep(pick(FREE_JOBS), L.n + Math.min(7, L.jobs >> 1), L.idx); persist(); return; }
   if (L.idx >= 10) { completeLevel(); return; }
   if (agent && agent.paid) agent = null;
   if (vip && (vip.done || vip.hp <= 0)) vip = null;
@@ -877,7 +896,7 @@ function updLevel(dt) {
 }
 function completeLevel() {
   const n = L.n, bonus = levelBonus(n);
-  save.money += bonus; L.earned += bonus; au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
+  save.money += bonus; L.earned += bonus; payProperties(1); au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
   const first = !save.done[n]; if (save.fails) delete save.fails[n];
   const sc = levelStars(L); save.stars = save.stars || {}; const prevStars = save.stars[n] || 0; save.stars[n] = Math.max(prevStars, sc.stars);
   if (first) track('levelsDone'); track('levelsPlayed');
@@ -889,6 +908,12 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
+  if (L && L.free) { // balade libre : comme dans le genre, on se réveille à l'hôpital (ou au commissariat) et on paie
+    const fee = Math.min(Math.round(save.money * .1), 1500 + L.n * 50); save.money -= fee; au('fail'); vib(200);
+    S.hp = maxHp(); S.heat = 0; S.unseen = 0; S.bust = 0; S.dead = 0; policeLeave(); if (P.car) { P.car.ai = null; P.car = null; } P.x = world.hospital.x; P.y = world.hospital.y + 20; P.armor = armorMax(); vip = null;
+    showBanner(reason.includes('Arrêté') ? 'ARRÊTÉ' : 'K.O.'); toast((reason.includes('Arrêté') ? 'Caution payée : -' : 'Frais d’hôpital : -') + fmt(fee));
+    L.step = makeStep(pick(FREE_JOBS), L.n, ++L.idx); persist(); return;
+  }
   S.lastFail = reason; S.lastFailStep = L && L.step ? L.step.type : '';
   save.fails = save.fails || {}; save.fails[L.n] = (save.fails[L.n] || 0) + 1;
   const cp = L.idx >= 5 || L.cp ? 5 : 0;
@@ -906,6 +931,8 @@ const ACH = [
   { id: 'kill50', name: 'Tireur', key: 'kills', goal: 50, r: 1000 },
   { id: 'kill500', name: 'Nettoyeur', key: 'kills', goal: 500, r: 8000 },
   { id: 'jail3', name: 'Libérateur', key: 'jailbreaks', goal: 3, r: 4000 },
+  { id: 'free10', name: 'Free-lance', key: 'freeJobs', goal: 10, r: 3000 },
+  { id: 'prop4', name: 'Magnat', key: 'props', goal: 4, r: 6000 },
   { id: 'tun10', name: 'La taupe', key: 'tunnels', goal: 10, r: 800 },
   { id: 'bribe5', name: 'Bon payeur', key: 'bribes', goal: 5, r: 800 },
   { id: 'boom25', name: 'Artificier', key: 'explosions', goal: 25, r: 1500 },
@@ -919,7 +946,7 @@ const ACH = [
   { id: 'lvl23', name: 'Maître de Sierra Verde', key: 'levelsDone', goal: 23, r: 9000 },
   { id: 'lvl30', name: 'Légende de Morro Azul', key: 'levelsDone', goal: 30, r: 15000 },
 ];
-const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets', jailbreaks: 'Fais évader {n} prisonniers' };
+const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets', jailbreaks: 'Fais évader {n} prisonniers', freeJobs: 'Termine {n} boulots en balade libre', props: 'Achète {n} propriétés' };
 const DAILY_POOL = [['escapes', 3], ['carsStolen', 5], ['kills', 20], ['tunnels', 2], ['cashPicked', 400], ['explosions', 4], ['levelsPlayed', 1], ['bribes', 1]];
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 function ensureDaily() {
@@ -1096,6 +1123,8 @@ function updHud(dt) {
   setText(hud.money, 'm', fmt(save.money));
   const s = stars(); if (last.s !== s) { last.s = s; starEls.forEach((e, i) => e.classList.toggle('on', i < s)); }
   const seen = s > 0 && S.unseen < .5; if (last.seen !== seen) { last.seen = seen; hud.stars.classList.toggle('blink', seen); }
+  { const on = s > 0 && S.mode === 'play'; if (last.uon !== on) { last.uon = on; $('unseen').hidden = !on; }
+    if (on) { const lose = ((save.perks.radio ? 5 : 7) + lvl() * .04) * (.55 + .45 * ez()), pc = Math.round(Math.min(1, S.unseen / lose) * 100); if (last.upc !== pc) { last.upc = pc; $('unseen').firstChild.style.width = pc + '%'; } } }
   setW(hud.hp, 'hp', Math.max(0, Math.round(S.hp / maxHp() * 100)));
   setW(hud.armor, 'ar', armorMax() ? Math.round(P.armor / armorMax() * 100) : 0);
   { const w = wepDef(save.weapon), am = P.ammo && P.ammo[w.id]; setText(hud.wep, 'w', w.name + (am ? ` ${am.mag}/${w.mag} · ${am.res === Infinity ? '∞' : am.res}` : '') + (P.reload > 0 ? ' · recharge…' : '')); }
@@ -1104,7 +1133,7 @@ function updHud(dt) {
   if (L && L.step) {
     const st = L.step;
     setText(hud.lvlName, 'ln', 'Niveau ' + L.n + ' · ' + L.def.t);
-    setText(hud.sN, 'sn', 'Étape ' + (L.idx + 1) + '/10 · ' + st.label);
+    setText(hud.sN, 'sn', L.free ? 'Balade libre · boulot ' + (L.jobs + 1) + ' · ' + st.label : 'Étape ' + (L.idx + 1) + '/10 · ' + st.label);
     setText(hud.sD, 'sd', st.needCar && !P.car ? stepDesc(st) + ' (monte dans une voiture : E)' : stepDesc(st));
     const t = st.time !== null ? Math.max(0, Math.ceil(st.time)) : null;
     const km = gps.len ? (gps.len / 1000 * .5).toFixed(1).replace('.', ',') + ' km' : '', eta = gps.len ? Math.ceil(gps.len / (P.car ? 300 : 150)) : 0;
@@ -1113,7 +1142,7 @@ function updHud(dt) {
     if (last.late !== late) { last.late = late; hud.sC.style.color = late ? 'var(--danger)' : ''; }
     { if (last.pIdx !== L.idx) { last.pIdx = L.idx; L.g0 = 0; L.t0 = st.time; }
       let fr = 0; if (st.survive && L.t0) fr = 1 - Math.max(0, st.time) / L.t0; else if (gps.len) { L.g0 = Math.max(L.g0 || 0, gps.len); fr = 1 - gps.len / L.g0; }
-      const pr = Math.max(0, Math.min(1, (L.idx + Math.max(0, Math.min(.95, fr))) / 10)), pc = Math.round(pr * 100);
+      const pr = L.free ? Math.max(0, Math.min(1, fr)) : Math.max(0, Math.min(1, (L.idx + Math.max(0, Math.min(.95, fr))) / 10)), pc = Math.round(pr * 100);
       if (last.pc !== pc) { last.pc = pc; $('progFill').style.width = pc + '%'; $('progMe').style.left = pc + '%'; setText($('progPct'), 'pp', pc + ' %'); } }
     if (last.dots !== L.idx) { last.dots = L.idx; hud.dots.innerHTML = Array.from({ length: 10 }, (_, i) => `<i class="${i < L.idx ? 'd' : i === L.idx ? 'c' : ''}"></i>`).join(''); }
   }
@@ -1560,6 +1589,16 @@ function bHeight(tx, ty) {
   const [lo, hi] = id === 'usa' ? [50, 130] : id === 'ita' ? [40, 90] : id === 'col' ? [30, 70] : [36, 80];
   return lo + r * (hi - lo);
 }
+// mobilier urbain Blender instancié (un InstancedMesh par pièce du modèle) ; renvoie false si le modèle n'est pas chargé
+function glbInst(g, key, list, h) {
+  const md = R3.models && R3.models[key]; if (!md || !list.length || qLevel === 'low') return false;
+  const k = h / (md.size.y || 1); md.scene.updateMatrixWorld(true);
+  const M = new THREE.Matrix4(), base = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sc = new THREE.Vector3(k, k, k);
+  md.scene.traverse(o => { if (!o.isMesh || o.isSkinnedMesh) return; const im = new THREE.InstancedMesh(o.geometry, o.material, list.length);
+    list.forEach((it, i) => { v.set(it[0], 0, it[1]); q.setFromAxisAngle(up, it[2] || 0); base.compose(v, q, it[3] ? new THREE.Vector3(k * it[3], k * it[3], k * it[3]) : sc); M.multiplyMatrices(base, o.matrixWorld); im.setMatrixAt(i, M); });
+    im.castShadow = !!R3.shadow && key === 'palm'; g.add(im); });
+  return true;
+}
 function build3DWorld() {
   const sc = R3.scene;
   if (R3.static) { sc.remove(R3.static); R3.static.traverse(o => { if (o.geometry && !o.geometry.parameters) o.geometry.dispose(); }); }
@@ -1612,9 +1651,10 @@ function build3DWorld() {
   for (const tr of trees) groups[kindOf(tr[0], tr[1])].push(tr);
   const inst = (geo, m, list, fn) => { if (!list.length) return; const im2 = new THREE.InstancedMesh(geo, m, list.length); list.forEach((tr, i) => { fn(tr); R3.m4.compose(R3.v, R3.q, R3.s); im2.setMatrixAt(i, R3.m4); }); g.add(im2); };
   const pos = (tr, y, sx, sy, sz) => { const s2 = tr[2] ? 1 : .75; R3.v.set(tr[0] * T + 32 + (hash(tr[0], tr[1]) % 9 - 4), y * s2, tr[1] * T + 32); R3.s.set(sx * s2, sy * s2, sz * s2); };
+  if (!glbInst(g, 'palm', groups.palm.map(tr => [tr[0] * T + 32 + (hash(tr[0], tr[1]) % 9 - 4), tr[1] * T + 32, hash(tr[1], tr[0]) % 628 / 100, tr[2] ? 1 : .75]), 84)) {
   inst(cyl(1, 1.3, 1, 6), mat('#6b4a2a'), groups.palm, tr => pos(tr, 34, 3.5, 68, 3.5));
   inst(new THREE.ConeGeometry(1, 1, 8), mat('#2f8a3a'), groups.palm, tr => pos(tr, 66, 34, 10, 34));
-  inst(new THREE.ConeGeometry(1, 1, 8), mat('#1f6a2c'), groups.palm, tr => pos(tr, 72, 16, 12, 16));
+  inst(new THREE.ConeGeometry(1, 1, 8), mat('#1f6a2c'), groups.palm, tr => pos(tr, 72, 16, 12, 16)); }
   inst(new THREE.ConeGeometry(1, 1, 7), mat('#24452c'), groups.cypress, tr => pos(tr, 38, 11, 76, 11));
   inst(cyl(1, 1.3, 1, 6), mat('#4a3424'), groups.round, tr => pos(tr, 12, 4, 24, 4));
   inst(new THREE.IcosahedronGeometry(1, 0), mat(p.tree), groups.round, tr => pos(tr, 38, 26, 22, 26));
@@ -1684,10 +1724,17 @@ function buildRegionDecor(g, tiles) {
   // lampadaires au bord des trottoirs
   const lamps = [];
   for (let ty = 1; ty < N - 1; ty++) for (let tx = 1; tx < N - 1; tx++) { if (world.map[ty * N + tx] !== WALK || hash(tx, ty) % 3) continue;
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (world.map[(ty + dy) * N + tx + dx] === ROAD) { lamps.push([tx * T + T / 2 + dx * 26, ty * T + T / 2 + dy * 26]); break; } }
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (world.map[(ty + dy) * N + tx + dx] === ROAD) { lamps.push([tx * T + T / 2 + dx * 26, ty * T + T / 2 + dy * 26, Math.atan2(dx, dy)]); break; } }
+  // mobilier : bornes, bancs, feux tricolores
+  { const hyd = [], ben = [], tl = [];
+    for (let ty = 1; ty < N - 1; ty++) for (let tx = 1; tx < N - 1; tx++) { const t0 = world.map[ty * N + tx], hh = hash(tx * 5, ty * 3) % 13;
+      if (t0 === WALK && (hh === 1 || hh === 7)) for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (world.map[(ty + dy) * N + tx + dx] === ROAD) { (hh === 1 ? hyd : ben).push([tx * T + T / 2 + dx * 22 + dy * 14, ty * T + T / 2 + dy * 22 + dx * 14, Math.atan2(dx, dy)]); break; }
+      if (t0 === ROAD && hash(tx, ty * 11) % 3 === 0) { const r = (a, b) => world.map[(ty + b) * N + tx + a] === ROAD; if ((r(1, 0) || r(-1, 0)) && (r(0, 1) || r(0, -1)) && world.map[(ty + 1) * N + tx + 1] === WALK) tl.push([tx * T + T - 4, ty * T + T - 4, -PI / 4]); } }
+    glbInst(g, 'hydrant', hyd, 10); glbInst(g, 'bench', ben, 10); glbInst(g, 'traffic_light', tl, 46); }
+  if (glbInst(g, 'lamp', lamps, 54)) {} else {
   const poleM = new THREE.InstancedMesh(cyl(1.3, 1.8, 48, 5), mat('#2a2830'), lamps.length), bulbM = new THREE.InstancedMesh(sph(3.4, 6, 4), new THREE.MeshBasicMaterial({ color: LK.lamp || '#fff2cc' }), lamps.length);
   lamps.forEach(([x, z], i) => { R3.v.set(x, 24, z); R3.m4.compose(R3.v, R3.q, R3.s); poleM.setMatrixAt(i, R3.m4); R3.v.set(x, 49, z); R3.m4.compose(R3.v, R3.q, R3.s); bulbM.setMatrixAt(i, R3.m4); });
-  g.add(poleM, bulbM);
+  g.add(poleM, bulbM); }
   { const hc = document.createElement('canvas'); hc.width = hc.height = 64; const hx = hc.getContext('2d'), gr = hx.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.3, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); hx.fillStyle = gr; hx.fillRect(0, 0, 64, 64);
     const pa = new Float32Array(lamps.length * 3); lamps.forEach(([x, z], i) => { pa[i * 3] = x; pa[i * 3 + 1] = 49; pa[i * 3 + 2] = z; });
     const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.BufferAttribute(pa, 3));
@@ -2455,7 +2502,7 @@ const SCREENS = {
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Carte des niveaux</h2><div class="row">${money()}<button class="btn small" data-go="shop">Boutique</button></div></div>
       ${D.REGIONS.map(r => `<section class="region" style="--acc:${r.accent}">
-        <div class="rhead"><h3>${r.name}</h3><span>${r.country} · niveaux ${r.from}–${r.to}</span><p>${r.tagline}</p></div>
+        <div class="rhead"><h3>${r.name}</h3><span>${r.country} · niveaux ${r.from}–${r.to}</span><p>${r.tagline}</p>${r.from <= save.maxLevel && (r.from === 1 || save.premium || PORTAL) ? `<button class="btn small free" data-free="${r.from}">Balade libre</button>` : ''}</div>
         <div class="grid">${D.LEVELS.slice(r.from - 1, r.to).map((l, i) => { const n = r.from + i; const ok = save.done[n], open = n <= save.maxLevel, paid = n > 1 && !save.premium && !PORTAL;
           const cls = ok ? 'done' : open ? (paid ? 'paid' : 'open') : 'locked';
           const tag = ok ? '✓ Terminé' : paid ? 'Version complète' : open ? 'Disponible' : 'Verrouillé';
@@ -2502,8 +2549,8 @@ const SCREENS = {
     };
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-back="1">${inGame ? '← Reprendre' : '← Retour'}</button><h2>Boutique</h2>${money()}</div>
-      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'a' ? 'on' : ''}" data-tab="a">Atelier</button><button class="${tab === 't' ? 'on' : ''}" data-tab="t">Entraînement</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
-      ${tab === 'a' ? armoryHtml() : tab === 't' ? trainHtml() : tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
+      <div class="tabs"><button class="${tab === 'w' ? 'on' : ''}" data-tab="w">Armes</button><button class="${tab === 'g' ? 'on' : ''}" data-tab="g">Équipement</button><button class="${tab === 'a' ? 'on' : ''}" data-tab="a">Atelier</button><button class="${tab === 't' ? 'on' : ''}" data-tab="t">Entraînement</button><button class="${tab === 'p' ? 'on' : ''}" data-tab="p">Propriétés</button><button class="${tab === 'o' ? 'on' : ''}" data-tab="o">Tenues</button></div>
+      ${tab === 'a' ? armoryHtml() : tab === 't' ? trainHtml() : tab === 'p' ? propsHtml() : tab === 'o' ? outfitHtml() : `<div class="items">${(tab === 'w' ? D.WEAPONS.filter(w => !w.melee) : D.GEAR).map(it => card(it, tab === 'w')).join('')}</div>`}
       ${tab === 'w' ? '<p class="legend"><span class="k1"></span>Dégâts <span class="k2"></span>Cadence</p>' : ''}
     </div>`;
   },
@@ -2515,7 +2562,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button><button class="btn" data-start="${L.n}">Recommencer le niveau</button><button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2687,6 +2734,8 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.prop) { buyProp(ds.prop); return; }
+  if (ds.free) { const n = +ds.free; au('init'); startLevel(n, 0, true); return; }
   if (ds.voice) { save.voice = save.voice === false; persist(); if (save.voice) say(TR('Voix off activée'), VLOC[(I18 && I18.lang) || 'fr']); else try { speechSynthesis.cancel(); } catch (e) {} showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
@@ -2779,7 +2828,7 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
     let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
     const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
-    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k === 'robot') P._m = null; };
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k === 'robot') P._m = null; if (['palm', 'lamp', 'hydrant', 'bench', 'traffic_light'].includes(k)) R3.world = null; };
   // secours : si le .glb ne peut pas être servi, on charge sa copie en JavaScript (base64)
   const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
   try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }

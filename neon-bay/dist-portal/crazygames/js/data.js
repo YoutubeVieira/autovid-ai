@@ -184,7 +184,7 @@ window.NB_DATA = (() => {
   };
 
   // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
-  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb' };
+  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb' };
 
   return { MODELS, SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();
