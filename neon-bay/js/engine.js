@@ -164,7 +164,7 @@ const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, labe
 const QORDER = ['high', 'medium', 'low'];
 let Q = QUAL.high, qLevel = 'high';
 const fpsMon = { t: 0, n: 0, slow: 0 };
-function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; if (R3.shadow && l !== 'high') { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
+function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { if (l === 'high' && !R3.composer) setupPost(); R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; if (R3.shadow && l !== 'high') { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
 function qualityLabel() { return (save.quality || 'auto') === 'auto' ? 'Auto (' + QUAL[qLevel].label + ')' : QUAL[save.quality].label; }
 function monitorFps(dt) {
   if ((save.quality || 'auto') !== 'auto' || S.mode !== 'play' || S.cine) return;
@@ -796,7 +796,8 @@ function startLevel(n) {
   L = { n, def: D.LEVELS[n - 1], region, idx: -1, earned: 0, time: 0, step: null, kos: 0 };
   S.tod = ((n * .23) % 1) * .6 + .7; if (S.tod > 1) S.tod -= 1;
   S.rain = n > 1 && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25);
-  S.cine = { type: 'intro', t: 0, dur: 3.4 }; showCine('Niveau ' + n + ' · ' + region.name, L.def.t);
+  save.seenIntro = save.seenIntro || {}; const firstIntro = !save.seenIntro[n]; save.seenIntro[n] = 1;
+  S.cine = { type: 'intro', t: 0, dur: firstIntro ? 7 : 3 }; showCine('Niveau ' + n + ' · ' + region.name, L.def.t, firstIntro ? L.def.s : '');
   if (S.rain) setTimeout(() => msg('Il pleut : la route glisse'), 3600);
   ensureDaily();
   if (n === 1) { const c = nearestFreeCar(); if (c) { setTimeout(() => { if (P.car) radioOn(); }, 3600); c.color = '#ff2e93'; P.car = c; c.ai = null; P.x = c.x; P.y = c.y; S.heat = 1.2; S.unseen = 0; S.spawnPol = 0; setTimeout(() => { if (L && L.n === 1) spawnPolice(); }, 400); } }
@@ -1958,7 +1959,7 @@ function poseHeli(m, h) {
   u.rotor.rotation.y = S.time * 28; u.tail.rotation.z = S.time * 40; u.red.visible = Math.sin(S.time * 8) > 0;
   setBar(u.bar, h.hp / h.max, '#2e6bff', true, h.a);
 }
-function showCine(sub, title) { document.body.classList.add('cine'); const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
+function showCine(sub, title, story) { document.body.classList.add('cine'); const el = $('cine'); el.querySelector('small').textContent = TR(sub); el.querySelector('b').textContent = TR(title); const sp = el.querySelector('p.story'); if (sp) { sp.textContent = story ? TR(story) : ''; sp.hidden = !story; } el.hidden = false; requestAnimationFrame(() => el.classList.add('on')); }
 function hideCine() { document.body.classList.remove('cine'); const el = $('cine'); el.classList.remove('on'); setTimeout(() => { if (!S.cine) el.hidden = true; }, 400); }
 function skipCine() { if (S.cine) S.cine.start = performance.now() - S.cine.dur * 1000; }
 const lerpC = (a, b, t) => col3(a).clone().lerp(col3(b), t);
@@ -2014,9 +2015,14 @@ function cineCamera(playing) {
   const normPos = cam3.position.clone(), normTgt = normPos.clone().add(fwd.multiplyScalar(300));
   let pos, tgt, e;
   if (c.type === 'intro') {
-    const px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y, ang = k * 1.6;
-    pos = new THREE.Vector3(px + Math.cos(ang) * 520, 420 - k * 120, pz + Math.sin(ang) * 520); tgt = new THREE.Vector3(px, 10, pz);
-    e = k < .7 ? 0 : (k - .7) / .3; e = e * e * (3 - 2 * e);
+    const px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y;
+    if (c.dur > 5) { // plan large, travelling de rue, puis approche du héros
+      if (k < .4) { const a2 = k / .4 * 1.2; pos = new THREE.Vector3(px + Math.cos(a2) * 900, 640, pz + Math.sin(a2) * 900); tgt = new THREE.Vector3(px, 0, pz); }
+      else if (k < .75) { const f = (k - .4) / .35; pos = new THREE.Vector3(px - 520 + f * 360, 46, pz + 150); tgt = new THREE.Vector3(px + 200, 30, pz - 40); }
+      else { const f = (k - .75) / .25; pos = new THREE.Vector3(px + 90 - f * 30, 40 + f * 30, pz + 90); tgt = new THREE.Vector3(px, 28, pz); }
+      e = k < .88 ? 0 : (k - .88) / .12;
+    } else { const ang = k * 1.6; pos = new THREE.Vector3(px + Math.cos(ang) * 520, 420 - k * 120, pz + Math.sin(ang) * 520); tgt = new THREE.Vector3(px, 10, pz); e = k < .7 ? 0 : (k - .7) / .3; }
+    e = e * e * (3 - 2 * e);
   } else {
     const b = c.focus, a = Math.atan2(P.y - b.y, P.x - b.x);
     pos = new THREE.Vector3(b.x + Math.cos(a) * 95, 48, b.y + Math.sin(a) * 95); tgt = new THREE.Vector3(b.x, 34, b.y);
@@ -2051,7 +2057,13 @@ function sync(e, make, pose) {
   if (m.parent !== R3.dyn) R3.dyn.add(m);
   R3.seen.add(m); pose(m, e);
 }
-function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); }
+function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); if (R3.composer) { R3.composer.setPixelRatio(R3.r.getPixelRatio()); R3.composer.setSize(VW, VH); } }
+// rendu filmique : étalonnage ACES + halos lumineux (bloom) en qualité haute
+function setupPost() {
+  R3.r.toneMapping = THREE.ACESFilmicToneMapping; R3.r.toneMappingExposure = 1.25;
+  if (!THREE.EffectComposer || !THREE.UnrealBloomPass || qLevel !== 'high') { R3.composer = null; return; }
+  try { const c = new THREE.EffectComposer(R3.r); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl); R3.composer = c; R3.bloom = bl; R3.w = 0; } catch (e) { R3.composer = null; }
+}
 function render3D(dt) {
   R3.dt = dt;
   if (R3.world !== world) build3DWorld();
@@ -2160,7 +2172,8 @@ function render3D(dt) {
   R3.ndc.set(mouse.sx / VW * 2 - 1, -(mouse.sy / VH) * 2 + 1); R3.ray.setFromCamera(R3.ndc, R3.cam);
   if (R3.ray.ray.intersectPlane(R3.plane, R3.hit)) { mouse.wx = R3.hit.x; mouse.wy = R3.hit.z; }
   cineCamera(playing);
-  R3.r.render(R3.scene, R3.cam);
+  { const nn = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.r.toneMappingExposure = .82 + nn * .43; }
+  if (R3.composer && qLevel === 'high') { const night = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.bloom.strength = .12 + night * .95; R3.bloom.threshold = .9 - night * .2; R3.composer.render(); } else R3.r.render(R3.scene, R3.cam);
   if (playing) drawMini(target);
 }
 
@@ -2506,6 +2519,7 @@ world = buildWorld(D.REGIONS[0]); P.x = cam.x = W / 2; P.y = cam.y = W / 2;
 for (let i = 0; i < 60; i++) { const t = randWalk(0, W * 2, 0, 0); parkedCar(t.x, t.y); }
 if (I18) { I18.set(I18.lang); I18.dom(document.getElementById('touch')); I18.dom(document.getElementById('cine')); I18.dom(document.getElementById('rotate')); }
 init3D();
+if (R3.ok) setupPost();
 // modèles .glb animés (optionnels)
 R3.models = {};
 if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries(D.MODELS)) {

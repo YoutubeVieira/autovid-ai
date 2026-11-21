@@ -208,6 +208,7 @@ html,body{touch-action:manipulation;overscroll-behavior:none}
 #cine.on .ct{opacity:1;transform:none}
 #cine small{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
 #cine b{font-family:var(--display);font-weight:400;font-size:clamp(20px,4.5vw,40px);color:var(--ink);text-shadow:0 0 22px var(--magenta),0 3px 0 #000}
+#cine .story{max-width:min(640px,86vw);margin:4px 0 0;font-size:clamp(13px,1.8vw,17px);line-height:1.45;color:var(--ink);text-shadow:0 2px 6px #000;text-wrap:balance}
 #cine em{font-style:normal;font-size:11px;color:var(--muted)}
 .langs .btn.on{border-color:var(--cyan);color:var(--cyan)}
 .info .assist{color:var(--lime)}
@@ -262,7 +263,7 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 <div class="hud" id="banner"></div>
 <div class="hud" id="prompt" hidden></div>
 <div id="fade"></div>
-<div id="cine" hidden><i class="bar t"></i><i class="bar b"></i><div class="ct"><small></small><b></b><em>Touche l'écran pour passer</em></div></div>
+<div id="cine" hidden><i class="bar t"></i><i class="bar b"></i><div class="ct"><small></small><b></b><p class="story" hidden></p><em>Touche l'écran pour passer</em></div></div>
 <div class="hud" id="tip" hidden></div>
 <div id="reward" hidden></div>
 
@@ -286,6 +287,7 @@ canvas.gunview{width:100%;max-width:520px;height:auto;aspect-ratio:520/300;displ
 
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
+<script src="vendor/postfx.js"></script>
 <script src="js/data.js"></script>
 <script src="js/i18n-dict.js"></script>
 <script src="js/i18n.js"></script>
