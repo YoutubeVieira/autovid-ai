@@ -2509,13 +2509,16 @@ init3D();
 // modèles .glb animés (optionnels)
 R3.models = {};
 if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries(D.MODELS)) {
-  try { new THREE.GLTFLoader().load(url, gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = false; } });
+  const onGl = gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = false; } });
     const mixer = new THREE.AnimationMixer(scene), find = re => { const c = gl.animations.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
     const acts = { idle: find(/idle/i), walk: find(/walk(?!jump)/i), run: find(/run/i), punch: find(/punch|attack/i), death: find(/death|die/i) };
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
     let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
     const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
-    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h }; P._m = null; }, undefined, () => {}); } catch (e) {}
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h }; P._m = null; };
+  // secours : si le .glb ne peut pas être servi, on charge sa copie en JavaScript (base64)
+  const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
+  try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }
 }
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
