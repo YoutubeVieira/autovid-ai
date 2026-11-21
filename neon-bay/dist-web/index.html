@@ -29,6 +29,7 @@ body:not(.playing) .hud, body:not(.playing) #mini{display:none!important}
 #hudL{top:calc(12px + env(safe-area-inset-top,0px));left:calc(12px + env(safe-area-inset-left,0px));display:flex;flex-direction:column;gap:5px}
 #money{font-family:var(--display);font-size:clamp(20px,3.6vw,30px);color:var(--amber);text-shadow:0 0 12px rgba(255,182,39,.5),0 2px 0 #000;font-variant-numeric:tabular-nums}
 #stars{display:flex;gap:3px;font-size:21px;line-height:1}
+#o2{position:relative;width:110px;height:12px;margin-top:3px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}#o2 i{position:absolute;left:0;top:0;bottom:0;width:100%;background:linear-gradient(90deg,#21e6ff,#a6ff4d)}#o2 b{position:relative;display:block;font-size:8px;line-height:12px;text-align:center;letter-spacing:.08em;text-transform:uppercase;color:#fff}#o2.low i{background:#ff2e4d}
 #unseen{position:relative;width:110px;height:12px;margin-top:3px;border-radius:6px;background:rgba(255,255,255,.12);overflow:hidden}#unseen i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#2e6bff,#21e6ff)}#unseen b{position:relative;display:block;font-size:8px;line-height:12px;text-align:center;letter-spacing:.08em;text-transform:uppercase;color:#fff}
 #stars span{color:rgba(255,255,255,.18);text-shadow:0 1px 0 #000}
 #stars span.on{color:var(--ink);text-shadow:0 0 10px var(--cyan)}
@@ -288,7 +289,7 @@ body.playing #tip{top:calc(var(--hudB,98px) + 72px)!important}
 
 <div class="hud" id="hudL">
   <div id="money">0 $</div>
-  <div id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div><div id="unseen" hidden><i></i><b>Hors de vue</b></div>
+  <div id="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div><div id="unseen" hidden><i></i><b>Hors de vue</b></div><div id="o2" hidden><i></i><b>Oxygène</b></div>
   <div class="barw" title="Santé"><div id="hp"></div></div>
   <div class="barw" title="Armure"><div id="armor"></div></div>
   <div id="wep">Pistolet</div>

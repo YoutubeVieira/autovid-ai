@@ -217,6 +217,7 @@ window.NB_AUDIO = (() => {
     col: { bpm: 96, chords: [43, 48, 50, 43], minor: false, kick: 'x...x...x...x...', snare: '..x...x...x...x.', hat: 'xx.xxx.xxx.xxx.x', lead: 'marimba', arp: '0 4 7 - 12 - 7 4 0 - 4 7 - 4 - -' },
     bra: { bpm: 128, chords: [40, 40, 43, 38], minor: true, kick: 'x..x..x...x..x..', snare: '....x..x....x...', hat: 'x.xxx.xxx.xxx.xx', lead: 'synth', arp: '0 - - 4 - - 7 - - 10 - - 7 - 4 -' },
   };
+  STYLES.moon = { bpm: 70, chords: [45, 48, 43, 40], minor: true, kick: 'x...............', snare: '................', hat: '....x.......x...', lead: 'pad', arp: '0 - - - 7 - - - 12 - - - 5 - - -' }; STYLES.mars = { bpm: 84, chords: [40, 43, 38, 41], minor: true, kick: 'x.......x.......', snare: '........x.......', hat: '..x...x...x...x.', lead: 'pad', arp: '0 - 3 - 7 - 3 - 0 - 5 - 7 - 10 -' };
   STYLES.synth = STYLES.usa; STYLES.funk = STYLES.bra; STYLES.usa = STYLES.trap; STYLES.menu = STYLES.lofi;
   let mus = { style: null, timer: null, step: 0, next: 0, intensity: 0 };
   function setMusic(style) {

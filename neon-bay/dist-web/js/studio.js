@@ -21,6 +21,8 @@
     car_van: { cat: 'Cars', name: 'Fourgon', desc: '4,85 m', file: 'car_van', kind: 'car', slots: ['Paint'] },
     police: { cat: 'Cars', name: 'Police', desc: 'gyrophare', file: 'car_sedan', kind: 'car', slots: ['Paint'], police: true },
     street: { cat: 'Props', name: 'Rue néon', desc: 'immeubles', kind: 'street' },
+    rocket: { cat: 'Props', name: 'Fusée', desc: 'flammes', kind: 'rocket', slots: ['Color'] },
+    boat: { cat: 'Cars', name: 'Bateau', desc: 'vedette', kind: 'boat', slots: ['Paint'] },
     palm: { cat: 'Props', name: 'Palmier', desc: '7 m', file: 'palm', kind: 'prop', h: 7 },
     lamp: { cat: 'Props', name: 'Lampadaire', desc: 'éclaire', file: 'lamp', kind: 'prop', h: 5.5, light: true },
     traffic_light: { cat: 'Props', name: 'Feu', desc: 'tricolore', file: 'traffic_light', kind: 'prop', h: 4.2 },
@@ -131,6 +133,20 @@
     if (o.asset === 'camera') {
       inner = new THREE.Group(); const body = new THREE.Mesh(new THREE.BoxGeometry(.5, .35, .7), new THREE.MeshBasicMaterial({ color: 0xff2e93, wireframe: true })); const lens = new THREE.Mesh(new THREE.ConeGeometry(.3, .5, 4, 1, true), new THREE.MeshBasicMaterial({ color: 0xff2e93, wireframe: true })); lens.rotation.x = PI / 2; lens.position.z = -.55; inner.add(body, lens); u.helper = true;
     } else if (a.kind === 'street') inner = streetGroup(o);
+    else if (a.kind === 'rocket') { // fusée 33 m : corps, coiffe, ailerons, flamme animée (visible quand la fusée monte)
+      inner = new THREE.Group(); const W = new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: .35, metalness: .3 }), Rd = new THREE.MeshStandardMaterial({ color: (o.color || {}).Color || '#d6332a', roughness: .4 });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 24, 24), W); body.position.y = 14; const nose = new THREE.Mesh(new THREE.ConeGeometry(1.8, 6, 24), Rd); nose.position.y = 29;
+      inner.add(body, nose); for (let i = 0; i < 4; i++) { const f = new THREE.Mesh(new THREE.BoxGeometry(.25, 4, 2.4), Rd); f.position.set(Math.cos(i * PI / 2) * 2.3, 3.5, Math.sin(i * PI / 2) * 2.3); f.rotation.y = -i * PI / 2; inner.add(f); }
+      const noz = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.9, 2, 18), new THREE.MeshStandardMaterial({ color: 0x1a1a22, metalness: .7, roughness: .3 })); noz.position.y = 1; inner.add(noz);
+      inner.traverse(x => { if (x.isMesh) { x.castShadow = true; } });
+      const fl = new THREE.Group(); const f1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 9, 16), new THREE.MeshBasicMaterial({ color: 0xffa21a, transparent: true, opacity: .9 })); f1.rotation.x = PI; f1.position.y = -4.5; const f2 = new THREE.Mesh(new THREE.ConeGeometry(.8, 5, 12), new THREE.MeshBasicMaterial({ color: 0xfff4c0 })); f2.rotation.x = PI; f2.position.y = -2.5; fl.add(f1, f2); inner.add(fl);
+      const fL = new THREE.PointLight(0xffa040, 0, 120, 2); fL.position.y = -3; inner.add(fL); u.flame = fl; u.flameL = fL;
+      const smoke = new THREE.Group(); for (let i = 0; i < 14; i++) { const m = new THREE.Mesh(new THREE.SphereGeometry(1, 10, 8), new THREE.MeshStandardMaterial({ color: 0xd8d4dc, roughness: 1, transparent: true, opacity: .8 })); smoke.add(m); } u.smoke = smoke; u.smokeRoot = true;
+    }
+    else if (a.kind === 'boat') { inner = new THREE.Group(); const pm = new THREE.MeshStandardMaterial({ color: (o.color || {}).Paint || '#ffffff', roughness: .3, metalness: .2 });
+      const hull = new THREE.Mesh(new THREE.BoxGeometry(6, 1.2, 2.4), pm); hull.position.y = .5; const bow = new THREE.Mesh(new THREE.CylinderGeometry(0, 1.2, 2, 4), pm); bow.rotation.z = -PI / 2; bow.rotation.x = PI / 4; bow.scale.set(1, 1, .9); bow.position.set(4, .5, 0);
+      const cab = new THREE.Mesh(new THREE.BoxGeometry(2, 1.1, 1.8), new THREE.MeshStandardMaterial({ color: 0xf4f4f4 })); cab.position.set(-.6, 1.6, 0); const ws = new THREE.Mesh(new THREE.BoxGeometry(.1, .7, 1.6), new THREE.MeshStandardMaterial({ color: 0x9fd6ff, metalness: .3, roughness: .05 })); ws.position.set(.45, 1.7, 0);
+      inner.add(hull, bow, cab, ws); inner.traverse(x => { if (x.isMesh) x.castShadow = true; }); u.boat = true; }
     else if (a.kind === 'prim') {
       const geo = { cube: new THREE.BoxGeometry(1, 1, 1), sphere: new THREE.SphereGeometry(.5, 32, 20), cylinder: new THREE.CylinderGeometry(.5, .5, 1, 28), neon: new THREE.BoxGeometry(3, .5, .12) }[o.asset];
       const col = (o.color || {}).Color || DEFCOL.Color; inner = new THREE.Mesh(geo, o.asset === 'neon' ? new THREE.MeshBasicMaterial({ color: col }) : new THREE.MeshStandardMaterial({ color: col, roughness: .5 })); inner.castShadow = inner.receiveShadow = true; if (o.asset !== 'neon') inner.position.y = .5;
@@ -155,8 +171,8 @@
     const clip = (u.anims || []).find(c => new RegExp(o.clip || 'Idle', 'i').test(c.name)) || (u.anims || [])[0]; if (!clip) return;
     u.action = u.mixer.clipAction(clip); u.action.play(); u.clipDur = clip.duration;
   }
-  function rebuild(o) { const u = rt[o.id]; if (u) { scene.remove(u.holder); if (gizmo.object === u.holder) gizmo.detach(); delete rt[o.id]; } build(o); if (sel === o.id) attach(); }
-  function clearScene() { for (const id in rt) { scene.remove(rt[id].holder); delete rt[id]; } gizmo.detach(); if (mirror) { scene.remove(mirror); mirror = null; } }
+  function rebuild(o) { const u = rt[o.id]; if (u) { scene.remove(u.holder); if (u.smoke) scene.remove(u.smoke); if (gizmo.object === u.holder) gizmo.detach(); delete rt[o.id]; } build(o); if (sel === o.id) attach(); }
+  function clearScene() { for (const id in rt) { scene.remove(rt[id].holder); if (rt[id].smoke) scene.remove(rt[id].smoke); delete rt[id]; } gizmo.detach(); if (mirror) { scene.remove(mirror); mirror = null; } }
 
   // ---------- animation : interpolation des images clés ----------
   const ease = u => u * u * (3 - 2 * u);
@@ -183,6 +199,9 @@
       if (u.action) { u.action.time = ((time * (o.speed || 1)) % (u.clipDur || 1)); u.mixer.update(0); }
       if (u.wheels.length) { const ang = pathLen(o, time) / .34; for (const w of u.wheels) w.rotation.z = -ang; }
       if (u.flash) { const f = Math.sin(time * 18) > 0; u.flash[0].material.color.set(f ? 0xff2e4d : 0x300810); u.flash[1].material.color.set(f ? 0x0a1030 : 0x2e6bff); u.flashL.color.set(f ? 0xff2e4d : 0x2e6bff); u.flashL.intensity = AMB.night ? 6 : 2; }
+      if (u.flame) { const y0 = sample(o, Math.max(0, time - .1)).p[1], vy = (s.p[1] - y0) * 10, on = vy > .2 || (o.ignite != null && time >= o.ignite); u.flame.visible = on; u.flame.scale.set(1, on ? .8 + Math.random() * .5 : 0, 1); u.flameL.intensity = on ? 6 + Math.random() * 3 : 0;
+        if (!u.smoke.parent) scene.add(u.smoke); const base = u.holder.position; u.smoke.children.forEach((m, i) => { const st = on ? ((time * .6 + i / 14) % 1) : 0; m.visible = on && st > 0; const a = i * 2.4; m.position.set(base.x + Math.cos(a) * st * 14, Math.max(.6, base.y * .15) + st * 4, base.z + Math.sin(a) * st * 14); m.scale.setScalar(1 + st * 5); m.material.opacity = .75 * (1 - st); }); }
+      if (u.boat) { u.inner.position.y = Math.sin(time * 2) * .12; u.inner.rotation.z = Math.sin(time * 1.6) * .03; }
       if (u.head) u.head.intensity = AMB.night ? 30 : 0;
       if (u.lampL) u.lampL.intensity = AMB.night ? 8 : 0;
     }
@@ -240,6 +259,15 @@
   function defaultProject() { return { v: 1, name: 'Ma cinématique', duration: 12, aspect: '16:9', res: 720, amb: 'night', bloom: true, rain: false, wet: false, objects: [newObj('camera', { id: 'cam', name: 'Caméra', fov: 40, base: { p: [12, 4, 14], r: [-.2, .7, 0], s: [1, 1, 1] } })] }; }
   const TEMPLATES = {
     empty: () => defaultProject(),
+    launch: () => { const p = defaultProject(); Object.assign(p, { name: 'Décollage', duration: 12, aspect: '16:9', amb: 'night', bloom: true, wet: true });
+      const rk = newObj('rocket', { id: 'rocket', name: 'Fusée', ignite: 2.5, keys: [K(0, [0, 0, 0]), K(4, [0, 0, 0]), K(8, [0, 40, 0]), K(12, [0, 220, 0])] });
+      rk.keys.forEach(k => k.ease = 'linear'); rk.keys[1].ease = 'ease'; rk.keys[2].ease = 'ease';
+      p.objects.push(newObj('street', { id: 'street', name: 'Rue néon', seed: 21, length: 160, base: { p: [0, 0, -40], r: [0, 0, 0], s: [1, 1, 1] } }), rk,
+        newObj('human_m', { name: 'Toi', color: { Shirt: '#21e6ff' }, clip: 'Idle', base: { p: [10, 0, 22], r: [0, PI + .6, 0], s: [1, 1, 1] } }),
+        newObj('car_suv', { name: 'Rover de service', color: { Paint: '#f4f4f4' }, base: { p: [-14, 0, 16], r: [0, .7, 0], s: [1, 1, 1] } }));
+      for (let i = 0; i < 3; i++) p.objects.push(newObj('lamp', { name: 'Projecteur ' + (i + 1), base: { p: [-12 + i * 12, 0, 10], r: [0, PI, 0], s: [1, 1, 1] } }));
+      const cam = p.objects[0]; cam.target = 'rocket'; cam.tgtY = 16; cam.keys = [K(0, [34, 2.2, 66], [0, 0, 0], [1, 1, 1], 30), K(4, [26, 2.4, 52], [0, 0, 0], [1, 1, 1], 34), K(8, [30, 4, 50], [0, 0, 0], [1, 1, 1], 40), K(12, [40, 10, 60], [0, 0, 0], [1, 1, 1], 34)];
+      return p; },
     chase: () => { const p = defaultProject(); Object.assign(p, { name: 'Poursuite de nuit', duration: 10, aspect: '2.39', amb: 'night', rain: true, wet: true });
       const car = newObj('car_sedan', { id: 'hero', name: 'Voiture du héros', color: { Paint: '#ff2e93' }, keys: [K(0, [-90, 0, -2.4]), K(4.5, [-20, 0, -2.4]), K(6, [2, 0, 2.2], [0, -.12, 0]), K(10, [96, 0, 2.2])] });
       const cop = newObj('police', { id: 'cop', name: 'Police', keys: [K(0, [-112, 0, 2.2]), K(5, [-35, 0, 2.2]), K(7, [-8, 0, -2.4], [0, .1, 0]), K(10, [70, 0, -2.4])] });

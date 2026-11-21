@@ -11,6 +11,34 @@ window.NB_DATA = (() => {
     verifyUrl: '',         // (recommandé) adresse d'un petit serveur qui vérifie l'achat et en accuse réception, voir ANDROID.md
   };
 
+
+  // ---------- CONQUÊTE SPATIALE (bonus) : fuir la Terre en fusée et survivre sur la Lune ou sur Mars ----------
+  const SPACE = [
+    {
+      id: 'moon', name: 'Base Tranquille', country: 'Lune', from: 31, to: 31, seed: 71, accent: '#cfd8ff', space: true,
+      tagline: 'Gravité faible, oxygène compté, la Terre au-dessus de ta tête.',
+      pal: { ground: '#0a0a0e', road: '#3a3a42', walk: '#55555e', line: '#6a6a74', curb: '#7a7a86', park: '#6d6d74', tree: '#5a5a62', water: '#3a3a42', plaza: '#8a8f9e',
+        bld: ['#c9ccd6', '#b8bcc8', '#d8dae2', '#9fa4b2'], neon: ['#21e6ff', '#ffffff', '#ffb627', '#9d7bff', '#a6ff4d'] },
+      blocks: { park: 4, full: 1.2, split: 1, plaza: 1.6, warehouse: 1 },
+      factions: [{ name: 'les mineurs rebelles', color: '#ffb627', look: { shirt: '#e8e2d0', jacket: '#ffb627', pants: '#8a8070', hat: '#ffffff', hatType: 'beanie' } }, { name: 'la sécurité de la base', color: '#21e6ff', look: { shirt: '#dfe6f2', jacket: '#21e6ff', pants: '#3a4a66', hat: '#ffffff', hatType: 'beanie' } }],
+      look: { roof: 'flat', glass: '#9fc6ff', facades: ['#d8dae2', '#c9ccd6', '#e8e8ee', '#b8bcc8'], trees: 'cone', edges: {}, lamp: '#cfe6ff', sidewalk: 'concrete', sky: '#000000', ground: '#6d6d74', space: 'moon', landmarks: [],
+        peds: { shirts: ['#f4f4f4', '#e8e8ee', '#ffffff'], pants: ['#d8dae2', '#c9ccd6'], shorts: 0, hat: 1, hatTypes: ['beanie'], jacket: .4, skirt: 0, skins: ['#f2d3b3', '#c68b59', '#8d5a3b'] },
+        cars: { palette: ['#f4f4f4', '#d8dae2', '#ffb627'], taxi: '#ffb627', types: { jeep: 4, van: 1.5, pickup: 1 } } },
+      vip: 'la docteure Ilsa Moreau', places: ['le dôme Armstrong', 'la mine d’hélium 3', 'le module de communication', 'la serre hydroponique', 'le spatioport', 'le cratère Shackleton'],
+    },
+    {
+      id: 'mars', name: 'Colonie Ares', country: 'Mars', from: 32, to: 32, seed: 97, accent: '#ff7a3d', space: true,
+      tagline: 'Tempêtes de poussière, colons armés, un ciel couleur rouille.',
+      pal: { ground: '#1a0c08', road: '#5a3424', walk: '#7a4a34', line: '#8a5a44', curb: '#9a6a50', park: '#a4573a', tree: '#7a3a24', water: '#5a3424', plaza: '#c9a48a',
+        bld: ['#e2d6c6', '#cfc2b0', '#b8a894', '#f0e6d8'], neon: ['#ff7a3d', '#21e6ff', '#ffd23f', '#ffffff', '#a6ff4d'] },
+      blocks: { park: 3.5, full: 1.2, warehouse: 1.4, plaza: 1.6, split: .8 },
+      factions: [{ name: 'les Fils de la Poussière', color: '#ff7a3d', look: { shirt: '#c98a5a', jacket: '#ff7a3d', pants: '#5a3424', hat: '#e8e2d0', hatType: 'beanie' } }, { name: 'la milice de la colonie', color: '#a6ff4d', look: { shirt: '#e2d6c6', jacket: '#3a5a2a', pants: '#2a3a20', hat: '#ffffff', hatType: 'beanie' } }],
+      look: { roof: 'flat', glass: '#ffb88a', facades: ['#f0e6d8', '#e2d6c6', '#cfc2b0'], trees: 'cone', edges: {}, lamp: '#ffd8b0', sidewalk: 'concrete', sky: '#c27a4e', ground: '#a4573a', space: 'mars', landmarks: [],
+        peds: { shirts: ['#f4f4f4', '#ffb627', '#ffffff'], pants: ['#d8dae2', '#8a8070'], shorts: 0, hat: 1, hatTypes: ['beanie'], jacket: .5, skirt: 0, skins: ['#f2d3b3', '#c68b59', '#8d5a3b'] },
+        cars: { palette: ['#f4f4f4', '#ff7a3d', '#d8dae2'], taxi: '#ff7a3d', types: { jeep: 4, pickup: 2, van: 1 } } },
+      vip: 'le commandant Okafor', places: ['la serre de la colonie', 'le dôme principal', 'la foreuse de glace', 'le canyon Valles', 'la piste du spatioport', 'le relais radio'],
+    },
+  ];
   const REGIONS = [
     {
       id: 'usa', name: 'Néon Bay', country: 'États-Unis', from: 1, to: 8, seed: 11, accent: '#ff2e93',
@@ -186,5 +214,5 @@ window.NB_DATA = (() => {
   // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
   const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb' };
 
-  return { MODELS, SHOP_CONFIG, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
+  return { MODELS, SHOP_CONFIG, SPACE, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();

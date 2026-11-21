@@ -1,5 +1,5 @@
 /* Néon Bay : cache hors ligne. La version est remplacée à chaque build (tools/build-web.js). */
-const VERSION = 'nb-mwr0s8m6';
+const VERSION = 'nb-mwr1fjef';
 const SHELL = ['./', 'index.html', 'js/data.js', 'js/i18n-dict.js', 'js/i18n.js', 'js/audio.js', 'js/store.js', 'js/portal.js', 'js/engine.js', 'vendor/three.min.js', 'vendor/GLTFLoader.js', 'vendor/SkeletonUtils.js', 'vendor/postfx.js', 'models/robot.glb', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

@@ -19,7 +19,7 @@ const fps = +arg('fps', 30), res = +arg('res', 1080);
   const proj = file ? JSON.parse(fs.readFileSync(file, 'utf8')) : await p.evaluate(k => window.STUDIO.template(k), tpl);
   const dur = await p.evaluate(async pr => window.STUDIO.load(pr), proj);
   const asp = proj.aspect || '16:9', W = asp === '9:16' ? res : asp === '2.39' ? Math.round(res * 2.39 / 2) * 2 : Math.round(res * 16 / 9 / 2) * 2, H = asp === '9:16' ? Math.round(res * 16 / 9 / 2) * 2 : res;
-  const out = arg('out', path.join(root, 'marketing', 'studio', (proj.name || tpl || 'film').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() + '.mp4'));
+  const out = arg('out', path.join(root, 'marketing', 'studio', (proj.name || tpl || 'film').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() + '.mp4'));
   fs.mkdirSync(path.dirname(out), { recursive: true });
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const N = Math.round(dur * fps), t0 = Date.now();
