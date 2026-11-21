@@ -5991,6 +5991,7 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    'Arrestation imminente : bouge ou riposte !': { en: 'About to be arrested: move or fight back!', es: '¡Te van a arrestar: muévete o defiéndete!', pt: 'Você vai ser preso: corra ou revide!' },
     "Néon Bay · 2 h du matin": { en: "Neon Bay · 2 a.m.", es: "Neon Bay · 2 de la madrugada", pt: "Neon Bay · 2 da manhã" },
     "Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.": { en: "You step off the bus with forty dollars and a number scribbled on a ticket.", es: "Bajas del autobús con cuarenta dólares y un número garabateado en un boleto.", pt: "Você desce do ônibus com quarenta dólares e um número rabiscado num bilhete." },
     "Le cousin Dre": { en: "Cousin Dre", es: "El primo Dre", pt: "O primo Dre" },
@@ -7156,6 +7157,7 @@ function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.
 function hurt(n) {
   if (S.dead > 0 || S.mode !== 'play') return;
   n *= dif().dmg * (1 - .05 * trainLv('str'));
+  if (S.bot && S.dmgLog) { const f = (new Error().stack || '').split('\n')[2] || ''; const k = (f.match(/at (\w+)/) || [])[1] || '?'; S.dmgLog[k] = (S.dmgLog[k] || 0) + n; }
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
   S.hp -= n; P.hitT = S.time; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
@@ -7324,6 +7326,8 @@ function updInmates(dt) {
   }
   inmates = inmates.filter(m => !m.free || m.ft < 7);
 }
+// longueur réelle par la route (A* du GPS) : les chronos se calculent sur le trajet à conduire, pas à vol d'oiseau
+function roadLen(x1, y1, x2, y2) { try { const p = gpsCompute(x1, y1, x2, y2); if (p && p.length) { let t = 0, x = x1, y = y1; for (const q of p) { t += dist(x, y, q.x, q.y); x = q.x; y = q.y; } return t + dist(x, y, x2, y2); } } catch (e) {} return dist(x1, y1, x2, y2) * 1.35; }
 function makeStep(type, n, idx) {
   const st = { type, label: D.STEP_LABEL[type], target: null, time: null, survive: false, desc: '' };
   const g = 'g' + idx;
@@ -7331,8 +7335,8 @@ function makeStep(type, n, idx) {
   switch (type) {
     case 'goto': { const pl = place(); st.target = randWalk(1100, 2100, P.x, P.y); st.desc = 'Rejoins ' + pl; st.check = () => dist(P.x, P.y, st.target.x, st.target.y) < 56; break; }
     case 'deliver': {
-      const pl = place(); st.target = randWalk(1700, 3000, P.x, P.y); const d = dist(P.x, P.y, st.target.x, st.target.y);
-      st.time = Math.round(d / (240 + n * 2) + 22 - n * .35); st.needCar = true;
+      const pl = place(); st.target = randWalk(1700, 3000, P.x, P.y); const d = roadLen(P.x, P.y, st.target.x, st.target.y);
+      st.time = Math.round(d / (215 + n * 2) + 24 - n * .3); st.needCar = true;
       st.desc = 'Livre la marchandise à ' + pl + ' en voiture';
       st.check = () => P.car && dist(P.x, P.y, st.target.x, st.target.y) < 64; break;
     }
@@ -7345,7 +7349,7 @@ function makeStep(type, n, idx) {
       st.fail = () => st.car.wreck ? 'La voiture dorée a été détruite' : null; break;
     }
     case 'garage': {
-      st.target = nearestOf(world.garages); st.needCar = true; st.time = Math.round(dist(P.x, P.y, st.target.x, st.target.y) / 220 + 30);
+      st.target = nearestOf(world.garages); st.needCar = true; st.time = Math.round(roadLen(P.x, P.y, st.target.x, st.target.y) / 200 + 30);
       st.desc = 'Dépose la voiture au garage (G vert)';
       st.check = () => { if (!P.car || dist(P.x, P.y, st.target.x, st.target.y) > 60) return false; if (L.stolen && !L.stolen.wreck && P.car !== L.stolen) { msg('Ramène la voiture dorée'); return false; } if (P.car.mark) { P.car.mark = false; P.car.keep = false; } return true; }; break;
     }
@@ -7393,7 +7397,7 @@ function makeStep(type, n, idx) {
       st.check = () => {
         if (st.phase === 0 && dist(P.x, P.y, vip.x, vip.y) < 70) {
           st.phase = 1; vip.following = true; st.dest = randWalk(1800, 2900, vip.x, vip.y);
-          st.time = Math.round(dist(vip.x, vip.y, st.dest.x, st.dest.y) / 200 + 40);
+          st.time = Math.round(roadLen(vip.x, vip.y, st.dest.x, st.dest.y) / 185 + 40);
           const mx = (vip.x + st.dest.x) / 2, my = (vip.y + st.dest.y) / 2; spawnGroup(mx, my, 2 + Math.floor(n / 5), f, g); if (n >= 6) spawnGangCar(mx, my, f, g);
           toast(vip.name + ' te suit'); return false;
         }
@@ -7415,7 +7419,7 @@ function makeStep(type, n, idx) {
         if (st.phase === 1 && !enemies.some(e => e.group === g && e.hp > 0)) {
           st.phase = 2; prison.open = true; for (const m of inmates) { m.free = true; m.a = Math.atan2(m.y - c.y, m.x - c.x) + rnd(-.6, .6); }
           vip = { x: c.x, y: c.y + 70, a: 0, hp: 100 + n * 5, max: 100 + n * 5, name: vn, full: vn, following: true, inCar: null, step: 0, look: INMATE_LOOK };
-          st.dest = randWalk(1800, 2800, c.x, c.y); st.time = Math.round(dist(c.x, c.y, st.dest.x, st.dest.y) / 200 + 45); st.assisted = false;
+          st.dest = randWalk(1800, 2800, c.x, c.y); st.time = Math.round(roadLen(c.x, c.y, st.dest.x, st.dest.y) / 185 + 45); st.assisted = false;
           toast(vn + ' est libre : emmène-le'); track('jailbreaks'); return false;
         }
         if (st.phase === 2 && vip) { const vx = vip.inCar ? vip.inCar.x : vip.x, vy = vip.inCar ? vip.inCar.y : vip.y; if (dist(vx, vy, st.dest.x, st.dest.y) < 75) { vip.following = false; vip.done = true; return true; } }
@@ -7432,8 +7436,8 @@ function makeStep(type, n, idx) {
     }
     case 'race': {
       let x = P.x, y = P.y, tot = 0; st.pts = [];
-      for (let k = 0; k < 4; k++) { const d = randWalk(800, 1400, x, y); tot += dist(x, y, d.x, d.y); st.pts.push(d); x = d.x; y = d.y; }
-      st.k = 0; st.time = Math.round(tot / (250 + n * 2.5) + 16 - n * .3);
+      for (let k = 0; k < 4; k++) { const d = randWalk(800, 1400, x, y); tot += roadLen(x, y, d.x, d.y); st.pts.push(d); x = d.x; y = d.y; }
+      st.k = 0; st.time = Math.round(tot / (225 + n * 2.2) + 18 - n * .25); st.needCar = true;
       st.desc = () => 'Course : passe les checkpoints (' + st.k + '/4)';
       st.dyn = () => st.pts[st.k];
       st.check = () => { if (dist(P.x, P.y, st.pts[st.k].x, st.pts[st.k].y) < 60) { st.k++; if (st.k < 4) msg('Checkpoint ' + st.k + '/4'); } return st.k >= 4; }; break;
@@ -7514,6 +7518,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
+  S.lastFail = reason; S.lastFailStep = L && L.step ? L.step.type : '';
   save.fails = save.fails || {}; save.fails[L.n] = (save.fails[L.n] || 0) + 1;
   const cp = L.idx >= 5 || L.cp ? 5 : 0;
   S.mode = 'result'; if (PORTAL) PORTAL.stop(); persist(); au('fail'); vib(300); au('setMusic', null);
@@ -7746,8 +7751,9 @@ function updHud(dt) {
   if (vipOn) { setW(hud.vipHp, 'vh', Math.round(vip.hp / vip.max * 100)); }
   // aide contextuelle
   let hint = '';
+  if (S.bust > .4 && S.mode === 'play') hint = 'Arrestation imminente : bouge ou riposte !';
   const t2 = tileAt(P.x, P.y);
-  if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) hint = 'E : payer l’agent (' + fmt(agent.cost) + ')';
+  if (hint) {} else if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) hint = 'E : payer l’agent (' + fmt(agent.cost) + ')';
   else if (t2 === TUNNEL) hint = 'E : prendre le tunnel';
   else if (t2 === SHOP && !P.car) hint = 'E : ouvrir la boutique';
   else if (s > 0 && nearCop()) hint = 'B : soudoyer les agents (' + fmt(bribeCost()) + ')';
@@ -7773,7 +7779,12 @@ function update(dt) {
   const Lk = keys.KeyA || keys.ArrowLeft, Rk = keys.KeyD || keys.ArrowRight, U = keys.KeyW || keys.ArrowUp, Dn = keys.KeyS || keys.ArrowDown;
   pollPad();
   const act = keys.Space || mouse.down || touch.shoot || pad.rt > .3;
-  if (S.dead <= 0) {
+  if (S.bot && S.dead <= 0) { // testeurs automatiques : mêmes règles que le joueur (vitesse, tir, conduite), sans téléportation
+    const B = S.bot;
+    if (P.car) { if (B.nitro && P.nitro <= 0 && save.nitro > 0) useNitro(); const c = P.car; drive(c, dt, B.thr || 0, B.st || 0, !!B.hb); P.x = c.x; P.y = c.y; P.a = c.a; }
+    else { const m = Math.hypot(B.mx || 0, B.my || 0); if (m > .1) { const sp = B.run ? 230 : 150, ma = Math.atan2(B.my, B.mx); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+      if (B.aimA !== undefined && B.aimA !== null) P.a = B.aimA; P.cd -= dt; if (B.shoot && P.cd <= 0) fire(); }
+  } else if (S.dead <= 0) {
     if (P.car) {
       const c = P.car; let thr = (U ? 1 : 0) - (Dn ? 1 : 0), st = (Rk ? 1 : 0) - (Lk ? 1 : 0);
       if (pad.on) { if (pad.rt > .05 || pad.lt > .05) thr = pad.rt - pad.lt; if (Math.abs(pad.lx) > .15) st = pad.lx; }
@@ -7808,9 +7819,12 @@ function update(dt) {
       if (!a.wreck && !carHits(a.x - nx * push, a.y - ny * push, a.a)) { a.x -= nx * push; a.y -= ny * push; }
       if (!b.wreck && !carHits(b.x + nx * push, b.y + ny * push, b.a)) { b.x += nx * push; b.y += ny * push; }
       const rel = Math.hypot(Math.cos(a.a) * a.v - Math.cos(b.a) * b.v, Math.sin(a.a) * a.v - Math.sin(b.a) * b.v);
-      if (rel > 110) {
-        { const [pn, vl] = spatial(a.x, a.y); if (vl > .1) au('crash', vl * Math.min(1, rel / 300), pn); } damageCar(a, rel * .045); damageCar(b, rel * .045); sparks((a.x + b.x) / 2, (a.y + b.y) / 2, 6);
-        if (a === P.car || b === P.car) { vib(Math.min(120, rel / 4)); shake = Math.min(10, rel / 40); const o = a === P.car ? b : a; if (o.kind === 'police' && o.ai) addHeat(.15); if (o.ai === 'traffic' || o.ai === 'convoy') o.panic = 3; }
+      // un choc = un seul dégât (avant : un dégât par image tant que les voitures se touchaient) ; la police qui te percute ne te rend pas plus recherché
+      const pcar = a === P.car ? a : b === P.car ? b : null, pc = !!pcar, cd = pc ? (S.ramCd || 0) : Math.max(a.hitCd || 0, b.hitCd || 0);
+      if (rel > 110 && S.time >= cd) {
+        if (pc) S.ramCd = S.time + .45; else { a.hitCd = b.hitCd = S.time + .45; }
+        { const [pn, vl] = spatial(a.x, a.y); if (vl > .1) au('crash', vl * Math.min(1, rel / 300), pn); } damageCar(a, rel * (a === pcar ? .022 : .045)); damageCar(b, rel * (b === pcar ? .022 : .045)); sparks((a.x + b.x) / 2, (a.y + b.y) / 2, 6);
+        if (pc) { vib(Math.min(120, rel / 4)); shake = Math.min(10, rel / 40); const o = pcar === a ? b : a; if (o.kind === 'police' && o.ai && Math.abs(pcar.v) > Math.abs(o.v) + 40) addHeat(.25); if (o.ai === 'traffic' || o.ai === 'convoy') o.panic = 3; }
       }
       a.v *= .7; b.v *= .7;
     }
@@ -7870,8 +7884,10 @@ function update(dt) {
     const lose = ((save.perks.radio ? 5 : 7) + lvl() * .04) * (.55 + .45 * ez());
     if (S.unseen > lose && !(L && L.step && L.step.lock)) { S.heat = Math.max(0, s - 1); S.unseen = 0; if (S.heat < 1) { S.heat = 0; msg('Police semée'); policeLeave(); track('escapes'); } }
     let near = false; for (const c of cars) if (c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, P.x, P.y) < (P.car ? 62 : 56) && Math.abs(c.v) < 90) { near = true; break; }
-    if (near && (!P.car || Math.abs(P.car.v) < 30)) S.bust += dt * (P.car ? .6 : 1); else S.bust = Math.max(0, S.bust - dt);
-    if (S.bust > 1.6 + (1 - ez()) * 3) failLevel('Arrêté par la police');
+    const runningAway = !P.car && P.step - (S.lastStep || 0) > dt * 30; S.lastStep = P.step;
+    const fighting = !P.car && S.time - (P.lastShot || -9) < 2; // on n'arrête pas quelqu'un qui riposte : la police tire
+    if (near && !fighting && (!P.car || Math.abs(P.car.v) < 30)) S.bust += dt * (P.car ? .6 : runningAway ? .5 : 1); else S.bust = Math.max(0, S.bust - dt * 1.5);
+    if (S.bust > 2.2 + (1 - ez()) * 3) failLevel('Arrêté par la police');
   } else { S.bust = 0; if (S.hp < maxHp()) S.hp = Math.min(maxHp(), S.hp + dt * (1.5 + (1 - ez()) * 6)); }
   // nettoyage
   for (const c of cars) if (c.ai === 'block') { c.ttl -= dt; if (c.ttl <= 0 || stars() === 0) c.ai = 'leave'; }
@@ -9402,7 +9418,7 @@ if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
-window.__nb = { step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
 
 </script>

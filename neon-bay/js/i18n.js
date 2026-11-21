@@ -13,6 +13,7 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    'Arrestation imminente : bouge ou riposte !': { en: 'About to be arrested: move or fight back!', es: '¡Te van a arrestar: muévete o defiéndete!', pt: 'Você vai ser preso: corra ou revide!' },
     "Néon Bay · 2 h du matin": { en: "Neon Bay · 2 a.m.", es: "Neon Bay · 2 de la madrugada", pt: "Neon Bay · 2 da manhã" },
     "Tu descends du bus avec quarante dollars et un numéro griffonné sur un ticket.": { en: "You step off the bus with forty dollars and a number scribbled on a ticket.", es: "Bajas del autobús con cuarenta dólares y un número garabateado en un boleto.", pt: "Você desce do ônibus com quarenta dólares e um número rabiscado num bilhete." },
     "Le cousin Dre": { en: "Cousin Dre", es: "El primo Dre", pt: "O primo Dre" },

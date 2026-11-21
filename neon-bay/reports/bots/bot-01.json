@@ -1,0 +1,289 @@
+{
+ "id": 1,
+ "name": "Débutant prudent",
+ "role": "Mesure si un nouveau joueur finit le jeu en Facile",
+ "levels": [
+  {
+   "n": 1,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "goto",
+     "idx": 0,
+     "time": 32,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "goto",
+     "idx": 0,
+     "time": 68,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "goto",
+     "idx": 0,
+     "time": 107,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 207,
+   "stars": 0,
+   "money": 1401
+  },
+  {
+   "n": 2,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "race",
+     "idx": 3,
+     "time": 137,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 155,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "race",
+     "idx": 3,
+     "time": 145,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 437,
+   "stars": 0,
+   "money": 4404
+  },
+  {
+   "n": 3,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "escape",
+     "idx": 6,
+     "time": 321,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "escape",
+     "idx": 6,
+     "time": 93,
+     "from": 5
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "destroy",
+     "idx": 8,
+     "time": 206,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 620,
+   "stars": 0,
+   "money": 4519
+  },
+  {
+   "n": 4,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 0,
+     "time": 38,
+     "from": 0
+    },
+    {
+     "ok": true,
+     "time": 394,
+     "from": 0
+    }
+   ],
+   "ok": true,
+   "time": 432,
+   "stars": 3,
+   "money": 9855
+  },
+  {
+   "n": 5,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "destroy",
+     "idx": 1,
+     "time": 166,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "destroy",
+     "idx": 1,
+     "time": 110,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 142,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 418,
+   "stars": 0,
+   "money": 11047
+  },
+  {
+   "n": 6,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tyrell n’a pas survécu",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 81,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tyrell n’a pas survécu",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 80,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 98,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 259,
+   "stars": 0,
+   "money": 4557
+  },
+  {
+   "n": 7,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 2,
+     "time": 221,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 2,
+     "time": 216,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "destroy",
+     "idx": 2,
+     "time": 92,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 529,
+   "stars": 0,
+   "money": 8837
+  },
+  {
+   "n": 8,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 1,
+     "time": 73,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "collect",
+     "idx": 3,
+     "time": 199,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "escort",
+     "idx": 1,
+     "time": 141,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 413,
+   "stars": 0,
+   "money": 10066
+  }
+ ],
+ "totalGame": 3315,
+ "attempts": 23,
+ "gameErrors": 0,
+ "gameError1": "",
+ "errors": [],
+ "wall": 24,
+ "profile": {
+  "diff": 0,
+  "aimErr": 0.26,
+  "think": 0.7,
+  "range": 330,
+  "car": true,
+  "carDist": 700,
+  "drive": 0.55,
+  "run": false,
+  "heal": true,
+  "fightBack": true,
+  "shop": "basic",
+  "strafe": false,
+  "tunnel": false,
+  "nitro": false,
+  "melee": false,
+  "wander": false,
+  "noCheckpoint": false,
+  "copsMax": 2,
+  "id": 1,
+  "name": "Débutant prudent",
+  "role": "Mesure si un nouveau joueur finit le jeu en Facile"
+ }
+}

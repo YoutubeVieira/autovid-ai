@@ -1,0 +1,259 @@
+{
+ "id": 4,
+ "name": "Speedrunner",
+ "role": "Toujours en voiture, nitro, aucun détour : chemin le plus rapide",
+ "levels": [
+  {
+   "n": 1,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 2,
+     "time": 94,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 7,
+     "time": 207,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 7,
+     "time": 146,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 447,
+   "stars": 0,
+   "money": 3010
+  },
+  {
+   "n": 2,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 111,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 1,
+     "time": 85,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 169,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 365,
+   "stars": 0,
+   "money": 3853
+  },
+  {
+   "n": 3,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 6,
+     "time": 283,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 5,
+     "time": 48,
+     "from": 5
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 6,
+     "time": 309,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 640,
+   "stars": 0,
+   "money": 5898
+  },
+  {
+   "n": 4,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 1,
+     "time": 129,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escort",
+     "idx": 0,
+     "time": 87,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 0,
+     "time": 77,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 293,
+   "stars": 0,
+   "money": 4115
+  },
+  {
+   "n": 5,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "escape",
+     "idx": 2,
+     "time": 246,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 186,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 97,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 529,
+   "stars": 0,
+   "money": 8267
+  }
+ ],
+ "totalGame": 2274,
+ "attempts": 15,
+ "timing": [
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 60,
+   "route": 1920,
+   "need": 32
+  },
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 63,
+   "route": 2306,
+   "need": 37
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 59,
+   "route": 3381,
+   "need": 57
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 65,
+   "route": 6399,
+   "need": 99
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 78,
+   "route": 6393,
+   "need": 82
+  },
+  {
+   "n": 3,
+   "idx": 4,
+   "type": "garage",
+   "time": 57,
+   "route": 2240,
+   "need": 39
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 58,
+   "route": 5993,
+   "need": 104
+  }
+ ],
+ "gameErrors": 0,
+ "gameError1": "",
+ "errors": [],
+ "wall": 15,
+ "profile": {
+  "diff": 1,
+  "aimErr": 0.06,
+  "think": 1,
+  "range": 330,
+  "car": true,
+  "carDist": 250,
+  "drive": 1.1,
+  "run": true,
+  "heal": true,
+  "fightBack": true,
+  "shop": "weapons",
+  "strafe": false,
+  "tunnel": false,
+  "nitro": true,
+  "melee": false,
+  "wander": false,
+  "noCheckpoint": false,
+  "copsMax": 3,
+  "id": 4,
+  "name": "Speedrunner",
+  "role": "Toujours en voiture, nitro, aucun détour : chemin le plus rapide"
+ }
+}
