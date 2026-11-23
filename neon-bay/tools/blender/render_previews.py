@@ -2,8 +2,13 @@
 
     python3 tools/blender/render_previews.py            # every models/*.glb (except robot)
     python3 tools/blender/render_previews.py car_sedan  # some models
+    python3 tools/blender/render_previews.py human_m@AimRifle:12   # a clip at a frame
+    python3 tools/blender/render_previews.py human_m@face          # head close-up
 
-Writes models/previews/<name>.png (640x400, 3/4 view, studio light).
+Writes models/previews/<name>.png (640x400, 3/4 view, studio light);
+"<name>@<Clip>[:frame]" writes previews/<name>_<Clip>.png (default frame 1);
+"<name>@face" writes previews/<name>_face.png (front 3/4 close-up of the head).
+Weapons (w_*) are framed from their right side (+Z glTF), slightly from above.
 Tries Eevee first; headless machines without GPU fall back to Cycles CPU.
 """
 import glob
@@ -54,22 +59,28 @@ def setup_engine(scene, engine):
             pass
 
 
-def render_model(name):
+def render_model(spec):
+    name, _, variant = spec.partition("@")
+    clip, _, frame = variant.partition(":")
+    face = clip == "face"
+    if face or not clip:
+        clip = "Idle"
+    out_name = name + ("_" + variant.split(":")[0] if variant else "")
     path = os.path.join(nb.MODELS, name + ".glb")
     nb.reset_scene()
     bpy.ops.import_scene.gltf(filepath=path)
     scene = bpy.context.scene
-    # pose humans at frame 0 of their Idle action if present
+    # pose humans on a frame of a clip (Idle by default)
     for o in scene.objects:
         if o.type == "ARMATURE" and o.animation_data:
-            act = bpy.data.actions.get("Idle")
+            act = bpy.data.actions.get(clip)
             if act:
                 o.animation_data.action = act
                 try:
                     o.animation_data.action_slot = act.slots[0]
                 except Exception:
                     pass
-            scene.frame_set(1)
+            scene.frame_set(int(frame) if frame else 1)
     bpy.context.view_layer.update()
 
     meshes = [o for o in scene.objects if o.type == "MESH" and o.visible_get() and not o.hide_render]
@@ -82,11 +93,17 @@ def render_model(name):
         ev.to_mesh_clear()
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
+    floor_z = lo.z
+    if face:  # frame the head only
+        top = hi.z
+        hp = [p for p in pts if p.z > top - 0.30 and abs(p.x) < 0.15]
+        lo = Vector((min(p.x for p in hp), min(p.y for p in hp), top - 0.30))
+        hi = Vector((max(p.x for p in hp), max(p.y for p in hp), top + 0.01))
     center = (lo + hi) / 2
     radius = (hi - lo).length / 2
 
     # floor + world
-    bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, lo.z))
+    bpy.ops.mesh.primitive_plane_add(size=60, location=(0, 0, floor_z))
     floor = bpy.context.active_object
     floor.data.materials.append(nb.material("PreviewFloor", (0.3, 0.31, 0.33), roughness=0.8))
     world = bpy.data.worlds.new("World")
@@ -97,6 +114,10 @@ def render_model(name):
 
     if name.startswith("car_"):
         d = Vector((1.25, -1.0, 0.55))
+    elif name.startswith("w_"):
+        d = Vector((0.22, -1.0, 0.32))
+    elif face:
+        d = Vector((0.55, -1.0, 0.12))
     else:
         d = Vector((0.75, -1.35, 0.35))
     d.normalize()
@@ -134,7 +155,7 @@ def render_model(name):
     scene.view_settings.view_transform = "AgX" if "AgX" in [
         i.identifier for i in scene.view_settings.bl_rna.properties["view_transform"].enum_items] else "Filmic"
     os.makedirs(OUT, exist_ok=True)
-    scene.render.filepath = os.path.join(OUT, name + ".png")
+    scene.render.filepath = os.path.join(OUT, out_name + ".png")
 
     engine = os.environ.get("NB_RENDER_ENGINE", "")
     order = [engine] if engine else ["BLENDER_EEVEE", "CYCLES"]
@@ -153,7 +174,7 @@ def render_model(name):
 if __name__ == "__main__":
     names = sys.argv[1:] or sorted(
         os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(nb.MODELS, "*.glb")))
-    names = [n for n in names if n not in SKIP]
+    names = [n for n in names if n.split("@")[0] not in SKIP]
     # Eevee in a headless process usually aborts; probe once in a cheap way and remember.
     if "NB_RENDER_ENGINE" not in os.environ:
         os.environ["NB_RENDER_ENGINE"] = "CYCLES" if not os.environ.get("DISPLAY") else ""
