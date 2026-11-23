@@ -13,6 +13,7 @@ window.NB_I18N = (() => {
     lang = LANGS.includes(saved) ? saved : LANGS.includes(nav) ? nav : 'en';
   } catch (e) { lang = 'fr'; }
   const EXTRA = {
+    'Renforts': { en: 'Backup', es: 'Refuerzos', pt: 'Reforços' }, 'Hélicoptère de police': { en: 'Police helicopter', es: 'Helicóptero de policía', pt: 'Helicóptero da polícia' }, 'Alarme générale': { en: 'General alarm', es: 'Alarma general', pt: 'Alarme geral' }, 'Évasion': { en: 'Jailbreak', es: 'Fuga', pt: 'Fuga' },
     "Conquête spatiale": { en: "Space conquest", es: "Conquista espacial", pt: "Conquista espacial" },
     "Bonus · balade libre et survie": { en: "Bonus · free roam and survival", es: "Bonus · paseo libre y supervivencia", pt: "Bônus · passeio livre e sobrevivência" },
     "Prends la fusée de Néon Bay et installe-toi sur la Lune ou sur Mars. Surveille ton oxygène : rovers et dômes te le rendent.": { en: "Take the rocket from Neon Bay and settle on the Moon or Mars. Watch your oxygen: rovers and domes refill it.", es: "Toma el cohete de Neon Bay e instálate en la Luna o en Marte. Vigila tu oxígeno: los rovers y las cúpulas lo recargan.", pt: "Pegue o foguete de Neon Bay e se instale na Lua ou em Marte. Cuide do oxigênio: rovers e cúpulas recarregam." },
@@ -215,6 +216,8 @@ window.NB_I18N = (() => {
     [/^Aide à la conduite : (oui|non)$/, { en: 'Driving assist: $1', es: 'Asistencia de conducción: $1', pt: 'Assistência de direção: $1' }],
     [/^Termine Néon Bay \(niveau 8\)(.*) pour débloquer la fusée\.$/, { en: 'Finish Neon Bay (level 8) to unlock the rocket.', es: 'Termina Neon Bay (nivel 8) para desbloquear el cohete.', pt: 'Termine Neon Bay (nível 8) para liberar o foguete.' }],
     [/^Ralentis cinéma : (oui|non)$/, { en: 'Cinematic slow motion: $1', es: 'Cámara lenta cinematográfica: $1', pt: 'Câmera lenta cinematográfica: $1' }],
+    [/^Chef de gang · (.+)$/, { en: 'Gang boss · $1', es: 'Jefe de banda · $1', pt: 'Chefe de gangue · $1' }],
+    [/^Personnages réalistes : (oui|non)$/, { en: 'Realistic characters: $1', es: 'Personajes realistas: $1', pt: 'Personagens realistas: $1' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],

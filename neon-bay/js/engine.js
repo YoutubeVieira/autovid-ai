@@ -176,7 +176,7 @@ const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, labe
 const QORDER = ['high', 'medium', 'low'];
 let Q = QUAL.high, qLevel = 'high';
 const fpsMon = { t: 0, n: 0, slow: 0 };
-function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { if (l === 'high' && !R3.composer) setupPost(); R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; if (R3.shadow && l !== 'high') { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
+function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { setEnvMap(); if (l === 'high' && !R3.composer) setupPost(); R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; if (R3.shadow && l !== 'high') { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
 function qualityLabel() { return (save.quality || 'auto') === 'auto' ? 'Auto (' + QUAL[qLevel].label + ')' : QUAL[save.quality].label; }
 function monitorFps(dt) {
   if ((save.quality || 'auto') !== 'auto' || S.mode !== 'play' || S.cine) return;
@@ -391,7 +391,7 @@ function updGang(c, dt) {
 let heli = null;
 function updHeli(dt) {
   S.heliCd = (S.heliCd || 0) - dt;
-  if (!heli && stars() >= 4 && S.heliCd <= 0) { const a = rnd(TAU); heli = { x: P.x + Math.cos(a) * 1000, y: P.y + Math.sin(a) * 1000, a: 0, hp: 300 + lvl() * 10, max: 300 + lvl() * 10, cd: 2, t: rnd(6), leave: 0 }; toast('Hélicoptère de police !'); }
+  if (!heli && stars() >= 4 && S.heliCd <= 0) { const a = rnd(TAU); heli = { x: P.x + Math.cos(a) * 1000, y: P.y + Math.sin(a) * 1000, a: 0, hp: 300 + lvl() * 10, max: 300 + lvl() * 10, cd: 2, t: rnd(6), leave: 0 }; toast('Hélicoptère de police !'); if (L && !L.heliCine && save.cineInGame !== false) { L.heliCine = 1; S.cine = { type: 'focus', t: 0, dur: 2.4, focus: heli, h: 90, dist: 340 }; showCine('Renforts', 'Hélicoptère de police'); } }
   if (!heli) return;
   const h = heli; h.t += dt;
   if (stars() < 4) h.leave += dt;
@@ -818,7 +818,7 @@ function makeStep(type, n, idx) {
       st.desc = () => st.phase === 0 ? 'Fais évader ' + vn + ' de la prison' : st.phase === 1 ? 'Neutralise les gardiens (' + enemies.filter(e => e.group === g && e.hp > 0).length + ' restants)' : 'Emmène ' + vn + ' en lieu sûr avant les renforts';
       st.dyn = () => st.phase === 0 ? st.gate : st.phase === 1 ? (nearestOf(enemies.filter(e => e.group === g && e.hp > 0)) || st.gate) : st.dest;
       st.check = () => {
-        if (st.phase === 0 && dist(P.x, P.y, st.gate.x, st.gate.y) < 90) { st.phase = 1; addHeat(2.2); au('alarm'); shake = Math.max(shake, 6); toast('Alarme ! Neutralise les gardiens'); spawnGroup(c.x, c.y + 20, 3 + Math.floor(n / 4), GUARDS, g); return false; }
+        if (st.phase === 0 && dist(P.x, P.y, st.gate.x, st.gate.y) < 90) { st.phase = 1; addHeat(2.2); au('alarm'); shake = Math.max(shake, 6); toast('Alarme ! Neutralise les gardiens'); if (save.cineInGame !== false) { S.cine = { type: 'focus', t: 0, dur: 2.6, focus: { x: c.x, y: c.y }, h: 30, dist: 300 }; showCine('Évasion', 'Alarme générale'); } spawnGroup(c.x, c.y + 20, 3 + Math.floor(n / 4), GUARDS, g); return false; }
         if (st.phase === 1 && !enemies.some(e => e.group === g && e.hp > 0)) {
           st.phase = 2; prison.open = true; for (const m of inmates) { m.free = true; m.a = Math.atan2(m.y - c.y, m.x - c.x) + rnd(-.6, .6); }
           vip = { x: c.x, y: c.y + 70, a: 0, hp: 100 + n * 5, max: 100 + n * 5, name: vn, full: vn, following: true, inCar: null, step: 0, look: INMATE_LOOK };
@@ -972,7 +972,7 @@ function updLevel(dt) {
   }
   if (st.fail) { const r = st.fail(); if (r) { failLevel(r); return; } }
   if (st.needCar && !P.car && st.target && dist(P.x, P.y, st.target.x, st.target.y) < 70) msg('Il faut arriver en voiture');
-  if (st.type === 'boss' && st.boss && !st.introDone && st.boss.hp > 0 && dist(P.x, P.y, st.boss.x, st.boss.y) < 480) { st.introDone = true; S.cine = { type: 'boss', t: 0, dur: 2.6, focus: st.boss }; showCine('Chef de gang', st.boss.boss.toUpperCase()); au('boom', 0, .4); }
+  if (st.type === 'boss' && st.boss && !st.introDone && st.boss.hp > 0 && dist(P.x, P.y, st.boss.x, st.boss.y) < 480) { st.introDone = true; S.cine = { type: 'boss', t: 0, dur: 3.6, focus: st.boss }; showCine('Chef de gang · ' + (st.boss.faction || world.region.name), st.boss.boss.toUpperCase()); au('boom', 0, .4); }
   if (st.check(dt)) nextStep();
 }
 function completeLevel() {
@@ -2033,10 +2033,17 @@ function makeChar(o) {
 // matériaux glTF -> Phong (même éclairage que le reste de la ville, plus léger sur mobile)
 function glbMat(m, skin) {
   const n = m.name || '', em = m.emissive && (m.emissive.r + m.emissive.g + m.emissive.b) > .05;
+  if (qLevel === 'high' && m.isMeshStandardMaterial) { // matières physiques + reflets d'environnement (comme le studio)
+    const q = m.clone(); q.skinning = !!skin; q.envMapIntensity = .75;
+    if (/paint/i.test(n)) { q.metalness = .55; q.roughness = .28; } else if (/glass/i.test(n)) { q.metalness = .3; q.roughness = .05; } else if (/tyre|tire/i.test(n)) { q.roughness = .92; q.metalness = 0; } else if (/rim|chrome|metal/i.test(n)) { q.metalness = .9; q.roughness = .22; }
+    return q; }
   const shiny = /paint|glass|chrome|rim|metal|trim/i.test(n);
   const p = new THREE.MeshPhongMaterial({ color: m.color ? m.color.clone() : 0xffffff, emissive: em ? m.emissive.clone() : 0x000000, shininess: /glass/i.test(n) ? 90 : shiny ? 50 : 8, specular: shiny ? 0x666666 : 0x111111, skinning: !!skin, transparent: m.transparent, opacity: m.opacity });
   p.name = n; return p;
 }
+const PMATS = {};
+function pmat(col) { if (qLevel !== 'high') return mat(col); return PMATS[col] || (PMATS[col] = new THREE.MeshStandardMaterial({ color: col, metalness: .55, roughness: .3, envMapIntensity: .9 })); }
+function setEnvMap() { if (!R3.ok) return; if (qLevel === 'high') { if (!R3.envTex && THREE.RoomEnvironment) { try { const pm = new THREE.PMREMGenerator(R3.r); R3.envTex = pm.fromScene(new THREE.RoomEnvironment(), .04).texture; } catch (e) {} } R3.scene.environment = R3.envTex || null; } else R3.scene.environment = null; }
 const HUMAN_GLB = () => qLevel !== 'low' && THREE.SkeletonUtils && R3.models.human_m && R3.models.human_f;
 function makeHuman(md, col) {
   const sc = THREE.SkeletonUtils.clone(md.scene);
@@ -2045,6 +2052,28 @@ function makeHuman(md, col) {
   const acts = { idle: find(/idle/i), walk: find(/walk/i), run: find(/run/i), punch: find(/punch/i), death: find(/death/i) };
   if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
   const m = makeGlbChar({ scene: sc, mixer, acts, hand: null, scale: md.scale }); m.userData.human = true; return m;
+}
+// personnages Blender (héros, ennemis) : arme dans la main droite, bras qui visent la direction de tir
+const HERO_GLB = () => HUMAN_GLB() && save.outfit.body !== 'robot' && save.realChar !== false;
+const AIMQ = new THREE.Quaternion(), YV = new THREE.Vector3(0, 1, 0);
+function makeHumanHero(look, gunId, gunSkin, female) {
+  const md = female ? R3.models.human_f : R3.models.human_m;
+  const m = makeHuman(md, { Skin: look.skin, Shirt: look.jacket || look.shirt, Pants: look.pants, Shoes: look.shoes || '#1a1a22', Hair: look.hair || '#1a120c' });
+  const bones = {}; m.userData.glb.scene.traverse(o => { if (o.isBone) bones[o.name] = o; }); m.userData.bones = bones;
+  setHeroGun(m, gunId, gunSkin); return m;
+}
+function setHeroGun(m, gunId, gunSkin) {
+  const u = m.userData, hand = u.bones && (u.bones.HandR || u.bones.Hand_R); if (!hand) return;
+  if (u.gunMesh) hand.remove(u.gunMesh); u.gunMesh = null; u.gunId = gunId; u.gunSkin = gunSkin;
+  const gm = makeGun(gunId, gunSkin); if (!gm) return; gm.scale.setScalar(1 / u.glb.scale * .82); gm.rotation.set(0, 0, PI / 2); gm.position.set(0, .05, 0); hand.add(gm); u.gunMesh = gm; u.twoHand = !!gm.userData.twoHand;
+}
+function aimArms(m, a, recoil) {
+  const b = m.userData.bones; if (!b || !b.UpperArmR) return; m.updateMatrixWorld(true);
+  const setDir = (bone, dw) => { if (!bone || !bone.parent) return; bone.parent.getWorldQuaternion(AIMQ); AIMQ.invert(); bone.quaternion.setFromUnitVectors(YV, dw.clone().applyQuaternion(AIMQ).normalize()); bone.updateMatrixWorld(true); };
+  const fwd = new THREE.Vector3(Math.cos(a), -.06 + recoil * .35, Math.sin(a)).normalize(), side = new THREE.Vector3(-Math.sin(a), 0, Math.cos(a));
+  setDir(b.UpperArmR, fwd); setDir(b.LowerArmR, fwd);
+  if (m.userData.twoHand) { setDir(b.UpperArmL, fwd.clone().addScaledVector(side, -.55).normalize()); setDir(b.LowerArmL, fwd.clone().addScaledVector(side, .7).normalize()); }
+  if (b.Head) { m.updateMatrixWorld(true); }
 }
 function makeGlbChar(md) {
   const g = new THREE.Group(); g.add(md.scene); md.scene.scale.setScalar(md.scale); md.scene.rotation.y = PI / 2;
@@ -2118,7 +2147,7 @@ function makeCar3(c) {
   } else if (md) {
     const sc = md.scene.clone(true), k = (type === 'van' ? 44 : type === 'small' ? 36 : 42) / md.size.x; sc.scale.setScalar(k); g.add(sc);
     sc.traverse(o => { if (o.isMesh && o.material && /paint/i.test(o.material.name)) paint.push(o); if (/^Wheel/i.test(o.name)) wheelsL.push(o); });
-    for (const pm of paint) pm.material = mat(c.color);
+    for (const pm of paint) pm.material = pmat(c.color);
     front = md.size.x * k / 2; roofY = md.size.y * k + 1.5;
     if (type === 'taxi') add(bx(8, 4, 12), mat('#ffd23f', '#806000'), -4, roofY + .5, 0);
   } else if (type === 'scooter') {
@@ -2174,7 +2203,7 @@ function poseCar(m, c) {
   const u = m.userData;
   m.position.set(c.x, c.boat ? -1 + Math.sin(S.time * 2 + (c.bob || 0)) * 1.2 : 0, c.y); m.rotation.y = -c.a; if (c.boat) m.rotation.z = Math.sin(S.time * 1.6 + (c.bob || 0)) * .04 + clamp(c.v / 3000, -.08, .12);
   if (c.wreck && !u.wreck) { u.wreck = true; for (const pm of u.paint) pm.material = mat('#26222e'); u.cone.visible = false; if (u.glow) u.glow.visible = false; if (u.mk) u.mk.visible = false; }
-  if (!c.wreck && u.color !== c.color) { u.color = c.color; for (const pm of u.paint) pm.material = mat(c.color); }
+  if (!c.wreck && u.color !== c.color) { u.color = c.color; for (const pm of u.paint) pm.material = pmat(c.color); }
   if (u.r && !c.wreck) { const f = Math.sin((S.time + c.flash) * 14) > 0; u.r.material = f ? mat('#ff2e4d', '#ff2e4d') : mat('#401018'); u.b.material = f ? mat('#10183a') : mat('#2e6bff', '#2e6bff'); u.glow.material = bmat(f ? '#ff2e4d' : '#2e6bff', .2, true); }
   if (u.mk) { u.mk.visible = c.mark && !c.wreck; u.mk.position.set(0, 40 + Math.sin(S.time * 5) * 4, 0); }
   if (u.wheels.length && !c.wreck) { const da = (c.v || 0) * (R3.dt || .016) / u.wr; for (const w of u.wheels) w.rotation.z -= da; }
@@ -2369,9 +2398,13 @@ function cineCamera(playing) {
     } else { const ang = k * 1.6; pos = new THREE.Vector3(px + Math.cos(ang) * 520, 420 - k * 120, pz + Math.sin(ang) * 520); tgt = new THREE.Vector3(px, 10, pz); e = k < .7 ? 0 : (k - .7) / .3; }
     e = e * e * (3 - 2 * e);
   } else {
-    const b = c.focus, a = Math.atan2(P.y - b.y, P.x - b.x);
-    pos = new THREE.Vector3(b.x + Math.cos(a) * 95, 48, b.y + Math.sin(a) * 95); tgt = new THREE.Vector3(b.x, 34, b.y);
-    e = k < .15 ? 1 - k / .15 : k > .8 ? (k - .8) / .2 : 0;
+    const b = c.focus, a = Math.atan2(P.y - b.y, P.x - b.x), hy = c.type === 'boss' ? 34 : (c.h || 20);
+    if (c.type === 'boss') { // 3 plans : par-dessus l'épaule du héros, contre-plongée sur le chef, retour au jeu
+      if (k < .34) { const f = k / .34; pos = new THREE.Vector3(P.x + Math.cos(a) * 40 - Math.sin(a) * 18, 46, P.y + Math.sin(a) * 40 + Math.cos(a) * 18); tgt = new THREE.Vector3(b.x, 30 + f * 6, b.y); }
+      else if (k < .8) { const f = (k - .34) / .46, d2 = 92 - f * 34; pos = new THREE.Vector3(b.x + Math.cos(a + .35 - f * .3) * d2, 12 + f * 6, b.y + Math.sin(a + .35 - f * .3) * d2); tgt = new THREE.Vector3(b.x, 44, b.y); }
+      else { pos = new THREE.Vector3(b.x + Math.cos(a) * 130, 70, b.y + Math.sin(a) * 130); tgt = new THREE.Vector3(b.x, hy, b.y); }
+      e = k < .06 ? 1 - k / .06 : k > .84 ? (k - .84) / .16 : 0; e = e * e * (3 - 2 * e);
+    } else { const ang = a + .6 + k * .8, d2 = c.dist || 260; pos = new THREE.Vector3(b.x + Math.cos(ang) * d2, (c.h || 20) + 90 + k * 30, b.y + Math.sin(ang) * d2); tgt = new THREE.Vector3(b.x, c.h || 20, b.y); e = k < .12 ? 1 - k / .12 : k > .82 ? (k - .82) / .18 : 0; e = e * e * (3 - 2 * e); }
   }
   cam3.position.copy(pos.lerp(normPos, e)); cam3.lookAt(tgt.lerp(normTgt, e));
 }
@@ -2405,6 +2438,7 @@ function sync(e, make, pose) {
 function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); if (R3.composer) { R3.composer.setPixelRatio(R3.r.getPixelRatio()); R3.composer.setSize(VW, VH); } }
 // rendu filmique : étalonnage ACES + halos lumineux (bloom) en qualité haute
 function setupPost() {
+  setEnvMap();
   R3.r.toneMapping = THREE.ACESFilmicToneMapping; R3.r.toneMappingExposure = 1.25;
   if (!THREE.EffectComposer || !THREE.UnrealBloomPass || qLevel !== 'high') { R3.composer = null; return; }
   try { const c = new THREE.EffectComposer(R3.r); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl);
@@ -2483,16 +2517,16 @@ function render3D(dt) {
   R3.seen.clear();
   for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
   for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; if (HUMAN_GLB() && Math.random() < .75) return makeHuman(f ? R3.models.human_f : R3.models.human_m, { Skin: e.skin, Shirt: e.shirt, Pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a', '#c2a878']), Shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']), Hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a']) }); return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
-  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
-    (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
+  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; if (qLevel === 'high' && HUMAN_GLB()) { const gid = e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle'; const hm = makeHumanHero({ skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b']), shirt: lk.shirt || e2.color, jacket: lk.jacket || (e2.boss ? e2.color : null), pants: lk.pants || '#1a1a20', hair: '#1a120c' }, gid, e2.boss ? 'gold' : 'black', !e2.boss && hash(Math.round(e2.x), Math.round(e2.y)) % 3 === 0); if (e2.boss) hm.scale.setScalar(1.3); hm.userData.bar = hpBar(hm, 30, 16); return hm; } const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
+    (m, e2) => { poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); if (m.userData.bones && e2.hp > 0 && e2.alert) aimArms(m, e2.a, S.time - (e2.firedT || -9) < .08 ? 1 : 0); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (prison && near(prison.x, prison.y)) sync(prison, makePrison, posePrison);
   for (const an of animals) if (near(an.x, an.y)) sync(an, makeAnimal, poseAnimal);
   for (const m of inmates) if (near(m.x, m.y)) sync(m, e => makeChar(Object.assign({}, INMATE_LOOK, { skin: e.skin, hair: pick(['#111111', '#3b2414', null]) })), (mm, e) => poseChar(mm, e.x, e.y, e.a, e.step, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar(vip.look || { shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
   if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
-  if (playing && !P.car && P._m && !!P._m.userData.glb !== (save.outfit.body === 'robot' && !!R3.models.robot)) P._m = null;
-  if (playing && !P.car) sync(P, () => { if (save.outfit.body === 'robot' && R3.models.robot) return makeGlbChar(R3.models.robot); const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); });
+  if (playing && !P.car && P._m && !!P._m.userData.glb !== ((save.outfit.body === 'robot' && !!R3.models.robot) || !!HERO_GLB())) P._m = null;
+  if (playing && !P.car) sync(P, () => { if (save.outfit.body === 'robot' && R3.models.robot) return makeGlbChar(R3.models.robot); if (HERO_GLB()) return makeHumanHero(playerLook(), save.weapon === 'fists' ? 'pistol' : save.weapon, wup(save.weapon).skin || 'black', false); const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); if (u.bones && save.weapon !== 'fists' && (!!P.lock || S.time - (P.lastShot || -9) < 1.2 || touch.aiming)) aimArms(m, P.a, S.time - (P.lastShot || -9) < .06 ? 1 : 0); });
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
   if (playing) { const got = (save.tagsFound || {})[world.region.id] || []; world.tags.forEach((tg, i) => { if (got.includes(i) || !near(tg.x, tg.y)) return; sync(tg, () => { const g2 = new THREE.Group(); const col = world.region.pal.neon[i % world.region.pal.neon.length]; const d = new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), new THREE.MeshBasicMaterial({ color: col })); d.position.y = 22; g2.add(d); const h2 = new THREE.Mesh(new THREE.CircleGeometry(18, 18), bmat(col, .35, true)); h2.rotation.x = -PI / 2; h2.position.y = .8; g2.add(h2); g2.userData.d = d; return g2; }, (m, e) => { m.position.set(e.x, 0, e.y); m.userData.d.rotation.y = S.time * 2.5; m.userData.d.position.y = 22 + Math.sin(S.time * 3 + e.x) * 3; }); }); }
@@ -2619,7 +2653,7 @@ const SCREENS = {
         <button class="btn" data-go="intro">Introduction</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button>
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -2704,7 +2738,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2880,6 +2914,7 @@ screenEl.addEventListener('click', e => {
   if (ds.launch) { launchRocket(+ds.launch); return; }
   if (ds.free) { const n = +ds.free; au('init'); startLevel(n, 0, true); return; }
   if (ds.voice) { save.voice = save.voice === false; persist(); if (save.voice) say(TR('Voix off activée'), VLOC[(I18 && I18.lang) || 'fr']); else try { speechSynthesis.cancel(); } catch (e) {} showScreen(S.screen); return; }
+  if (ds.realchar) { save.realChar = save.realChar === false; P._m = null; persist(); showScreen(S.screen); return; }
   if (ds.slowmo) { save.slowmo = save.slowmo === false; persist(); showScreen(S.screen); return; }
   if (ds.assist) { save.driveAssist = save.driveAssist === false; persist(); showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
