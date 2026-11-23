@@ -8505,15 +8505,35 @@ function windowTex() { // façade tuilable : 4 fenêtres x 4 étages = 64 x 56 u
   for (const t of [m, em]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; }
   return { m, em };
 }
+function glassTex() { // mur-rideau de tour : vitrages réfléchissants, montants, bureaux éclairés
+  const W2 = 256, H2 = 224, a = document.createElement('canvas'), e = document.createElement('canvas'); a.width = e.width = W2; a.height = e.height = H2; const ga = a.getContext('2d'), ge = e.getContext('2d');
+  const gr = ga.createLinearGradient(0, 0, W2, H2); gr.addColorStop(0, '#5d7896'); gr.addColorStop(.5, '#344a66'); gr.addColorStop(1, '#4f6884'); ga.fillStyle = gr; ga.fillRect(0, 0, W2, H2); ge.fillStyle = '#000'; ge.fillRect(0, 0, W2, H2);
+  for (let f = 0; f < 4; f++) for (let c = 0; c < 8; c++) { const x = c * 32, y = f * 56; if (Math.random() < .3) { ge.globalAlpha = .4 + Math.random() * .5; ge.fillStyle = Math.random() < .7 ? '#e8f4ff' : '#ffe9c0'; ge.fillRect(x + 2, y + 6, 28, 44); } ga.fillStyle = 'rgba(255,255,255,' + (.04 + Math.random() * .08) + ')'; ga.fillRect(x + 2, y + 2, 28, 50); }
+  ge.globalAlpha = 1; ga.fillStyle = '#c8ccd6'; for (let c = 0; c <= 8; c++) ga.fillRect(c * 32 - 1.5, 0, 3, H2); ga.fillStyle = '#9aa0ac'; for (let f = 0; f <= 4; f++) ga.fillRect(0, f * 56 - 3, W2, 6);
+  ge.fillStyle = '#000'; for (let c = 0; c <= 8; c++) ge.fillRect(c * 32 - 1.5, 0, 3, H2); for (let f = 0; f <= 4; f++) ge.fillRect(0, f * 56 - 3, W2, 6);
+  const m = new THREE.CanvasTexture(a), em = new THREE.CanvasTexture(e); for (const t of [m, em]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; } return { m, em };
+}
+function brickTex() { // brique d'entrepôt : appareillage, joints, grandes verrières industrielles
+  const W2 = 256, H2 = 224, a = document.createElement('canvas'), e = document.createElement('canvas'); a.width = e.width = W2; a.height = e.height = H2; const ga = a.getContext('2d'), ge = e.getContext('2d');
+  ga.fillStyle = '#6e6660'; ga.fillRect(0, 0, W2, H2); ge.fillStyle = '#000'; ge.fillRect(0, 0, W2, H2);
+  for (let y = 0, r = 0; y < H2; y += 7, r++) for (let x = (r % 2) * -8; x < W2; x += 16) { const v = 150 + Math.random() * 60; ga.fillStyle = `rgb(${v},${v * .55},${v * .42})`; ga.fillRect(x + 1, y + 1, 14, 5); }
+  for (let c = 0; c < 2; c++) { const x = 24 + c * 128, y = 70; ga.fillStyle = '#3a3a3e'; ga.fillRect(x - 3, y - 3, 86, 110); ga.fillStyle = '#26303c'; ga.fillRect(x, y, 80, 104); ga.fillStyle = '#4a4a50'; for (let i = 1; i < 4; i++) ga.fillRect(x + i * 20 - 1, y, 2, 104); for (let j = 1; j < 5; j++) ga.fillRect(x, y + j * 21 - 1, 80, 2);
+    if (Math.random() < .5) { ge.fillStyle = '#ffd890'; ge.globalAlpha = .6; ge.fillRect(x, y, 80, 104); ge.globalAlpha = 1; ge.fillStyle = '#000'; for (let i = 1; i < 4; i++) ge.fillRect(x + i * 20 - 1, y, 2, 104); for (let j = 1; j < 5; j++) ge.fillRect(x, y + j * 21 - 1, 80, 2); } }
+  const m = new THREE.CanvasTexture(a), em = new THREE.CanvasTexture(e); for (const t of [m, em]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; } return { m, em };
+}
 // UV à l'échelle du monde pour les immeubles instanciés : les fenêtres gardent leur taille quelle que soit la hauteur
 function worldUV(mtl) { mtl.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <uv_vertex>', `#ifdef USE_UV
   #ifdef USE_INSTANCING
     vec2 bsc = vec2(length(instanceMatrix[0].xyz), length(instanceMatrix[1].xyz));
     vUv = uv * vec2(bsc.x / 64.0, bsc.y / 56.0) + vec2(floor(fract(instanceMatrix[3].x * .0137 + instanceMatrix[3].z * .0071) * 4.0) * .25, 0.0);
+    vBH = (position.y + .5) * bsc.y;
   #else
-    vUv = ( uvTransform * vec3( uv, 1 ) ).xy;
+    vUv = ( uvTransform * vec3( uv, 1 ) ).xy; vBH = 100.0;
   #endif
-#endif`); }; mtl.customProgramCacheKey = () => 'worldUV'; return mtl; }
+#endif`).replace('void main() {', 'varying float vBH;\nvoid main() {');
+  // ombre de contact au pied des murs + léger dégradé vertical (lecture des volumes)
+  sh.fragmentShader = sh.fragmentShader.replace('void main() {', 'varying float vBH;\nvoid main() {').replace('#include <map_fragment>', '#include <map_fragment>\n diffuseColor.rgb *= mix(.5, 1.0, smoothstep(0.0, 18.0, vBH)) * (0.92 + 0.08 * smoothstep(0.0, 160.0, vBH));'); };
+  mtl.customProgramCacheKey = () => 'worldUV2'; return mtl; }
 function bHeight(tx, ty) {
   const i = ty * N + tx, id = world.region.id;
   if (world.wh[i]) return 44;
@@ -8545,28 +8565,42 @@ function build3DWorld() {
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) drawTile(x, y);
   ctx = saved;
   const tex = new THREE.CanvasTexture(gc); tex.anisotropy = Math.min(8, R3.r.capabilities.getMaxAnisotropy());
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W, W), new THREE.MeshLambertMaterial({ map: tex }));
+  const gmat = new THREE.MeshLambertMaterial({ map: tex });
+  if (qLevel !== 'low') { // détail du sol à l'échelle du monde : grain d'asphalte, fissures, taches, rustines
+    const dt = R3.detailTex || (R3.detailTex = (() => { const S2 = 256, cv2 = document.createElement('canvas'); cv2.width = cv2.height = S2; const x = cv2.getContext('2d'), id = x.createImageData(S2, S2);
+      for (let i = 0; i < S2 * S2; i++) { const v = 222 + (Math.random() - .5) * 46 + (Math.random() < .02 ? -40 : 0); id.data[i * 4] = id.data[i * 4 + 1] = id.data[i * 4 + 2] = v; id.data[i * 4 + 3] = 255; } x.putImageData(id, 0, 0);
+      for (let k = 0; k < 7; k++) { x.fillStyle = `rgba(${Math.random() < .5 ? '40,40,46' : '255,255,255'},${.05 + Math.random() * .06})`; x.beginPath(); x.ellipse(Math.random() * S2, Math.random() * S2, 10 + Math.random() * 40, 6 + Math.random() * 24, Math.random() * 3, 0, TAU); x.fill(); }
+      x.strokeStyle = 'rgba(30,30,36,.35)'; x.lineWidth = 1; for (let k = 0; k < 6; k++) { x.beginPath(); let px = Math.random() * S2, py = Math.random() * S2; x.moveTo(px, py); for (let j = 0; j < 8; j++) { px += (Math.random() - .5) * 26; py += (Math.random() - .5) * 26; x.lineTo(px, py); } x.stroke(); }
+      x.fillStyle = 'rgba(20,20,26,.12)'; x.fillRect(40, 150, 60, 34);
+      const t2 = new THREE.CanvasTexture(cv2); t2.wrapS = t2.wrapT = THREE.RepeatWrapping; t2.anisotropy = 8; return t2; })());
+    gmat.onBeforeCompile = sh => { sh.uniforms.detailMap = { value: dt }; sh.fragmentShader = 'uniform sampler2D detailMap;\n' + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>\n diffuseColor.rgb *= texture2D(detailMap, vUv * ' + (N * 1.5).toFixed(1) + ').rgb * 1.1 * mix(1.0, texture2D(detailMap, vUv * ' + (N * .21).toFixed(2) + ').r * 1.12, .5);'); };
+    gmat.customProgramCacheKey = () => 'groundDetail'; }
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W, W), gmat);
   ground.rotation.x = -PI / 2; ground.position.set(W / 2, 0, W / 2); ground.receiveShadow = true; g.add(ground);
   // immeubles
   const tiles = []; for (let ty = 0; ty < N; ty++) for (let tx = 0; tx < N; tx++) if (world.map[ty * N + tx] === BLD && !world.lm[ty * N + tx]) tiles.push([tx, ty]);
   const wt = R3.wt || (R3.wt = windowTex());
   const side = R3.sideMat = worldUV(new THREE.MeshLambertMaterial({ map: wt.m, emissiveMap: wt.em, emissive: 0xffffff, emissiveIntensity: .85 }));
+  const gt = R3.gt || (R3.gt = glassTex()), bt = R3.bt || (R3.bt = brickTex());
+  const glassM = R3.glassMat = worldUV(qLevel === 'high' ? new THREE.MeshStandardMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, metalness: .6, roughness: .12, envMapIntensity: 1.1 }) : new THREE.MeshPhongMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, shininess: 80, specular: 0x8899aa }));
+  const brickM = R3.brickMat = worldUV(new THREE.MeshLambertMaterial({ map: bt.m, emissiveMap: bt.em, emissive: 0xffffff, emissiveIntensity: .8 }));
   const roof = new THREE.MeshLambertMaterial({ color: 0xffffff });
-  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), [side, side, roof, roof, side, side], tiles.length);
-  const c = new THREE.Color();
-  tiles.forEach(([tx, ty], i) => {
-    const h = bHeight(tx, ty), k = ty * N + tx;
-    R3.v.set(tx * T + T / 2, h / 2, ty * T + T / 2); R3.s.set(T, h, T); R3.q.identity();
-    R3.m4.compose(R3.v, R3.q, R3.s); im.setMatrixAt(i, R3.m4);
-    const lk = world.region.look || {};
-    if (world.wh[k]) c.set('#55545f');
-    else if (lk.glass && h > 105) c.set(lk.glass);
-    else if (lk.facades) { c.set(lk.facades[(world.bcol[k] + (hash(tx, ty) % 3 === 0 ? 1 : 0)) % lk.facades.length]); c.multiplyScalar(.72); }
-    else { c.set(p.bld[(world.bcol[k] + (hash(tx, ty) & 1)) % p.bld.length]); c.offsetHSL(0, 0, .12); }
-    im.setColorAt(i, c);
-  });
-  R3.s.set(1, 1, 1);
-  im.castShadow = true; im.receiveShadow = true; g.add(im); R3.bldMesh = im;
+  const lk0 = world.region.look || {}, kinds = { a: [], gl: [], br: [] };
+  tiles.forEach(t => { const k = t[1] * N + t[0], h = bHeight(t[0], t[1]); (world.wh[k] ? kinds.br : lk0.glass && h > 105 ? kinds.gl : kinds.a).push(t); });
+  const c = new THREE.Color(); R3.bldMeshes = [];
+  for (const [kk, list, sm] of [['a', kinds.a, side], ['gl', kinds.gl, glassM], ['br', kinds.br, brickM]]) { if (!list.length) continue;
+    const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), [sm, sm, roof, roof, sm, sm], list.length);
+    list.forEach(([tx, ty], i) => {
+      const h = bHeight(tx, ty), k = ty * N + tx;
+      R3.v.set(tx * T + T / 2, h / 2, ty * T + T / 2); R3.s.set(T, h, T); R3.q.identity();
+      R3.m4.compose(R3.v, R3.q, R3.s); im.setMatrixAt(i, R3.m4);
+      if (kk === 'br') c.set('#d8d0c8'); else if (kk === 'gl') c.set('#e8eef8');
+      else if (lk0.facades) { c.set(lk0.facades[(world.bcol[k] + (hash(tx, ty) % 3 === 0 ? 1 : 0)) % lk0.facades.length]); c.multiplyScalar(.78); }
+      else { c.set(p.bld[(world.bcol[k] + (hash(tx, ty) & 1)) % p.bld.length]); c.offsetHSL(0, 0, .12); }
+      im.setColorAt(i, c);
+    });
+    im.castShadow = true; im.receiveShadow = true; g.add(im); R3.bldMeshes.push(im); if (kk === 'a') R3.bldMesh = im; }
+  R3.s.set(1, 1, 1); if (!R3.bldMesh) R3.bldMesh = R3.bldMeshes[0];
   // rez-de-chaussée commerçant côté rue : vitrines éclairées + auvents ; toits : climatiseurs et citernes
   if (qLevel !== 'low') {
     const shops = [], tanks = [], acs = [];
@@ -8898,15 +8932,15 @@ function makeChar(o) {
 function glbMat(m, skin) {
   const n = m.name || '', em = m.emissive && (m.emissive.r + m.emissive.g + m.emissive.b) > .05;
   if (qLevel === 'high' && m.isMeshStandardMaterial) { // matières physiques + reflets d'environnement (comme le studio)
-    const q = m.clone(); q.skinning = !!skin; q.envMapIntensity = .75;
+    const q = m.clone(); q.skinning = !!skin; q.envMapIntensity = .75; q.userData.envBase = .75; ENVMATS.push(q);
     if (/paint/i.test(n)) { q.metalness = .55; q.roughness = .28; } else if (/glass/i.test(n)) { q.metalness = .3; q.roughness = .05; } else if (/tyre|tire/i.test(n)) { q.roughness = .92; q.metalness = 0; } else if (/rim|chrome|metal/i.test(n)) { q.metalness = .9; q.roughness = .22; }
     return q; }
   const shiny = /paint|glass|chrome|rim|metal|trim/i.test(n);
   const p = new THREE.MeshPhongMaterial({ color: m.color ? m.color.clone() : 0xffffff, emissive: em ? m.emissive.clone() : 0x000000, shininess: /glass/i.test(n) ? 90 : shiny ? 50 : 8, specular: shiny ? 0x666666 : 0x111111, skinning: !!skin, transparent: m.transparent, opacity: m.opacity });
   p.name = n; return p;
 }
-const PMATS = {};
-function pmat(col) { if (qLevel !== 'high') return mat(col); return PMATS[col] || (PMATS[col] = new THREE.MeshStandardMaterial({ color: col, metalness: .55, roughness: .3, envMapIntensity: .9 })); }
+const PMATS = {}, ENVMATS = [];
+function pmat(col) { if (qLevel !== 'high') return mat(col); if (!PMATS[col]) { PMATS[col] = new THREE.MeshStandardMaterial({ color: col, metalness: .55, roughness: .3, envMapIntensity: .9 }); PMATS[col].userData.envBase = .9; ENVMATS.push(PMATS[col]); } return PMATS[col]; }
 function setEnvMap() { if (!R3.ok) return; if (qLevel === 'high') { if (!R3.envTex && THREE.RoomEnvironment) { try { const pm = new THREE.PMREMGenerator(R3.r); R3.envTex = pm.fromScene(new THREE.RoomEnvironment(), .04).texture; } catch (e) {} } R3.scene.environment = R3.envTex || null; } else R3.scene.environment = null; }
 const HUMAN_GLB = () => qLevel !== 'low' && THREE.SkeletonUtils && R3.models.human_m && R3.models.human_f;
 function makeHuman(md, col) {
@@ -9233,7 +9267,8 @@ function envFx(dt, playing) {
   }
   R3.hemi.intensity = .6 + day * .8 - rainK * .15; R3.hemi.color = lerpC('#a7b0ff', '#ffffff', day); R3.hemi.groundColor = lerpC('#241838', '#6a6070', day);
   R3.moon.intensity = .45 + day * .7; R3.moon.color = lerpC('#9fb0ff', '#fff2dd', day).lerp(col3('#ffb070'), Math.min(.6, dusk));
-  if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85;
+  { const ek = .18 + day * .82; if (R3.envK === undefined || Math.abs(R3.envK - ek) > .02) { R3.envK = ek; for (const m of ENVMATS) m.envMapIntensity = m.userData.envBase * ek; if (R3.glassMat && R3.glassMat.isMeshStandardMaterial) R3.glassMat.envMapIntensity = 1.1 * ek; } }
+  if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85; if (R3.glassMat) R3.glassMat.emissiveIntensity = .08 + night * .8; if (R3.brickMat) R3.brickMat.emissiveIntensity = .05 + night * .8;
   if (R3.shopMat) R3.shopMat.color.setScalar(.42 + night * .62);
   if (R3.anim) for (const f of R3.anim) f(dt, night);
   if (R3.beacons) { const cx = R3.cam.position.x, cz = R3.cam.position.z, px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y; for (const m of R3.beacons) { const dc = Math.hypot(m.position.x - cx, m.position.z - cz), dp = Math.hypot(m.position.x - px, m.position.z - pz); m.visible = dc > 140 && dp > 90; } }
@@ -9291,7 +9326,7 @@ function xray(m) {
   if (R3.xf % 5 === 0 && R3.bldMesh) {
     const tgt = new THREE.Vector3(P.x, 30, P.y), from = R3.cam.position.clone(), dir = tgt.clone().sub(from), len = dir.length();
     R3.ray.set(from, dir.normalize()); R3.ray.far = len - 8;
-    let hid = false; try { hid = R3.ray.intersectObject(R3.bldMesh, false).length > 0; } catch (e) {}
+    let hid = false; try { hid = R3.ray.intersectObjects(R3.bldMeshes || [R3.bldMesh], false).length > 0; } catch (e) {}
     const inside = tileAt(P.x, P.y) === BLD; R3.ray.far = Infinity;
     R3.hidden = hid || inside;
   }
