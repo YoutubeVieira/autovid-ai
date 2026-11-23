@@ -21,6 +21,7 @@
     car_van: { cat: 'Cars', name: 'Fourgon', desc: '4,85 m', file: 'car_van', kind: 'car', slots: ['Paint'] },
     police: { cat: 'Cars', name: 'Police', desc: 'gyrophare', file: 'car_sedan', kind: 'car', slots: ['Paint'], police: true },
     street: { cat: 'Props', name: 'Rue néon', desc: 'immeubles', kind: 'street' },
+    ...Object.fromEntries([['pistol', 'Pistolet', '0,22 m'], ['rifle', 'Fusil d’assaut', '0,94 m'], ['shotgun', 'Fusil à pompe', '1,04 m'], ['sniper', 'Précision', '1,25 m'], ['rocket', 'Lance-roquettes', '1,13 m'], ['rail', 'Impulsion', '1,02 m']].map(([k, n, d]) => ['w_' + k, { cat: 'Weap', name: n, desc: d, file: 'w_' + k, kind: 'prop' }])),
     sea: { cat: 'Props', name: 'Mer', desc: 'vagues', kind: 'sea' },
     rocket: { cat: 'Props', name: 'Fusée', desc: 'flammes', kind: 'rocket', slots: ['Color'] },
     boat: { cat: 'Cars', name: 'Bateau', desc: 'vedette', kind: 'boat', slots: ['Paint'] },
@@ -37,7 +38,9 @@
     gen: { cat: 'Gen', name: 'Modèle généré', kind: 'gen', slots: [] },
   };
   const DEFCOL = { Skin: '#c68b59', Shirt: '#21e6ff', Pants: '#1d1a2e', Shoes: '#f2f2f2', Hair: '#1a120c', Paint: '#ff2e93', Color: '#8a7dff' };
-  const CLIPS = ['Idle', 'Walk', 'Run', 'Punch', 'Death'];
+  const CLIPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch', 'Punch', 'Death'];
+  const WEAPS = [['pistol', 'Pistolet'], ['uzi', 'Mitraillette'], ['shotgun', 'Fusil à pompe'], ['rifle', 'Fusil d’assaut'], ['sniper', 'Fusil de précision'], ['rocket', 'Lance-roquettes'], ['minigun', 'Minigun'], ['lmg', 'Mitrailleuse'], ['gl', 'Lance-grenades'], ['rail', 'Fusil à impulsion']];
+  const GRIP = { Aim: [-.3496, -.348, .6307, .5991], AimRifle: [-.3471, -.164, .8898, .2467] };
 
   // ---------- état ----------
   let P = null; // projet
@@ -121,7 +124,7 @@
       s.onerror = () => res(null); document.head.appendChild(s);
     });
   }
-  const needFiles = objs => [...new Set(objs.map(o => ASSETS[o.asset] && ASSETS[o.asset].file).filter(Boolean))];
+  const needFiles = objs => [...new Set(objs.map(o => ASSETS[o.asset] && ASSETS[o.asset].file).concat(objs.filter(o => o.weapon).map(o => 'w_' + o.weapon)).filter(Boolean))];
 
   // ---------- construction des objets ----------
   function tint(root, colors) {
@@ -239,7 +242,10 @@
       const cols = Object.assign({}, ...((a.slots || []).map(s => ({ [s]: DEFCOL[s] }))), a.police ? { Paint: '#eef0ff' } : {}, o.color || {});
       tint(inner, cols);
       if (a.h) inner.scale.setScalar(a.h / (md.size.y || 1));
-      if (a.kind === 'human') { inner.traverse(x => { if (x.isMesh) x.frustumCulled = false; }); u.mixer = new THREE.AnimationMixer(inner); u.anims = md.anims; }
+      if (a.kind === 'human') { inner.traverse(x => { if (x.isMesh) x.frustumCulled = false; if (x.isMesh && x.material && x.material.name === 'Lips' && cols.Skin) { x.material.color.set(cols.Skin).multiplyScalar(.72); } }); u.mixer = new THREE.AnimationMixer(inner); u.anims = md.anims;
+        if (o.weapon) { let hand = null; inner.traverse(x => { if (x.isBone && /^Hand\.?R$/.test(x.name)) hand = x; }); const wf = 'w_' + o.weapon;
+          const attach = wm => { if (!wm || !hand) return; const g2 = wm.scene.clone(true); const q = GRIP[o.clip === 'AimRifle' || (!['pistol', 'uzi'].includes(o.weapon) && o.clip !== 'Aim') ? 'AimRifle' : 'Aim']; g2.position.set(.016, .078, -.007); g2.quaternion.set(q[0], q[1], q[2], q[3]); hand.add(g2); u.weap = g2; };
+          if (models[wf]) attach(models[wf]); else loadModel(wf).then(wm => { if (rt[o.id] === u) attach(wm); }); } }
       if (a.kind === 'car') { inner.traverse(x => { if (/^Wheel/i.test(x.name)) u.wheels.push(x); });
         if (a.police) { const bar = new THREE.Group(); const red = new THREE.Mesh(new THREE.BoxGeometry(.3, .14, .5), new THREE.MeshBasicMaterial({ color: 0xff2e4d })), blue = red.clone(); blue.material = new THREE.MeshBasicMaterial({ color: 0x2e6bff }); red.position.z = -.3; blue.position.z = .3; bar.add(red, blue); bar.position.set(-.2, md.size.y + .07, 0); inner.add(bar); u.flash = [red, blue]; u.flashL = new THREE.PointLight(0xff2e4d, 0, 14, 2); u.flashL.position.set(0, md.size.y + .5, 0); inner.add(u.flashL); }
         const hl = new THREE.SpotLight(0xfff2d0, 0, 40, .45, .5, 1.5); hl.position.set(md.size.x / 2, .7, 0); hl.target.position.set(md.size.x / 2 + 10, 0, 0); inner.add(hl, hl.target); u.head = hl; }
@@ -355,8 +361,8 @@
         newObj('human_f', { id: 'walker', name: 'Passante', color: { Shirt: '#ffd23f' }, clip: 'Walk', keys: [lin(0, [-34, .18, 9.5], [0, PI / 2, 0]), lin(46, [0, .18, 9.5], [0, PI / 2, 0])] }),
         newObj('car_sedan', { id: 'hero', name: 'Voiture du héros', color: { Paint: '#ff2e93' }, keys: [lin(0, [-125, 0, -2.4]), lin(7, [-125, 0, -2.4]), lin(11, [-15, 0, -2.4]), cut(14, [45, 0, -2.4]), { t: 33.5, p: [28, 0, 2.2], r: [0, 0, 0], s: [1, 1, 1] }, { t: 36, p: [82, 0, -1.2], r: [0, -.55, 0], s: [1, 1, 1] }] }),
         newObj('police', { id: 'cop', name: 'Police', keys: [lin(0, [-150, 0, 2.2]), lin(7, [-150, 0, 2.2]), lin(11, [-45, 0, 2.2]), cut(14, [22, 0, -1], [0, .12, 0])] }),
-        newObj('human_m', { id: 'a', name: 'Rafa', color: { Shirt: '#16141c', Hair: '#0c0c0c' }, clip: 'Idle', base: { p: [-62.2, 0, 0], r: [0, PI / 2, 0], s: [1, 1, 1] } }),
-        newObj('human_f', { id: 'b', name: 'Lia', color: { Shirt: '#c8102e' }, clip: 'Punch', base: { p: [-57.8, 0, 0], r: [0, -PI / 2, 0], s: [1, 1, 1] } }),
+        newObj('human_m', { id: 'a', name: 'Rafa', color: { Shirt: '#16141c', Hair: '#0c0c0c' }, clip: 'Aim', weapon: 'pistol', base: { p: [-62.2, 0, 0], r: [0, PI / 2, 0], s: [1, 1, 1] } }),
+        newObj('human_f', { id: 'b', name: 'Lia', color: { Shirt: '#c8102e' }, clip: 'AimRifle', weapon: 'rifle', base: { p: [-57.8, 0, 0], r: [0, -PI / 2, 0], s: [1, 1, 1] } }),
         newObj('neon', { name: 'Enseigne', color: { Color: '#21e6ff' }, base: { p: [-60, 5, -11.9], r: [0, 0, 0], s: [2, 1, 1] } }),
         newObj('light', { name: 'Lumière rose', color: { Color: '#ff2e93' }, intensity: 5, base: { p: [-66, 2, 4], r: [0, 0, 0], s: [1, 1, 1] } }),
         newObj('gen', { id: 'helico', name: 'Hélicoptère', spec: JSON.parse(JSON.stringify(GEN_EX.helico)), keys: [lin(0, [90, 24, -4], [0, PI, 0]), lin(21, [90, 24, -4], [0, PI, 0]), lin(25, [-25, 30, -4], [0, PI, .05])] }),
@@ -449,7 +455,7 @@
   function lib() {
     const mk = cat => Object.entries(ASSETS).filter(([, a]) => a.cat === cat).map(([k, a]) => `<button data-add="${k}"><b>${a.name}</b><small>${a.desc}</small></button>`).join('');
     $('libGen').innerHTML = Object.entries(GEN_EX).map(([k, v]) => `<button data-genex="${k}"><b>${v.name}</b><small>${v.parts.length} pièces</small></button>`).join('');
-    $('libChars').innerHTML = mk('Chars'); $('libCars').innerHTML = mk('Cars'); $('libProps').innerHTML = mk('Props'); $('libPrims').innerHTML = mk('Prims');
+    $('libChars').innerHTML = mk('Chars'); if ($('libWeap')) $('libWeap').innerHTML = mk('Weap'); $('libCars').innerHTML = mk('Cars'); $('libProps').innerHTML = mk('Props'); $('libPrims').innerHTML = mk('Prims');
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function ui() {
@@ -465,7 +471,8 @@
         <div class="field" style="margin-top:6px"><label>Rotation °</label><div class="vec">${s.r.map((v, i) => num('r', i, deg(v), 5)).join('')}</div></div>
         <div class="field" style="margin-top:6px"><label>Échelle</label><div class="vec">${s.s.map((v, i) => num('s', i, v, .1)).join('')}</div></div>
         ${(a.slots || []).length ? `<h2 style="margin-top:12px">Couleurs</h2><div class="colors">${a.slots.map(sl => `<label>${{ Skin: 'Peau', Shirt: 'Haut', Pants: 'Bas', Shoes: 'Chaussures', Hair: 'Cheveux', Paint: 'Carrosserie', Color: 'Couleur' }[sl]}<input type="color" data-col="${sl}" value="${(o.color || {})[sl] || (a.police && sl === 'Paint' ? '#eef0ff' : DEFCOL[sl])}"></label>`).join('')}</div>` : ''}
-        ${a.kind === 'human' ? `<div class="field" style="margin-top:10px"><label for="oclip">Animation</label><select id="oclip">${CLIPS.map(c => `<option ${o.clip === c ? 'selected' : ''} value="${c}">${{ Idle: 'Attente', Walk: 'Marche', Run: 'Course', Punch: 'Coup de poing', Death: 'Chute' }[c]}</option>`).join('')}</select></div>
+        ${a.kind === 'human' ? `<div class="field" style="margin-top:10px"><label for="oclip">Animation</label><select id="oclip">${CLIPS.map(c => `<option ${o.clip === c ? 'selected' : ''} value="${c}">${{ Idle: 'Attente', Walk: 'Marche', Run: 'Course', Aim: 'Viser (pistolet)', AimRifle: 'Viser (fusil)', Crouch: 'Accroupi', Punch: 'Coup de poing', Death: 'Chute' }[c]}</option>`).join('')}</select></div>
+          <div class="field" style="margin-top:6px"><label for="oweap">Arme en main</label><select id="oweap"><option value="">Aucune</option>${WEAPS.map(([k, n]) => `<option value="${k}" ${o.weapon === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
           <div class="field" style="margin-top:6px"><label for="ospeed">Vitesse</label><input type="number" id="ospeed" min=".2" max="3" step=".1" value="${o.speed || 1}"></div>` : ''}
         ${o.asset === 'camera' ? `<div class="field" style="margin-top:10px"><label for="ofov">Focale</label><select id="ofov">${[[24, '24 mm grand-angle'], [32, '35 mm'], [40, '50 mm'], [60, '85 mm portrait'], [80, '135 mm téléobjectif']].map(([v, l]) => `<option value="${v}" ${Math.round(s.f) === v || (o.lens || 40) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
           <div class="field" style="margin-top:6px"><label for="otgt">Viser</label><select id="otgt"><option value="">Rien (rotation libre)</option>${P.objects.filter(x => x.asset !== 'camera' && x.asset !== 'street').map(x => `<option value="${x.id}" ${o.target === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
@@ -519,7 +526,8 @@
     if (el.id === 'oname') o.name = el.value || o.name;
     else if (el.dataset.tr) { const k = el.dataset.tr[0], i = +el.dataset.tr[1], s = sample(o, t), tr = { p: s.p.slice(), r: s.r.slice(), s: s.s.slice() }; tr[k][i] = k === 'r' ? (+el.value) * PI / 180 : +el.value; writeKey(o, tr); }
     else if (el.dataset.col) { o.color = Object.assign({}, o.color, { [el.dataset.col]: el.value }); rebuild(o); }
-    else if (el.id === 'oclip') { o.clip = el.value; setClip(o); }
+    else if (el.id === 'oclip') { o.clip = el.value; if (o.weapon) rebuild(o); else setClip(o); }
+    else if (el.id === 'oweap') { o.weapon = el.value || null; rebuild(o); }
     else if (el.id === 'ospeed') o.speed = +el.value || 1;
     else if (el.id === 'ofov') { o.lens = +el.value; const ks = o.keys.find(k => Math.abs(k.t - t) < .04); if (ks) ks.f = +el.value; else if (o.keys.length) { const s = sample(o, t); o.keys.push({ t: +t.toFixed(2), p: s.p, r: s.r, s: s.s, f: +el.value }); o.keys.sort((a, b) => a.t - b.t); } else o.fov = +el.value; }
     else if (el.id === 'otgt') o.target = el.value || null;

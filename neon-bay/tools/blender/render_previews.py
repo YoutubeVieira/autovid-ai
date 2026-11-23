@@ -6,8 +6,11 @@
     python3 tools/blender/render_previews.py human_m@face          # head close-up
 
 Writes models/previews/<name>.png (640x400, 3/4 view, studio light);
-"<name>@<Clip>[:frame]" writes previews/<name>_<Clip>.png (default frame 1);
-"<name>@face" writes previews/<name>_face.png (front 3/4 close-up of the head).
+"<name>@<Clip>[:frame]" writes previews/<name>_<Clip>[_<frame>].png (default frame 1);
+"<name>@face" writes previews/<name>_face.png (3/4 close-up of the head);
+debug close-ups: @front, @side (head), @feet, @hands (left hand);
+"<human>@<Clip>:<frame>+w_<id>" puts a weapon in the right hand (grip rule of check_glb_three.js);
+NB_PREVIEW_VIEW=side|front forces the camera direction, NB_PREVIEW_OUT=<dir> redirects the output.
 Weapons (w_*) are framed from their right side (+Z glTF), slightly from above.
 Tries Eevee first; headless machines without GPU fall back to Cycles CPU.
 """
@@ -22,7 +25,7 @@ from mathutils import Vector  # noqa: E402
 
 import nb_common as nb  # noqa: E402
 
-OUT = os.path.join(nb.MODELS, "previews")
+OUT = os.environ.get("NB_PREVIEW_OUT") or os.path.join(nb.MODELS, "previews")
 SKIP = {"robot"}
 
 
@@ -45,7 +48,7 @@ def setup_engine(scene, engine):
     scene.render.engine = engine
     if engine == "CYCLES":
         scene.cycles.device = "CPU"
-        scene.cycles.samples = 32
+        scene.cycles.samples = int(os.environ.get("NB_SAMPLES", "32"))
         scene.cycles.use_denoising = True
         scene.cycles.max_bounces = 4
         try:
@@ -59,13 +62,36 @@ def setup_engine(scene, engine):
             pass
 
 
+def attach_weapon(weapon):
+    """Put models/<weapon>.glb in the right hand of the posed human (same rule as
+    check_glb_three.js: grip 7.8 cm along the hand + 1.8 cm towards the palm, barrel forward)."""
+    arm = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE")
+    pb = arm.pose.bones.get("Hand.R")
+    mw = arm.matrix_world
+    head, tail = mw @ pb.head, mw @ pb.tail
+    along = (tail - head).normalized()
+    delta = (mw @ pb.matrix).to_3x3() @ (mw @ pb.bone.matrix_local).to_3x3().inverted()
+    palm = delta @ Vector((1, 0, 0))
+    palm = (palm - along * palm.dot(along)).normalized()
+    grip = head + along * 0.078 + palm * 0.018
+    before = set(bpy.context.scene.objects)
+    bpy.ops.import_scene.gltf(filepath=os.path.join(nb.MODELS, weapon + ".glb"))
+    for o in set(bpy.context.scene.objects) - before:
+        if o.parent is None:
+            o.location = grip
+            o.rotation_mode = "XYZ"
+            o.rotation_euler = (0, 0, -math.pi / 2)      # weapon +X -> character forward (-Y)
+
+
 def render_model(spec):
+    spec, _, weapon = spec.partition("+")
     name, _, variant = spec.partition("@")
     clip, _, frame = variant.partition(":")
-    face = clip == "face"
+    face = clip in ("face", "front", "side", "feet", "hands")
+    view = clip
     if face or not clip:
         clip = "Idle"
-    out_name = name + ("_" + variant.split(":")[0] if variant else "")
+    out_name = name + ("_" + variant.replace(":", "_") if variant else "")
     path = os.path.join(nb.MODELS, name + ".glb")
     nb.reset_scene()
     bpy.ops.import_scene.gltf(filepath=path)
@@ -82,6 +108,10 @@ def render_model(spec):
                     pass
             scene.frame_set(int(frame) if frame else 1)
     bpy.context.view_layer.update()
+    if weapon:
+        attach_weapon(weapon)
+        out_name += "+" + weapon
+        bpy.context.view_layer.update()
 
     meshes = [o for o in scene.objects if o.type == "MESH" and o.visible_get() and not o.hide_render]
     dg = bpy.context.evaluated_depsgraph_get()
@@ -96,9 +126,14 @@ def render_model(spec):
     floor_z = lo.z
     if face:  # frame the head only
         top = hi.z
-        hp = [p for p in pts if p.z > top - 0.30 and abs(p.x) < 0.15]
-        lo = Vector((min(p.x for p in hp), min(p.y for p in hp), top - 0.30))
-        hi = Vector((max(p.x for p in hp), max(p.y for p in hp), top + 0.01))
+        if view == "feet":
+            hp = [p for p in pts if p.z < 0.25]
+        elif view == "hands":
+            hp = [p for p in pts if 0.6 < p.z < 0.95 and p.x > 0.15]
+        else:
+            hp = [p for p in pts if p.z > top - 0.30 and abs(p.x) < 0.15]
+        lo = Vector([min(p[i] for p in hp) for i in range(3)])
+        hi = Vector([max(p[i] for p in hp) for i in range(3)])
     center = (lo + hi) / 2
     radius = (hi - lo).length / 2
 
@@ -112,10 +147,20 @@ def render_model(spec):
     bg.inputs["Strength"].default_value = 0.35
     scene.world = world
 
-    if name.startswith("car_"):
+    if os.environ.get("NB_PREVIEW_VIEW") == "side":
+        d = Vector((1.0, 0.0, 0.08))
+    elif os.environ.get("NB_PREVIEW_VIEW") == "front":
+        d = Vector((0.0, -1.0, 0.08))
+    elif name.startswith("car_"):
         d = Vector((1.25, -1.0, 0.55))
     elif name.startswith("w_"):
         d = Vector((0.22, -1.0, 0.32))
+    elif view == "front":
+        d = Vector((0.0, -1.0, 0.05))
+    elif view == "side":
+        d = Vector((1.0, 0.0, 0.05))
+    elif view == "hands":
+        d = Vector((1.0, -0.6, 0.1))
     elif face:
         d = Vector((0.55, -1.0, 0.12))
     else:
