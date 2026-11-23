@@ -279,6 +279,7 @@ const skids = []; let skidI = 0;
 function skid(x, y, a) { const last = skids[(skidI + 399) % 400]; if (last && Math.abs(last.x - x) + Math.abs(last.y - y) < 6) return; skids[skidI] = { x, y, a, t: S.time }; skidI = (skidI + 1) % 400; }
 function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) explode(c); }
 function explosionAt(x, y, r, dmg, byPlayer) {
+  if (byPlayer && save.slowmo !== false && dist(x, y, P.x, P.y) < 520 && (S.lastSlow == null ? -99 : S.lastSlow) + 6 < S.time) slowMo(1.1, .3);
   booms.push({ x, y, r, t: 0, seed: Math.random() * 100 }); if (booms.length > 8) booms.shift();
   scorch.push({ x, y, r: r * .55, t: 0 }); if (scorch.length > 14) scorch.shift();
   shake = Math.max(shake, 14); { const [pn, vl] = spatial(x, y); if (vl > 0) au('boom', pn, vl); if (vl > .35) vib(Math.round(80 + vl * 160)); }
@@ -295,6 +296,7 @@ function explode(c) {
   const wasPlayer = c === P.car;
   if (wasPlayer) { radioOff(); P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30); toast('Voiture détruite !'); }
   if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x; vip.y = c.y + 26; hurtVip(30); }
+  if (!wasPlayer && S.mode === 'play' && dist(c.x, c.y, P.x, P.y) < 520 && S.time - (P.lastShot || -9) < 2 && (S.lastSlow == null ? -99 : S.lastSlow) + 6 < S.time) slowMo(1.2, .28);
   explosionAt(c.x, c.y, 85, 45, false);
   if (c.kind === 'police') addHeat(1);
   if (c.kind === 'gang') { track('kills'); picks.push({ x: c.x + 20, y: c.y, ammo: true, t: 30 }); }
@@ -466,7 +468,7 @@ function hitEnemy(e, dmg) {
     for (const o of enemies) if (o.group === e.group && dist(o.x, o.y, e.x, e.y) < 600) o.alert = true;
     if (Math.random() < .5) picks.push({ x: e.x, y: e.y, amt: (20 + lvl() * 8 + rnd(30)) | 0, t: 30 });
     else if (Math.random() < .55) picks.push({ x: e.x + 6, y: e.y, ammo: true, t: 30 });
-    if (e.boss) { toast(e.boss + ' est tombé !'); for (let i = 0; i < 3; i++) picks.push({ x: e.x + rnd(-20, 20), y: e.y + rnd(-20, 20), amt: 200 + lvl() * 40, t: 40 }); }
+    if (e.boss) { slowMo(2, .2); toast(e.boss + ' est tombé !'); for (let i = 0; i < 3; i++) picks.push({ x: e.x + rnd(-20, 20), y: e.y + rnd(-20, 20), amt: 200 + lvl() * 40, t: 40 }); }
   }
 }
 function findCover(e, tx, ty) {
@@ -921,6 +923,8 @@ function updAnimals(dt) {
   }
 }
 // ---------- fusée : décollage depuis Néon Bay vers la Lune (31) ou Mars (32) ----------
+// ralenti cinéma : le temps du jeu ralentit, la caméra se rapproche, le son s'étouffe (durée en secondes réelles)
+function slowMo(sec, k) { if (save.slowmo === false) return; S.slowUntil = performance.now() + sec * 1000; S.slowK = k; S.lastSlow = S.time; au('duck', true); vib([40, 80, 40]); }
 function launchRocket(n) {
   au('init'); au('setMusic', n === 31 ? 'moon' : 'mars'); au('setIntensity', .6);
   if (world.region.id !== 'usa') world = buildWorld(D.REGIONS[0]);
@@ -972,6 +976,7 @@ function updLevel(dt) {
   if (st.check(dt)) nextStep();
 }
 function completeLevel() {
+  slowMo(1.4, .25);
   const n = L.n, bonus = levelBonus(n);
   save.money += bonus; L.earned += bonus; payProperties(1); au('win'); vib([60, 40, 60, 40, 160]); au('setMusic', 'menu');
   const first = !save.done[n]; if (save.fails) delete save.fails[n];
@@ -2402,7 +2407,13 @@ function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = 
 function setupPost() {
   R3.r.toneMapping = THREE.ACESFilmicToneMapping; R3.r.toneMappingExposure = 1.25;
   if (!THREE.EffectComposer || !THREE.UnrealBloomPass || qLevel !== 'high') { R3.composer = null; return; }
-  try { const c = new THREE.EffectComposer(R3.r); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl); R3.composer = c; R3.bloom = bl; R3.w = 0; } catch (e) { R3.composer = null; }
+  try { const c = new THREE.EffectComposer(R3.r); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl);
+    // passe cinéma : étalonnage par pays, vignette, grain, légère aberration chromatique (plus forte pendant les ralentis)
+    if (THREE.ShaderPass) { const cine = new THREE.ShaderPass({ uniforms: { tDiffuse: { value: null }, time: { value: 0 }, tint: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.1 }, slow: { value: 0 } },
+      vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform sampler2D tDiffuse; uniform float time, sat, slow; uniform vec3 tint; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time) * 43758.5453); } void main(){ vec2 d = vUv - .5; float ca = .0015 + slow * .006; vec3 c = vec3(texture2D(tDiffuse, vUv + d * ca).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - d * ca).b); float l = dot(c, vec3(.299, .587, .114)); c = mix(vec3(l), c, sat - slow * .45) * tint; c *= 1. - (.28 + slow * .35) * dot(d, d) * 2.; c += (h(vUv * 800.) - .5) * .03; gl_FragColor = vec4(c, 1.); }' });
+      c.addPass(cine); R3.cine = cine; }
+    R3.composer = c; R3.bloom = bl; R3.w = 0; } catch (e) { R3.composer = null; }
 }
 function render3D(dt) {
   R3.dt = dt;
@@ -2424,7 +2435,7 @@ function render3D(dt) {
     if (!playing) { R3.orbit = (R3.orbit || 0) + dt * .04; tx = W / 2 + Math.cos(R3.orbit) * 1100; ty = W / 2 + Math.sin(R3.orbit) * 1100; }
     else { tx = P.car ? P.car.x + Math.cos(P.car.a) * P.car.v * .3 : P.x; ty = P.car ? P.car.y + Math.sin(P.car.a) * P.car.v * .3 : P.y; }
     const k = Math.min(1, dt * 4); cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
-    let d = 350 + sp * .3; if (VW < VH) d *= 1.35; if (!playing) d = 760;
+    let d = 350 + sp * .3; if (VW < VH) d *= 1.35; if (!playing) d = 760; if (S.slowUntil) d *= .72;
     cam.z += (d - cam.z) * Math.min(1, dt * 2); if (cam.z < 100) cam.z = d;
     R3.cam.position.set(cam.x + sx, cam.z, cam.y + cam.z * (playing ? .3 : .5) + sy); R3.cam.lookAt(cam.x, 0, cam.y);
     ccx = cam.x; ccz = cam.y;
@@ -2536,7 +2547,9 @@ function render3D(dt) {
   if (R3.ray.ray.intersectPlane(R3.plane, R3.hit)) { mouse.wx = R3.hit.x; mouse.wy = R3.hit.z; }
   cineCamera(playing);
   { const nn = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.r.toneMappingExposure = .82 + nn * .43; }
-  if (R3.composer && qLevel === 'high') { const night = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.bloom.strength = .12 + night * .95; R3.bloom.threshold = .9 - night * .2; R3.composer.render(); } else R3.r.render(R3.scene, R3.cam);
+  if (R3.composer && qLevel === 'high') { const night = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.bloom.strength = .12 + night * .95; R3.bloom.threshold = .9 - night * .2;
+    if (R3.cine) { const u = R3.cine.uniforms, T = { usa: [1.02, .96, 1.08], ita: [1.08, 1.0, .9], col: [.96, 1.05, 1.0], bra: [1.08, 1.0, .92], moon: [.96, .98, 1.06], mars: [1.1, .95, .85] }[world.region.id] || [1, 1, 1]; u.tint.value.set(T[0], T[1], T[2]); u.time.value = S.time; u.slow.value += ((S.slowUntil ? 1 : 0) - u.slow.value) * .2; u.sat.value = world.region.id === 'moon' ? .8 : 1.12; }
+    R3.composer.render(); } else R3.r.render(R3.scene, R3.cam);
   if (playing) drawMini(target);
 }
 
@@ -2606,7 +2619,7 @@ const SCREENS = {
         <button class="btn" data-go="intro">Introduction</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button>
+      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button>
       </div>
       <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
       ${dailyHtml()}
@@ -2691,7 +2704,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2867,6 +2880,7 @@ screenEl.addEventListener('click', e => {
   if (ds.launch) { launchRocket(+ds.launch); return; }
   if (ds.free) { const n = +ds.free; au('init'); startLevel(n, 0, true); return; }
   if (ds.voice) { save.voice = save.voice === false; persist(); if (save.voice) say(TR('Voix off activée'), VLOC[(I18 && I18.lang) || 'fr']); else try { speechSynthesis.cancel(); } catch (e) {} showScreen(S.screen); return; }
+  if (ds.slowmo) { save.slowmo = save.slowmo === false; persist(); showScreen(S.screen); return; }
   if (ds.assist) { save.driveAssist = save.driveAssist === false; persist(); showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
@@ -2922,7 +2936,8 @@ screenEl.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.id
 let lastT = performance.now();
 function frame(t) {
   if (S.manual) { lastT = t; requestAnimationFrame(frame); return; }
-  const dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  let dt = Math.min(.05, (t - lastT) / 1000); lastT = t;
+  if (S.slowUntil && t < S.slowUntil && S.mode === 'play') { dt *= S.slowK || .3; document.body.classList.add('slowmo'); } else if (S.slowUntil) { S.slowUntil = 0; document.body.classList.remove('slowmo'); au('duck', false); }
   tick(dt);
   requestAnimationFrame(frame);
 }

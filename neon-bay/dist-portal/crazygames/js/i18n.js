@@ -214,6 +214,7 @@ window.NB_I18N = (() => {
     [/^Revenus actuels : (.+) par niveau terminé \(et un tiers tous les 3 boulots en balade libre\)\.$/, { en: 'Current income: $1 per level completed (and a third every 3 free-roam jobs).', es: 'Ingresos actuales: $1 por nivel completado (y un tercio cada 3 trabajos en paseo libre).', pt: 'Renda atual: $1 por nível concluído (e um terço a cada 3 trampos no passeio livre).' }],
     [/^Aide à la conduite : (oui|non)$/, { en: 'Driving assist: $1', es: 'Asistencia de conducción: $1', pt: 'Assistência de direção: $1' }],
     [/^Termine Néon Bay \(niveau 8\)(.*) pour débloquer la fusée\.$/, { en: 'Finish Neon Bay (level 8) to unlock the rocket.', es: 'Termina Neon Bay (nivel 8) para desbloquear el cohete.', pt: 'Termine Neon Bay (nível 8) para liberar o foguete.' }],
+    [/^Ralentis cinéma : (oui|non)$/, { en: 'Cinematic slow motion: $1', es: 'Cámara lenta cinematográfica: $1', pt: 'Câmera lenta cinematográfica: $1' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],
