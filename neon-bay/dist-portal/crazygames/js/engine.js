@@ -1657,17 +1657,35 @@ function init3D() {
   R3.m4 = new THREE.Matrix4(); R3.q = new THREE.Quaternion(); R3.v = new THREE.Vector3(); R3.s = new THREE.Vector3(1, 1, 1); R3.up = new THREE.Vector3(0, 1, 0);
   R3.ok = true; cvs.style.display = 'none'; c3.style.display = 'block';
 }
-function windowTex() {
-  const a = document.createElement('canvas'), e = document.createElement('canvas'); a.width = e.width = 64; a.height = e.height = 128;
+function windowTex() { // façade tuilable : 4 fenêtres x 4 étages = 64 x 56 unités (cadres, appuis, dalles, lumières variées)
+  const W2 = 256, H2 = 224, a = document.createElement('canvas'), e = document.createElement('canvas'); a.width = e.width = W2; a.height = e.height = H2;
   const ga = a.getContext('2d'), ge = e.getContext('2d');
-  ga.fillStyle = '#8a8a96'; ga.fillRect(0, 0, 64, 128); ge.fillStyle = '#000'; ge.fillRect(0, 0, 64, 128);
-  for (let y = 6; y < 124; y += 14) for (let x = 5; x < 60; x += 14) {
-    ga.fillStyle = '#3a3a48'; ga.fillRect(x, y, 9, 8);
-    const r = Math.random(); if (r < .38) { ge.fillStyle = r < .1 ? '#7fe9ff' : r < .2 ? '#ff9fd0' : '#ffd890'; ge.fillRect(x, y, 9, 8); }
-  }
+  ga.fillStyle = '#9a98a6'; ga.fillRect(0, 0, W2, H2); ge.fillStyle = '#000'; ge.fillRect(0, 0, W2, H2);
+  for (let f = 0; f < 4; f++) { const y0 = f * 56;
+    ga.fillStyle = '#7c7a88'; ga.fillRect(0, y0 + 52, W2, 4); // dalle d'étage
+    for (let c = 0; c < 4; c++) { const x = c * 64 + 12, y = y0 + 10, w = 40, h = 34;
+      ga.fillStyle = '#d8d6e0'; ga.fillRect(x - 3, y - 3, w + 6, h + 6); // encadrement
+      ga.fillStyle = '#2b3242'; ga.fillRect(x, y, w, h); ga.fillStyle = 'rgba(150,180,220,.18)'; ga.fillRect(x, y, w * .45, h); // reflet du verre
+      ga.fillStyle = '#c9c7d2'; ga.fillRect(x + w / 2 - 1.5, y, 3, h); ga.fillRect(x, y + h * .42, w, 2.5); // meneaux
+      ga.fillStyle = '#b6b4c0'; ga.fillRect(x - 5, y + h + 3, w + 10, 4); // appui
+      const r = Math.random();
+      if (r < .46) { const col = r < .1 ? '#86e8ff' : r < .19 ? '#ffa8d8' : r < .32 ? '#ffe2a6' : '#fff0c8'; ge.globalAlpha = .55 + Math.random() * .45; ge.fillStyle = col; ge.fillRect(x, y, w, h);
+        if (Math.random() < .5) { ge.globalAlpha = 1; ge.fillStyle = '#000'; ge.fillRect(x, y, w, h * (.2 + Math.random() * .5)); } // store à moitié baissé
+        ge.globalAlpha = 1; ge.fillStyle = '#000'; ge.fillRect(x + w / 2 - 1.5, y, 3, h); ge.fillRect(x, y + h * .42, w, 2.5); }
+    } }
   const m = new THREE.CanvasTexture(a), em = new THREE.CanvasTexture(e);
+  for (const t of [m, em]) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4; }
   return { m, em };
 }
+// UV à l'échelle du monde pour les immeubles instanciés : les fenêtres gardent leur taille quelle que soit la hauteur
+function worldUV(mtl) { mtl.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <uv_vertex>', `#ifdef USE_UV
+  #ifdef USE_INSTANCING
+    vec2 bsc = vec2(length(instanceMatrix[0].xyz), length(instanceMatrix[1].xyz));
+    vUv = uv * vec2(bsc.x / 64.0, bsc.y / 56.0) + vec2(floor(fract(instanceMatrix[3].x * .0137 + instanceMatrix[3].z * .0071) * 4.0) * .25, 0.0);
+  #else
+    vUv = ( uvTransform * vec3( uv, 1 ) ).xy;
+  #endif
+#endif`); }; mtl.customProgramCacheKey = () => 'worldUV'; return mtl; }
 function bHeight(tx, ty) {
   const i = ty * N + tx, id = world.region.id;
   if (world.wh[i]) return 44;
@@ -1704,7 +1722,7 @@ function build3DWorld() {
   // immeubles
   const tiles = []; for (let ty = 0; ty < N; ty++) for (let tx = 0; tx < N; tx++) if (world.map[ty * N + tx] === BLD && !world.lm[ty * N + tx]) tiles.push([tx, ty]);
   const wt = R3.wt || (R3.wt = windowTex());
-  const side = R3.sideMat = new THREE.MeshLambertMaterial({ map: wt.m, emissiveMap: wt.em, emissive: 0xffffff, emissiveIntensity: .85 });
+  const side = R3.sideMat = worldUV(new THREE.MeshLambertMaterial({ map: wt.m, emissiveMap: wt.em, emissive: 0xffffff, emissiveIntensity: .85 }));
   const roof = new THREE.MeshLambertMaterial({ color: 0xffffff });
   const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), [side, side, roof, roof, side, side], tiles.length);
   const c = new THREE.Color();
@@ -1721,6 +1739,24 @@ function build3DWorld() {
   });
   R3.s.set(1, 1, 1);
   im.castShadow = true; im.receiveShadow = true; g.add(im); R3.bldMesh = im;
+  // rez-de-chaussée commerçant côté rue : vitrines éclairées + auvents ; toits : climatiseurs et citernes
+  if (qLevel !== 'low') {
+    const shops = [], tanks = [], acs = [];
+    tiles.forEach(([tx, ty]) => { if (world.wh[ty * N + tx]) return; const h = bHeight(tx, ty);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const t2 = world.map[(ty + dy) * N + tx + dx]; if ((t2 === WALK || t2 === PLAZA) && hash(tx * 3 + dx, ty * 5 + dy) % 4 !== 0) shops.push([tx, ty, dx, dy]); }
+      const hh = hash(tx * 13, ty * 7); if (hh % 4 === 0) tanks.push([tx * T + 16 + hh % 30, h, ty * T + 18 + (hh >> 3) % 28]); if (hh % 3 === 1) acs.push([tx * T + 10 + hh % 40, h, ty * T + 12 + (hh >> 2) % 38, hh % 2]); });
+    const front = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), R3.shopMat = new THREE.MeshBasicMaterial({ color: 0xffffff }), shops.length);
+    const awn = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({ color: 0xffffff }), shops.length);
+    const SHOPC = ['#ffe9c2', '#fff4dc', '#ffd0e8', '#c8f4ff', '#ffe0a0', '#d8ffd0'], AWNC = ['#c8102e', '#1f5fae', '#2e8b57', '#ffb627', '#5a2a82', '#e8e4dc', '#111111'];
+    shops.forEach(([tx, ty, dx, dy], i) => { const cx = tx * T + T / 2 + dx * (T / 2 + .6), cz = ty * T + T / 2 + dy * (T / 2 + .6), hs = hash(tx, ty * 9 + dx + 3 * dy);
+      R3.v.set(cx, 7, cz); R3.s.set(dx ? 1 : T - 8, 12, dy ? 1 : T - 8); R3.m4.compose(R3.v, R3.q, R3.s); front.setMatrixAt(i, R3.m4); front.setColorAt(i, c.set(SHOPC[hs % SHOPC.length]));
+      R3.v.set(tx * T + T / 2 + dx * (T / 2 + 4), 15, ty * T + T / 2 + dy * (T / 2 + 4)); R3.s.set(dx ? 8 : T - 6, 1.6, dy ? 8 : T - 6); R3.m4.compose(R3.v, R3.q, R3.s); awn.setMatrixAt(i, R3.m4); awn.setColorAt(i, c.set(AWNC[hs % AWNC.length])); });
+    awn.castShadow = !!R3.shadow; g.add(front, awn); R3.shopFront = front;
+    const tk = new THREE.InstancedMesh(cyl(6, 6, 12, 10), mat('#8a7a68'), tanks.length), ac = new THREE.InstancedMesh(bx(10, 6, 8), mat('#b8b8c2'), acs.length);
+    tanks.forEach(([x, h, z], i) => { R3.v.set(x, h + 9, z); R3.s.set(1, 1, 1); R3.m4.compose(R3.v, R3.q, R3.s); tk.setMatrixAt(i, R3.m4); });
+    acs.forEach(([x, h, z, r], i) => { R3.v.set(x, h + 3, z); R3.s.set(r ? 1 : .8, 1, r ? .8 : 1); R3.m4.compose(R3.v, R3.q, R3.s); ac.setMatrixAt(i, R3.m4); });
+    R3.s.set(1, 1, 1); g.add(tk, ac);
+  }
   // néons sur les toits (bordures lumineuses autour des blocs)
   const LK = world.region.look || {};
   const neonTiles = (LK.roof === 'tile' ? [] : tiles).filter(([tx, ty]) => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => world.map[(ty + dy) * N + tx + dx] !== BLD));
@@ -2358,6 +2394,7 @@ function envFx(dt, playing) {
   R3.hemi.intensity = .6 + day * .8 - rainK * .15; R3.hemi.color = lerpC('#a7b0ff', '#ffffff', day); R3.hemi.groundColor = lerpC('#241838', '#6a6070', day);
   R3.moon.intensity = .45 + day * .7; R3.moon.color = lerpC('#9fb0ff', '#fff2dd', day).lerp(col3('#ffb070'), Math.min(.6, dusk));
   if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85;
+  if (R3.shopMat) R3.shopMat.color.setScalar(.42 + night * .62);
   if (R3.anim) for (const f of R3.anim) f(dt, night);
   if (R3.beacons) { const cx = R3.cam.position.x, cz = R3.cam.position.z, px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y; for (const m of R3.beacons) { const dc = Math.hypot(m.position.x - cx, m.position.z - cz), dp = Math.hypot(m.position.x - px, m.position.z - pz); m.visible = dc > 140 && dp > 90; } }
   if (R3.coneMat) R3.coneMat.opacity = .02 + night * .1;

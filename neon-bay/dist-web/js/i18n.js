@@ -217,6 +217,7 @@ window.NB_I18N = (() => {
     [/^Termine Néon Bay \(niveau 8\)(.*) pour débloquer la fusée\.$/, { en: 'Finish Neon Bay (level 8) to unlock the rocket.', es: 'Termina Neon Bay (nivel 8) para desbloquear el cohete.', pt: 'Termine Neon Bay (nível 8) para liberar o foguete.' }],
     [/^Ralentis cinéma : (oui|non)$/, { en: 'Cinematic slow motion: $1', es: 'Cámara lenta cinematográfica: $1', pt: 'Câmera lenta cinematográfica: $1' }],
     [/^Chef de gang · (.+)$/, { en: 'Gang boss · $1', es: 'Jefe de banda · $1', pt: 'Chefe de gangue · $1' }],
+    [/^Personnages réalistes : (oui|non)$/, { en: 'Realistic characters: $1', es: 'Personajes realistas: $1', pt: 'Personagens realistas: $1' }],
     [/^Qualité : (.+)$/, { en: 'Quality: $1', es: 'Calidad: $1', pt: 'Qualidade: $1' }],
     [/^Auto \((.+)\)$/, { en: 'Auto ($1)', es: 'Auto ($1)', pt: 'Auto ($1)' }],
     [/^Traverser les immeubles : (oui|non)$/, { en: 'Walk through buildings: $1', es: 'Atravesar edificios: $1', pt: 'Atravessar prédios: $1' }],
