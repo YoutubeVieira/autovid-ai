@@ -247,7 +247,7 @@ def write_js_fallback(glb_path):
         f.write("window.NB_MODEL_DATA=window.NB_MODEL_DATA||{};window.NB_MODEL_DATA.%s='%s';" % (key, b64))
 
 
-def export_glb(name, animations=False, objects=None):
+def export_glb(name, animations=False, objects=None, texcoords=False):
     os.makedirs(MODELS, exist_ok=True)
     path = os.path.join(MODELS, name + ".glb")
     for o in bpy.context.scene.objects:
@@ -257,7 +257,8 @@ def export_glb(name, animations=False, objects=None):
         export_format="GLB",
         export_yup=True,
         export_apply=True,
-        export_texcoords=False,
+        export_texcoords=texcoords,          # UVs only for textured assets (humans)
+        export_image_format="AUTO",
         export_normals=True,
         export_materials="EXPORT",
         export_cameras=False,

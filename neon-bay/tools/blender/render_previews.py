@@ -9,6 +9,9 @@ Writes models/previews/<name>.png (640x400, 3/4 view, studio light);
 "<name>@<Clip>[:frame]" writes previews/<name>_<Clip>[_<frame>].png (default frame 1);
 "<name>@face" writes previews/<name>_face.png (3/4 close-up of the head);
 debug close-ups: @front, @side (head), @feet, @hands (left hand);
+"<name>@far" / "@top": whole body from 10 m (3/4 from above / almost top-down, game distance);
+"<name>@<Clip>:<frame>/handR" (or /handL, /face, /far, /top): a view of a posed clip, e.g.
+"human_m@Aim:0/handR+w_pistol" = close-up of the right hand holding the pistol;
 "<human>@<Clip>:<frame>+w_<id>" puts a weapon in the right hand (grip rule of check_glb_three.js);
 NB_PREVIEW_VIEW=side|front forces the camera direction, NB_PREVIEW_OUT=<dir> redirects the output.
 Weapons (w_*) are framed from their right side (+Z glTF), slightly from above.
@@ -86,12 +89,15 @@ def attach_weapon(weapon):
 def render_model(spec):
     spec, _, weapon = spec.partition("+")
     name, _, variant = spec.partition("@")
+    variant, _, cview = variant.partition("/")          # "<Clip>:<frame>/<view>"
     clip, _, frame = variant.partition(":")
-    face = clip in ("face", "front", "side", "feet", "hands")
+    face = clip in ("face", "front", "side", "feet", "hands", "far", "top")
     view = clip
     if face or not clip:
         clip = "Idle"
-    out_name = name + ("_" + variant.replace(":", "_") if variant else "")
+    if cview:
+        view, face = cview, True
+    out_name = name + ("_" + variant.replace(":", "_") if variant else "") + ("_" + cview if cview else "")
     path = os.path.join(nb.MODELS, name + ".glb")
     nb.reset_scene()
     bpy.ops.import_scene.gltf(filepath=path)
@@ -124,9 +130,18 @@ def render_model(spec):
     lo = Vector((min(p.x for p in pts), min(p.y for p in pts), min(p.z for p in pts)))
     hi = Vector((max(p.x for p in pts), max(p.y for p in pts), max(p.z for p in pts)))
     floor_z = lo.z
+    lens = 50
+    if view in ("far", "top"):     # game-like distance: whole body seen from ~10 m
+        face = False
+        lens = 50
     if face:  # frame the head only
         top = hi.z
-        if view == "feet":
+        arm = next((o for o in scene.objects if o.type == "ARMATURE"), None)
+        if view in ("handR", "handL") and arm:
+            pb = arm.pose.bones["Hand." + view[-1]]
+            hp_c = arm.matrix_world @ (pb.head * 0.4 + pb.tail * 0.6)
+            hp = [p for p in pts if (p - hp_c).length < 0.11] or [hp_c]
+        elif view == "feet":
             hp = [p for p in pts if p.z < 0.25]
         elif view == "hands":
             hp = [p for p in pts if 0.6 < p.z < 0.95 and p.x > 0.15]
@@ -161,13 +176,21 @@ def render_model(spec):
         d = Vector((1.0, 0.0, 0.05))
     elif view == "hands":
         d = Vector((1.0, -0.6, 0.1))
+    elif view == "handR":
+        d = Vector((-1.0, -0.5, 0.35))
+    elif view == "handL":
+        d = Vector((1.0, -0.7, -0.25))
+    elif view == "top":
+        d = Vector((0.25, -0.35, 1.0))
+    elif view == "far":
+        d = Vector((0.7, -1.0, 0.75))
     elif face:
         d = Vector((0.55, -1.0, 0.12))
     else:
         d = Vector((0.75, -1.35, 0.35))
     d.normalize()
     cam_data = bpy.data.cameras.new("Cam")
-    cam_data.lens = 50
+    cam_data.lens = lens
     cam = nb.link(bpy.data.objects.new("Cam", cam_data))
     scene.camera = cam
     scene.render.resolution_x = 640
@@ -176,7 +199,10 @@ def render_model(spec):
     from bpy_extras.object_utils import world_to_camera_view
     corners = [Vector((x, y, z)) for x in (lo.x, hi.x) for y in (lo.y, hi.y) for z in (lo.z, hi.z)]
     dist = radius * 6
-    for _ in range(60):
+    if view in ("far", "top"):    # fixed 10 m camera, no framing
+        cam.location = center + d * 10.0
+        look_at(cam, center)
+    for _ in range(0 if view in ("far", "top") else 60):
         cam.location = center + d * dist
         look_at(cam, center)
         bpy.context.view_layer.update()
