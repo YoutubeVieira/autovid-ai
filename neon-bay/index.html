@@ -270,6 +270,11 @@ body.playing #toast{top:calc(var(--hudB,98px) + 40px)!important}
 body.playing #tip{top:calc(var(--hudB,98px) + 72px)!important}
 #bCam,#bPause{min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center}
 #bCam{right:calc(84px + env(safe-area-inset-right,0px))}
+
+/* ralenti cinéma : bandes noires qui glissent */
+body::before,body::after{content:"";position:fixed;left:0;right:0;height:0;background:#000;z-index:4;pointer-events:none;transition:height .25s ease}
+body::before{top:0}body::after{bottom:0}
+body.slowmo::before,body.slowmo::after{height:8vh}
 </style>
 
 <canvas id="game"></canvas>

@@ -12,6 +12,18 @@
 
 Raccourcis : Espace lecture · W/E/R déplacer, tourner, échelle · C vue caméra · K poser une clé · Suppr supprimer.
 
+## Effets de cinéma (panneau Film)
+- **Coupe franche** : sur une clé, « Après cette clé : Coupe franche » pour passer au plan suivant sans mouvement (bande-annonce, clip).
+- **Viser par plan** : chaque clé de caméra peut suivre un objet différent.
+- **Tremblement** : par clé de caméra (poursuites, décollage, explosions).
+- **Ralenti « bullet time »** : l'action ralentit, la caméra continue ; à terminer sur une coupe.
+- **Titres** dans l'image (donc dans la vidéo exportée) : titre centré, carton noir, bandeau bas, logo néon sur deux lignes (MOT1|MOT2).
+- **Flash blanc**, **fondus** d'ouverture et de fin, **étalonnage** : bleu-orange, néon saturé, film noir, doré.
+- Nouveaux éléments : mer à vagues, ambiance Lune (ciel noir, Terre dans le ciel).
+
+## Cinémathèque (scènes prêtes)
+Bande-annonce complète (46 s, 12 plans), Poursuite de nuit, Arrivée à Morro Azul, Face-à-face, Décollage de la fusée.
+
 ## Générateur 3D (texte ou photo)
 - Décris un objet (« un phare breton », « une moto de course néon ») ou donne une photo : Claude conçoit le modèle pièce par pièce (formes, matières, lumières) et le studio le construit aussitôt, à la bonne taille en mètres.
 - « Modifier par IA » : une phrase suffit (« ajoute des ailes », « rouge mat », « deux fois plus grand ») ; le reste du modèle ne bouge pas.
@@ -24,5 +36,6 @@ Raccourcis : Espace lecture · W/E/R déplacer, tourner, échelle · C vue camé
 node tools/build-web.js
 node tools/studio/render.js --template chase --res 1080      # scènes prêtes : chase, arrival, duel
 node tools/studio/render.js mon-projet.json --res 1080        # un projet exporté depuis le studio
+node tools/studio/render.js --template trailer --music usa --hot 7-14,21-36   # avec la musique du jeu
 ```
 La vidéo sort dans `marketing/studio/`. Le rendu se fait image par image : aucune saccade, même sur un téléphone lent.

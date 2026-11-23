@@ -94,6 +94,7 @@ footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6
     <h1>Néon <b>Studio</b></h1>
     <select id="tpl" aria-label="Modèle de scène">
       <option value="">Scènes prêtes…</option>
+      <option value="trailer">Bande-annonce complète (46 s)</option>
       <option value="chase">Poursuite de nuit</option>
       <option value="arrival">Arrivée à Morro Azul</option>
       <option value="duel">Face-à-face</option>
@@ -123,8 +124,18 @@ footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6
       <section><h2>Décor</h2><div class="lib" id="libProps"></div></section>
       <section><h2>Formes</h2><div class="lib" id="libPrims"></div></section>
       <section><h2>Ambiance</h2>
-        <div class="field"><label for="amb">Lumière</label><select id="amb"><option value="night">Nuit néon</option><option value="sunset">Coucher de soleil</option><option value="day">Plein jour</option><option value="storm">Orage</option></select></div>
+        <div class="field"><label for="amb">Lumière</label><select id="amb"><option value="night">Nuit néon</option><option value="moon">Lune</option><option value="sunset">Coucher de soleil</option><option value="day">Plein jour</option><option value="storm">Orage</option></select></div>
         <div class="row" style="margin-top:8px"><button id="bloomBtn" class="on">Halo néon</button><button id="rainBtn">Pluie</button><button id="wetBtn">Sol mouillé</button></div>
+      </section>
+      <section><h2>Film</h2>
+        <div class="field"><label for="grade">Étalonnage</label><select id="grade"><option value="none">Naturel</option><option value="teal">Bleu-orange</option><option value="neon">Néon saturé</option><option value="noir">Film noir</option><option value="warm">Doré</option></select></div>
+        <div class="row" style="margin-top:8px"><button id="fadesBtn">Fondus début et fin</button></div>
+        <h2 style="margin-top:10px">Titre à l'instant courant</h2>
+        <input type="text" id="tText" placeholder="Texte du titre">
+        <input type="text" id="tSub" placeholder="Sous-titre (facultatif)" style="margin-top:4px">
+        <div class="row" style="margin-top:4px"><select id="tStyle" style="flex:1"><option value="title">Titre centré</option><option value="card">Carton noir</option><option value="sub">Bandeau bas</option><option value="logo">Logo (MOT1|MOT2)</option></select><input type="number" id="tDur" value="2.5" min=".5" max="20" step=".5" style="width:64px" aria-label="Durée du titre"></div>
+        <div class="row" style="margin-top:6px"><button id="tAdd">Ajouter le titre</button><button id="flashAdd">Flash</button><button id="slowAdd">Ralenti 2 s</button></div>
+        <div class="outliner" id="fxList" style="margin-top:6px"></div>
       </section>
     </aside>
 
