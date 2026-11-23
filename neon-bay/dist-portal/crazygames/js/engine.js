@@ -1896,6 +1896,12 @@ function buildRegionDecor(g, tiles) {
   { const hc = document.createElement('canvas'); hc.width = hc.height = 64; const hx = hc.getContext('2d'), gr = hx.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(.3, 'rgba(255,255,255,.45)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); hx.fillStyle = gr; hx.fillRect(0, 0, 64, 64);
     const pa = new Float32Array(lamps.length * 3); lamps.forEach(([x, z], i) => { pa[i * 3] = x; pa[i * 3 + 1] = 49; pa[i * 3 + 2] = z; });
     const hg = new THREE.BufferGeometry(); hg.setAttribute('position', new THREE.BufferAttribute(pa, 3));
+    // flaques de lumière au sol sous les lampadaires (nuit)
+    { const pc = document.createElement('canvas'); pc.width = pc.height = 64; const px2 = pc.getContext('2d'), gr2 = px2.createRadialGradient(32, 32, 0, 32, 32, 32); gr2.addColorStop(0, 'rgba(255,255,255,1)'); gr2.addColorStop(.55, 'rgba(255,255,255,.35)'); gr2.addColorStop(1, 'rgba(255,255,255,0)'); px2.fillStyle = gr2; px2.fillRect(0, 0, 64, 64);
+      const pm = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(pc), color: LK.lamp || '#ffe2a8', transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+      const pools = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1).rotateX(-PI / 2), pm, lamps.length);
+      lamps.forEach(([x, z, an], i) => { R3.v.set(x + Math.sin(an || 0) * 12, .7, z + Math.cos(an || 0) * 12); R3.s.set(92, 1, 92); R3.m4.compose(R3.v, R3.q, R3.s); pools.setMatrixAt(i, R3.m4); });
+      R3.s.set(1, 1, 1); pools.renderOrder = 2; g.add(pools); R3.pools = pools; }
     R3.halos = new THREE.Points(hg, new THREE.PointsMaterial({ map: new THREE.CanvasTexture(hc), color: LK.lamp || '#fff2cc', size: 70, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: .6 })); g.add(R3.halos); }
   // espace : dômes de verre, Terre dans le ciel (Lune) ou deux petites lunes (Mars)
   if (LK.space) {
@@ -2167,9 +2173,12 @@ function makeGlbChar(md) {
 function poseGlb(m, x, y, a, step, ko, punching) {
   const u = m.userData, md = u.glb; m.position.set(x, 0, y); m.rotation.set(0, -a, 0);
   const ds = step - (u.ls < 0 ? step : u.ls); u.ls = step; u.spd += (Math.min(8, Math.abs(ds) * 60) - u.spd) * .2;
-  const want = ko ? 'death' : punching ? 'punch' : u.spd > 4.5 ? 'run' : u.spd > .6 ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
+  // vitesse réelle (m/s) pour caler la foulée sur le déplacement : plus de pieds qui glissent
+  const dtt = Math.max(.008, R3.dt || .016), mv = u.px === undefined ? 0 : Math.hypot(x - u.px, y - u.py) / dtt; u.px = x; u.py = y; const ms = (u.ms = (u.ms || 0) + (Math.min(12, mv / (md.scale || 30) / Math.max(.6, m.scale.x)) - (u.ms || 0)) * .25);
+  const want = ko ? 'death' : punching ? 'punch' : ms > 2.6 ? 'run' : ms > .25 ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
   const act = md.acts[want] || md.acts.idle;
   if (act && u.cur !== act) { if (u.cur) u.cur.fadeOut(.2); act.reset().fadeIn(.2).play(); u.cur = act; }
+  if (act) act.timeScale = want === 'walk' ? clamp(ms / 1.0, .6, 2.4) : want === 'run' ? clamp(ms / 2.4, .7, 2.4) : 1;
   md.mixer.update(Math.min(.05, R3.dt || .016));
 }
 function poseChar(m, x, y, a, step, ko, aim, fx) {
@@ -2440,6 +2449,7 @@ function envFx(dt, playing) {
   R3.hemi.intensity = .6 + day * .8 - rainK * .15; R3.hemi.color = lerpC('#a7b0ff', '#ffffff', day); R3.hemi.groundColor = lerpC('#241838', '#6a6070', day);
   R3.moon.intensity = .45 + day * .7; R3.moon.color = lerpC('#9fb0ff', '#fff2dd', day).lerp(col3('#ffb070'), Math.min(.6, dusk));
   { const ek = .18 + day * .82; if (R3.envK === undefined || Math.abs(R3.envK - ek) > .02) { R3.envK = ek; for (const m of ENVMATS) m.envMapIntensity = m.userData.envBase * ek; if (R3.glassMat && R3.glassMat.isMeshStandardMaterial) R3.glassMat.envMapIntensity = 1.1 * ek; } }
+  if (R3.pools) R3.pools.material.opacity = Math.max(0, night - .25) * .85;
   if (R3.sideMat) R3.sideMat.emissiveIntensity = .12 + night * .85; if (R3.glassMat) R3.glassMat.emissiveIntensity = .08 + night * .8; if (R3.brickMat) R3.brickMat.emissiveIntensity = .05 + night * .8;
   if (R3.shopMat) R3.shopMat.color.setScalar(.42 + night * .62);
   if (R3.anim) for (const f of R3.anim) f(dt, night);
