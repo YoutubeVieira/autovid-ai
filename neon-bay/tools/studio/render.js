@@ -36,8 +36,8 @@ const fps = +arg('fps', 30), res = +arg('res', 1080);
     const hot = (arg('hot', '') || '').split(',').filter(Boolean).map(x => { const [a, z] = x.split('-').map(Number); return { hot: true, t: a, d: z - a }; });
     const b64 = await g.evaluate(async ([st, secs, ev]) => { const buf = await window.NB_AUDIO.renderOffline(st, secs, ev); let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); }, [music, Math.ceil(dur) + 1, hot]);
     const wav = out.replace(/\.mp4$/, '.wav'), tmp = out.replace(/\.mp4$/, '.tmp.mp4'); fs.writeFileSync(wav, Buffer.from(b64, 'base64')); fs.renameSync(out, tmp);
-    await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:d=.6,afade=t=out:st=${Math.max(0, dur - 2)}:d=2,loudnorm=I=-14:TP=-1`, '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
-    fs.unlinkSync(tmp); fs.unlinkSync(wav);
+    const code = await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1`, '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
+    if (code === 0) { fs.unlinkSync(tmp); fs.unlinkSync(wav); } else { fs.renameSync(tmp, out); console.error('Musique non ajoutée (vidéo muette gardée), son : ' + wav); }
   }
   await b.close();
   console.log(`\nVidéo : ${out} · ${Math.round((Date.now() - t0) / 1000)} s de calcul`);
