@@ -33,6 +33,7 @@
     cylinder: { cat: 'Prims', name: 'Cylindre', desc: '1 m', kind: 'prim', slots: ['Color'] },
     neon: { cat: 'Prims', name: 'Enseigne', desc: 'néon', kind: 'prim', slots: ['Color'] },
     light: { cat: 'Prims', name: 'Lumière', desc: 'ponctuelle', kind: 'light', slots: ['Color'] },
+    gen: { cat: 'Gen', name: 'Modèle généré', kind: 'gen', slots: [] },
   };
   const DEFCOL = { Skin: '#c68b59', Shirt: '#21e6ff', Pants: '#1d1a2e', Shoes: '#f2f2f2', Hair: '#1a120c', Paint: '#ff2e93', Color: '#8a7dff' };
   const CLIPS = ['Idle', 'Walk', 'Run', 'Punch', 'Death'];
@@ -128,11 +129,65 @@
     for (let x = -L / 2 + 10; x < L / 2; x += 22) for (const sz of [-1, 1]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.08, .12, 6, 8), poleM); p.position.set(x, 3, sz * 7.6); g.add(p); const bl = new THREE.Mesh(new THREE.SphereGeometry(.22, 10, 8), bulbM); bl.position.set(x, 6.05, sz * 7.1); g.add(bl); g.userData.bulbs = (g.userData.bulbs || []).concat([bl]); }
     g.userData.street = true; return g;
   }
+  // ---------- générateur 3D : un modèle = une liste de pièces (formes, matières, lumière) décrite en JSON ----------
+  const GEN_EX = {
+    moto: { name: 'Moto néon', parts: [
+      { s: 'torus', d: [.3, .09], p: [.72, .33, 0], c: '#16161c', g: .8 }, { s: 'torus', d: [.3, .09], p: [-.72, .33, 0], c: '#16161c', g: .8 },
+      { s: 'cyl', d: [.18, .18, .1], p: [.72, .33, 0], r: [90, 0, 0], c: '#cfd3dc', m: .9, g: .2 }, { s: 'cyl', d: [.18, .18, .1], p: [-.72, .33, 0], r: [90, 0, 0], c: '#cfd3dc', m: .9, g: .2 },
+      { s: 'box', d: [.6, .25, .3], p: [.05, .85, 0], c: '#ff2e93', m: .5, g: .25 }, { s: 'box', d: [.55, .08, .28], p: [-.38, .87, 0], c: '#1a1a22', g: .6 },
+      { s: 'box', d: [.4, .35, .32], p: [.52, .88, 0], r: [0, 0, -22], c: '#ff2e93', m: .5, g: .25 }, { s: 'box', d: [.45, .3, .28], p: [0, .55, 0], c: '#2a2830', m: .7, g: .4 },
+      { s: 'cyl', d: [.05, .05, .7], p: [-.42, .45, .17], r: [0, 0, 80], c: '#cfd3dc', m: .9, g: .2 }, { s: 'cyl', d: [.03, .03, .72], p: [.66, .64, 0], r: [0, 0, 25], c: '#cfd3dc', m: .9, g: .2 },
+      { s: 'cyl', d: [.02, .02, .7], p: [.52, 1.1, 0], r: [90, 0, 0], c: '#16161c', m: .6 }, { s: 'sphere', d: [.08], p: [.77, .97, 0], c: '#ffffff', e: '#fff2c0' },
+      { s: 'box', d: [.04, .05, .14], p: [-.66, .88, 0], c: '#ff2e4d', e: '#ff2e4d' }, { s: 'box', d: [.9, .02, .02], p: [0, .63, .16], c: '#21e6ff', e: '#21e6ff' }, { s: 'box', d: [.9, .02, .02], p: [0, .63, -.16], c: '#21e6ff', e: '#21e6ff' }] },
+    helico: { name: 'Hélicoptère', parts: [
+      { s: 'capsule', d: [1.15, 2.6], p: [0, 1.6, 0], r: [0, 0, 90], c: '#c8102e', m: .4, g: .3 }, { s: 'sphere', d: [1.05], p: [1.55, 1.7, 0], c: '#9fd6ff', m: .3, g: .05, o: .55 },
+      { s: 'cyl', d: [.28, .14, 5], p: [-3.7, 1.9, 0], r: [0, 0, 90], c: '#c8102e', m: .4, g: .3 }, { s: 'box', d: [.8, 1.3, .1], p: [-6.1, 2.4, 0], r: [0, 0, -15], c: '#c8102e' },
+      { s: 'box', d: [.1, 1.6, .08], p: [-6.15, 2.45, .16], c: '#2a2830' }, { s: 'cyl', d: [.12, .12, .6], p: [0, 3, 0], c: '#2a2830', m: .8 },
+      { s: 'box', d: [9, .06, .3], p: [0, 3.3, 0], c: '#1a1a22', m: .5 }, { s: 'box', d: [9, .06, .3], p: [0, 3.3, 0], r: [0, 90, 0], c: '#1a1a22', m: .5 },
+      { s: 'cyl', d: [.06, .06, 3.2], p: [.1, .15, .9], r: [0, 0, 90], c: '#2a2830', m: .8 }, { s: 'cyl', d: [.06, .06, 3.2], p: [.1, .15, -.9], r: [0, 0, 90], c: '#2a2830', m: .8 },
+      { s: 'cyl', d: [.05, .05, .9], p: [.8, .6, .85], r: [15, 0, 0], c: '#2a2830' }, { s: 'cyl', d: [.05, .05, .9], p: [-.8, .6, .85], r: [15, 0, 0], c: '#2a2830' }, { s: 'cyl', d: [.05, .05, .9], p: [.8, .6, -.85], r: [-15, 0, 0], c: '#2a2830' }, { s: 'cyl', d: [.05, .05, .9], p: [-.8, .6, -.85], r: [-15, 0, 0], c: '#2a2830' },
+      { s: 'box', d: [1.2, .05, .02], p: [0, 1.2, 1.16], c: '#ffffff' }, { s: 'sphere', d: [.08], p: [-6.3, 3.1, 0], c: '#ff2e4d', e: '#ff2e4d' }] },
+    truck: { name: 'Food truck', parts: [
+      { s: 'box', d: [4.4, 2.2, 2.1], p: [-.4, 1.5, 0], c: '#ffd23f', g: .4 }, { s: 'box', d: [1.4, 1.7, 2.05], p: [2.5, 1.25, 0], c: '#ffd23f', g: .4 },
+      { s: 'box', d: [.05, .8, 1.8], p: [3.21, 1.6, 0], c: '#9fd6ff', m: .3, g: .05 }, { s: 'box', d: [2.2, .9, .05], p: [-.4, 1.75, 1.06], c: '#1a1a22' },
+      { s: 'box', d: [2.5, .06, .9], p: [-.4, 2.35, 1.45], r: [-18, 0, 0], c: '#ff2e93' }, { s: 'box', d: [2.4, .5, .1], p: [-.4, 2.9, 0], c: '#1a1a22', e: '#ff2e93' },
+      { s: 'cyl', d: [.4, .4, .3], p: [2.4, .4, 1], r: [90, 0, 0], c: '#16161c', g: .9 }, { s: 'cyl', d: [.4, .4, .3], p: [2.4, .4, -1], r: [90, 0, 0], c: '#16161c', g: .9 },
+      { s: 'cyl', d: [.4, .4, .3], p: [-1.6, .4, 1], r: [90, 0, 0], c: '#16161c', g: .9 }, { s: 'cyl', d: [.4, .4, .3], p: [-1.6, .4, -1], r: [90, 0, 0], c: '#16161c', g: .9 },
+      { s: 'box', d: [4.4, .12, 2.12], p: [-.4, .95, 0], c: '#2a2830' }, { s: 'sphere', d: [.12], p: [3.2, 1, .8], c: '#ffffff', e: '#fff2c0' }, { s: 'sphere', d: [.12], p: [3.2, 1, -.8], c: '#ffffff', e: '#fff2c0' },
+      { s: 'box', d: [2.2, .06, .5], p: [-.4, 1.3, 1.3], c: '#cfd3dc', m: .8 }] },
+  };
+  const num = (v, d = 0) => Number.isFinite(+v) ? +v : d, hex = c => /^#[0-9a-f]{6}$/i.test(String(c)) ? c : '#888888';
+  function genGeo(pt) {
+    const d = Array.isArray(pt.d) ? pt.d.map(x => Math.max(.005, Math.min(200, Math.abs(num(x, .5))))) : [];
+    switch (pt.s) {
+      case 'box': return new THREE.BoxGeometry(d[0] || 1, d[1] || 1, d[2] || 1);
+      case 'sphere': return new THREE.SphereGeometry(d[0] || .5, 28, 18);
+      case 'cyl': return new THREE.CylinderGeometry(d[0] != null ? d[0] : .5, d[1] != null ? d[1] : .5, d[2] || 1, 28);
+      case 'cone': return new THREE.ConeGeometry(d[0] || .5, d[1] || 1, 28);
+      case 'torus': return new THREE.TorusGeometry(d[0] || .5, d[1] || .1, 14, 36);
+      case 'capsule': { const r = d[0] || .3, l = d[1] || 1, g = new THREE.CylinderGeometry(r, r, l, 24, 1, true); const a = new THREE.SphereGeometry(r, 24, 12, 0, TAU, 0, PI / 2); a.translate(0, l / 2, 0); const b = new THREE.SphereGeometry(r, 24, 12, 0, TAU, PI / 2, PI / 2); b.translate(0, -l / 2, 0); return mergeGeo([g, a, b]); }
+      case 'lathe': { const pts = (pt.pts || []).slice(0, 64).map(q => new THREE.Vector2(Math.max(0, num(q[0])), num(q[1]))); return pts.length > 1 ? new THREE.LatheGeometry(pts, 32) : new THREE.SphereGeometry(.3); }
+      case 'extrude': { const pts = (pt.pts || []).slice(0, 64); if (pts.length < 3) return new THREE.BoxGeometry(.3, .3, .3); const sh = new THREE.Shape(pts.map(q => new THREE.Vector2(num(q[0]), num(q[1])))); const g = new THREE.ExtrudeGeometry(sh, { depth: d[0] || .1, bevelEnabled: true, bevelSize: .01, bevelThickness: .01, bevelSegments: 2 }); g.translate(0, 0, -(d[0] || .1) / 2); return g; }
+      default: return new THREE.BoxGeometry(.3, .3, .3);
+    }
+  }
+  function mergeGeo(list) { const pos = [], nor = [], uv = []; for (const g0 of list) { const g = g0.index ? g0.toNonIndexed() : g0; pos.push(...g.attributes.position.array); nor.push(...g.attributes.normal.array); if (g.attributes.uv) uv.push(...g.attributes.uv.array); } const m = new THREE.BufferGeometry(); m.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); m.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3)); if (uv.length === pos.length / 3 * 2) m.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); return m; }
+  function buildGen(spec) {
+    const g = new THREE.Group(); g.name = (spec && spec.name) || 'Modèle';
+    for (const pt of ((spec && spec.parts) || []).slice(0, 150)) {
+      const em = pt.e ? hex(pt.e) : null, op = pt.o != null ? clamp(num(pt.o, 1), .05, 1) : 1;
+      const m = new THREE.MeshStandardMaterial({ color: hex(pt.c), metalness: clamp(num(pt.m, 0), 0, 1), roughness: clamp(num(pt.g, .5), .02, 1), emissive: em || 0x000000, emissiveIntensity: em ? 1.4 : 0, transparent: op < 1, opacity: op });
+      const me = new THREE.Mesh(genGeo(pt), m); const p = pt.p || [0, 0, 0], r = pt.r || [0, 0, 0];
+      me.position.set(num(p[0]), num(p[1]), num(p[2])); me.rotation.set(num(r[0]) * PI / 180, num(r[1]) * PI / 180, num(r[2]) * PI / 180); me.castShadow = me.receiveShadow = op === 1; g.add(me);
+    }
+    return g;
+  }
   function build(o) {
     const a = ASSETS[o.asset] || {}, holder = new THREE.Group(); holder.userData.oid = o.id; let inner = null; const u = { holder, wheels: [], mixer: null, action: null };
     if (o.asset === 'camera') {
       inner = new THREE.Group(); const body = new THREE.Mesh(new THREE.BoxGeometry(.5, .35, .7), new THREE.MeshBasicMaterial({ color: 0xff2e93, wireframe: true })); const lens = new THREE.Mesh(new THREE.ConeGeometry(.3, .5, 4, 1, true), new THREE.MeshBasicMaterial({ color: 0xff2e93, wireframe: true })); lens.rotation.x = PI / 2; lens.position.z = -.55; inner.add(body, lens); u.helper = true;
-    } else if (a.kind === 'street') inner = streetGroup(o);
+    } else if (o.asset === 'gen') inner = buildGen(o.spec);
+    else if (a.kind === 'street') inner = streetGroup(o);
     else if (a.kind === 'rocket') { // fusée 33 m : corps, coiffe, ailerons, flamme animée (visible quand la fusée monte)
       inner = new THREE.Group(); const W = new THREE.MeshStandardMaterial({ color: 0xf4f4f4, roughness: .35, metalness: .3 }), Rd = new THREE.MeshStandardMaterial({ color: (o.color || {}).Color || '#d6332a', roughness: .4 });
       const body = new THREE.Mesh(new THREE.CylinderGeometry(1.8, 1.8, 24, 24), W); body.position.y = 14; const nose = new THREE.Mesh(new THREE.ConeGeometry(1.8, 6, 24), Rd); nose.position.y = 29;
@@ -326,6 +381,7 @@
   // ---------- interface ----------
   function lib() {
     const mk = cat => Object.entries(ASSETS).filter(([, a]) => a.cat === cat).map(([k, a]) => `<button data-add="${k}"><b>${a.name}</b><small>${a.desc}</small></button>`).join('');
+    $('libGen').innerHTML = Object.entries(GEN_EX).map(([k, v]) => `<button data-genex="${k}"><b>${v.name}</b><small>${v.parts.length} pièces</small></button>`).join('');
     $('libChars').innerHTML = mk('Chars'); $('libCars').innerHTML = mk('Cars'); $('libProps').innerHTML = mk('Props'); $('libPrims').innerHTML = mk('Prims');
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -347,6 +403,7 @@
         ${o.asset === 'camera' ? `<div class="field" style="margin-top:10px"><label for="ofov">Focale</label><select id="ofov">${[[24, '24 mm grand-angle'], [32, '35 mm'], [40, '50 mm'], [60, '85 mm portrait'], [80, '135 mm téléobjectif']].map(([v, l]) => `<option value="${v}" ${Math.round(s.f) === v || (o.lens || 40) === v ? 'selected' : ''}>${l}</option>`).join('')}</select></div>
           <div class="field" style="margin-top:6px"><label for="otgt">Viser</label><select id="otgt"><option value="">Rien (rotation libre)</option>${P.objects.filter(x => x.asset !== 'camera' && x.asset !== 'street').map(x => `<option value="${x.id}" ${o.target === x.id ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}</select></div>` : ''}
         ${a.kind === 'street' ? `<div class="field" style="margin-top:10px"><label for="olen">Longueur</label><input type="number" id="olen" min="40" max="600" step="10" value="${o.length || 200}"></div><div class="row" style="margin-top:6px"><button id="reseed">Autres immeubles</button></div>` : ''}
+        ${o.asset === 'gen' ? `<h2 style="margin-top:12px">Modèle généré · ${(o.spec.parts || []).length} pièces</h2><textarea id="genInstr" rows="2" placeholder="Ajoute des ailes, mets-le en rouge mat, plus grand…"></textarea><div class="row" style="margin-top:6px"><button id="genEdit" class="prim" ${sampleFn ? '' : 'disabled'}>Modifier par IA</button><button id="genExp">Exporter GLB</button></div>` : ''}
         ${a.kind === 'light' ? `<div class="field" style="margin-top:10px"><label for="oint">Intensité</label><input type="number" id="oint" min="0" max="20" step=".5" value="${o.intensity || 3}"></div>` : ''}
         <div class="row" style="margin-top:12px">${o.asset !== 'camera' ? '<button id="dup">Dupliquer</button><button id="del">Supprimer</button>' : ''}<button id="clrKeys">Effacer les clés</button></div>
         <p class="empty" style="margin-top:8px">${o.keys.length ? o.keys.length + ' image(s) clé. Déplace l’objet à un autre instant : une nouvelle clé se crée.' : 'Sans image clé, l’objet reste immobile.'}</p>`;
@@ -382,12 +439,15 @@
     else if (d.sel) select(d.sel);
     else if (d.mode) { gizmo.setMode(d.mode); document.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b)); }
     else if (d.tab) { document.querySelectorAll('aside').forEach(a => a.classList.toggle('show', a.id === d.tab)); }
+    else if (d.genex) addGen(JSON.parse(JSON.stringify(GEN_EX[d.genex])));
+    else if (b.id === 'genEdit') { const o = obj(sel), q = $('genInstr').value.trim(); if (o && q) editGen(o, q); }
+    else if (b.id === 'genExp') { const o = obj(sel); if (o) exportGLB(o); }
     else if (b.id === 'del') delSel(); else if (b.id === 'dup') dupSel();
     else if (b.id === 'clrKeys') { const o = obj(sel); if (o) { if (o.keys.length) o.base = { p: sample(o, t).p, r: sample(o, t).r, s: sample(o, t).s }; o.keys = []; ui(); save(); } }
     else if (b.id === 'reseed') { const o = obj(sel); o.seed = Math.floor(Math.random() * 1000); rebuild(o); save(); }
   });
   $('insp').addEventListener('change', e => {
-    const o = obj(sel); if (!o) return; const el = e.target;
+    const o = obj(sel); if (!o) return; const el = e.target; if (el.id === 'genInstr') return;
     if (el.id === 'oname') o.name = el.value || o.name;
     else if (el.dataset.tr) { const k = el.dataset.tr[0], i = +el.dataset.tr[1], s = sample(o, t), tr = { p: s.p.slice(), r: s.r.slice(), s: s.s.slice() }; tr[k][i] = k === 'r' ? (+el.value) * PI / 180 : +el.value; writeKey(o, tr); }
     else if (el.dataset.col) { o.color = Object.assign({}, o.color, { [el.dataset.col]: el.value }); rebuild(o); }
@@ -428,6 +488,34 @@
     select(null);
   });
 
+  // ---------- génération par Claude (dans Claude seulement : sample) ----------
+  const GEN_RULES = `Tu es un modeleur 3D professionnel. Construis le modèle demandé uniquement avec des pièces géométriques.
+Unités : mètres, axe Y vers le haut, l'objet posé sur le sol (son point le plus bas à y=0), centré en x=0 et z=0, l'avant tourné vers +X. Respecte les vraies dimensions de l'objet.
+Réponds avec un seul objet JSON, sans texte autour : {"name": string, "parts": [pièce, ...]} avec 10 à 90 pièces.
+Pièce : {"s": forme, "d": dimensions, "p": [x,y,z] (centre), "r": [rx,ry,rz] en degrés, "c": "#rrggbb", "m": métal 0..1, "g": rugosité 0..1, "e": "#rrggbb" seulement si la pièce émet de la lumière, "o": opacité 0..1 seulement si transparente}.
+Formes : "box" d=[x,y,z] ; "sphere" d=[rayon] ; "cyl" d=[rayon haut, rayon bas, hauteur] ; "cone" d=[rayon, hauteur] ; "torus" d=[rayon, épaisseur] (anneau dans le plan XY, idéal pour une roue qui roule vers +X) ; "capsule" d=[rayon, longueur] ; "lathe" avec "pts": [[rayon,y], ...] profil tourné autour de Y (vases, bouteilles, colonnes) ; "extrude" avec "pts": [[x,y], ...] contour dans le plan XY et d=[épaisseur en z] (ailes, panneaux, silhouettes).
+cyl, cone, capsule et lathe sont verticaux (axe Y) avant rotation ; pour un axe horizontal vers Z, r=[90,0,0] ; vers X, r=[0,0,90].
+Soigne la silhouette, les proportions, les détails qui rendent l'objet reconnaissable (roues, vitres, poignées, phares, yeux, motifs) et une palette de couleurs cohérente.
+Exemple de pièce : {"s":"box","d":[1.2,0.05,0.8],"p":[0,0.75,0],"r":[0,0,0],"c":"#8a5a34","m":0,"g":0.7}`;
+  let sampleFn = null, genCtl = null, sampleImages = false;
+  (async () => { try { sampleFn = window.claude && window.claude.use ? await window.claude.use('sample') : null; if (sampleFn) { const lim = await sampleFn.limits().catch(() => null); sampleImages = !!(lim && lim.images); $('genImgL').hidden = !sampleImages; } } catch (e) { sampleFn = null; }
+    if (!sampleFn) { $('genGo').disabled = true; $('genStatus').textContent = 'La création par Claude marche quand le studio est ouvert dans Claude. Les modèles d’exemple restent disponibles.'; } })();
+  const genMsg = { not_granted: 'Autorise le studio à utiliser Claude pour créer des modèles.', rate_limited: 'Trop de demandes ou limite d’usage atteinte : réessaie un peu plus tard.', invalid_json: 'La réponse n’était pas un modèle valide : réessaie ou simplifie la demande.', refused: 'Claude n’a pas voulu créer ce modèle : change la demande.', sampling_disabled: 'Claude n’est pas disponible pour ce compte.' };
+  async function askModel(input, opts = {}) {
+    if (!sampleFn) return null; genCtl = new AbortController(); $('genStop').hidden = false; $('genGo').disabled = true; let parts = 0;
+    $('genStatus').textContent = 'Claude réfléchit au modèle…';
+    try { const spec = await sampleFn.json(input, Object.assign({ signal: genCtl.signal, cache: false, onText: ({ text }) => { const n = (text.match(/"s"\s*:/g) || []).length; if (n !== parts) { parts = n; $('genStatus').textContent = 'Construction : ' + n + ' pièce(s)…'; } } }, opts));
+      if (!spec || !Array.isArray(spec.parts) || !spec.parts.length) throw { code: 'invalid_json' }; return spec; }
+    catch (e) { if (e && e.code !== 'cancelled') $('genStatus').textContent = genMsg[e && e.code] || 'La création a échoué, réessaie.'; else $('genStatus').textContent = 'Arrêté.'; return null; }
+    finally { $('genStop').hidden = true; $('genGo').disabled = false; }
+  }
+  function addGen(spec) { const o = newObj('gen', { name: spec.name || 'Modèle', spec }); const c = orbit.target; o.base.p = [+c.x.toFixed(2), 0, +c.z.toFixed(2)]; P.objects.push(o); build(o); select(o.id); save(); $('genStatus').textContent = '« ' + o.name + ' » : ' + spec.parts.length + ' pièces. Modifie-le depuis le panneau Objet.'; return o; }
+  $('genGo').addEventListener('click', async () => { const q = $('genPrompt').value.trim(); if (!q) { toast('Décris d’abord l’objet à créer'); return; } const spec = await askModel(GEN_RULES + '\n\nObjet à créer : ' + q); if (spec) addGen(spec); });
+  $('genStop').addEventListener('click', () => genCtl && genCtl.abort());
+  $('genImg').addEventListener('change', async e => { const f = e.target.files[0]; e.target.value = ''; if (!f) return; const q = $('genPrompt').value.trim(); const spec = await askModel(GEN_RULES + '\n\nReconstruis en 3D l’objet principal de la photo jointe, avec ses couleurs et proportions.' + (q ? ' Précision : ' + q : ''), { images: f }); if (spec) addGen(spec); });
+  async function editGen(o, instr) { const spec = await askModel(GEN_RULES + '\n\nVoici le modèle actuel :\n' + JSON.stringify(o.spec) + '\n\nModifie-le selon cette demande, garde le reste identique, et renvoie le modèle complet : ' + instr); if (spec) { o.spec = spec; o.name = o.name || spec.name; rebuild(o); ui(); save(); toast('Modèle modifié'); } }
+  function exportGLB(o) { const u = rt[o.id]; if (!u || !THREE.GLTFExporter) return; new THREE.GLTFExporter().parse(u.inner, async res => { const base = (o.name || 'modele').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '-').toLowerCase() || 'modele';
+      if (window.JSZip) { const z = new JSZip(); z.file(base + '.glb', res); z.file(base + '.json', JSON.stringify(o.spec || {}, null, 1)); offer(base + '.zip', await z.generateAsync({ type: 'blob' })); } else offer(base + '.json', JSON.stringify(o.spec || {}, null, 1)); }, { binary: true }); }
   // ---------- sauvegarde, export ----------
   let saveT = 0; function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem('neonstudio.project', JSON.stringify(P)); } catch (e) {} }, 400); }
   let toastT = 0; function toast(m) { const el = $('toast'); el.textContent = m; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2600); }

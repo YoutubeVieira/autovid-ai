@@ -17,6 +17,8 @@ button, select, input { font: inherit; color: inherit; }
 button { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; }
 button:hover { border-color: #46406a; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+[hidden] { display: none !important; }
+button:disabled { opacity: .45; cursor: not-allowed; }
 button.on { border-color: var(--accent); color: var(--accent); }
 button.prim { background: var(--accent); color: #041318; border-color: var(--accent); font-weight: 700; }
 button.keyb { color: var(--key); border-color: rgba(255,46,147,.5); }
@@ -55,6 +57,10 @@ h2 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: v
 .colors { display: flex; flex-wrap: wrap; gap: 8px; }
 .colors label { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--mute); }
 .empty { color: var(--mute); font-size: 12px; }
+textarea { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px; font: 12px/1.4 var(--ui); color: var(--ink); resize: vertical; }
+.filebtn { display: inline-flex; align-items: center; background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; box-sizing: border-box; }
+.gen { border: 1px solid rgba(33,230,255,.35); border-radius: 10px; padding: 8px; background: rgba(33,230,255,.04); }
+.gen .lib { margin-top: 6px; }
 footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6px max(10px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 6px; }
 .tbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .tbar label { color: var(--mute); font-size: 11px; display: flex; align-items: center; gap: 4px; }
@@ -106,6 +112,12 @@ footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6
   <div class="main">
     <aside id="pLib">
       <div class="tabs"><button data-tab="pLib" class="on">Bibliothèque</button><button data-tab="pObj">Objet</button></div>
+      <section class="gen"><h2>Générateur 3D</h2>
+        <textarea id="genPrompt" rows="3" placeholder="Décris l'objet : une moto de course néon, un phare breton, un food truck de tacos…"></textarea>
+        <div class="row" style="margin-top:6px"><button id="genGo" class="prim">Créer le modèle</button><label class="filebtn" id="genImgL" hidden><input type="file" id="genImg" accept="image/*" hidden><span>Depuis une photo</span></label><button id="genStop" hidden>Arrêter</button></div>
+        <p class="empty" id="genStatus">Claude construit le modèle pièce par pièce, modifiable ensuite par une phrase.</p>
+        <div class="lib" id="libGen"></div>
+      </section>
       <section><h2>Personnages</h2><div class="lib" id="libChars"></div></section>
       <section><h2>Véhicules</h2><div class="lib" id="libCars"></div></section>
       <section><h2>Décor</h2><div class="lib" id="libProps"></div></section>
@@ -160,5 +172,7 @@ footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6
 <script src="vendor/RoomEnvironment.js"></script>
 <script src="vendor/Sky.js"></script>
 <script src="vendor/Reflector.js"></script>
+<script src="vendor/GLTFExporter.js"></script>
+<script src="vendor/jszip.min.js"></script>
 <script src="vendor/postfx.js"></script>
 <script src="js/studio.js"></script>

@@ -12,6 +12,13 @@
 
 Raccourcis : Espace lecture · W/E/R déplacer, tourner, échelle · C vue caméra · K poser une clé · Suppr supprimer.
 
+## Générateur 3D (texte ou photo)
+- Décris un objet (« un phare breton », « une moto de course néon ») ou donne une photo : Claude conçoit le modèle pièce par pièce (formes, matières, lumières) et le studio le construit aussitôt, à la bonne taille en mètres.
+- « Modifier par IA » : une phrase suffit (« ajoute des ailes », « rouge mat », « deux fois plus grand ») ; le reste du modèle ne bouge pas.
+- « Exporter GLB » : un .zip avec le modèle .glb (s'ouvre dans Blender, Unity, Unreal, Godot, three.js) et sa description .json.
+- Trois modèles d'exemple marchent sans connexion : moto néon, hélicoptère, food truck.
+- La création consomme l'usage Claude de la personne qui l'utilise ; Claude demande l'autorisation au premier usage.
+
 ## Rendu cloud (qualité maximale, MP4 H.264)
 ```
 node tools/build-web.js
