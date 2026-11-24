@@ -206,7 +206,8 @@ function carStyle(kind) {
   for (const [k, w] of ent) { r -= w; if (r <= 0) { type = k; break; } }
   return { type, color: type === 'taxi' ? cs.taxi : type === 'bus' ? pick(['#ffd23f', '#ff006e', '#3a86ff', '#8ac926']) : pick(cs.palette) };
 }
-function mkCar(x, y, a, kind) { const cs = carStyle(kind); return { type: cs.type, x, y, a, v: 0, hp: kind === 'police' ? 150 + lvl() * 4 : 100, kind, color: kind === 'police' ? '#eef0ff' : (cs.color || pick(CIV)), ai: null, dir: 0, wreck: false, stuck: 0, rev: 0, lock: -1, flash: rnd(1), panic: 0 }; }
+const ARMY = { army_jeep: { hp: 300, v: 600, armor: .7, name: 'Jeep militaire' }, army_truck: { hp: 480, v: 420, armor: .5, name: 'Camion militaire' }, army_apc: { hp: 950, v: 360, armor: .25, name: 'Blindé' } };
+function mkCar(x, y, a, kind, atype) { const cs = atype ? { type: atype, color: '#4b5a3a' } : carStyle(kind); return { type: cs.type, x, y, a, v: 0, hp: atype ? ARMY[atype].hp : kind === 'police' ? 150 + lvl() * 4 : 100, kind, color: kind === 'police' ? '#eef0ff' : (cs.color || pick(CIV)), ai: null, dir: 0, wreck: false, stuck: 0, rev: 0, lock: -1, flash: rnd(1), panic: 0 }; }
 function pedLook() {
   const pl = (world && world.region.look && world.region.look.peds) || null; if (!pl) return null;
   const f = Math.random() < .5, hat = Math.random() < pl.hat, jk = Math.random() < pl.jacket;
@@ -233,6 +234,12 @@ function lanePoint(minD, maxD, cx, cy) {
 function spawnTraffic() { const p = lanePoint(560, 1250, P.x, P.y); if (!p) return null; const c = mkCar(p.x, p.y, DIRA[p.d], 'civ'); c.ai = 'traffic'; c.dir = p.d; c.v = 150; cars.push(c); return c; }
 function spawnPolice() { const p = lanePoint(650, 1100, P.x, P.y); if (!p) return; const c = mkCar(p.x, p.y, Math.atan2(P.y - p.y, P.x - p.x), 'police'); c.ai = 'police'; c.v = 150; if (carHits(c.x, c.y, c.a)) c.a = DIRA[p.d]; cars.push(c); }
 function spawnPed() { for (let k = 0; k < 20; k++) { const x = P.x + rnd(-1000, 1000), y = P.y + rnd(-1000, 1000); if (tileAt(x, y) !== WALK) continue; const d = dist(x, y, P.x, P.y); if (d < 420 || d > 1050) continue; peds.push(mkPed(x, y)); return; } }
+// base militaire : 3 véhicules de l'armée à voler (4 étoiles immédiates)
+function spawnArmyBase() {
+  world.armyBase = null; if (!world.region || /moon|mars/.test(world.region.id)) return;
+  const b = randWalk(1300, 2300, P.x, P.y); world.armyBase = { x: b.x, y: b.y };
+  ['army_jeep', 'army_truck', 'army_apc'].forEach((t, i) => { const p = freeNear(b.x + (i - 1) * 70, b.y, 90); for (const a of DIRA) { if (!carHits(p.x, p.y, a)) { cars.push(mkCar(p.x, p.y, a, 'army', t)); break; } } });
+}
 function parkedCar(x, y) { for (const a of DIRA) { const c = mkCar(x, y, a, 'civ'); if (!carHits(x, y, a)) { cars.push(c); return c; } } return null; }
 
 // ---------- voitures ----------
@@ -245,7 +252,7 @@ function drive(c, dt, thr, st, hb) {
 }
 function driveInner(c, dt, thr, st, hb) {
   const boost = c === P.car && (P.nitro > 0 || (P.turboT || 0) > 0);
-  const maxV = (c.kind === 'police' ? 520 + lvl() * 2 : (c === P.car ? 520 : 380)) * (boost ? 1.5 : 1);
+  const maxV = (c.kind === 'army' && ARMY[c.type] ? ARMY[c.type].v : c.kind === 'police' ? 520 + lvl() * 2 : (c === P.car ? 520 : 380)) * (boost ? 1.5 : 1);
   if (boost) thr = 1;
   if (thr > 0) c.v += thr * (boost ? 900 : 440) * dt * (c.v < 0 ? 2.2 : 1); else if (thr < 0) c.v += thr * (c.v > 0 ? 760 : 320) * dt;
   c.v -= c.v * (S.rain ? .7 : .85) * dt; if (thr === 0 && Math.abs(c.v) < 10) c.v = 0;
@@ -279,7 +286,7 @@ function moveCar(c, dt) {
 }
 const skids = []; let skidI = 0;
 function skid(x, y, a) { const last = skids[(skidI + 399) % 400]; if (last && Math.abs(last.x - x) + Math.abs(last.y - y) < 6) return; skids[skidI] = { x, y, a, t: S.time }; skidI = (skidI + 1) % 400; }
-function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) { if (c.burn > 0) return; if (c === P.car && S.mode === 'play') { c.hp = 0; c.burn = 3.5; toast('Ta voiture prend feu : sors vite (E) !'); vib(200); return; } if (n < 40) { c.hp = 0; c.burn = 2.5; c.panic = 3; return; } explode(c); } }
+function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; if (c.kind === 'army' && ARMY[c.type]) n *= ARMY[c.type].armor; c.hp -= n; if (c.hp <= 0) { if (c.burn > 0) return; if (c === P.car && S.mode === 'play') { c.hp = 0; c.burn = 3.5; toast('Ta voiture prend feu : sors vite (E) !'); vib(200); return; } if (n < 40) { c.hp = 0; c.burn = 2.5; c.panic = 3; return; } explode(c); } }
 function explosionAt(x, y, r, dmg, byPlayer) {
   if (byPlayer && save.slowmo !== false && dist(x, y, P.x, P.y) < 520 && (S.lastSlow == null ? -99 : S.lastSlow) + 6 < S.time) slowMo(1.1, .3);
   booms.push({ x, y, r, t: 0, seed: Math.random() * 100 }); if (booms.length > 8) booms.shift();
@@ -607,6 +614,7 @@ function toggleCar() {
   if (!best) { msg('Aucune voiture à portée'); return; }
   if (best.ai === 'traffic' || best.ai === 'convoy') { const d = mkPed(best.x - Math.sin(best.a) * 24, best.y + Math.cos(best.a) * 24); d.state = 'flee'; d.t = 6; peds.push(d); if (Math.random() < .3) addHeat(.4); }
   if (best.kind === 'police') { S.heat = Math.max(S.heat, 2); S.unseen = 0; toast('Voiture de police volée !'); }
+  if (best.kind === 'army' && !best.stolen) { best.stolen = true; S.heat = Math.max(S.heat, 4); S.unseen = 0; showBanner('VÉHICULE MILITAIRE'); toast(ARMY[best.type].name + ' volé : l’armée et la police sont sur tes traces !'); track('armyStolen'); vib(250); }
   if (best !== P.lastCar) track('carsStolen'); P.lastCar = best;
   best.ai = null; best.v = Math.min(best.v, 40); P.car = best; au('door'); radioOn();
 }
@@ -902,7 +910,7 @@ function startLevel(n, from = 0, free = false) {
   for (let k = 0; k < 3; k++) { const p = freeNear(P.x + 60, P.y + 40, 80); parkedCar(p.x, p.y); }
   for (let i = 0; i < 25; i++) spawnPed();
   for (let i = 0; i < 14; i++) spawnTraffic();
-  spawnBoats(); spawnAnimals();
+  spawnBoats(); spawnAnimals(); spawnArmyBase();
   L = { n, free, jobs: 0, def: free ? { t: 'Balade libre', s: '', steps: [] } : D.LEVELS[n - 1], region, idx: from - 1, cp: from, earned: 0, time: 0, step: null, kos: 0 };
   S.tod = ((n * .23) % 1) * .6 + .7; if (S.tod > 1) S.tod -= 1;
   S.rain = n > 1 && !region.space && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25); S.o2 = 100; if (region.space) S.tod = .5;
@@ -1704,6 +1712,7 @@ function drawAerial() {
   for (const p of world.shops) dot(p.x, p.y, PL.shop, 5, 1);
   for (const p of world.tunnels) dot(p.x, p.y, PL.tunnel, 4.5, 1);
   for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 4, 1);
+  if (world.armyBase) { const ab = world.armyBase; g.fillStyle = '#8fae5a'; g.strokeStyle = '#0a0816'; g.lineWidth = 2 * dpr; g.fillRect(ab.x * k - 7 * dpr, ab.y * k - 7 * dpr, 14 * dpr, 14 * dpr); g.strokeRect(ab.x * k - 7 * dpr, ab.y * k - 7 * dpr, 14 * dpr, 14 * dpr); }
   for (const c of cars) if (c.kind === 'police' && c.ai === 'police') dot(c.x, c.y, PL.police, 5, 1);
   for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, PL.enemy, 4, 1);
   if (heli) dot(heli.x, heli.y, '#ffffff', 6, 1);
@@ -1719,6 +1728,7 @@ function drawMini(target) {
   const s = mini.width / W; mctx.drawImage(world.mm, 0, 0, mini.width, mini.height);
   const dot = (x, y, c, r) => { mctx.fillStyle = c; mctx.beginPath(); mctx.arc(x * s, y * s, r, 0, TAU); mctx.fill(); };
   for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 2.5);
+  if (world.armyBase) { const ab = world.armyBase; mctx.fillStyle = '#8fae5a'; mctx.fillRect(ab.x * s - 3.5, ab.y * s - 3.5, 7, 7); }
   const PL = pal();
   for (const p of world.shops) dot(p.x, p.y, PL.shop, 3);
   for (const p of world.tunnels) dot(p.x, p.y, PL.tunnel, 2.5);
@@ -2391,14 +2401,14 @@ function makeCar3(c) {
   const wheels = (fx, rx, w = 22) => { add(bx(9, 9, w), tyre, fx, 5, 0); add(bx(9, 9, w), tyre, rx, 5, 0); };
   const lights = (fx, rx, y = 10, wd = 15) => { add(bx(1, 3, wd), mat('#fff6cc', '#fff2b0'), fx, y, 0); add(bx(1, 3, wd), mat('#ff2e4d', '#ff2e4d'), rx, y, 0); };
   let front = 21, roofY = 25.5;
-  const mk = { sedan: 'car_sedan', taxi: 'car_sedan', small: 'car_sedan', muscle: 'car_sports', convertible: 'car_sports', sports: 'car_sports', jeep: 'car_suv', pickup: 'car_suv', suv: 'car_suv', van: 'car_van' }[type], md = mk && qLevel !== 'low' && R3.models[mk];
+  const AM = R3.models || {}, mk = { sedan: 'car_sedan', taxi: 'car_sedan', small: 'car_sedan', muscle: 'car_sports', convertible: 'car_sports', sports: 'car_sports', jeep: 'car_suv', pickup: 'car_suv', suv: 'car_suv', van: 'car_van', army_jeep: AM.army_jeep ? 'army_jeep' : 'car_suv', army_truck: AM.army_truck ? 'army_truck' : 'car_van', army_apc: AM.army_apc ? 'army_apc' : 'car_van' }[type], md = mk && qLevel !== 'low' && R3.models[mk];
   const wheelsL = [];
   if (c.boat) { // bateau : coque, proue, cabine, pare-brise, liseré
     P2(bx(40, 6, 18), -2, 4, 0); const bow = add(new THREE.CylinderGeometry(0, 9, 14, 4, 1), mat(c.color), 23, 4, 0); bow.rotation.z = -PI / 2; bow.rotation.x = PI / 4; bow.scale.set(1, 1, .7); paint.push(bow);
     add(bx(44, 1.4, 18.6), mat('#1a1a22'), 0, 1.6, 0); add(bx(14, 7, 13), mat('#f4f4f4'), -6, 10.5, 0); add(bx(1.2, 5, 12), mat('#9fd6ff', '#203040'), 1.6, 11, 0);
     add(bx(10, 1, 15), mat('#6b4a2a'), -19, 7.4, 0); front = 26; roofY = 16;
   } else if (md) {
-    const sc = md.scene.clone(true), k = (type === 'van' ? 44 : type === 'small' ? 36 : 42) / md.size.x; sc.scale.setScalar(k); g.add(sc);
+    const sc = md.scene.clone(true), k = (type === 'army_truck' ? 62 : type === 'army_apc' ? 58 : type === 'army_jeep' ? 46 : type === 'van' ? 44 : type === 'small' ? 36 : 42) / md.size.x; sc.scale.setScalar(k); g.add(sc);
     sc.traverse(o => { if (o.isMesh && o.material && /paint/i.test(o.material.name)) paint.push(o); if (/^Wheel/i.test(o.name)) wheelsL.push(o); });
     for (const pm of paint) pm.material = pmat(c.color);
     front = md.size.x * k / 2; roofY = md.size.y * k + 1.5;
@@ -3026,7 +3036,7 @@ const SCREENS = {
   aerial: () => { const st = L && L.step, PL = pal(); return `<div class="aerial">
       <div class="aer-top"><div><p class="eyebrow">Vue aérienne · ${esc(TR(world.region.name || ''))}</p><h2>${st ? esc(st.label) : 'Carte'}</h2>${st ? `<p class="aer-obj">${esc(stepDesc(st))}</p>` : ''}</div><div class="aer-kpi"><span>Distance</span><b class="aer-dist">—</b></div></div>
       <div class="aer-map"><canvas id="aerialCv"></canvas></div>
-      <div class="aer-leg"><span><i style="background:#fff"></i>Toi</span><span><i style="background:#21e6ff"></i>Objectif</span><span><i style="background:#ffd23f"></i>Trajet GPS</span><span><i style="background:${PL.shop}"></i>Boutique</span><span><i style="background:${PL.tunnel}"></i>Tunnel</span><span><i style="background:${PL.police}"></i>Police</span><span><i style="background:${PL.enemy}"></i>Ennemi</span></div>
+      <div class="aer-leg"><span><i style="background:#fff"></i>Toi</span><span><i style="background:#21e6ff"></i>Objectif</span><span><i style="background:#ffd23f"></i>Trajet GPS</span><span><i style="background:${PL.shop}"></i>Boutique</span><span><i style="background:${PL.tunnel}"></i>Tunnel</span><span><i style="background:${PL.police}"></i>Police</span><span><i style="background:${PL.enemy}"></i>Ennemi</span><span><i style="background:#8fae5a;border-radius:2px"></i>Base militaire</span></div>
       <button class="btn primary" data-resume="1">Reprendre (M)</button>
     </div>`; },
   help: () => { const st = L.step, cost = 400 + lvl() * 40; return `<div class="wrap narrow center-col">
@@ -3078,7 +3088,7 @@ const SCREENS = {
     return `<div class="wrap narrow center-col" style="--acc:${r.accent}">
       <p class="eyebrow">Niveau ${d.n}</p><h2 class="title big fail">ÉCHEC</h2>
       <p class="lead">${esc(d.reason)}. L'argent gagné pendant la tentative est conservé (${fmt(d.earned)}).</p>
-      <div class="col">${d.cp ? `<button class="btn primary" data-start="${d.n}" data-from="${d.cp}">Reprendre à l'étape ${d.cp + 1}</button><button class="btn" data-start="${d.n}">Recommencer depuis le début</button>` : `<button class="btn primary" data-start="${d.n}">Réessayer</button>`}<button class="btn" data-go="shop" data-ret="brief:${d.n}">Boutique</button><button class="btn" data-go="map">Carte</button></div>
+      <div class="col">${d.cp ? `<button class="btn primary" data-start="${d.n}" data-from="${d.cp}">Reprendre à l'étape ${d.cp + 1}</button><button class="btn" data-start="${d.n}">Recommencer depuis le début</button>` : `<button class="btn primary" data-start="${d.n}">Réessayer</button>`}<button class="btn" data-free="${d.n}">Continuer dans la ville (balade libre)</button><button class="btn" data-go="shop" data-ret="brief:${d.n}">Boutique</button><button class="btn" data-go="map">Carte</button></div>
     </div>`;
   },
   unlock: ({ msg: m }) => {
