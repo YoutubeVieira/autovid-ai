@@ -1,0 +1,69 @@
+{
+  "title": "Over 60 and New to the Gym? Start With These 5 Gentle Moves",
+  "slug": "gym-over-60",
+  "description": "Nervous about the gym after 60? This beginner routine for women walks you through five simple moves: sit-to-stand, wall push-ups, the seated row, the leg press and a balance hold. Twice a week, about twenty-five minutes.\n\nThis video is general information, not medical advice. Check with your doctor before starting a new exercise program.\n\nSource: CDC, Physical Activity Guidelines for Adults 65 and Older, https://www.cdc.gov/physical-activity-basics/guidelines/older-adults.html",
+  "tags": ["exercise for women over 60", "senior fitness", "gym for beginners over 60", "strength training for seniors", "senior workout", "balance exercises for seniors"],
+  "fallback_queries": ["senior woman exercise", "older woman gym", "senior fitness"],
+  "scenes": [
+    {
+      "chapter": "Intro",
+      "text": "If you're over sixty and the gym makes you a little nervous, you're not alone. Plenty of women feel the same way. You don't know where to start, and you don't want to look lost. So let's fix that today. Five moves and one simple plan. No personal trainer needed.",
+      "queries": ["senior woman gym", "older woman fitness smiling", "senior woman walking gym"]
+    },
+    {
+      "chapter": "Why strength matters",
+      "text": "Here's why it matters. The CDC recommends that adults sixty-five and older do muscle-strengthening work at least two days a week, plus about a hundred and fifty minutes of moderate activity, like brisk walking. Strong legs make the stairs easier. They also help you get up from the floor, or out of a low car seat.",
+      "queries": ["senior woman walking outdoors", "older woman climbing stairs", "senior woman brisk walk"]
+    },
+    {
+      "chapter": "Before you start",
+      "text": "One thing before we begin. If you have a heart condition, joint pain, or a recent surgery, talk to your doctor first. And at the gym, it's always fine to ask a staff member how a machine adjusts. That's what they're there for.",
+      "queries": ["senior woman doctor consultation", "gym trainer helping senior", "fitness instructor older woman"]
+    },
+    {
+      "chapter": "Warm-up",
+      "text": "Start with five minutes of easy walking on the treadmill. Hold the side rails if you like. Keep the speed low enough that you could chat with a friend.",
+      "queries": ["senior woman treadmill", "older woman treadmill walking", "treadmill walking"]
+    },
+    {
+      "chapter": "Move 1: Sit-to-stand",
+      "text": "Move one is the sit-to-stand. Grab a sturdy bench or chair. Sit near the edge with your feet flat, about hip-width apart. Lean forward a little and stand up, pushing through your heels. Then sit back down slowly, counting to three on the way down. Do eight to ten. Too hard? Put your hands on your thighs and help yourself up. Nobody's grading you.",
+      "queries": ["senior chair exercise", "older woman squat chair", "senior woman sit to stand"]
+    },
+    {
+      "chapter": "Move 2: Wall push-up",
+      "text": "Move two, the wall push-up. Stand an arm's length from a wall and place your hands on it at shoulder height. Bend your elbows and bring your chest toward the wall, then press back. Keep your body straight, like a plank leaning on the wall. Ten slow reps is a great start.",
+      "queries": ["wall push up", "senior woman push up", "older woman arm exercise"]
+    },
+    {
+      "chapter": "Move 3: Seated row",
+      "text": "Move three is the seated row machine. This one works your upper back and helps your posture. Pick a light weight, lighter than you think. Sit tall, pull the handles toward your belly and squeeze your shoulder blades together. Pause for a second. Then let the handles go forward with control. Aim for ten.",
+      "queries": ["seated row machine", "senior woman gym machine", "woman rowing machine gym"]
+    },
+    {
+      "chapter": "Move 4: Leg press",
+      "text": "Move four, the leg press. Set the seat so your knees are bent at about a right angle. Push the platform away until your legs are almost straight, but don't lock your knees. Then bring it back slowly. Start light here too. You can add weight in a week or two, once it feels easy.",
+      "queries": ["leg press machine", "senior woman leg exercise gym", "woman leg press"]
+    },
+    {
+      "chapter": "Move 5: Balance hold",
+      "text": "And move five is for balance. Stand next to something steady, like a counter or the rail of a machine. Hold on with one hand and lift one foot a few inches off the floor. Stay there for ten seconds and keep breathing. Switch sides. As it gets easier, hold on with just a fingertip.",
+      "queries": ["senior balance exercise", "older woman standing on one leg", "senior woman yoga balance"]
+    },
+    {
+      "chapter": "Your weekly plan",
+      "text": "So here's the plan. Twice a week, with a day off in between. Warm up, then go through all five moves once. When that feels comfortable, do the whole circuit a second time. Finish with a few minutes of gentle stretching. Your first session might take twenty-five minutes. That's plenty.",
+      "queries": ["senior woman stretching", "older woman stretching gym", "senior women fitness class"]
+    },
+    {
+      "chapter": "Soreness and pain",
+      "text": "A little soreness the next day is normal. Sharp pain is not. If something hurts, stop and try an easier version. And go easy on yourself. You don't need to be fast or strong to start. You just need to come back next week.",
+      "queries": ["senior woman resting water bottle", "older woman smiling after workout", "senior woman relaxing"]
+    },
+    {
+      "chapter": "Your turn",
+      "text": "If this helped, subscribe for a new routine every week. And tell me in the comments, which move are you trying first?",
+      "queries": ["happy senior woman", "senior women friends laughing", "older woman smiling"]
+    }
+  ]
+}
