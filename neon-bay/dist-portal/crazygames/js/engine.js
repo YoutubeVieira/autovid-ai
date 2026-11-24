@@ -1618,7 +1618,7 @@ function drawPerson(x, y, a, skin, shirt, step, glow, scale = 1) {
 }
 function bar(x, y, w, v, col) { ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(x - w / 2, y, w, 4); ctx.fillStyle = col; ctx.fillRect(x - w / 2, y, w * clamp(v, 0, 1), 4); }
 function render(dt) {
-  if (R3.ok && world) { render3D(dt); return; }
+  if (R3.ok && world) { render3D(dt); if (REC.on) recFrame(); return; }
   if (!world) { ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#0d0b1a'; ctx.fillRect(0, 0, VW, VH); return; }
   const tx = P.car ? P.car.x + Math.cos(P.car.a) * P.car.v * .35 : P.x, ty = P.car ? P.car.y + Math.sin(P.car.a) * P.car.v * .35 : P.y;
   const k = Math.min(1, dt * 4); cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k;
@@ -3049,7 +3049,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-clip="1">Clip vidéo 10 s</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
     </div>`,
   jail: () => { const j = save.jail; if (!j) return '<div class="wrap narrow center-col"><button class="btn primary" data-go="home">Retour</button></div>';
     const pct = Math.round(j.served / j.total * 100), lc = jailLawyerCost(), pok = jailParoleOk();
@@ -3218,6 +3218,34 @@ function takePhoto() {
     try { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'neon-bay.png'; document.body.appendChild(a); a.click(); a.remove(); flashNote('Photo enregistrée'); } catch (e) { flashNote('Photo impossible ici'); }
   }, 'image/png');
 }
+// clip vidéo de 10 s à partager (TikTok, Reels) : image du jeu + filigrane, enregistrée par MediaRecorder
+const REC = { on: false };
+function startClip() {
+  if (REC.on || !R3.ok || !window.MediaRecorder) { flashNote('Clip vidéo impossible sur cet appareil'); return; }
+  const src = $('game3d'), vert = VH > VW, w = vert ? 720 : 1280, h = vert ? 1280 : 720, cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+  const stream = cv.captureStream ? cv.captureStream(30) : null; if (!stream) { flashNote('Clip vidéo impossible sur cet appareil'); return; }
+  const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'], type = types.find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)) || '';
+  let mr; try { mr = new MediaRecorder(stream, type ? { mimeType: type, videoBitsPerSecond: 6e6 } : undefined); } catch (e) { flashNote('Clip vidéo impossible sur cet appareil'); return; }
+  const chunks = []; mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = () => { REC.on = false; document.body.classList.remove('recording'); const ext = (mr.mimeType || type).includes('mp4') ? 'mp4' : 'webm', blob = new Blob(chunks, { type: mr.mimeType || type || 'video/webm' }); shareClip(blob, ext); };
+  Object.assign(REC, { on: true, cv, g: cv.getContext('2d'), src, mr, t0: performance.now() }); document.body.classList.add('recording');
+  mr.start(500); setTimeout(() => { try { mr.state !== 'inactive' && mr.stop(); } catch (e) {} }, 10000);
+  if (S.mode === 'pause') resumeGame(); toast('Enregistrement du clip : 10 secondes'); track('clips');
+}
+function recFrame() {
+  const { g, cv, src } = REC, w = cv.width, h = cv.height, sr = src.width / src.height, dr = w / h;
+  let sw = src.width, sh = src.height, sx = 0, sy = 0; if (sr > dr) { sw = sh * dr; sx = (src.width - sw) / 2; } else { sh = sw / dr; sy = (src.height - sh) / 2; }
+  try { g.drawImage(src, sx, sy, sw, sh, 0, 0, w, h); } catch (e) { return; }
+  const fs = Math.round(Math.min(w, h) * .06); g.font = `900 ${fs}px Bungee, "Arial Black", sans-serif`; g.textAlign = 'right'; g.shadowColor = '#ff2e93'; g.shadowBlur = fs * .5; g.fillStyle = '#ffffff';
+  g.fillText('NÉON BAY', w - fs * .5, h - fs * (h > w ? 4.2 : .8)); g.shadowBlur = 0; g.font = `700 ${Math.round(fs * .42)}px "Chakra Petch", sans-serif`; g.fillStyle = '#ffb627'; g.fillText(TR('Joue gratuitement'), w - fs * .5, h - fs * (h > w ? 3.6 : .25));
+  const left = Math.max(0, 10 - (performance.now() - REC.t0) / 1000); g.fillStyle = 'rgba(0,0,0,0)';
+  const rc = document.getElementById('recDot'); if (rc) rc.textContent = 'REC ' + Math.ceil(left) + ' s';
+}
+async function shareClip(blob, ext) {
+  const file = new File([blob], 'neon-bay-clip.' + ext, { type: blob.type });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Néon Bay', text: TR('Regarde ma partie de Néon Bay !') }); return; } } catch (e) {}
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'neon-bay-clip.' + ext; document.body.appendChild(a); a.click(); a.remove(); flashNote('Clip enregistré'); } catch (e) { flashNote('Clip impossible ici'); }
+}
 function canFull() { return !!(document.fullscreenEnabled || document.webkitFullscreenEnabled); }
 function toggleFull() {
   try {
@@ -3256,6 +3284,7 @@ screenEl.addEventListener('click', e => {
   if (AU) { AU.init(); au('click'); if (!L || S.mode === 'menu') au('setMusic', 'menu'); }
   if (ds.lang) { I18.set(ds.lang); save.lang = ds.lang; persist(); last.ln = last.sn = last.sd = last.m = last.w = last.inv = null; for (const k in last) last[k] = undefined; if (R3.ok) R3.world = null; I18.dom(document.getElementById('touch')); showScreen(S.screen); return; }
   if (ds.photo) { takePhoto(); return; }
+  if (ds.clip) { startClip(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
   if (ds.jail) { jailAct(ds.jail); return; }
