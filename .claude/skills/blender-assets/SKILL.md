@@ -22,6 +22,7 @@ python3 tools/blender/gen_human.py           # human_m human_f human_m2 human_f2
 python3 tools/blender/gen_weapons.py         # w_pistol w_uzi w_shotgun w_rifle w_sniper w_rocket
                                              # w_minigun w_lmg w_gl w_rail  (args : ids, ex. "pistol rail")
 python3 tools/blender/render_previews.py     # models/previews/<nom>.png pour chaque .glb
+python3 tools/blender/weapon_sheet.py        # planche des armes : tools/blender/previews/weapons_sheet.png
 python3 tools/blender/render_previews.py "human_m@AimRifle:0+w_rifle" human_f@face   # variantes
 python3 tools/blender/render_previews.py "human_m@Aim:0/handR+w_pistol" human_m@far  # main en gros plan, vue à 10 m
 node tools/blender/check_glb_three.js        # vérifie le chargement three.js r128 + contrats
@@ -48,7 +49,7 @@ au centre de l'objet.
 |---|---|---|---|
 | Voitures `car_*.glb` | **+X** | ~4,4 m de long (SUV 4,6, van 4,8) | matériaux `Paint` (carrosserie, recolorée par le jeu), `Glass`, `Tyre`, `Rim`, `LightFront` (émissif), `LightRear` (émissif), `Trim` ; roues = objets séparés `Wheel_FL`, `Wheel_FR`, `Wheel_RL`, `Wheel_RR`, origine au moyeu, sans rotation : l'essieu est l'axe local Z (latéral), donc faire rouler = `wheel.rotation.z -= v*dt/R` ; enfants de `Body` |
 | Humains `human_m/f/m2/f2.glb` | **+Z** (glTF) | m 1,80 m / f et f2 1,71 m au crâne (1,82 / 1,72 avec les cheveux) ; m2 1,765 m (1,79 avec la casquette), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` + doigts (v3) `Thumb.L/R Thumb2.L/R` (pouce, enfants de Hand) et `Fingers.L/R Fingers2.L/R` (4 doigts : phalange proximale puis moyenne+distale) ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips`, `EyeWhite`, jamais recolorés par le jeu ; + `Hat` casquette, **human_m2 seulement**, non recoloré par le jeu actuel) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` ; textures 512×512 sur `Skin Shirt Pants Shoes` (+`Hat`), normal maps sur `Shirt Pants` (+`Hat`) ; < 9 000 triangles et < 900 Ko |
-| Armes `w_<id>.glb` | canon **+X**, haut **+Y**, côté droit +Z | réelle : pistol 0,23 m, uzi 0,47, shotgun 1,04, rifle 0,94, sniper 1,25, rocket 1,13, minigun 1,01, lmg 1,06, gl 0,77, rail 1,02 | origine = centre de la poignée (main droite ; poignée arrière pour rocket/minigun) ; matériaux `Body` (couleur principale, recolorée pour les peintures), `Metal`, `Grip`, `Glow` (émissif : points de visée, LED, bobines du rail) sur toutes, `Lens` (optiques) sur rifle, sniper, rocket, gl, rail ; un seul maillage, pas d'animation |
+| Armes `w_<id>.glb` | canon **+X**, haut **+Y**, côté droit +Z | réelle : pistol 0,23 m, uzi 0,47, shotgun 1,04, rifle 0,94, sniper 1,25, rocket 1,13, minigun 1,01, lmg 1,06, gl 0,77, rail 1,02 | origine = centre de la poignée (main droite ; poignée arrière pour rocket/minigun) ; matériaux `Body` (couleur principale, recolorée pour les peintures : le jeu recolore tout matériau dont le nom contient « body », n'en créer aucun autre), `Metal`, `Grip`, `Glow` (émissif : points de visée, LED, bobines du rail) sur toutes, `Lens` (optiques) sur rifle, sniper, rocket, gl, rail ; v3 ajoute `MetalEdge` (usure claire des arêtes) et `Polymer` ; UV + textures 256 px ; un seul maillage, pas d'animation |
 | Lampadaire `lamp.glb` | bras vers +Z | 6 m | matériau émissif `Bulb` (+ `Metal`) |
 | Autres props | façade vers +Z | réelle | `palm` (Trunk/Leaves/Coconut), `hydrant` (HydrantPaint/Metal), `bench` (Wood/Metal), `traffic_light` (Metal/Housing/LightRed/LightYellow/LightGreen) |
 
@@ -124,9 +125,9 @@ si l'arme est mise à l'échelle séparément.
 |---|---|---|
 | Voiture (carrosserie + 4 roues) | ≤ ~4 000 | 3 600–3 800 |
 | Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 876 Ko (dont ~210 Ko de textures) |
-| Arme | < 2 500 et < 120 Ko | 900–2 050 tris, 39–75 Ko |
+| Arme (v3) | pistol ≤ 4 000, fusils ≤ 9 000, lourdes (rocket, minigun, lmg, gl) ≤ 12 000 ; ≤ 600 Ko | 3 660–9 010 tris, 250–450 Ko (≈ 60 Ko de textures + ~50 o/tri) |
 | Prop | ≤ ~1 500 | 450–1 100 |
-| Total de tous les .glb | ≤ ~4,5 Mo | ~4,3 Mo |
+| Total de tous les .glb | ~8,4 Mo depuis les armes v3 (armes : 3,75 Mo) | à surveiller (chargement mobile) |
 
 Leviers : voitures → nombre de sections du loft (`build_body`), segments des roues (`lathe(...,
 14)`), biseaux des petites pièces ; humains → budgets par morceau (`budget = {"Shirt": ...}`
@@ -174,10 +175,22 @@ taille d'arme) est dépassé.
   douces) ; cheveux/yeux → `Head` (cheveux longs : mélange Neck/Chest sous la nuque), col →
   Chest/Neck seulement. Les animations sont des fonctions `t ∈ [0,1] → pose` (`idle_pose`,
   `walk_pose`, `run_pose`, `aim_pose`, `aim_rifle_pose`, `crouch_pose`, ...).
-- **Armes** (`gen_weapons.py`) : surtout des profils latéraux (x, z) extrudés en épaisseur
-  (`prism`), des tubes et tours le long de X (`tube_x`, `lathe_x`, `ring_x`), petits chanfreins
-  (modificateur Bevel appliqué) pour accrocher la lumière de loin ; `pistol_grip()` renvoie le
-  centre de la poignée et `finish_weapon()` y place l'origine. Designs génériques inventés.
+- **Armes** (`gen_weapons.py`, version 3 « vitrine ») : profils latéraux extrudés (`prism`),
+  sections extrudées le long de X (`xsec`, `chamfer_sec`), tubes/tours/anneaux (`tube_x`, `lathe_x`,
+  `ring_x`, `fluted_x`), **découpes booléennes** EXACT appliquées sans `bpy.ops` (`cut(obj, cutters,
+  pre=(largeur, seg))` : biseauter avant de découper coûte bien moins de triangles ; `slot_cutter`,
+  `cutter`, `cutter_prism`, `cutter_cyl`, `ring_cutter`), puis Bevel dont les nouvelles faces prennent
+  `MetalEdge` (`edge=True`, défaut pour `Metal`). Kits : `picatinny`, `screw`/`screw_z`, `pin_y`,
+  `sling_loop`, `knurl_*`, `trigger_group`, `pistol_grip` (même centre qu'en v2 : ne pas changer ses
+  arguments, sinon la prise de main bouge), `muzzle_brake`, `slotted_handguard`, `red_dot`, `scope`,
+  `ring_mount`, `flip_sight`, `curved_mag`. `finish_weapon()` place l'origine sur la poignée, lisse et
+  pose des UV en projection cubique à l'échelle (`WEAPON_TILE`). Textures : `nb_textures.weapon_textures()`
+  (`poly`, `poly_n`, `checker_n`, `steel`). `NB_DEBUG=1` affiche les pièces les plus lourdes ; le
+  script affiche tris/budget (`BUDGET`). Pièges : un `slot_cutter` plus haut que long était dégénéré
+  (corrigé) ; des découpeurs qui se chevauchent exigent `use_self` (activé) ; les grosses découpes +
+  biseau après coup explosent le budget. Planche : `python3 tools/blender/weapon_sheet.py [ids]` →
+  `tools/blender/previews/weapons_sheet.png` (profil orthographique + 3/4, fond sombre ; regarder
+  la planche avec Read et chercher les pièces flottantes). Designs génériques inventés, sans marquage.
 - **Props** (`gen_props.py`) : tours (`lathe_obj`), tubes balayés (`tube`), boîtes biseautées.
 
 ## Ajouter un nouvel asset
