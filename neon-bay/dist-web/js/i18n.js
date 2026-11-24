@@ -145,6 +145,7 @@ window.NB_I18N = (() => {
     'Vue aérienne : où tu es, où tu vas': { en: 'Aerial view: where you are, where you are going', es: 'Vista aérea: dónde estás y adónde vas', pt: 'Visão aérea: onde você está e para onde vai' },
     'Vue aérienne (M ou appui sur la mini-carte) : toute la ville, ta position et le trajet.': { en: 'Aerial view (M or tap the mini-map): the whole city, your position and the route.', es: 'Vista aérea (M o toca el minimapa): toda la ciudad, tu posición y la ruta.', pt: 'Visão aérea (M ou toque no minimapa): a cidade inteira, sua posição e a rota.' },
     'Vue aérienne (M)': { en: 'Aerial view (M)', es: 'Vista aérea (M)', pt: 'Visão aérea (M)' },
+    'Ta voiture prend feu : sors vite (E) !': { en: 'Your car is on fire: get out now (E)!', es: '¡Tu coche está ardiendo: sal ya (E)!', pt: 'Seu carro está pegando fogo: saia já (E)!' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },

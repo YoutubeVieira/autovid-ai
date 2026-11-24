@@ -20,7 +20,7 @@ const outDir = path.join(root, 'reports', 'bots'); fs.mkdirSync(outDir, { recurs
       const page = await ctx.newPage(); const errs = [];
       page.on('pageerror', e => errs.push(e.message));
       await page.addInitScript(() => { try { localStorage.clear(); localStorage.setItem('neonbay.save.v2', JSON.stringify({ money: 500, owned: { pistol: true }, weapon: 'pistol', armor: 0, medkits: 2, nitro: 0, perks: {}, done: {}, maxLevel: 30, premium: true, seenOpen: 1, voice: false })); localStorage.setItem('neonbay.audio', JSON.stringify({ sfx: false, music: false })); } catch (e) {} });
-      await page.goto('file://' + path.join(root, 'index.html')); await page.waitForTimeout(1500);
+      await page.goto('file://' + path.join(root, 'index.html'), { timeout: 180000 }); await page.waitForTimeout(1500);
       await page.addScriptTag({ path: path.join(__dirname, 'bot.js') });
       await page.evaluate(() => { window.__nb.S.manual = true; });
       await page.exposeFunction('nbLog', s => process.stdout.write(s + '\n'));

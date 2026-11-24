@@ -6364,6 +6364,7 @@ window.NB_I18N = (() => {
     'Vue aérienne : où tu es, où tu vas': { en: 'Aerial view: where you are, where you are going', es: 'Vista aérea: dónde estás y adónde vas', pt: 'Visão aérea: onde você está e para onde vai' },
     'Vue aérienne (M ou appui sur la mini-carte) : toute la ville, ta position et le trajet.': { en: 'Aerial view (M or tap the mini-map): the whole city, your position and the route.', es: 'Vista aérea (M o toca el minimapa): toda la ciudad, tu posición y la ruta.', pt: 'Visão aérea (M ou toque no minimapa): a cidade inteira, sua posição e a rota.' },
     'Vue aérienne (M)': { en: 'Aerial view (M)', es: 'Vista aérea (M)', pt: 'Visão aérea (M)' },
+    'Ta voiture prend feu : sors vite (E) !': { en: 'Your car is on fire: get out now (E)!', es: '¡Tu coche está ardiendo: sal ya (E)!', pt: 'Seu carro está pegando fogo: saia já (E)!' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
@@ -7278,7 +7279,7 @@ function moveCar(c, dt) {
 }
 const skids = []; let skidI = 0;
 function skid(x, y, a) { const last = skids[(skidI + 399) % 400]; if (last && Math.abs(last.x - x) + Math.abs(last.y - y) < 6) return; skids[skidI] = { x, y, a, t: S.time }; skidI = (skidI + 1) % 400; }
-function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) explode(c); }
+function damageCar(c, n) { if (c.wreck) return; if (c === P.car && save.perks.carArmor) n *= .5; c.hp -= n; if (c.hp <= 0) { if (c.burn > 0) return; if (c === P.car && S.mode === 'play') { c.hp = 0; c.burn = 3.5; toast('Ta voiture prend feu : sors vite (E) !'); vib(200); return; } if (n < 40) { c.hp = 0; c.burn = 2.5; c.panic = 3; return; } explode(c); } }
 function explosionAt(x, y, r, dmg, byPlayer) {
   if (byPlayer && save.slowmo !== false && dist(x, y, P.x, P.y) < 520 && (S.lastSlow == null ? -99 : S.lastSlow) + 6 < S.time) slowMo(1.1, .3);
   booms.push({ x, y, r, t: 0, seed: Math.random() * 100 }); if (booms.length > 8) booms.shift();
@@ -7290,12 +7291,12 @@ function explosionAt(x, y, r, dmg, byPlayer) {
   for (const e of enemies) if (e.hp > 0 && dist(e.x, e.y, x, y) < r) hitEnemy(e, dmg);
   for (const o of cars) if (!o.wreck && dist(o.x, o.y, x, y) < r) setTimeout(() => damageCar(o, dmg * .7), 100);
   if (vip && !vip.inCar && vip.hp > 0 && dist(vip.x, vip.y, x, y) < r) hurtVip(dmg * .5);
-  if (!P.car && dist(P.x, P.y, x, y) < r) hurt(dmg * .5);
+  if (!P.car && dist(P.x, P.y, x, y) < r) hurt(dmg * .5 * ez(), 'explosion');
 }
 function explode(c) {
   c.wreck = true; c.v = 0; c.ai = null; c.hp = 0; S.flash = { x: c.x, y: c.y, i: 6 }; S.debris = (S.debris || []).concat([{ x: c.x, y: c.y, col: c.color }]); if (S.mode === 'play' && dist(c.x, c.y, P.x, P.y) < 700) track('explosions');
   const wasPlayer = c === P.car;
-  if (wasPlayer) { radioOff(); P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30); toast('Voiture détruite !'); }
+  if (wasPlayer) { radioOff(); P.car = null; P.x = c.x + 30; P.y = c.y; if (solid(P.x, P.y)) P.x = c.x - 30; hurt(30 * ez(), 'carboom'); toast('Voiture détruite !'); }
   if (vip && vip.inCar === c) { vip.inCar = null; vip.x = c.x; vip.y = c.y + 26; hurtVip(30); }
   if (!wasPlayer && S.mode === 'play' && dist(c.x, c.y, P.x, P.y) < 520 && S.time - (P.lastShot || -9) < 2 && (S.lastSlow == null ? -99 : S.lastSlow) + 6 < S.time) slowMo(1.2, .28);
   explosionAt(c.x, c.y, 85, 45, false);
@@ -7383,7 +7384,7 @@ function updGang(c, dt) {
   c.cd -= dt;
   if (c.cd <= 0 && d < 330 && los(c.x, c.y, tx, ty)) {
     const a = Math.atan2(ty - c.y, tx - c.x) + rnd(-.18, .18), dmg = 4 + lvl() * .3;
-    bullets.push({ x: c.x + Math.cos(a) * 24, y: c.y + Math.sin(a) * 24, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, life: .8, dmg, from: 'enemy' });
+    bullets.push({ x: c.x + Math.cos(a) * 24, y: c.y + Math.sin(a) * 24, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, life: .8, dmg, from: 'enemy', src: 'gangcar' });
     { const [pn, vl] = spatial(c.x, c.y); au('shot', 'enemy', pn, vl * .8); }
     c.cd = Math.max(.45, 1 - lvl() * .015) * rnd(.7, 1.3);
   }
@@ -7392,7 +7393,7 @@ function updGang(c, dt) {
 let heli = null;
 function updHeli(dt) {
   S.heliCd = (S.heliCd || 0) - dt;
-  if (!heli && stars() >= 4 && S.heliCd <= 0) { const a = rnd(TAU); heli = { x: P.x + Math.cos(a) * 1000, y: P.y + Math.sin(a) * 1000, a: 0, hp: 300 + lvl() * 10, max: 300 + lvl() * 10, cd: 2, t: rnd(6), leave: 0 }; toast('Hélicoptère de police !'); if (L && !L.heliCine && save.cineInGame !== false) { L.heliCine = 1; S.cine = { type: 'focus', t: 0, dur: 2.4, focus: heli, h: 90, dist: 340 }; showCine('Renforts', 'Hélicoptère de police'); } }
+  if (!heli && stars() >= 4 && lvl() >= 3 && S.heliCd <= 0) { const a = rnd(TAU); heli = { x: P.x + Math.cos(a) * 1000, y: P.y + Math.sin(a) * 1000, a: 0, hp: 300 + lvl() * 10, max: 300 + lvl() * 10, cd: 2, t: rnd(6), leave: 0 }; toast('Hélicoptère de police !'); if (L && !L.heliCine && save.cineInGame !== false) { L.heliCine = 1; S.cine = { type: 'focus', t: 0, dur: 2.4, focus: heli, h: 90, dist: 340 }; showCine('Renforts', 'Hélicoptère de police'); } }
   if (!heli) return;
   const h = heli; h.t += dt;
   if (stars() < 4) h.leave += dt;
@@ -7402,7 +7403,7 @@ function updHeli(dt) {
   const sp = Math.min(320, dist(h.x, h.y, tx, ty) * 1.5); h.x += Math.cos(h.a) * sp * dt; h.y += Math.sin(h.a) * sp * dt;
   h.cd -= dt;
   if (!h.leave && h.cd <= 0 && dist(h.x, h.y, P.x, P.y) < 420) {
-    for (let k = 0; k < 3; k++) { const a = Math.atan2(P.y - h.y, P.x - h.x) + rnd(-.15, .15); bullets.push({ x: h.x, y: h.y, vx: Math.cos(a) * 600, vy: Math.sin(a) * 600, life: .9, dmg: 3 + lvl() * .2, from: 'enemy', air: true }); }
+    for (let k = 0; k < 3; k++) { const a = Math.atan2(P.y - h.y, P.x - h.x) + rnd(-.15, .15); bullets.push({ x: h.x, y: h.y, vx: Math.cos(a) * 600, vy: Math.sin(a) * 600, life: .9, dmg: 3 + lvl() * .2, from: 'enemy', air: true, src: 'heli' }); }
     au('shot', 'uzi', 0, .7); h.cd = Math.max(1, 2.2 - lvl() * .03);
   }
 }
@@ -7528,7 +7529,7 @@ function updEnemy(e, dt) {
     const dmg = (4 + n * .35) * (e.boss ? 1.4 : 1) * (1 - .15 * assist()) * ez();
     const shots = e.boss && n >= 15 ? 3 : 1;
     { const [pn, vl] = spatial(e.x, e.y); if (vl > .05) au('shot', 'enemy', pn, vl * .8); }
-    for (let k = 0; k < shots; k++) { const aa = a + (k - (shots - 1) / 2) * .12; bullets.push({ x: e.x + Math.cos(aa) * 12, y: e.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 560, vy: Math.sin(aa) * 560, life: 1, dmg, from: 'enemy' }); }
+    for (let k = 0; k < shots; k++) { const aa = a + (k - (shots - 1) / 2) * .12; bullets.push({ x: e.x + Math.cos(aa) * 12, y: e.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 560, vy: Math.sin(aa) * 560, life: 1, dmg, from: 'enemy', src: e.cop ? 'cop' : e.boss ? 'boss' : 'foot' }); }
     e.cd = Math.max(.8, 2.4 - n * .04) * rnd(.75, 1.35) * (e.boss ? .6 : 1) / ez();
   }
 }
@@ -7540,10 +7541,10 @@ function movePlayer(vx, vy) {
 function moveBody(o, vx, vy) { if (!solid(o.x + vx + Math.sign(vx) * 8, o.y)) o.x += vx; if (!solid(o.x, o.y + vy + Math.sign(vy) * 8)) o.y += vy; }
 
 // ---------- joueur ----------
-function hurt(n) {
+function hurt(n, tag) {
   if (S.dead > 0 || S.mode !== 'play') return;
   n *= dif().dmg * (1 - .05 * trainLv('str'));
-  if (S.bot && S.dmgLog) { const f = (new Error().stack || '').split('\n')[2] || ''; const k = (f.match(/at (\w+)/) || [])[1] || '?'; S.dmgLog[k] = (S.dmgLog[k] || 0) + n; }
+  if (S.bot && S.dmgLog) { const f = (new Error().stack || '').split('\n')[2] || ''; const k = tag || (f.match(/at (\w+)/) || [])[1] || '?'; S.dmgLog[k] = (S.dmgLog[k] || 0) + n; }
   if (P.armor > 0) { const a = Math.min(P.armor, n * .7); P.armor -= a; n -= a; }
   S.hp -= n; P.hitT = S.time; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
@@ -8347,6 +8348,7 @@ function update(dt) {
   }
   for (const c of cars) {
     if (c === P.car || c.wreck) { if (c.wreck && Math.random() < dt * 3) puff(c.x, c.y, '#2d283f', 1.4); continue; }
+    if (c.burn > 0 && !c.boat) { drive(c, dt, 0, 0, true); continue; }
     if (c.boat) updBoat(c, dt); else if (c.ai === 'traffic' || c.ai === 'convoy') updTraffic(c, dt); else if (c.ai === 'gang') updGang(c, dt); else if (c.ai === 'block') drive(c, dt, 0, 0, true); else if (c.kind === 'police' && c.ai) updPolice(c, dt); else drive(c, dt, 0, 0, false);
     if (c.hp < 35 && Math.random() < dt * 6) puff(c.x + Math.cos(c.a) * 14, c.y + Math.sin(c.a) * 14, '#4a4560', 1);
   }
@@ -8370,12 +8372,14 @@ function update(dt) {
       a.v *= .7; b.v *= .7;
     }
   }
+  // voiture en feu : quelques secondes pour sortir avant l'explosion
+  for (const c of cars) if (c.burn > 0 && !c.wreck) { c.burn -= dt; if (Math.random() < dt * 14) puff(c.x + rnd(-14, 14), c.y + rnd(-10, 10), Math.random() < .5 ? '#ff6b3d' : '#ffb627', 1.2); if (c.burn <= 0) { c.burn = 0; explode(c); } }
   for (const c of cars) {
     const sp = Math.abs(c.v); if (sp < 55 || c.wreck) continue;
     for (const p of peds) if (p.state !== 'ko' && dist(c.x, c.y, p.x, p.y) < 20) koPed(p, c === P.car);
     for (const e of enemies) if (e.hp > 0 && dist(c.x, c.y, e.x, e.y) < 22) { hitEnemy(e, sp * .5); }
     if (vip && vip.hp > 0 && !vip.inCar && c !== P.car && dist(c.x, c.y, vip.x, vip.y) < 20) hurtVip(sp * .05);
-    if (!P.car && S.dead <= 0 && dist(c.x, c.y, P.x, P.y) < 22 && P.hurt <= 0) { hurt(sp * .06); P.hurt = .6; const a = Math.atan2(P.y - c.y, P.x - c.x); moveBody(P, Math.cos(a) * 30, Math.sin(a) * 30); }
+    if (!P.car && S.dead <= 0 && dist(c.x, c.y, P.x, P.y) < 22 && P.hurt <= 0) { hurt(sp * .06 * (c === P.car ? 1 : ez()), 'carhit'); P.hurt = .6; const a = Math.atan2(P.y - c.y, P.x - c.x); moveBody(P, Math.cos(a) * 30, Math.sin(a) * 30); }
   }
   P.hurt -= dt; updLock();
   if (P.reload > 0) { P.reload -= dt; if (P.reload <= 0) finishReload(); }
@@ -8401,7 +8405,7 @@ function update(dt) {
       else if (b.life <= 0 && b.explosive) explosionAt(b.x, b.y, 95, b.dmg, true);
     } else {
       if (P.car && dist(b.x, b.y, P.car.x, P.car.y) < 20) { damageCar(P.car, b.dmg * .6); b.life = 0; sparks(b.x, b.y, 3); continue; }
-      if (!P.car && dist(b.x, b.y, P.x, P.y) < 12) { hurt(b.dmg); b.life = 0; continue; }
+      if (!P.car && dist(b.x, b.y, P.x, P.y) < 12) { hurt(b.dmg, 'b:' + (b.src || '?')); b.life = 0; continue; }
       if (vip && vip.hp > 0 && !vip.inCar && dist(b.x, b.y, vip.x, vip.y) < 12) { hurtVip(b.dmg * .8); b.life = 0; continue; }
       for (const p of peds) if (p.state !== 'ko' && dist(b.x, b.y, p.x, p.y) < 10) { koPed(p, false); b.life = 0; break; }
     }

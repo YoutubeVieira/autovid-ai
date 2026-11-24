@@ -106,6 +106,8 @@
       // éviter l'arrestation : ne jamais rester immobile au contact d'un policier
       if (nb.stars() > 0) { const cop = nb.cars.filter(c => c.kind === 'police' && c.ai === 'police' && !c.wreck).sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0];
         if (cop && (S.bust > .25 || (P.car && dist(cop.x, cop.y, P.x, P.y) < 70 && Math.abs(P.car.v) < 40))) { mem.flee = 1.0; mem.fleeA = ang(cop.x, cop.y, P.x, P.y); } }
+      { const fire = nb.cars.find(c => c.burn > 0 && c !== P.car && !c.wreck && dist(c.x, c.y, P.x, P.y) < 130); if (fire && !P.car) { mem.flee = .8; mem.fleeA = ang(fire.x, fire.y, P.x, P.y); } }
+      if (P.car && P.car.burn > 0) { nb.toggleCar(); mem.flee = 1.2; mem.fleeA = rnd(0, 6.28); return; } // voiture en feu : on sort comme un joueur
       if (P.car && Math.abs(P.car.v) < 35 && S.bust > .7) { nb.toggleCar(); mem.fightCops = 3; return; } // coincé par la police : sortir et riposter
       if (mem.fightCops > 0 && !P.car) { mem.fightCops -= DT; const cop = nb.cars.filter(c => c.kind === 'police' && c.ai && !c.wreck).sort((a, b) => dist(a.x, a.y, P.x, P.y) - dist(b.x, b.y, P.x, P.y))[0];
         if (cop) { save.weapon = bestWeapon(); B.aimA = ang(P.x, P.y, cop.x, cop.y) + rnd(-profile.aimErr, profile.aimErr); B.shoot = true; const a = ang(cop.x, cop.y, P.x, P.y); B.mx = Math.cos(a); B.my = Math.sin(a); B.run = true; return; } }
