@@ -291,16 +291,21 @@ body.slowmo::before,body.slowmo::after{height:8vh}
 #objArrow i::before{content:"";position:absolute;left:8px;top:5px;border-left:22px solid #ffd23f;border-top:12px solid transparent;border-bottom:12px solid transparent;filter:drop-shadow(0 0 6px rgba(255,210,63,.9))}
 #objArrow b{position:absolute;left:-40px;top:20px;width:80px;text-align:center;font:700 12px var(--display,sans-serif);color:#ffd23f;text-shadow:0 1px 3px #000}
 /* bouton d'aide sur l'objectif */
-.hudhelp{position:fixed;z-index:7;top:calc(12px + env(safe-area-inset-top,0px));left:calc(50% + min(210px,calc(50vw - 200px)) + 8px);width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(10,8,22,.75);color:var(--cyan);font:700 18px var(--display,sans-serif);display:none;cursor:pointer}
+.hudhelp{position:fixed;z-index:7;top:calc(12px + env(safe-area-inset-top,0px));left:calc(50% + min(210px,calc(50vw - 200px)) + 8px);width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgba(10,8,22,.75);color:var(--cyan);font:700 18px var(--display,sans-serif);display:none;cursor:pointer}
 body.playing .hudhelp{display:block}body.cine .hudhelp{display:none}
-@media (max-width:760px){.hudhelp{left:auto;right:calc(70px + env(safe-area-inset-right,0px));top:calc(8px + env(safe-area-inset-top,0px));width:32px;height:32px}}
+@media (max-width:760px),(max-height:500px){.hudhelp{left:auto;right:calc(12px + env(safe-area-inset-right,0px));top:calc(var(--miniB,118px) + 8px);width:44px;height:44px}}
 /* jauge de turbo dans le bouton */
-#bNitro{background:linear-gradient(to top,rgba(157,123,255,.55) var(--e,100%),rgba(10,8,22,.55) var(--e,100%))}
+#bNitro{bottom:calc(262px + env(safe-area-inset-bottom,0px))!important;min-width:60px;min-height:44px;display:flex;align-items:center;justify-content:center;background:linear-gradient(to top,rgba(157,123,255,.55) var(--e,100%),rgba(10,8,22,.55) var(--e,100%))}
 #bNitro.low{opacity:.55}
 /* lecteur de la bande-annonce */
 .trailer{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
 .trailer video{max-width:100%;max-height:85vh;background:#000}
 .trailer p{color:#fff}
+
+@media (max-height:500px) and (orientation:landscape){
+  body.touch #bNitro{right:auto!important;left:calc(150px + env(safe-area-inset-left,0px))!important;bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
+  .hudhelp{right:auto!important;left:calc(12px + env(safe-area-inset-left,0px))!important;top:calc(112px + env(safe-area-inset-top,0px))!important}
+}
 </style>
 </head>
 <body>

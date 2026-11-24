@@ -1252,7 +1252,7 @@ function fade(t) { hud.fade.textContent = TR(t); hud.fade.style.opacity = 1; set
 function setText(el, k, v) { if (last[k] !== v) { last[k] = v; el.textContent = TR(v); } }
 function setW(el, k, v) { if (last[k] !== v) { last[k] = v; el.style.width = v + '%'; } }
 function updHud(dt) {
-  last.hb = (last.hb || 0) - dt; if (last.hb <= 0) { last.hb = .5; const r = hud.step.getBoundingClientRect(); const v = r.height && r.top < innerHeight / 2 ? Math.round(r.bottom) : 0; if (v !== last.hbv) { last.hbv = v; if (v) document.body.style.setProperty('--hudB', v + 'px'); else document.body.style.removeProperty('--hudB'); } }
+  last.hb = (last.hb || 0) - dt; if (last.hb <= 0) { last.hb = .5; { const mr = $('mini').getBoundingClientRect(), mb = Math.round(mr.bottom); if (mr.height && last.mb !== mb) { last.mb = mb; document.body.style.setProperty('--miniB', mb + 'px'); } } const r = hud.step.getBoundingClientRect(); const v = r.height && r.top < innerHeight / 2 ? Math.round(r.bottom) : 0; if (v !== last.hbv) { last.hbv = v; if (v) document.body.style.setProperty('--hudB', v + 'px'); else document.body.style.removeProperty('--hudB'); } }
   setText(hud.money, 'm', fmt(save.money));
   const s = stars(); if (last.s !== s) { last.s = s; starEls.forEach((e, i) => e.classList.toggle('on', i < s)); }
   const seen = s > 0 && S.unseen < .5; if (last.seen !== seen) { last.seen = seen; hud.stars.classList.toggle('blink', seen); }
