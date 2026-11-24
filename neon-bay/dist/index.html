@@ -389,6 +389,22 @@ body.playing.cinecam #game3d{clip-path:inset(5.5vh 0 5.5vh 0)}
 .gthumb{display:block;width:100%;height:96px;object-fit:contain;margin:-4px 0 4px;border-radius:12px;background:radial-gradient(70% 90% at 50% 60%,rgba(33,230,255,.12),transparent 70%)}
 .gthumb:not([src]){visibility:hidden}
 .item.is-locked .gthumb{filter:grayscale(.7) brightness(.7)}
+
+/* prison : écran de vie en cellule */
+.jail{max-width:980px;display:flex;flex-direction:column;gap:16px}
+.jhead{background:linear-gradient(180deg,rgba(255,140,40,.14),rgba(16,12,34,.8)),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 3px,transparent 3px 46px);border:1px solid var(--glass-b);border-radius:var(--r3);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.jhead .title{margin:0}
+.jstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.jbar{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.jbar i{display:block;height:100%;background:linear-gradient(90deg,#ff8a2a,#ffd36b);border-radius:99px}
+.jgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.jact{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:14px 16px;border-radius:var(--r2);background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--glass-hi);transition:transform .18s var(--ease),border-color .18s}
+.jact b{font-weight:700;font-size:15px;letter-spacing:.05em;text-transform:uppercase}.jact small{color:var(--muted);font-size:12.5px;line-height:1.35}
+.jact:hover:not([disabled]),.jact:focus-visible{transform:translateY(-2px);border-color:rgba(255,214,107,.5)}
+.jact.prim{border-color:rgba(255,214,107,.55);background:linear-gradient(100deg,rgba(255,182,39,.28),rgba(16,12,34,.8))}
+.jact.gold{border-color:rgba(166,255,77,.4)}.jact.danger{border-color:rgba(255,77,94,.45);background:linear-gradient(100deg,rgba(255,77,94,.2),rgba(16,12,34,.8))}
+.jact[disabled]{opacity:.45;cursor:not-allowed}
+.jlog{background:rgba(10,8,22,.6);border:1px solid var(--glass-b);border-radius:var(--r2);padding:12px 16px}.jlog p{margin:4px 0;color:#d9d2f2;font-size:13.5px}.jlog p:first-child{color:#fff}
+@media (max-width:640px){.jstats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -6376,6 +6392,32 @@ window.NB_I18N = (() => {
     'Ta voiture prend feu : sors vite (E) !': { en: 'Your car is on fire: get out now (E)!', es: '¡Tu coche está ardiendo: sal ya (E)!', pt: 'Seu carro está pegando fogo: saia já (E)!' },
     'Astuce : un tunnel (point orange sur la carte) sème la police tout de suite': { en: 'Tip: a tunnel (orange dot on the map) loses the cops instantly', es: 'Consejo: un túnel (punto naranja en el mapa) despista a la policía al instante', pt: 'Dica: um túnel (ponto laranja no mapa) despista a polícia na hora' },
     'Vue cinéma': { en: 'Cinematic view', es: 'Vista cine', pt: 'Visão cinema' },
+    'Musculation': { en: 'Workout', es: 'Musculación', pt: 'Musculação' },
+    'Tous les 3 jours : Force +1': { en: 'Every 3 days: Strength +1', es: 'Cada 3 días: Fuerza +1', pt: 'A cada 3 dias: Força +1' },
+    'Étudier': { en: 'Study', es: 'Estudiar', pt: 'Estudar' },
+    'Bonne conduite, remise de peine': { en: 'Good behavior, reduced sentence', es: 'Buena conducta, reducción de pena', pt: 'Bom comportamento, redução de pena' },
+    'Travailler à l’atelier': { en: 'Work in the workshop', es: 'Trabajar en el taller', pt: 'Trabalhar na oficina' },
+    'Dormir': { en: 'Sleep', es: 'Dormir', pt: 'Dormir' },
+    'Laisser passer la journée': { en: 'Let the day go by', es: 'Dejar pasar el día', pt: 'Deixar o dia passar' },
+    'Libération conditionnelle': { en: 'Parole', es: 'Libertad condicional', pt: 'Liberdade condicional' },
+    'Accordée : sortie immédiate, sous surveillance': { en: 'Granted: out now, under watch', es: 'Concedida: salida inmediata, bajo vigilancia', pt: 'Concedida: saída imediata, sob vigilância' },
+    'Appeler un avocat': { en: 'Call a lawyer', es: 'Llamar a un abogado', pt: 'Chamar um advogado' },
+    'Tenter l’évasion': { en: 'Attempt escape', es: 'Intentar la fuga', pt: 'Tentar a fuga' },
+    'Sortie immédiate, mais 3 étoiles de recherche': { en: 'Out now, but 3 wanted stars', es: 'Salida inmediata, pero 3 estrellas de búsqueda', pt: 'Saída imediata, mas 3 estrelas de procurado' },
+    'Cellule 214': { en: 'Cell 214', es: 'Celda 214', pt: 'Cela 214' },
+    'Jours restants': { en: 'Days left', es: 'Días restantes', pt: 'Dias restantes' },
+    'Bonne conduite': { en: 'Good behavior', es: 'Buena conducta', pt: 'Bom comportamento' },
+    'Premier jour. Le bruit des grilles ne s’arrête jamais.': { en: 'Day one. The clanging of the bars never stops.', es: 'Primer día. El ruido de las rejas nunca para.', pt: 'Primeiro dia. O barulho das grades nunca para.' },
+    'Pas assez d’argent pour l’avocat': { en: 'Not enough money for the lawyer', es: 'No tienes dinero para el abogado', pt: 'Dinheiro insuficiente para o advogado' },
+    'Conditionnelle terminée : tu es vraiment libre': { en: 'Parole over: you are truly free', es: 'Condicional terminada: eres libre de verdad', pt: 'Condicional encerrada: você está livre de verdade' },
+    'Peine purgée': { en: 'Sentence served', es: 'Pena cumplida', pt: 'Pena cumprida' },
+    'Libéré grâce à ton avocat': { en: 'Freed by your lawyer', es: 'Liberado gracias a tu abogado', pt: 'Libertado pelo seu advogado' },
+    'ÉVASION !': { en: 'ESCAPE!', es: '¡FUGA!', pt: 'FUGA!' },
+    'Libre. La ville ne t’a pas oublié.': { en: 'Free. The city has not forgotten you.', es: 'Libre. La ciudad no te ha olvidado.', pt: 'Livre. A cidade não te esqueceu.' },
+    'Vice de procédure : le juge n’a rien pu faire.': { en: 'Procedural error: the judge could do nothing.', es: 'Vicio de procedimiento: el juez no pudo hacer nada.', pt: 'Erro processual: o juiz nada pôde fazer.' },
+    'Reste discret 4 minutes : une arrestation te renverrait en cellule plus longtemps.': { en: 'Keep a low profile for 4 minutes: an arrest would send you back for longer.', es: 'Mantente discreto 4 minutos: un arresto te devolvería a la celda por más tiempo.', pt: 'Fique discreto por 4 minutos: uma prisão te levaria de volta por mais tempo.' },
+    'Le mur de la cour a cédé. Toute la police te cherche : sème-la !': { en: 'The yard wall gave way. Every cop is after you: lose them!', es: 'El muro del patio cedió. Toda la policía te busca: ¡despístala!', pt: 'O muro do pátio cedeu. Toda a polícia te procura: despiste-a!' },
+    'Les menottes claquent. Le juge n’a pas souri. Ici, chaque jour compte : muscle-toi, étudie, travaille… ou prépare ta sortie.': { en: 'The cuffs snap shut. The judge did not smile. In here every day counts: train, study, work… or plan your way out.', es: 'Las esposas se cierran. El juez no sonrió. Aquí cada día cuenta: entrena, estudia, trabaja… o prepara tu salida.', pt: 'As algemas fecham. O juiz não sorriu. Aqui cada dia conta: treine, estude, trabalhe… ou prepare sua saída.' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
@@ -6416,6 +6458,12 @@ window.NB_I18N = (() => {
     [/^Taille du texte : (\d+) %$/, { en: 'Text size: $1%', es: 'Tamaño del texto: $1 %', pt: 'Tamanho do texto: $1%' }],
     [/^Mode daltonien : oui$/, { en: 'Colorblind mode: on', es: 'Modo daltónico: sí', pt: 'Modo daltônico: sim' }],
     [/^Mode daltonien : non$/, { en: 'Colorblind mode: off', es: 'Modo daltónico: no', pt: 'Modo daltônico: não' }],
+    [/^Centre pénitentiaire · (.+)$/, { en: 'Penitentiary · $1', es: 'Centro penitenciario · $1', pt: 'Penitenciária · $1' }],
+    [/^Condamné à (\d+) jours$/, { en: 'Sentenced to $1 days', es: 'Condenado a $1 días', pt: 'Condenado a $1 dias' }],
+    [/^Après (\d+) jours et 2 de bonne conduite$/, { en: 'After $1 days and 2 good-behavior points', es: 'Tras $1 días y 2 de buena conducta', pt: 'Após $1 dias e 2 de bom comportamento' }],
+    [/^Sortie immédiate · (.+)$/, { en: 'Out now · $1', es: 'Salida inmediata · $1', pt: 'Saída imediata · $1' }],
+    [/^\+(.+) par jour$/, { en: '+$1 per day', es: '+$1 por día', pt: '+$1 por dia' }],
+    [/^Jour (\d+) · (.*)$/, { en: 'Day $1 · $2', es: 'Día $1 · $2', pt: 'Dia $1 · $2' }],
     [/^Rejoins (.+)$/, { en: 'Go to $1', es: 'Ve a $1', pt: 'Vá até $1' }],
     [/^Livre la marchandise à (.+) en voiture$/, { en: 'Deliver the goods to $1 by car', es: 'Entrega la mercancía en $1 en coche', pt: 'Entregue a mercadoria em $1 de carro' }],
     [/^Récupère les valises près de (.+) \((\d+)\/(\d+)\)$/, { en: 'Grab the briefcases near $1 ($2/$3)', es: 'Recoge los maletines cerca de $1 ($2/$3)', pt: 'Pegue as maletas perto de $1 ($2/$3)' }],
@@ -8059,6 +8107,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
+  if (reason.includes('Arrêté') && !S.bot) { goToJail(); return; } // arrêté : la partie continue en prison (le jeu ne s'arrête jamais)
   if (L && L.free) { // balade libre : comme dans le genre, on se réveille à l'hôpital (ou au commissariat) et on paie
     const fee = Math.min(Math.round(save.money * .1), 1500 + L.n * 50); save.money -= fee; au('fail'); vib(200);
     S.hp = maxHp(); S.heat = 0; S.unseen = 0; S.bust = 0; S.dead = 0; policeLeave(); if (P.car) { P.car.ai = null; P.car = null; } P.x = world.hospital.x; P.y = world.hospital.y + 20; P.armor = armorMax(); vip = null;
@@ -8073,6 +8122,41 @@ function failLevel(reason) {
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned, cp }), 1100);
 }
 
+// ---------- prison : la vie continue derrière les barreaux ----------
+const JAIL_EVENTS = ['Une lettre de ta famille arrive : « Tiens bon. »', 'Bagarre dans la cour : tu restes à l’écart.', 'Le gardien de nuit te fait passer un journal.', 'Ton codétenu te raconte un plan d’évasion foireux.', 'Douche froide, café tiède : journée ordinaire.', 'Un détenu te propose un « travail » à ta sortie.', 'Le directeur passe en revue les cellules.', 'Match de foot dans la cour : ton équipe gagne 3-1.'];
+function goToJail() {
+  const st0 = stars(), was = save.jail;
+  const days = Math.min(9, 2 + st0 + (save.parole > 0 ? 3 : 0) + ((save.jailCount || 0) >= 3 ? 1 : 0));
+  save.jailCount = (save.jailCount || 0) + 1; save.parole = 0; track('arrests');
+  save.jail = { days, total: days, served: 0, conduct: 0, studies: 0, work: 0, lift: 0, n: L.n, cp: L.free ? 0 : (L.idx >= 5 || L.cp ? 5 : 0), free: !!L.free, region: world.region.name, log: [] };
+  S.mode = 'result'; if (PORTAL) PORTAL.stop(); policeLeave(); if (P.car) { P.car.ai = null; P.car = null; }
+  au('fail'); vib(300); au('setMusic', null); showBanner('ARRÊTÉ'); persist();
+  setTimeout(() => { showCine('Centre pénitentiaire · ' + world.region.name, 'Condamné à ' + days + ' jours', 'Les menottes claquent. Le juge n’a pas souri. Ici, chaque jour compte : muscle-toi, étudie, travaille… ou prépare ta sortie.'); }, 900);
+  setTimeout(() => { hideCine(); showScreen('jail'); }, 4600);
+}
+function jailDay(txt) {
+  const j = save.jail; if (!j) return; j.days--; j.served++; j.log.unshift('Jour ' + j.served + ' · ' + txt + (Math.random() < .45 ? ' ' + pick(JAIL_EVENTS) : ''));
+  j.log = j.log.slice(0, 4); if (j.days <= 0) { persist(); releaseJail('sentence'); return; } persist(); au('click'); showScreen('jail');
+}
+function jailAct(a) {
+  const j = save.jail; if (!j) return;
+  if (a === 'lift') { j.lift++; let extra = ''; if (j.lift % 3 === 0 && trainLv('str') < 5) { save.train = save.train || {}; save.train.str = trainLv('str') + 1; extra = ' Force +1 !'; } jailDay('Séance de musculation.' + extra); }
+  else if (a === 'study') { j.studies++; j.conduct++; let extra = ''; if (j.studies % 2 === 0 && j.days > 1) { j.days--; extra = ' Remise de peine : −1 jour.'; } if (j.studies === 4) { save.perks.diploma = true; extra += ' Diplôme obtenu : l’atelier paie double.'; } jailDay('Cours à la bibliothèque.' + extra); }
+  else if (a === 'work') { const pay = jailPay(); save.money += pay; j.work++; j.conduct++; jailDay('Atelier : +' + fmt(pay) + '.'); }
+  else if (a === 'wait') jailDay('Tu comptes les heures.');
+  else if (a === 'lawyer') { const c = jailLawyerCost(); if (save.money < c) { flashNote('Pas assez d’argent pour l’avocat'); return; } save.money -= c; au('cash'); releaseJail('lawyer'); }
+  else if (a === 'parole') { if (!jailParoleOk()) return; save.parole = 240; releaseJail('parole'); }
+  else if (a === 'escape') releaseJail('escape');
+}
+const jailPay = () => (120 + (save.jail ? save.jail.n : 1) * 15) * (save.perks.diploma ? 2 : 1);
+const jailLawyerCost = () => { const j = save.jail; return Math.round((900 + j.days * 450 + j.n * 60) / 50) * 50; };
+const jailParoleOk = () => { const j = save.jail; return j && j.served >= Math.ceil(j.total / 2) && j.conduct >= 2; };
+function releaseJail(kind) {
+  const j = save.jail; if (!j) return; save.jail = null; persist();
+  const msgs = { sentence: ['Peine purgée', 'Libre. La ville ne t’a pas oublié.'], lawyer: ['Libéré grâce à ton avocat', 'Vice de procédure : le juge n’a rien pu faire.'], parole: ['Libération conditionnelle', 'Reste discret 4 minutes : une arrestation te renverrait en cellule plus longtemps.'], escape: ['ÉVASION !', 'Le mur de la cour a cédé. Toute la police te cherche : sème-la !'] }[kind];
+  startLevel(j.n, j.cp, j.free);
+  setTimeout(() => { showBanner(msgs[0]); toast(msgs[1]); if (kind === 'escape') { S.heat = Math.max(S.heat, 3.2); S.unseen = 0; } }, 1200);
+}
 // ---------- progression : succès, défis du jour, conseils ----------
 const ACH = [
   { id: 'steal10', name: 'Voleur de voitures', key: 'carsStolen', goal: 10, r: 500 },
@@ -8328,6 +8412,7 @@ const PCOUNT = [0, 1, 2, 3, 5, 7];
 function update(dt) {
   S.time += dt; S.msgCd -= dt; mouse.aim -= dt; S.tunnelCd -= dt;
   if (P.nitro > 0) P.nitro -= dt;
+  if (save.parole > 0) { save.parole -= dt; if (save.parole <= 0) { save.parole = 0; toast('Conditionnelle terminée : tu es vraiment libre'); } }
   if (peds.length < Q.peds && Math.random() < .5) spawnPed();
   if (cars.filter(c => c.ai === 'traffic').length < Q.traffic && Math.random() < .3) spawnTraffic();
   const want = Math.max(stars() ? 1 : 0, Math.round(PCOUNT[stars()] * (save.perks.radio ? .6 : 1) * (.5 + .5 * ez()) + (stars() >= 3 ? Math.floor(lvl() / 12) : 0)));
@@ -10017,6 +10102,24 @@ const SCREENS = {
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
       <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
     </div>`,
+  jail: () => { const j = save.jail; if (!j) return '<div class="wrap narrow center-col"><button class="btn primary" data-go="home">Retour</button></div>';
+    const pct = Math.round(j.served / j.total * 100), lc = jailLawyerCost(), pok = jailParoleOk();
+    const act = (k, t, sub, cls = '', dis = false) => `<button class="jact ${cls}" data-jail="${k}" ${dis ? 'disabled' : ''}><b>${t}</b><small>${sub}</small></button>`;
+    return `<div class="wrap jail">
+      <header class="jhead"><p class="eyebrow">Centre pénitentiaire · ${esc(j.region)}</p><h2 class="title">Cellule 214</h2>
+        <div class="jstats"><div class="pk"><span>Jours restants</span><b>${j.days}</b></div><div class="pk"><span>Bonne conduite</span><b>${'★'.repeat(Math.min(5, j.conduct))}${'☆'.repeat(Math.max(0, 5 - j.conduct))}</b></div><div class="pk"><span>Force</span><b>${trainLv('str')}/5</b></div><div class="pk"><span>Argent</span><b>${fmt(save.money)}</b></div></div>
+        <div class="jbar"><i style="width:${pct}%"></i></div></header>
+      <div class="jgrid">
+        ${act('lift', 'Musculation', 'Tous les 3 jours : Force +1')}
+        ${act('study', 'Étudier', 'Bonne conduite, remise de peine')}
+        ${act('work', 'Travailler à l’atelier', '+' + fmt(jailPay()) + ' par jour')}
+        ${act('wait', 'Dormir', 'Laisser passer la journée')}
+        ${act('parole', 'Libération conditionnelle', pok ? 'Accordée : sortie immédiate, sous surveillance' : 'Après ' + Math.ceil(j.total / 2) + ' jours et 2 de bonne conduite', 'gold', !pok)}
+        ${act('lawyer', 'Appeler un avocat', 'Sortie immédiate · ' + fmt(lc), save.money >= lc ? 'prim' : '', save.money < lc)}
+        ${act('escape', 'Tenter l’évasion', 'Sortie immédiate, mais 3 étoiles de recherche', 'danger')}
+      </div>
+      ${j.log.length ? `<div class="jlog">${j.log.map(l => `<p>${esc(l)}</p>`).join('')}</div>` : '<div class="jlog"><p>Premier jour. Le bruit des grilles ne s’arrête jamais.</p></div>'}
+    </div>`; },
   result: d => {
     const r = regionOf(d.n);
     if (d.ok) {
@@ -10206,6 +10309,7 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.jail) { jailAct(ds.jail); return; }
   if (ds.optback) { showScreen(L && S.mode === 'pause' ? 'pause' : 'home'); return; }
   if (ds.allies) { resumeGame(); callAllies(); return; }
   if (ds.skipjob) { if (L && L.free) { L.idx++; L.step = makeStep(pick(FREE_JOBS.filter(t => t !== L.step.type)), L.n, L.idx); toast('Nouveau boulot : ' + TR(L.step.label)); } resumeGame(); return; }
@@ -10329,7 +10433,7 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) {
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
-showScreen(save.seenOpen ? 'home' : 'intro');
+showScreen(save.jail ? 'jail' : save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
 window.__nb = { mdl: k => R3.models && R3.models[k], scene: () => R3.scene, cam: () => R3.cam, perf: () => R3.r ? Object.assign({}, R3.r.info.render, { geo: R3.r.info.memory.geometries, tex: R3.r.info.memory.textures, prog: R3.r.info.programs.length }) : null, models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

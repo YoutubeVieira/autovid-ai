@@ -1046,6 +1046,7 @@ function completeLevel() {
 }
 function failLevel(reason) {
   if (S.mode !== 'play') return;
+  if (reason.includes('Arrêté') && !S.bot) { goToJail(); return; } // arrêté : la partie continue en prison (le jeu ne s'arrête jamais)
   if (L && L.free) { // balade libre : comme dans le genre, on se réveille à l'hôpital (ou au commissariat) et on paie
     const fee = Math.min(Math.round(save.money * .1), 1500 + L.n * 50); save.money -= fee; au('fail'); vib(200);
     S.hp = maxHp(); S.heat = 0; S.unseen = 0; S.bust = 0; S.dead = 0; policeLeave(); if (P.car) { P.car.ai = null; P.car = null; } P.x = world.hospital.x; P.y = world.hospital.y + 20; P.armor = armorMax(); vip = null;
@@ -1060,6 +1061,41 @@ function failLevel(reason) {
   setTimeout(() => showScreen('result', { ok: false, n: L.n, reason, earned: L.earned, cp }), 1100);
 }
 
+// ---------- prison : la vie continue derrière les barreaux ----------
+const JAIL_EVENTS = ['Une lettre de ta famille arrive : « Tiens bon. »', 'Bagarre dans la cour : tu restes à l’écart.', 'Le gardien de nuit te fait passer un journal.', 'Ton codétenu te raconte un plan d’évasion foireux.', 'Douche froide, café tiède : journée ordinaire.', 'Un détenu te propose un « travail » à ta sortie.', 'Le directeur passe en revue les cellules.', 'Match de foot dans la cour : ton équipe gagne 3-1.'];
+function goToJail() {
+  const st0 = stars(), was = save.jail;
+  const days = Math.min(9, 2 + st0 + (save.parole > 0 ? 3 : 0) + ((save.jailCount || 0) >= 3 ? 1 : 0));
+  save.jailCount = (save.jailCount || 0) + 1; save.parole = 0; track('arrests');
+  save.jail = { days, total: days, served: 0, conduct: 0, studies: 0, work: 0, lift: 0, n: L.n, cp: L.free ? 0 : (L.idx >= 5 || L.cp ? 5 : 0), free: !!L.free, region: world.region.name, log: [] };
+  S.mode = 'result'; if (PORTAL) PORTAL.stop(); policeLeave(); if (P.car) { P.car.ai = null; P.car = null; }
+  au('fail'); vib(300); au('setMusic', null); showBanner('ARRÊTÉ'); persist();
+  setTimeout(() => { showCine('Centre pénitentiaire · ' + world.region.name, 'Condamné à ' + days + ' jours', 'Les menottes claquent. Le juge n’a pas souri. Ici, chaque jour compte : muscle-toi, étudie, travaille… ou prépare ta sortie.'); }, 900);
+  setTimeout(() => { hideCine(); showScreen('jail'); }, 4600);
+}
+function jailDay(txt) {
+  const j = save.jail; if (!j) return; j.days--; j.served++; j.log.unshift('Jour ' + j.served + ' · ' + txt + (Math.random() < .45 ? ' ' + pick(JAIL_EVENTS) : ''));
+  j.log = j.log.slice(0, 4); if (j.days <= 0) { persist(); releaseJail('sentence'); return; } persist(); au('click'); showScreen('jail');
+}
+function jailAct(a) {
+  const j = save.jail; if (!j) return;
+  if (a === 'lift') { j.lift++; let extra = ''; if (j.lift % 3 === 0 && trainLv('str') < 5) { save.train = save.train || {}; save.train.str = trainLv('str') + 1; extra = ' Force +1 !'; } jailDay('Séance de musculation.' + extra); }
+  else if (a === 'study') { j.studies++; j.conduct++; let extra = ''; if (j.studies % 2 === 0 && j.days > 1) { j.days--; extra = ' Remise de peine : −1 jour.'; } if (j.studies === 4) { save.perks.diploma = true; extra += ' Diplôme obtenu : l’atelier paie double.'; } jailDay('Cours à la bibliothèque.' + extra); }
+  else if (a === 'work') { const pay = jailPay(); save.money += pay; j.work++; j.conduct++; jailDay('Atelier : +' + fmt(pay) + '.'); }
+  else if (a === 'wait') jailDay('Tu comptes les heures.');
+  else if (a === 'lawyer') { const c = jailLawyerCost(); if (save.money < c) { flashNote('Pas assez d’argent pour l’avocat'); return; } save.money -= c; au('cash'); releaseJail('lawyer'); }
+  else if (a === 'parole') { if (!jailParoleOk()) return; save.parole = 240; releaseJail('parole'); }
+  else if (a === 'escape') releaseJail('escape');
+}
+const jailPay = () => (120 + (save.jail ? save.jail.n : 1) * 15) * (save.perks.diploma ? 2 : 1);
+const jailLawyerCost = () => { const j = save.jail; return Math.round((900 + j.days * 450 + j.n * 60) / 50) * 50; };
+const jailParoleOk = () => { const j = save.jail; return j && j.served >= Math.ceil(j.total / 2) && j.conduct >= 2; };
+function releaseJail(kind) {
+  const j = save.jail; if (!j) return; save.jail = null; persist();
+  const msgs = { sentence: ['Peine purgée', 'Libre. La ville ne t’a pas oublié.'], lawyer: ['Libéré grâce à ton avocat', 'Vice de procédure : le juge n’a rien pu faire.'], parole: ['Libération conditionnelle', 'Reste discret 4 minutes : une arrestation te renverrait en cellule plus longtemps.'], escape: ['ÉVASION !', 'Le mur de la cour a cédé. Toute la police te cherche : sème-la !'] }[kind];
+  startLevel(j.n, j.cp, j.free);
+  setTimeout(() => { showBanner(msgs[0]); toast(msgs[1]); if (kind === 'escape') { S.heat = Math.max(S.heat, 3.2); S.unseen = 0; } }, 1200);
+}
 // ---------- progression : succès, défis du jour, conseils ----------
 const ACH = [
   { id: 'steal10', name: 'Voleur de voitures', key: 'carsStolen', goal: 10, r: 500 },
@@ -1315,6 +1351,7 @@ const PCOUNT = [0, 1, 2, 3, 5, 7];
 function update(dt) {
   S.time += dt; S.msgCd -= dt; mouse.aim -= dt; S.tunnelCd -= dt;
   if (P.nitro > 0) P.nitro -= dt;
+  if (save.parole > 0) { save.parole -= dt; if (save.parole <= 0) { save.parole = 0; toast('Conditionnelle terminée : tu es vraiment libre'); } }
   if (peds.length < Q.peds && Math.random() < .5) spawnPed();
   if (cars.filter(c => c.ai === 'traffic').length < Q.traffic && Math.random() < .3) spawnTraffic();
   const want = Math.max(stars() ? 1 : 0, Math.round(PCOUNT[stars()] * (save.perks.radio ? .6 : 1) * (.5 + .5 * ez()) + (stars() >= 3 ? Math.floor(lvl() / 12) : 0)));
@@ -3004,6 +3041,24 @@ const SCREENS = {
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
       <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
     </div>`,
+  jail: () => { const j = save.jail; if (!j) return '<div class="wrap narrow center-col"><button class="btn primary" data-go="home">Retour</button></div>';
+    const pct = Math.round(j.served / j.total * 100), lc = jailLawyerCost(), pok = jailParoleOk();
+    const act = (k, t, sub, cls = '', dis = false) => `<button class="jact ${cls}" data-jail="${k}" ${dis ? 'disabled' : ''}><b>${t}</b><small>${sub}</small></button>`;
+    return `<div class="wrap jail">
+      <header class="jhead"><p class="eyebrow">Centre pénitentiaire · ${esc(j.region)}</p><h2 class="title">Cellule 214</h2>
+        <div class="jstats"><div class="pk"><span>Jours restants</span><b>${j.days}</b></div><div class="pk"><span>Bonne conduite</span><b>${'★'.repeat(Math.min(5, j.conduct))}${'☆'.repeat(Math.max(0, 5 - j.conduct))}</b></div><div class="pk"><span>Force</span><b>${trainLv('str')}/5</b></div><div class="pk"><span>Argent</span><b>${fmt(save.money)}</b></div></div>
+        <div class="jbar"><i style="width:${pct}%"></i></div></header>
+      <div class="jgrid">
+        ${act('lift', 'Musculation', 'Tous les 3 jours : Force +1')}
+        ${act('study', 'Étudier', 'Bonne conduite, remise de peine')}
+        ${act('work', 'Travailler à l’atelier', '+' + fmt(jailPay()) + ' par jour')}
+        ${act('wait', 'Dormir', 'Laisser passer la journée')}
+        ${act('parole', 'Libération conditionnelle', pok ? 'Accordée : sortie immédiate, sous surveillance' : 'Après ' + Math.ceil(j.total / 2) + ' jours et 2 de bonne conduite', 'gold', !pok)}
+        ${act('lawyer', 'Appeler un avocat', 'Sortie immédiate · ' + fmt(lc), save.money >= lc ? 'prim' : '', save.money < lc)}
+        ${act('escape', 'Tenter l’évasion', 'Sortie immédiate, mais 3 étoiles de recherche', 'danger')}
+      </div>
+      ${j.log.length ? `<div class="jlog">${j.log.map(l => `<p>${esc(l)}</p>`).join('')}</div>` : '<div class="jlog"><p>Premier jour. Le bruit des grilles ne s’arrête jamais.</p></div>'}
+    </div>`; },
   result: d => {
     const r = regionOf(d.n);
     if (d.ok) {
@@ -3193,6 +3248,7 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.jail) { jailAct(ds.jail); return; }
   if (ds.optback) { showScreen(L && S.mode === 'pause' ? 'pause' : 'home'); return; }
   if (ds.allies) { resumeGame(); callAllies(); return; }
   if (ds.skipjob) { if (L && L.free) { L.idx++; L.step = makeStep(pick(FREE_JOBS.filter(t => t !== L.step.type)), L.n, L.idx); toast('Nouveau boulot : ' + TR(L.step.label)); } resumeGame(); return; }
@@ -3316,7 +3372,7 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) {
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
-showScreen(save.seenOpen ? 'home' : 'intro');
+showScreen(save.jail ? 'jail' : save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
 window.__nb = { mdl: k => R3.models && R3.models[k], scene: () => R3.scene, cam: () => R3.cam, perf: () => R3.r ? Object.assign({}, R3.r.info.render, { geo: R3.r.info.memory.geometries, tex: R3.r.info.memory.textures, prog: R3.r.info.programs.length }) : null, models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
