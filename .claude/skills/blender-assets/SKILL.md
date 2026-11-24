@@ -123,7 +123,7 @@ si l'arme est mise à l'échelle séparément.
 | Asset | Budget | Actuel (env.) |
 |---|---|---|
 | Voiture (carrosserie + 4 roues) | ≤ ~4 000 | 3 600–3 800 |
-| Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 877 Ko (dont ~210 Ko de textures) |
+| Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 876 Ko (dont ~210 Ko de textures) |
 | Arme | < 2 500 et < 120 Ko | 900–2 050 tris, 39–75 Ko |
 | Prop | ≤ ~1 500 | 450–1 100 |
 | Total de tous les .glb | ≤ ~4,5 Mo | ~4,3 Mo |

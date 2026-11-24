@@ -942,8 +942,9 @@ def make_skirt(sp, bvh_body, mats):
             az = 2 * math.pi * i / NA
             d = Vector((math.sin(az), -math.cos(az), 0))
             c = Vector((0, 0.010, z))
-            hit = bvh_body.ray_cast(c + d * 0.4, -d, 0.4)
+            hit = bvh_body.ray_cast(c + d * 0.26, -d, 0.26)      # torso only (arms hang further out)
             rb = (hit[0] - c).length if (hit[0] is not None and s < 0.6) else 0.0
+            rb = min(rb, 0.21)
             flare = Vector((0.205 * math.sin(az), -0.170 * math.cos(az) - 0.012, 0)).length
             rr = max(rb + 0.006 + 0.012 * s, (rb + 0.006) * (1 - s) + flare * s if rb else flare)
             rr *= 1.0 + (0.045 * s ** 1.4) * math.sin(9 * az + 0.6)          # folds
@@ -1413,7 +1414,7 @@ def build_human(female, variant=""):
         o["uv"] = "box:Shirt"
         parts.append(o)
     elif dr:
-        bvh_b = bvh_of(list(pieces.values()))
+        bvh_b = bvh_of([o for n_, o in pieces.items() if n_ in ("Pants", "Shirt")])
         sk = make_skirt(sp, bvh_b, mats)
         sk["uv"] = "box:Pants"
         special[sk.name] = "skirt"
@@ -1562,6 +1563,8 @@ def build_human(female, variant=""):
         W[:, bidx[b]] += F[:, j]
     hair_i, eyes_i, shirt_i = ORDER.index("Hair"), ORDER.index("Eyes"), ORDER.index("Shirt")
     white_i, hat_i = ORDER.index("EyeWhite"), ORDER.index("Hat")
+    pants_i, shoes_i = ORDER.index("Pants"), ORDER.index("Shoes")
+    arm_bones = [b for b in bone_names if b.startswith(("UpperArm", "LowerArm", "Hand", "Thumb", "Fingers"))]
     neck_axis = np.array([0, 0.022])
     rule = np.array([""] * len(co), dtype=object)
     for name, a, b in ranges:
@@ -1597,6 +1600,9 @@ def build_human(female, variant=""):
                     W[i, bidx[b]] = 0
             if W[i].sum() < 1e-6:
                 W[i, bidx["Chest"]] = 1.0
+        elif vmat[i] in (pants_i, shoes_i):              # trousers / skirt / belt never follow the arms
+            for b in arm_bones:
+                W[i, bidx[b]] = 0
         if W[i].sum() < 1e-6:                            # outside every element: nearest bone
             best, bd = "Hips", 9.0
             for name, h, t, _ in BONES:

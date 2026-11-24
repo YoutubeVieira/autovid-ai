@@ -212,7 +212,7 @@ window.NB_DATA = (() => {
   };
 
   // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
-  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb', w_pistol: 'models/w_pistol.glb', w_uzi: 'models/w_uzi.glb', w_shotgun: 'models/w_shotgun.glb', w_rifle: 'models/w_rifle.glb', w_sniper: 'models/w_sniper.glb', w_rocket: 'models/w_rocket.glb', w_minigun: 'models/w_minigun.glb', w_lmg: 'models/w_lmg.glb', w_gl: 'models/w_gl.glb', w_rail: 'models/w_rail.glb' };
+  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', human_m2: 'models/human_m2.glb', human_f2: 'models/human_f2.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb', w_pistol: 'models/w_pistol.glb', w_uzi: 'models/w_uzi.glb', w_shotgun: 'models/w_shotgun.glb', w_rifle: 'models/w_rifle.glb', w_sniper: 'models/w_sniper.glb', w_rocket: 'models/w_rocket.glb', w_minigun: 'models/w_minigun.glb', w_lmg: 'models/w_lmg.glb', w_gl: 'models/w_gl.glb', w_rail: 'models/w_rail.glb' };
 
   return { MODELS, SHOP_CONFIG, SPACE, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();

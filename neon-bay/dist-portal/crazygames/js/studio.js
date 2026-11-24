@@ -14,6 +14,8 @@
   const ASSETS = {
     human_m: { cat: 'Chars', name: 'Homme', desc: 'animé', file: 'human_m', kind: 'human', slots: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair'], h: 1.8 },
     human_f: { cat: 'Chars', name: 'Femme', desc: 'animée', file: 'human_f', kind: 'human', slots: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair'], h: 1.71 },
+    human_m2: { cat: 'Chars', name: 'Homme (sweat)', desc: 'casquette', file: 'human_m2', kind: 'human', slots: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair', 'Hat'], h: 1.79 },
+    human_f2: { cat: 'Chars', name: 'Femme (jupe)', desc: 'queue de cheval', file: 'human_f2', kind: 'human', slots: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair'], h: 1.72 },
     robot: { cat: 'Chars', name: 'Robot', desc: 'animé', file: 'robot', kind: 'human', slots: [], h: 1.8 },
     car_sedan: { cat: 'Cars', name: 'Berline', desc: '4,45 m', file: 'car_sedan', kind: 'car', slots: ['Paint'] },
     car_sports: { cat: 'Cars', name: 'Sportive', desc: 'cabriolet', file: 'car_sports', kind: 'car', slots: ['Paint'] },
@@ -37,7 +39,7 @@
     light: { cat: 'Prims', name: 'Lumière', desc: 'ponctuelle', kind: 'light', slots: ['Color'] },
     gen: { cat: 'Gen', name: 'Modèle généré', kind: 'gen', slots: [] },
   };
-  const DEFCOL = { Skin: '#c68b59', Shirt: '#21e6ff', Pants: '#1d1a2e', Shoes: '#f2f2f2', Hair: '#1a120c', Paint: '#ff2e93', Color: '#8a7dff' };
+  const DEFCOL = { Hat: '#c8102e', Skin: '#c68b59', Shirt: '#21e6ff', Pants: '#1d1a2e', Shoes: '#f2f2f2', Hair: '#1a120c', Paint: '#ff2e93', Color: '#8a7dff' };
   const CLIPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch', 'Punch', 'Death'];
   const WEAPS = [['pistol', 'Pistolet'], ['uzi', 'Mitraillette'], ['shotgun', 'Fusil à pompe'], ['rifle', 'Fusil d’assaut'], ['sniper', 'Fusil de précision'], ['rocket', 'Lance-roquettes'], ['minigun', 'Minigun'], ['lmg', 'Mitrailleuse'], ['gl', 'Lance-grenades'], ['rail', 'Fusil à impulsion']];
   const GRIP = { Aim: [-.3496, -.348, .6307, .5991], AimRifle: [-.3471, -.164, .8898, .2467] };
@@ -470,7 +472,7 @@
         <div class="field" style="margin-top:6px"><label>Position</label><div class="vec">${s.p.map((v, i) => num('p', i, v, .1)).join('')}</div></div>
         <div class="field" style="margin-top:6px"><label>Rotation °</label><div class="vec">${s.r.map((v, i) => num('r', i, deg(v), 5)).join('')}</div></div>
         <div class="field" style="margin-top:6px"><label>Échelle</label><div class="vec">${s.s.map((v, i) => num('s', i, v, .1)).join('')}</div></div>
-        ${(a.slots || []).length ? `<h2 style="margin-top:12px">Couleurs</h2><div class="colors">${a.slots.map(sl => `<label>${{ Skin: 'Peau', Shirt: 'Haut', Pants: 'Bas', Shoes: 'Chaussures', Hair: 'Cheveux', Paint: 'Carrosserie', Color: 'Couleur' }[sl]}<input type="color" data-col="${sl}" value="${(o.color || {})[sl] || (a.police && sl === 'Paint' ? '#eef0ff' : DEFCOL[sl])}"></label>`).join('')}</div>` : ''}
+        ${(a.slots || []).length ? `<h2 style="margin-top:12px">Couleurs</h2><div class="colors">${a.slots.map(sl => `<label>${{ Skin: 'Peau', Shirt: 'Haut', Pants: 'Bas', Shoes: 'Chaussures', Hair: 'Cheveux', Hat: 'Casquette', Paint: 'Carrosserie', Color: 'Couleur' }[sl]}<input type="color" data-col="${sl}" value="${(o.color || {})[sl] || (a.police && sl === 'Paint' ? '#eef0ff' : DEFCOL[sl])}"></label>`).join('')}</div>` : ''}
         ${a.kind === 'human' ? `<div class="field" style="margin-top:10px"><label for="oclip">Animation</label><select id="oclip">${CLIPS.map(c => `<option ${o.clip === c ? 'selected' : ''} value="${c}">${{ Idle: 'Attente', Walk: 'Marche', Run: 'Course', Aim: 'Viser (pistolet)', AimRifle: 'Viser (fusil)', Crouch: 'Accroupi', Punch: 'Coup de poing', Death: 'Chute' }[c]}</option>`).join('')}</select></div>
           <div class="field" style="margin-top:6px"><label for="oweap">Arme en main</label><select id="oweap"><option value="">Aucune</option>${WEAPS.map(([k, n]) => `<option value="${k}" ${o.weapon === k ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
           <div class="field" style="margin-top:6px"><label for="ospeed">Vitesse</label><input type="number" id="ospeed" min=".2" max="3" step=".1" value="${o.speed || 1}"></div>` : ''}
