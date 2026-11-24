@@ -2869,6 +2869,7 @@ function showScreen(name, data) {
   if (I18) I18.dom(screenEl);
   screenEl.scrollTop = 0;
   if (name === 'aerial') requestAnimationFrame(drawAerial);
+  if (screenEl.querySelector('img[data-gthumb]')) fillThumbs();
   const f = screenEl.querySelector('[autofocus],.btn.primary'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
   void hudOn;
 }
@@ -2971,7 +2972,7 @@ const SCREENS = {
       else { const cnt = it.kind === 'medkit' ? ` (${save.medkits}/${it.max})` : it.kind === 'nitro' ? ` (${save.nitro}/${it.max})` : ''; btn = `<button class="btn small ${save.money >= it.price ? 'primary' : ''}" data-buy="${it.id}">${fmt(it.price)}${cnt}</button>`; }
       const stat = isW ? `<div class="stat"><i style="width:${Math.min(100, it.dmg * it.pellets / 1.4)}%"></i></div><div class="stat r"><i style="width:${Math.min(100, 8 / it.rate)}%"></i></div>` : '';
       const ct = isW && !owned && CONTRACTS[it.id] ? `<p class="contract">${esc(TR('Gratuit si tu réussis :'))} ${esc(TR(contractTxt(it.id).replace(/ \(\d+\/\d+\)$/, '')))} ${contractTxt(it.id).match(/\(\d+\/\d+\)$/)[0]}</p>` : '';
-      return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${it.name}</h4><p>${it.desc}</p>${ct}${stat}</div>${btn}</div>`;
+      return `<div class="item ${locked ? 'is-locked' : ''} ${isW ? 'witem' : ''}">${isW ? `<img class="gthumb" alt="" data-gthumb="${it.id}"${THUMBS[it.id] ? ` src="${THUMBS[it.id]}"` : ''}>` : ''}<div><h4>${it.name}</h4><p>${it.desc}</p>${ct}${stat}</div>${btn}</div>`;
     };
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-back="1">${inGame ? '← Reprendre' : '← Retour'}</button><h2>Boutique</h2>${money()}</div>
@@ -3073,6 +3074,24 @@ function armoryHtml() {
     </div></div>`;
 }
 let gunView = null;
+// vignettes 3D des armes pour la boutique : rendu unique par arme (éclairage studio), mis en cache
+const THUMBS = {}; let thumbR = null;
+function gunThumb(id) {
+  if (THUMBS[id]) return THUMBS[id]; if (!R3.ok || !R3.models || !R3.models['w_' + id]) return null;
+  if (!thumbR) { const cv = document.createElement('canvas'); cv.width = 360; cv.height = 150; let r; try { r = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true }); } catch (e) { return null; }
+    r.outputEncoding = THREE.sRGBEncoding; r.toneMapping = THREE.ACESFilmicToneMapping; r.toneMappingExposure = .95;
+    const sc = new THREE.Scene(), cam2 = new THREE.PerspectiveCamera(22, 360 / 150, 1, 600); cam2.position.set(0, 14, 120); cam2.lookAt(0, 0, 0);
+    sc.add(new THREE.HemisphereLight(0xdfe6ff, 0x3a2a50, .45)); const key = new THREE.DirectionalLight(0xffffff, 1.5); key.position.set(30, 50, 60); sc.add(key);
+    const rim = new THREE.DirectionalLight(0x6fe6ff, 1.2); rim.position.set(-50, 20, -40); sc.add(rim); const fill = new THREE.DirectionalLight(0xff7ac0, .55); fill.position.set(-40, -10, 50); sc.add(fill);
+    thumbR = { cv, r, sc, cam2 }; }
+  const gm = R3.models['w_' + id].scene.clone(true);
+  const box = new THREE.Box3().setFromObject(gm), c = box.getCenter(new THREE.Vector3()), sz = box.getSize(new THREE.Vector3()); gm.position.sub(c);
+  const holder = new THREE.Group(); holder.add(gm); holder.scale.setScalar(Math.min(104 / Math.max(sz.x, sz.z), 40 / sz.y)); holder.rotation.set(.12, -.38, 0);
+  gm.traverse(o => { if (o.isMesh && o.material) { o.material = o.material.clone(); if (o.material.envMapIntensity !== undefined) o.material.envMapIntensity = .55; } });
+  thumbR.sc.add(holder); thumbR.r.render(thumbR.sc, thumbR.cam2); const url = thumbR.cv.toDataURL('image/png'); thumbR.sc.remove(holder);
+  return (THUMBS[id] = url);
+}
+function fillThumbs() { const imgs = [...screenEl.querySelectorAll('img[data-gthumb]:not([src])')]; let i = 0; const step = () => { const im = imgs[i++]; if (!im || !im.isConnected) return; const u = gunThumb(im.dataset.gthumb); if (u) im.src = u; requestAnimationFrame(step); }; requestAnimationFrame(step); }
 function mountGunView() {
   const slot = document.getElementById('gunViewSlot'); if (!slot || !R3.ok) return;
   if (!gunView) {
@@ -3282,7 +3301,7 @@ function loadModel(k, url, fin) {
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
     let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
     const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
-    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k === 'robot') P._m = null; if (['palm', 'lamp', 'hydrant', 'bench', 'traffic_light'].includes(k)) R3.world = null; };
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k.startsWith('w_') && S.screen === 'shop') setTimeout(fillThumbs, 50); if (k === 'robot') P._m = null; if (['palm', 'lamp', 'hydrant', 'bench', 'traffic_light'].includes(k)) R3.world = null; };
   // secours : si le .glb ne peut pas être servi, on charge sa copie en JavaScript (base64)
   const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
   try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }
@@ -3299,5 +3318,5 @@ if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
-window.__nb = { scene: () => R3.scene, cam: () => R3.cam, perf: () => R3.r ? Object.assign({}, R3.r.info.render, { geo: R3.r.info.memory.geometries, tex: R3.r.info.memory.textures, prog: R3.r.info.programs.length }) : null, models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { mdl: k => R3.models && R3.models[k], scene: () => R3.scene, cam: () => R3.cam, perf: () => R3.r ? Object.assign({}, R3.r.info.render, { geo: R3.r.info.memory.geometries, tex: R3.r.info.memory.textures, prog: R3.r.info.programs.length }) : null, models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();

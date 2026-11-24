@@ -383,6 +383,12 @@ body.cbmode .lvl.done{border-color:rgba(77,166,255,.5)!important}
 
 /* vue cinéma : bandes noires fines (format 2,39) */
 body.playing.cinecam #game3d{clip-path:inset(5.5vh 0 5.5vh 0)}
+
+/* vignettes 3D des armes dans la boutique */
+.item.witem{flex-wrap:wrap}
+.gthumb{display:block;width:100%;height:96px;object-fit:contain;margin:-4px 0 4px;border-radius:12px;background:radial-gradient(70% 90% at 50% 60%,rgba(33,230,255,.12),transparent 70%)}
+.gthumb:not([src]){visibility:hidden}
+.item.is-locked .gthumb{filter:grayscale(.7) brightness(.7)}
 </style>
 </head>
 <body>

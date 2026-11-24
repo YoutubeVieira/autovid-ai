@@ -17,8 +17,13 @@ aucune géométrie, texture ou animation reprise d'un autre jeu ou d'un pack. R�
   Walk, Run, Punch, Death, Aim, AimRifle, Crouch (`gen_human.py`, `nb_textures.py`). Personnages inventés,
   ne représentant aucune personne réelle ; aucune photo ni texture externe.
 - `w_pistol.glb`, `w_uzi.glb`, `w_shotgun.glb`, `w_rifle.glb`, `w_sniper.glb`, `w_rocket.glb`, `w_minigun.glb`,
-  `w_lmg.glb`, `w_gl.glb`, `w_rail.glb` : armes (`gen_weapons.py`). Designs génériques inventés : aucune
-  reproduction d'une arme réelle, aucune marque.
+  `w_lmg.glb`, `w_gl.glb`, `w_rail.glb` : armes, version 3 « vitrine » (`gen_weapons.py`) : formes
+  biseautées, découpes booléennes (stries, fenêtres d'éjection, garde-mains ajourés, freins de bouche),
+  rails à crans, organes de visée, vis, anneaux ; matériaux PBR (acier bruni avec usure claire des arêtes,
+  polymère texturé, caoutchouc quadrillé, verre teinté émissif) et textures procédurales cuites dans
+  Blender (`nb_textures.weapon_textures`, 256 px, normal maps). Designs génériques inventés : aucune
+  reproduction d'une arme réelle, aucune marque ni marquage, aucune texture externe.
 - `palm.glb`, `lamp.glb`, `hydrant.glb`, `bench.glb`, `traffic_light.glb` : mobilier urbain (`gen_props.py`).
 - Chaque `<nom>.glb.js` est la copie base64 du `.glb` correspondant (secours hors serveur).
-- `previews/*.png` : rendus d'aperçu (`render_previews.py`).
+- `previews/*.png` : rendus d'aperçu (`render_previews.py`) ; planche des armes dans
+  `tools/blender/previews/weapons_sheet.png` (`weapon_sheet.py`).
