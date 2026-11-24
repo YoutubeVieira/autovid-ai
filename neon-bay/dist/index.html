@@ -302,6 +302,62 @@ body.playing .hudhelp{display:block}body.cine .hudhelp{display:none}
   body.touch #bNitro{right:auto!important;left:calc(150px + env(safe-area-inset-left,0px))!important;bottom:calc(150px + env(safe-area-inset-bottom,0px))!important}
   .hudhelp{right:auto!important;left:calc(12px + env(safe-area-inset-left,0px))!important;top:calc(112px + env(safe-area-inset-top,0px))!important}
 }
+
+/* ===== Système visuel premium : panneaux de verre, rayons cohérents, hiérarchie typographique ===== */
+:root{--r1:10px;--r2:16px;--r3:24px;--glass:linear-gradient(180deg,rgba(44,34,86,.62),rgba(16,12,34,.78));--glass-b:rgba(255,255,255,.10);--glass-hi:inset 0 1px 0 rgba(255,255,255,.08);--shadow:0 14px 40px rgba(0,0,0,.38);--ease:cubic-bezier(.2,.8,.2,1)}
+#screen{background:radial-gradient(120% 90% at 50% 110%,rgba(255,46,147,.22),transparent 55%),radial-gradient(90% 70% at 0% 0%,rgba(33,230,255,.10),transparent 60%),rgba(8,6,18,.82);backdrop-filter:blur(3px)}
+.btn{font-family:var(--body);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;border-radius:var(--r1);background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--glass-hi);transition:transform .18s var(--ease),border-color .18s,box-shadow .18s,background .18s}
+.btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.28);box-shadow:var(--glass-hi),0 8px 22px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn.primary{background:linear-gradient(180deg,#ffd36b,#ffb000);color:#1b0f02;box-shadow:0 0 0 1px rgba(255,214,107,.5),0 10px 30px rgba(255,176,0,.35)}
+.btn.gold{background:linear-gradient(180deg,#fff0a8,#e0b000);color:#1d1300}
+.btn.small{font-size:11.5px;padding:8px 12px;border-radius:var(--r1)}
+.item,.lvl,.daily,.panel,.stats>span{background:var(--glass)!important;border:1px solid var(--glass-b)!important;border-radius:var(--r2)!important;box-shadow:var(--glass-hi),0 6px 18px rgba(0,0,0,.25)}
+.item{padding:14px 16px;transition:transform .18s var(--ease),border-color .18s}
+.item:hover,.lvl:not(.locked):hover{transform:translateY(-2px);border-color:rgba(255,255,255,.22)!important}
+.item h4{font-family:var(--body);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:14px}
+.item p{color:#c9c0e6;line-height:1.4}
+.lvl{padding:12px 14px 14px!important;transition:transform .18s var(--ease),border-color .18s}
+.lvl .lt{font-weight:700;font-size:13.5px}
+.lvl.done{border-color:rgba(166,255,77,.35)!important}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:4px;border-radius:999px;background:rgba(10,8,22,.6);border:1px solid var(--glass-b);align-self:flex-start}
+.tabs button{border-radius:999px!important;font-family:var(--body)!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:12px;padding:8px 14px}
+.chip{border-radius:999px}
+.top h2,.title{letter-spacing:.02em}
+.top{position:sticky;top:0;z-index:2;padding:8px 0;background:linear-gradient(180deg,rgba(8,6,18,.85),rgba(8,6,18,0))}
+/* accueil */
+.home2{max-width:1180px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:28px;align-items:center;min-height:calc(100vh - 60px)}
+.home2 .hero{display:flex;flex-direction:column;gap:14px;align-items:flex-start;text-align:left}
+.home2 .logo{font-size:clamp(54px,9vw,112px);line-height:.88;text-align:left;margin:0}
+.home2 .tag{margin:0;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);font-size:13px}
+.mainmenu{display:flex;flex-direction:column;gap:8px;width:min(440px,100%);margin-top:8px}
+.mm{all:unset;cursor:pointer;display:flex;flex-direction:column;gap:2px;padding:13px 18px;border-radius:var(--r2);background:var(--glass);border:1px solid var(--glass-b);box-shadow:var(--glass-hi);transition:transform .2s var(--ease),border-color .2s,background .2s;position:relative;overflow:hidden}
+.mm b{font-weight:700;font-size:17px;letter-spacing:.1em;text-transform:uppercase}
+.mm small{color:var(--muted);font-size:12.5px;letter-spacing:.02em}
+.mm::before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:3px;border-radius:3px;background:var(--cyan);opacity:0;transition:opacity .2s}
+.mm:hover,.mm:focus-visible{transform:translateX(4px);border-color:rgba(33,230,255,.45)}
+.mm:hover::before,.mm:focus-visible::before{opacity:1}
+.mm.prim{background:linear-gradient(100deg,rgba(255,46,147,.55),rgba(255,182,39,.45));border-color:rgba(255,214,107,.55);box-shadow:0 10px 34px rgba(255,46,147,.25)}
+.mm.prim small{color:#ffe9f4}
+.mm.gold{background:linear-gradient(100deg,rgba(255,215,0,.35),rgba(255,160,0,.25));border-color:rgba(255,215,0,.5)}
+.home2 .side{display:flex;flex-direction:column;gap:12px}
+.pcard{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pk{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:12px 10px;display:flex;flex-direction:column;gap:4px;box-shadow:var(--glass-hi)}
+.pk span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pk b{font-size:18px;font-variant-numeric:tabular-nums}
+.home2 .legal{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;margin:0}
+.home2 .langs{gap:6px;flex-wrap:wrap}
+@media (max-width:860px),(max-height:520px){.home2{grid-template-columns:1fr;min-height:0;gap:16px}.home2 .logo{font-size:clamp(44px,12vw,72px)}.mainmenu{width:100%}.mm{padding:10px 14px}.mm b{font-size:15px}.pcard{grid-template-columns:repeat(4,minmax(0,1fr))}.pk b{font-size:15px}}
+@media (max-height:520px) and (orientation:landscape){.home2{grid-template-columns:1.1fr .9fr;align-items:start}.mainmenu{gap:6px}.mm small{display:none}.home2 .tag{display:none}}
+/* options */
+.opts{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r3);padding:16px 18px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--glass-hi)}
+.opts h3{margin:0;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.optgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+.optgrid .btn.small{text-align:left;padding:12px 14px;font-size:12.5px;letter-spacing:.05em;text-transform:none;font-weight:600}
+.opts .keys{margin:0}
+/* HUD premium */
+#step{border-radius:var(--r2)!important;background:linear-gradient(180deg,rgba(30,24,60,.72),rgba(12,9,26,.82))!important;border:1px solid var(--glass-b)!important;box-shadow:var(--glass-hi),0 10px 28px rgba(0,0,0,.35)}
+#mini{border-radius:var(--r2)!important}
 </style>
 </head>
 <body>
@@ -6259,11 +6315,25 @@ window.NB_I18N = (() => {
     'Prototype ultime : 260 dégâts par tir.': { en: 'Ultimate prototype: 260 damage per shot.', es: 'Prototipo definitivo: 260 de daño por disparo.', pt: 'Protótipo definitivo: 260 de dano por tiro.' },
     'Exosquelette': { en: 'Exoskeleton', es: 'Exoesqueleto', pt: 'Exoesqueleto' }, 'Armure lourde': { en: 'Heavy armor', es: 'Armadura pesada', pt: 'Armadura pesada' },
     '250 points d’armure.': { en: '250 armor points.', es: '250 puntos de armadura.', pt: '250 pontos de armadura.' }, '400 points d’armure : presque un tank.': { en: '400 armor points: almost a tank.', es: '400 puntos de armadura: casi un tanque.', pt: '400 pontos de armadura: quase um tanque.' },
+    '30 nuits. 4 pays. Une fusée.': { en: '30 nights. 4 countries. One rocket.', es: '30 noches. 4 países. Un cohete.', pt: '30 noites. 4 países. Um foguete.' },
+    'Nouvelle partie · niveau 1 gratuit': { en: 'New game · level 1 free', es: 'Nueva partida · nivel 1 gratis', pt: 'Novo jogo · nível 1 grátis' },
+    'Armes, équipement, entraînement, propriétés': { en: 'Weapons, gear, training, properties', es: 'Armas, equipo, entrenamiento, propiedades', pt: 'Armas, equipamento, treino, propriedades' },
+    '46 secondes': { en: '46 seconds', es: '46 segundos', pt: '46 segundos' },
+    'Son, image, difficulté, langue': { en: 'Sound, graphics, difficulty, language', es: 'Sonido, imagen, dificultad, idioma', pt: 'Som, imagem, dificuldade, idioma' },
+    '29 niveaux de plus, paiement unique': { en: '29 more levels, one-time payment', es: '29 niveles más, pago único', pt: 'Mais 29 níveis, pagamento único' },
+    'Argent': { en: 'Money', es: 'Dinero', pt: 'Dinheiro' },
+    'Niveaux': { en: 'Levels', es: 'Niveles', pt: 'Níveis' },
+    'Étoiles': { en: 'Stars', es: 'Estrellas', pt: 'Estrelas' },
+    'Tags': { en: 'Tags', es: 'Grafitis', pt: 'Grafites' },
+    'Réglages': { en: 'Settings', es: 'Ajustes', pt: 'Ajustes' },
+    'Langue': { en: 'Language', es: 'Idioma', pt: 'Idioma' },
+    'Commandes au clavier': { en: 'Keyboard controls', es: 'Controles de teclado', pt: 'Controles do teclado' },
+    'Jeu original. Lieux, gangs et personnages sont inventés.': { en: 'Original game. All places, gangs and characters are made up.', es: 'Juego original. Lugares, bandas y personajes son inventados.', pt: 'Jogo original. Lugares, gangues e personagens são inventados.' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
     "Tu as aimé ? La suite t'attend.": { en: 'Enjoyed it? The rest is waiting.', es: '¿Te gustó? Lo mejor está por venir.', pt: 'Curtiu? O resto te espera.' },
-    "Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).": { en: 'Purchases are not available yet.', es: 'Las compras aún no están disponibles.', pt: 'As compras ainda não estão disponíveis.' },
+    'Le jeu complet arrive très bientôt sur les boutiques. En attendant, le niveau 1 et la balade libre sont offerts.': { en: 'The full game is coming to stores very soon. Meanwhile, level 1 and free roam are on the house.', es: 'El juego completo llega muy pronto a las tiendas. Mientras tanto, el nivel 1 y el paseo libre son gratis.', pt: 'O jogo completo chega em breve às lojas. Enquanto isso, o nível 1 e o passeio livre são grátis.' },
     'Aide activée : plus de temps et ennemis moins dangereux': { en: 'Assist on: more time and weaker enemies', es: 'Ayuda activada: más tiempo y enemigos menos peligrosos', pt: 'Ajuda ativada: mais tempo e inimigos menos perigosos' },
     'Qualité graphique réduite pour plus de fluidité': { en: 'Graphics quality lowered for smoother play', es: 'Calidad gráfica reducida para más fluidez', pt: 'Qualidade gráfica reduzida para mais fluidez' },
     'Haute': { en: 'High', es: 'Alta', pt: 'Alta' }, 'Moyenne': { en: 'Medium', es: 'Media', pt: 'Média' }, 'Basse': { en: 'Low', es: 'Baja', pt: 'Baixa' },
@@ -6292,6 +6362,9 @@ window.NB_I18N = (() => {
   const dict = () => Object.assign({}, window.NB_DICT || {}, EXTRA);
   // [motif sur le texte français, { en, es, pt }] ; $1, $2… sont traduits à leur tour
   const P = [
+    [/^Niveau (\d+) · (.+)$/, { en: 'Level $1 · $2', es: 'Nivel $1 · $2', pt: 'Nível $1 · $2' }],
+    [/^(\d+)\/(\d+) débloqués$/, { en: '$1/$2 unlocked', es: '$1/$2 desbloqueados', pt: '$1/$2 desbloqueados' }],
+    [/^Jeu complet · (.+)$/, { en: 'Full game · $1', es: 'Juego completo · $1', pt: 'Jogo completo · $1' }],
     [/^Rejoins (.+)$/, { en: 'Go to $1', es: 'Ve a $1', pt: 'Vá até $1' }],
     [/^Livre la marchandise à (.+) en voiture$/, { en: 'Deliver the goods to $1 by car', es: 'Entrega la mercancía en $1 en coche', pt: 'Entregue a mercadoria em $1 de carro' }],
     [/^Récupère les valises près de (.+) \((\d+)\/(\d+)\)$/, { en: 'Grab the briefcases near $1 ($2/$3)', es: 'Recoge los maletines cerca de $1 ($2/$3)', pt: 'Pegue as maletas perto de $1 ($2/$3)' }],
@@ -9614,7 +9687,7 @@ function render3D(dt) {
   { const oa = $('objArrow'); let show = false;
     if (target && playing && !S.cine) { const v = new THREE.Vector3(target.x, 25, target.y).project(R3.cam); let x = v.x, y = v.y; const behind = v.z > 1; if (behind) { x = -x; y = -y; }
       if (behind || Math.abs(x) > .9 || Math.abs(y) > .85) { const k = Math.min(.86 / Math.max(.001, Math.abs(x)), .78 / Math.max(.001, Math.abs(y))); x *= k; y *= k; show = true;
-        oa.style.left = ((x + 1) / 2 * VW) + 'px'; oa.style.top = ((1 - y) / 2 * VH) + 'px'; oa.firstChild.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
+        if (!(S.time - (last.stepBt || -9) < 1)) { last.stepBt = S.time; const se = $('step'); last.stepB = (se && se.offsetParent && se.getBoundingClientRect().bottom) || 70; } const stB = last.stepB; oa.style.left = ((x + 1) / 2 * VW) + 'px'; oa.style.top = Math.max(stB + 34, (1 - y) / 2 * VH) + 'px'; oa.firstChild.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
         const m2 = Math.round((gps.len || dist(P.x, P.y, target.x, target.y)) * .5); setText(oa.lastChild, 'oad', m2 > 999 ? (m2 / 1000).toFixed(1).replace('.', ',') + ' km' : m2 + ' m'); } }
     if (last.oas !== show) { last.oas = show; oa.hidden = !show; } }
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
@@ -9689,24 +9762,34 @@ const SCREENS = {
       <button class="op-skip" data-opskip="1">Passer ›</button><div class="op-bar"><i></i></div>
     </div>`,
   home: () => {
-    const done = Object.keys(save.done).length;
-    return `<div class="wrap home">
-      <h1 class="logo">NÉON<br><span>BAY</span></h1>
-      <p class="lead">De Néon Bay aux favelas de Morro Azul : 30 niveaux, 4 pays, 300 étapes. Monte ton équipement, soudoie les agents, passe par les tunnels et fais tomber les chefs des gangs.</p>
-      <div class="row center">
-        <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
-        <button class="btn" data-go="shop">Boutique</button>
-        <button class="btn" data-go="trophies">Succès</button>
-        <button class="btn" data-trailer="1">Bande-annonce</button>
-        <button class="btn" data-go="intro">Introduction</button>
-        ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
-        ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button>
-      </div>
-      <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
-      ${dailyHtml()}
-      <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${Object.values(save.tagsFound || {}).reduce((a, v) => a + v.length, 0)}/48 tags secrets</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
-      <div class="keys">
+    const done = Object.keys(save.done).length, starsN = Object.values(save.stars || {}).reduce((a, v) => a + v, 0), next = Math.min(30, Math.max(1, save.maxLevel));
+    const ml = (go, t, sub, cls = '') => `<button class="mm ${cls}" ${go}><b>${t}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
+    return `<div class="wrap home2">
+      <section class="hero">
+        <h1 class="logo">NÉON<br><span>BAY</span></h1>
+        <p class="tag">30 nuits. 4 pays. Une fusée.</p>
+        <nav class="mainmenu">
+          ${ml('data-go="map"', done ? 'Continuer' : 'Jouer', done ? 'Niveau ' + next + ' · ' + esc(D.LEVELS[next - 1].t) : 'Nouvelle partie · niveau 1 gratuit', 'prim')}
+          ${ml('data-go="shop"', 'Boutique', 'Armes, équipement, entraînement, propriétés')}
+          ${ml('data-go="trophies"', 'Succès', Object.keys(save.ach || {}).length + '/' + ACH.length + ' débloqués')}
+          ${ml('data-trailer="1"', 'Bande-annonce', '46 secondes')}
+          ${ml('data-go="options"', 'Options', 'Son, image, difficulté, langue')}
+          ${save.premium || PORTAL ? '' : ml('data-go="unlock"', 'Jeu complet' + (priceLabel() ? ' · ' + priceLabel() : ''), '29 niveaux de plus, paiement unique', 'gold')}
+        </nav>
+      </section>
+      <aside class="side">
+        <div class="pcard"><div class="pk"><span>Argent</span><b>${fmt(save.money)}</b></div><div class="pk"><span>Niveaux</span><b>${done}/30</b></div><div class="pk"><span>Étoiles</span><b>${starsN}/90</b></div><div class="pk"><span>Tags</span><b>${Object.values(save.tagsFound || {}).reduce((a, v) => a + v.length, 0)}/48</b></div></div>
+        ${dailyHtml()}
+        <div class="row langs">${I18 ? I18.LANGS.map(l => `<button class="chip ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}${canFull() ? '<button class="chip" data-full="1">Plein écran</button>' : ''}<button class="chip" data-go="intro">Introduction</button></div>
+      </aside>
+      <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
+    </div>`;
+  },
+  options: () => `<div class="wrap narrow">
+      <div class="top"><button class="btn small" data-optback="1">← Retour</button><h2>Options</h2><span></span></div>
+      <section class="opts"><h3>Réglages</h3><div class="optgrid">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></section>
+      <section class="opts"><h3>Langue</h3><div class="row">${I18 ? I18.LANGS.map(l => `<button class="chip ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div></section>
+      <section class="opts"><h3>Commandes au clavier</h3><div class="keys">
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
         <b>E</b><span>Voiture, boutique, tunnel, payer un agent</span>
         <b>Espace / clic</b><span>Tirer · frein à main en voiture</span>
@@ -9716,10 +9799,8 @@ const SCREENS = {
         <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
         <b>Tab / clic droit</b><span>Verrouiller une cible, puis la suivante</span>
         <b>T</b><span>Changer de station de radio</span>
-      </div>
-      <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
-    </div>`;
-  },
+      </div></section>
+    </div>`,
   map: () => {
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Carte des niveaux</h2><div class="row">${money()}<button class="btn small" data-go="shop">Boutique</button></div></div>
@@ -9793,7 +9874,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -9829,7 +9910,7 @@ const SCREENS = {
       <button class="btn small" data-restore="1">Restaurer mes achats</button>
       ${ST.state.error ? `<p class="note bad">${esc(ST.state.error)}</p>` : ''}` : `
       <div class="price">${D.SHOP_CONFIG.price}</div>
-      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).</p>`}`}
+      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le jeu complet arrive très bientôt sur les boutiques. En attendant, le niveau 1 et la balade libre sont offerts.</p>`}`}
       <label class="lab" for="code">Tu as déjà un code ?</label>
       <div class="row"><input id="code" placeholder="NBAY-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"><button class="btn" data-code="1">Valider</button></div>
       ${m ? `<p class="note ${m.ok ? 'ok' : 'bad'}">${esc(m.t)}</p>` : ''}
@@ -9965,6 +10046,7 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.optback) { showScreen(L && S.mode === 'pause' ? 'pause' : 'home'); return; }
   if (ds.allies) { resumeGame(); callAllies(); return; }
   if (ds.skipjob) { if (L && L.free) { L.idx++; L.step = makeStep(pick(FREE_JOBS.filter(t => t !== L.step.type)), L.n, L.idx); toast('Nouveau boulot : ' + TR(L.step.label)); } resumeGame(); return; }
   if (ds.trailer) { showTrailer(); return; }

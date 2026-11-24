@@ -2727,7 +2727,7 @@ function render3D(dt) {
   { const oa = $('objArrow'); let show = false;
     if (target && playing && !S.cine) { const v = new THREE.Vector3(target.x, 25, target.y).project(R3.cam); let x = v.x, y = v.y; const behind = v.z > 1; if (behind) { x = -x; y = -y; }
       if (behind || Math.abs(x) > .9 || Math.abs(y) > .85) { const k = Math.min(.86 / Math.max(.001, Math.abs(x)), .78 / Math.max(.001, Math.abs(y))); x *= k; y *= k; show = true;
-        oa.style.left = ((x + 1) / 2 * VW) + 'px'; oa.style.top = ((1 - y) / 2 * VH) + 'px'; oa.firstChild.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
+        if (!(S.time - (last.stepBt || -9) < 1)) { last.stepBt = S.time; const se = $('step'); last.stepB = (se && se.offsetParent && se.getBoundingClientRect().bottom) || 70; } const stB = last.stepB; oa.style.left = ((x + 1) / 2 * VW) + 'px'; oa.style.top = Math.max(stB + 34, (1 - y) / 2 * VH) + 'px'; oa.firstChild.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
         const m2 = Math.round((gps.len || dist(P.x, P.y, target.x, target.y)) * .5); setText(oa.lastChild, 'oad', m2 > 999 ? (m2 / 1000).toFixed(1).replace('.', ',') + ' km' : m2 + ' m'); } }
     if (last.oas !== show) { last.oas = show; oa.hidden = !show; } }
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
@@ -2802,24 +2802,34 @@ const SCREENS = {
       <button class="op-skip" data-opskip="1">Passer ›</button><div class="op-bar"><i></i></div>
     </div>`,
   home: () => {
-    const done = Object.keys(save.done).length;
-    return `<div class="wrap home">
-      <h1 class="logo">NÉON<br><span>BAY</span></h1>
-      <p class="lead">De Néon Bay aux favelas de Morro Azul : 30 niveaux, 4 pays, 300 étapes. Monte ton équipement, soudoie les agents, passe par les tunnels et fais tomber les chefs des gangs.</p>
-      <div class="row center">
-        <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
-        <button class="btn" data-go="shop">Boutique</button>
-        <button class="btn" data-go="trophies">Succès</button>
-        <button class="btn" data-trailer="1">Bande-annonce</button>
-        <button class="btn" data-go="intro">Introduction</button>
-        ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
-        ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
-      </div><div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button>
-      </div>
-      <div class="row center langs">${I18 ? I18.LANGS.map(l => `<button class="btn small ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div>
-      ${dailyHtml()}
-      <div class="stats"><span>${done}/30 niveaux</span><span>${Object.keys(save.ach || {}).length}/${ACH.length} succès</span><span>${Object.values(save.tagsFound || {}).reduce((a, v) => a + v.length, 0)}/48 tags secrets</span><span>${fmt(save.money)}</span><span>${save.premium ? 'Version complète' : 'Niveau 1 gratuit'}</span></div>
-      <div class="keys">
+    const done = Object.keys(save.done).length, starsN = Object.values(save.stars || {}).reduce((a, v) => a + v, 0), next = Math.min(30, Math.max(1, save.maxLevel));
+    const ml = (go, t, sub, cls = '') => `<button class="mm ${cls}" ${go}><b>${t}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
+    return `<div class="wrap home2">
+      <section class="hero">
+        <h1 class="logo">NÉON<br><span>BAY</span></h1>
+        <p class="tag">30 nuits. 4 pays. Une fusée.</p>
+        <nav class="mainmenu">
+          ${ml('data-go="map"', done ? 'Continuer' : 'Jouer', done ? 'Niveau ' + next + ' · ' + esc(D.LEVELS[next - 1].t) : 'Nouvelle partie · niveau 1 gratuit', 'prim')}
+          ${ml('data-go="shop"', 'Boutique', 'Armes, équipement, entraînement, propriétés')}
+          ${ml('data-go="trophies"', 'Succès', Object.keys(save.ach || {}).length + '/' + ACH.length + ' débloqués')}
+          ${ml('data-trailer="1"', 'Bande-annonce', '46 secondes')}
+          ${ml('data-go="options"', 'Options', 'Son, image, difficulté, langue')}
+          ${save.premium || PORTAL ? '' : ml('data-go="unlock"', 'Jeu complet' + (priceLabel() ? ' · ' + priceLabel() : ''), '29 niveaux de plus, paiement unique', 'gold')}
+        </nav>
+      </section>
+      <aside class="side">
+        <div class="pcard"><div class="pk"><span>Argent</span><b>${fmt(save.money)}</b></div><div class="pk"><span>Niveaux</span><b>${done}/30</b></div><div class="pk"><span>Étoiles</span><b>${starsN}/90</b></div><div class="pk"><span>Tags</span><b>${Object.values(save.tagsFound || {}).reduce((a, v) => a + v.length, 0)}/48</b></div></div>
+        ${dailyHtml()}
+        <div class="row langs">${I18 ? I18.LANGS.map(l => `<button class="chip ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}${canFull() ? '<button class="chip" data-full="1">Plein écran</button>' : ''}<button class="chip" data-go="intro">Introduction</button></div>
+      </aside>
+      <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
+    </div>`;
+  },
+  options: () => `<div class="wrap narrow">
+      <div class="top"><button class="btn small" data-optback="1">← Retour</button><h2>Options</h2><span></span></div>
+      <section class="opts"><h3>Réglages</h3><div class="optgrid">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></section>
+      <section class="opts"><h3>Langue</h3><div class="row">${I18 ? I18.LANGS.map(l => `<button class="chip ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div></section>
+      <section class="opts"><h3>Commandes au clavier</h3><div class="keys">
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
         <b>E</b><span>Voiture, boutique, tunnel, payer un agent</span>
         <b>Espace / clic</b><span>Tirer · frein à main en voiture</span>
@@ -2829,10 +2839,8 @@ const SCREENS = {
         <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
         <b>Tab / clic droit</b><span>Verrouiller une cible, puis la suivante</span>
         <b>T</b><span>Changer de station de radio</span>
-      </div>
-      <p class="legal">Jeu original. Lieux, gangs et personnages sont inventés.</p>
-    </div>`;
-  },
+      </div></section>
+    </div>`,
   map: () => {
     return `<div class="wrap">
       <div class="top"><button class="btn small" data-go="home">← Menu</button><h2>Carte des niveaux</h2><div class="row">${money()}<button class="btn small" data-go="shop">Boutique</button></div></div>
@@ -2906,7 +2914,7 @@ const SCREENS = {
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<button class="btn" data-go="options">Options</button></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -2942,7 +2950,7 @@ const SCREENS = {
       <button class="btn small" data-restore="1">Restaurer mes achats</button>
       ${ST.state.error ? `<p class="note bad">${esc(ST.state.error)}</p>` : ''}` : `
       <div class="price">${D.SHOP_CONFIG.price}</div>
-      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le lien de paiement n'est pas encore configuré (SHOP_CONFIG.buyUrl dans js/data.js).</p>`}`}
+      ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le jeu complet arrive très bientôt sur les boutiques. En attendant, le niveau 1 et la balade libre sont offerts.</p>`}`}
       <label class="lab" for="code">Tu as déjà un code ?</label>
       <div class="row"><input id="code" placeholder="NBAY-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"><button class="btn" data-code="1">Valider</button></div>
       ${m ? `<p class="note ${m.ok ? 'ok' : 'bad'}">${esc(m.t)}</p>` : ''}
@@ -3078,6 +3086,7 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.optback) { showScreen(L && S.mode === 'pause' ? 'pause' : 'home'); return; }
   if (ds.allies) { resumeGame(); callAllies(); return; }
   if (ds.skipjob) { if (L && L.free) { L.idx++; L.step = makeStep(pick(FREE_JOBS.filter(t => t !== L.step.type)), L.n, L.idx); toast('Nouveau boulot : ' + TR(L.step.label)); } resumeGame(); return; }
   if (ds.trailer) { showTrailer(); return; }
