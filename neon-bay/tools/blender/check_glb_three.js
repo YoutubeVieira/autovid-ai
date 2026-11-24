@@ -19,6 +19,8 @@ const LOOPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch'];
 const WEAPON_LEN = { pistol: [0.17, 0.26], uzi: [0.35, 0.55], shotgun: [0.9, 1.15], rifle: [0.82, 1.0],
   sniper: [1.1, 1.3], rocket: [1.0, 1.2], minigun: [0.85, 1.1], lmg: [0.95, 1.15], gl: [0.6, 0.85], rail: [0.9, 1.1] };
 const WEAPON_LENS = ['rifle', 'sniper', 'rocket', 'gl', 'rail'];
+const WEAPON_TRIS = { pistol: 4000, uzi: 9000, shotgun: 9000, rifle: 9000, sniper: 9000, rail: 9000,
+  rocket: 12000, minigun: 12000, lmg: 12000, gl: 12000 };
 const CONTRACT = {
   car: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim'],
          nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'], maxTris: 4200 },
@@ -31,7 +33,8 @@ const CONTRACT = {
            // baked textures: colour map on these slots (x material.color), fabric normal maps
            textured: ['Skin', 'Shirt', 'Pants', 'Shoes'], normals: ['Shirt', 'Pants'],
            maxTris: 9000, maxBytes: 900 * 1024 },
-  weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 2500, maxBytes: 120 * 1024 },
+  // v3 weapons: pistol <= 4000 tris, rifles <= 9000, heavy weapons <= 12000 (WEAPON_TRIS), <= 600 KB each
+  weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 12000, maxBytes: 600 * 1024 },
   lamp: { mats: ['Bulb'], maxTris: 1500 },
   prop: { mats: [], maxTris: 1500 },
 };
@@ -152,6 +155,7 @@ function contractFor(name) {
       if (WEAPON_LENS.includes(id) && !info.mats.includes('Lens')) errs.push('missing material Lens');
       if (info.clipNames.length) errs.push('weapons must not be animated');
       if (len && (info.size[0] < len[0] || info.size[0] > len[1])) errs.push('length ' + info.size[0] + ' outside ' + len);
+      if (WEAPON_TRIS[id] && info.tris > WEAPON_TRIS[id]) errs.push('too many triangles for ' + id + ': ' + info.tris + ' > ' + WEAPON_TRIS[id]);
       if (!(info.max[0] > -info.min[0])) errs.push('barrel not towards +X');
       if (!(info.min[0] < 0 && info.min[1] < 0 && info.max[1] > 0)) errs.push('origin not inside the grip area');
     }
