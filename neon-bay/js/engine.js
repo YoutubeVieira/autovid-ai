@@ -242,7 +242,7 @@ function drive(c, dt, thr, st, hb) {
   if (c.boat && Math.abs(c.v) > 70 && Math.random() < dt * 9) parts.push({ x: c.x - Math.cos(c.a) * 24 + rnd(-5, 5), y: c.y - Math.sin(c.a) * 24 + rnd(-5, 5), vx: rnd(-15, 15), vy: rnd(-15, 15), life: .7, max: .7, r: rnd(2, 4), col: '#9ec9e6' });
 }
 function driveInner(c, dt, thr, st, hb) {
-  const boost = c === P.car && P.nitro > 0;
+  const boost = c === P.car && (P.nitro > 0 || (P.turboT || 0) > 0);
   const maxV = (c.kind === 'police' ? 520 + lvl() * 2 : (c === P.car ? 520 : 380)) * (boost ? 1.5 : 1);
   if (boost) thr = 1;
   if (thr > 0) c.v += thr * (boost ? 900 : 440) * dt * (c.v < 0 ? 2.2 : 1); else if (thr < 0) c.v += thr * (c.v > 0 ? 760 : 320) * dt;
@@ -689,6 +689,9 @@ function cycleWeapon(dir = 1) {
   msg(wepDef(save.weapon).name);
 }
 function useMedkit() { if (S.mode !== 'play') return; if (save.medkits <= 0) { msg('Plus de trousse de soins (boutique)'); return; } if (S.hp >= maxHp()) { msg('Santé déjà au maximum'); return; } save.medkits--; S.hp = Math.min(maxHp(), S.hp + 50); toast('+50 santé'); }
+// turbo : marche comme en voiture, se recharge tout seul (la nitro achetée reste plus forte)
+function useTurbo() { if (S.mode !== 'play') return; if ((P.turboT || 0) > 0) return; if ((S.turboE == null ? 1 : S.turboE) < .3) { msg('Turbo en recharge'); return; } P.turboT = 2.6; au('whoosh'); vib(35); track('turbos'); }
+function turboBtn() { if (P.car && save.nitro > 0 && P.nitro <= 0) useNitro(); else useTurbo(); }
 function useNitro() { if (S.mode !== 'play' || !P.car) return; if (P.nitro > 0) return; if (save.nitro <= 0) { msg('Plus de nitro (boutique)'); return; } save.nitro--; P.nitro = 2.5; }
 
 // ---------- étapes de mission ----------
@@ -717,6 +720,26 @@ function propsHtml() {
     return `<div class="item ${locked ? 'is-locked' : ''}"><div><h4>${p[1]}</h4><p>+${fmt(p[3])} par niveau terminé</p></div>${btn}</div>`; }).join('')}</div>`).join('');
 }
 function buyProp(key) { const [rid, id] = key.split(':'), p = (PROPS[rid] || []).find(x => x[0] === id); if (!p || (save.props || {})[key]) return; if (save.money < p[2]) { au('click'); flashNote('Pas assez d’argent'); return; } save.money -= p[2]; save.props = Object.assign({}, save.props, { [key]: Date.now() }); persist(); au('cash'); vib([30, 40, 60]); flashNote(p[1] + ' est à toi'); track('props'); showScreen('shop', shopState); }
+const STEP_HELP = {
+  goto: 'Va jusqu’au cercle lumineux. Suis les flèches jaunes au sol (le GPS) ; prends une voiture si c’est loin (E près d’une voiture).',
+  steal: 'Repère la voiture marquée d’un losange doré, approche-toi et appuie sur E (ou A) pour la voler.',
+  garage: 'Ramène la voiture volée jusqu’au garage (le G vert). Si elle est détruite, n’importe quelle voiture fait l’affaire.',
+  buy: 'Entre dans la boutique (case verte) avec E, achète ce que tu veux puis ferme la boutique : l’étape est validée.',
+  deliver: 'Monte dans une voiture et roule jusqu’au point de livraison avant la fin du chrono. Le turbo aide !',
+  collect: 'Ramasse les objets signalés sur la carte, un par un : le GPS t’emmène au suivant.',
+  elim: 'Neutralise tous les ennemis du groupe. Appuie sur CIBLE pour viser automatiquement, utilise les murs pour te couvrir, appelle des renforts (G).',
+  boss: 'Abats le chef de gang. Il est plus résistant et ses gardes le protègent : élimine-les d’abord, garde des soins.',
+  escape: 'Sème la police : éloigne-toi hors de vue (jauge « Hors de vue »), prends un tunnel (T orange) ou paie un agent (B). En mer, les voitures de police ne te suivent pas.',
+  survive: 'Tiens jusqu’à la fin du chrono. Reste mobile, soigne-toi (H ou B), mets-toi à couvert.',
+  tunnel: 'Va jusqu’à la bouche de tunnel (T orange) et appuie sur E pour traverser la ville en un instant.',
+  bribe: 'Va voir l’agent corrompu et appuie sur E pour le payer. Garde assez d’argent sinon il te dénonce.',
+  escort: 'Retrouve la personne à protéger, puis emmène-la à destination. Elle monte dans ta voiture si tu t’arrêtes près d’elle.',
+  destroy: 'Détruis tous les véhicules du convoi : tire dessus (une arme lourde ou un lance-roquettes va plus vite).',
+  race: 'Passe tous les checkpoints dans l’ordre avant la fin du chrono. Monte dans une voiture, utilise le turbo dans les lignes droites.',
+  jailbreak: 'Approche du portail de la prison, neutralise les gardiens, puis emmène le prisonnier libéré en lieu sûr.',
+};
+function showTrailer() { const ov = document.createElement('div'); ov.className = 'trailer'; ov.innerHTML = `<video src="media/bande-annonce.mp4" controls autoplay playsinline></video><button class="btn small">${TR('Fermer')}</button>`; document.body.appendChild(ov); au('setMusic', null); const close = () => { ov.remove(); au('setMusic', 'menu'); }; ov.querySelector('button').onclick = close; ov.querySelector('video').onended = close; ov.querySelector('video').onerror = () => { ov.querySelector('video').replaceWith(Object.assign(document.createElement('p'), { textContent: TR('La bande-annonce n’est pas disponible dans cette version.') })); }; }
+function showHelp() { if (S.mode !== 'play' || !L || !L.step) return; S.mode = 'pause'; if (PORTAL) PORTAL.stop(); au('duck', true); showScreen('help'); }
 const GUARDS = { name: 'les gardiens', color: '#6b8cff', look: { shirt: '#3a4a66', sleeve: '#3a4a66', pants: '#1a2233', hat: '#1a2233', jacket: null } };
 const INMATE_LOOK = { shirt: '#ff5a00', sleeve: '#ff5a00', pants: '#ff5a00', skin: '#8d5a3b', hair: '#111111', longSleeve: true };
 const INMATE = { usa: 'Tyrell', ita: 'Nino', col: 'El Flaco', bra: 'Biel' };
@@ -861,7 +884,7 @@ function startLevel(n, from = 0, free = false) {
   if (!world || world.region !== region) world = buildWorld(region);
   booms = []; scorch = []; prison = null; inmates = []; cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
   S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = maxHp(); S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
-  P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0;
+  P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0; P.turboT = 0; S.turboE = 1; allies = []; S.pboatCd = 0;
   if (!save.owned[save.weapon]) save.weapon = 'pistol';
   grenades.length = 0; skids.length = 0; skidI = 0;
   P.ammo = {}; for (const w0 of D.WEAPONS) if (w0.mag) { const w = wepDef(w0.id); P.ammo[w.id] = { mag: w.mag, res: w.reserve }; } P.reload = 0;
@@ -897,10 +920,35 @@ function spawnBoats() {
       const x = k === 'e' ? W + d : k === 'w' ? -d : along, y = k === 's' ? W + d : k === 'n' ? -d : along, a = k === 'e' || k === 'w' ? PI / 2 : 0;
       if (tileAt(x, y) === WATER) mkBoat(x, y, a + (cruise ? rnd(-.5, .5) : 0), cruise); } }
 }
+function updPoliceBoats(dt) {
+  S.pboatCd = (S.pboatCd || 0) - dt; const onSea = P.car && P.car.boat, pb = cars.filter(c => c.boat && c.kind === 'police' && !c.wreck);
+  if (onSea && stars() >= 2 && pb.length < Math.min(3, stars() - 1) && S.pboatCd <= 0) { S.pboatCd = 6;
+    for (let k = 0; k < 14; k++) { const a = rnd(TAU), d = rnd(420, 700), x = P.x + Math.cos(a) * d, y = P.y + Math.sin(a) * d; if (tileAt(x, y) === WATER && tileAt(x + 30, y) === WATER && tileAt(x, y + 30) === WATER) { const c = mkBoat(x, y, a + PI, false); c.kind = 'police'; c.ai = 'pboat'; c.color = '#eef0ff'; c.hp = 160; c.flash = rnd(1); if (!S.pboatMsg) { S.pboatMsg = 1; toast('Garde-côtes à tes trousses !'); } break; } } }
+  if (!stars()) for (const c of pb) c.ai = null;
+}
 function updBoat(c, dt) {
+  if (c.ai === 'pboat') { const tx = P.car ? P.car.x : P.x, ty = P.car ? P.car.y : P.y, da = angDiff(Math.atan2(ty - c.y, tx - c.x), c.a), ahead = tileAt(c.x + Math.cos(c.a) * 90, c.y + Math.sin(c.a) * 90) !== WATER;
+    drive(c, dt, ahead ? .3 : 1, ahead ? 1 : clamp(da * 2, -1, 1), false); return; }
   if (c.ai !== 'cruise') { c.v *= 1 - dt; BOATCHK = true; moveCar(c, dt); BOATCHK = false; return; }
   const ax = c.x + Math.cos(c.a) * 110, ay = c.y + Math.sin(c.a) * 110; const turn = tileAt(ax, ay) !== WATER ? 1 : Math.sin(S.time * .3 + c.bob) * .15;
   drive(c, dt, Math.abs(c.v) < 160 ? .5 : 0, turn, false);
+}
+let allies = [];
+// renforts : deux alliés qui te suivent et tirent sur les ennemis (2 minutes)
+function callAllies() {
+  if (S.mode !== 'play') return; if (allies.length) { msg('Tes renforts sont déjà là'); return; } const cost = 400 + lvl() * 40;
+  if (save.money < cost) { msg('Il te faut ' + fmt(cost) + ' pour appeler des renforts'); return; }
+  save.money -= cost; for (let k = 0; k < 2; k++) { const p2 = freeNear(P.x + rnd(-60, 60), P.y + rnd(-60, 60), 90); allies.push({ x: p2.x, y: p2.y, a: 0, step: 0, cd: rnd(.3, .8), t: 120, hp: 1, female: k === 1, look: { shirt: '#16141c', jacket: k ? '#ff2e93' : '#21e6ff', pants: '#1d1a2e', skin: pick(PEDC), hair: '#1a120c' } }); }
+  au('cash'); toast('Renforts en route · -' + fmt(cost)); track('allies'); if (S.screen === 'pause' || S.screen === 'help') resumeGame();
+}
+function updAllies(dt) {
+  for (const al of allies) { al.t -= dt; const tx = P.car ? P.car.x : P.x, ty = P.car ? P.car.y : P.y, d = dist(al.x, al.y, tx, ty);
+    if (d > 900) { const p2 = freeNear(tx + rnd(-60, 60), ty + rnd(-60, 60), 90); al.x = p2.x; al.y = p2.y; continue; }
+    let foe = null, fd = 340; for (const e of enemies) if (e.hp > 0 && dist(e.x, e.y, al.x, al.y) < fd && los(al.x, al.y, e.x, e.y)) { fd = dist(e.x, e.y, al.x, al.y); foe = e; }
+    al.shooting = !!foe; al.cd -= dt;
+    if (foe) { al.a = Math.atan2(foe.y - al.y, foe.x - al.x); if (al.cd <= 0) { al.cd = rnd(.45, .8); const aa = al.a + rnd(-.08, .08); bullets.push({ x: al.x + Math.cos(aa) * 12, y: al.y + Math.sin(aa) * 12, vx: Math.cos(aa) * 760, vy: Math.sin(aa) * 760, life: .6, dmg: 12 + lvl() * .7, from: 'player' }); au('shot', 'rifle', spatial(al.x, al.y)[0], .5); } }
+    if (d > 70) { const a2 = Math.atan2(ty - al.y, tx - al.x); if (!foe) al.a = a2; const sp = d > 220 ? 230 : 150; moveBody(al, Math.cos(a2) * sp * dt, Math.sin(a2) * sp * dt); al.step += sp * dt * .25; } }
+  allies = allies.filter(al => al.t > 0);
 }
 let animals = [];
 function spawnAnimals() {
@@ -1028,7 +1076,7 @@ const ACH = [
   { id: 'lvl23', name: 'Maître de Sierra Verde', key: 'levelsDone', goal: 23, r: 9000 },
   { id: 'lvl30', name: 'Légende de Morro Azul', key: 'levelsDone', goal: 30, r: 15000 },
 ];
-const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets', jailbreaks: 'Fais évader {n} prisonniers', freeJobs: 'Termine {n} boulots en balade libre', props: 'Achète {n} propriétés' };
+const STAT_LABEL = { carsStolen: 'Vole {n} voitures', escapes: 'Sème la police {n} fois', kills: 'Neutralise {n} ennemis', tunnels: 'Prends {n} tunnels', bribes: 'Soudoie la police {n} fois', explosions: 'Fais exploser {n} véhicules', cashPicked: 'Ramasse {n} $ par terre', levelsDone: 'Termine {n} niveaux différents', levelsPlayed: 'Termine {n} niveau(x)', threeStars: 'Obtiens 3 étoiles sur {n} niveaux', tags: 'Trouve {n} tags secrets', jailbreaks: 'Fais évader {n} prisonniers', turbos: 'Utilise {n} fois le turbo', allies: 'Appelle {n} fois des renforts', freeJobs: 'Termine {n} boulots en balade libre', props: 'Achète {n} propriétés' };
 const DAILY_POOL = [['escapes', 3], ['carsStolen', 5], ['kills', 20], ['tunnels', 2], ['cashPicked', 400], ['explosions', 4], ['levelsPlayed', 1], ['bribes', 1]];
 const today = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
 function ensureDaily() {
@@ -1116,6 +1164,9 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyQ') cycleWeapon(1);
     else if (e.code === 'KeyH') useMedkit();
     else if (e.code === 'KeyN') useNitro();
+    else if (e.code === 'KeyV') useTurbo();
+    else if (e.code === 'KeyI') showHelp();
+    else if (e.code === 'KeyG') callAllies();
     else if (e.code === 'KeyC') cycleCam();
     else if (e.code === 'KeyT') radioNext();
     else if (e.code === 'Tab' || e.code === 'KeyL') { e.preventDefault && e.preventDefault(); lockNext(); }
@@ -1187,7 +1238,7 @@ const tb = (id, fn) => $(id).addEventListener('pointerdown', e => { e.preventDef
   const endF = e => { if (e.pointerId !== fid) return; fid = null; touch.shoot = false; touch.aiming = false; fb.classList.remove('aiming'); knob2.style.transform = ''; };
   fb.addEventListener('pointerup', endF); fb.addEventListener('pointercancel', endF); }
 $('portraitOk').addEventListener('click', () => { save.portraitOk = true; persist(); $('rotate').hidden = true; S.rot = false; });
-tb('bLock', lockNext); tb('bRadio', radioNext); tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', useNitro); tb('bPause', pauseGame);
+tb('bLock', lockNext); tb('bRadio', radioNext); tb('bCam', cycleCam); tb('bAct', contextAction); tb('bWep', () => cycleWeapon(1)); tb('bMed', () => P.car ? (S.hbTouch = 1) : useMedkit()); tb('bRel', () => P.car ? useNitro() : startReload()); tb('bBribe', bribePolice); tb('bNitro', turboBtn); tb('bHelp', showHelp); tb('bPause', pauseGame);
 
 // ---------- HUD ----------
 const hud = { money: $('money'), stars: $('stars'), hp: $('hp'), armor: $('armor'), wep: $('wep'), inv: $('inv'), step: $('step'), sN: $('sN'), sD: $('sD'), sC: $('sC'), dots: $('dots'), lvlName: $('lvlName'), toast: $('toast'), banner: $('banner'), prompt: $('prompt'), vipBar: $('vipBar'), vipHp: $('vipHp'), fade: $('fade') };
@@ -1242,8 +1293,9 @@ function updHud(dt) {
   else if (s > 0 && nearCop()) hint = 'B : soudoyer les agents (' + fmt(bribeCost()) + ')';
   if (msgT > 0) { msgT -= dt; if (msgT <= 0) hud.prompt.hidden = true; }
   else { hud.prompt.hidden = !hint; if (hint) setText(hud.prompt, 'hint', hint); }
+  { const e2 = Math.round((S.turboE == null ? 1 : S.turboE) * 20); if (last.te !== e2) { last.te = e2; $('bNitro').style.setProperty('--e', (e2 * 5) + '%'); $('bNitro').classList.toggle('low', e2 < 6); } }
   const bb = $('bBribe'), bn = $('bNitro'); const showB = s > 0 && nearCop(); if (last.bb !== showB) { last.bb = showB; bb.hidden = !showB; }
-  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = true; $('bRadio').hidden = !inCar; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
+  const inCar = !!P.car; if (last.bn !== inCar) { last.bn = inCar; bn.hidden = false; bn.textContent = TR('TURBO'); $('bRadio').hidden = !inCar; $('fireLbl').textContent = TR(inCar ? 'FREIN' : 'TIRER'); $('bShoot').querySelector('small').textContent = TR(inCar ? 'frein à main' : 'glisse pour viser'); $('lblX').textContent = TR(inCar ? 'NITRO' : 'RECHARGE'); $('lblB').textContent = TR(inCar ? 'SOIN' : 'SOIN'); }
   { let la = 'ACTION'; if (P.car) la = 'DESCENDRE'; else if (agent && !agent.paid && dist(P.x, P.y, agent.x, agent.y) < 60) la = 'PAYER'; else if (tileAt(P.x, P.y) === TUNNEL) la = 'TUNNEL'; else if (tileAt(P.x, P.y) === SHOP) la = 'BOUTIQUE'; else if (cars.some(c => !c.wreck && dist(c.x, c.y, P.x, P.y) < 48)) la = 'MONTER';
     if (last.la !== la) { last.la = la; $('lblA').textContent = TR(la); } }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0) hud.toast.style.opacity = 0; }
@@ -1265,13 +1317,13 @@ function update(dt) {
   if (S.bot && S.dead <= 0) { // testeurs automatiques : mêmes règles que le joueur (vitesse, tir, conduite), sans téléportation
     const B = S.bot;
     if (P.car) { if (B.nitro && P.nitro <= 0 && save.nitro > 0) useNitro(); const c = P.car; drive(c, dt, B.thr || 0, B.st || 0, !!B.hb); P.x = c.x; P.y = c.y; P.a = c.a; }
-    else { const m = Math.hypot(B.mx || 0, B.my || 0); if (m > .1) { const sp = B.run ? 230 : 150, ma = Math.atan2(B.my, B.mx); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+    else { const m = Math.hypot(B.mx || 0, B.my || 0); if (m > .1) { const sp = (B.run ? 230 : 150) * ((P.turboT || 0) > 0 ? 1.65 : 1), ma = Math.atan2(B.my, B.mx); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
       if (B.aimA !== undefined && B.aimA !== null) P.a = B.aimA; P.cd -= dt; if (B.shoot && P.cd <= 0) fire(); }
   } else if (S.dead <= 0) {
     if (P.car) {
       const c = P.car; let thr = (U ? 1 : 0) - (Dn ? 1 : 0), st = (Rk ? 1 : 0) - (Lk ? 1 : 0);
       if (pad.on) { if (pad.rt > .05 || pad.lt > .05) thr = pad.rt - pad.lt; if (Math.abs(pad.lx) > .15) st = pad.lx; }
-      if (touch.mag > .2) { const ja = Math.atan2(touch.jy, touch.jx) + camRot(), d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
+      if (touch.mag > .2) { let ja = Math.atan2(touch.jy, touch.jx) + camRot(); if (save.driveAssist !== false && !c.boat) { const ax = Math.round(ja / (PI / 2)) * (PI / 2); if (Math.abs(angDiff(ax, ja)) < .5) ja = ax; } const d = angDiff(ja, c.a); if (Math.abs(d) > 2.5) { thr = -touch.mag; st = 0; } else { thr = touch.mag; st = clamp(d * 2.2, -1, 1); } }
       if ((keys.ShiftLeft || keys.ShiftRight) && P.nitro <= 0 && save.nitro > 0 && thr > 0 && !last.shiftN) { useNitro(); }
       last.shiftN = keys.ShiftLeft || keys.ShiftRight;
       drive(c, dt, thr, st, (keys.Space || mouse.down || touch.shoot || pad.hb || S.hbTouch > 0) && true); if (S.hbTouch > 0) S.hbTouch -= dt * 3;
@@ -1281,7 +1333,7 @@ function update(dt) {
       if (touch.mag > .15) { mx = touch.jx; my = touch.jy; }
       if (pad.lmag > .2) { mx = pad.lx; my = pad.ly; }
       const m = Math.hypot(mx, my);
-      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
+      if (m > .1) { const sp = (keys.ShiftLeft || keys.ShiftRight || touch.mag > .9 || pad.lmag > .9 ? 230 : 150) * Math.min(1, m) * ((P.turboT || 0) > 0 ? 1.65 : 1); const ma = Math.atan2(my, mx) + camRot(); P.a = ma; movePlayer(Math.cos(ma) * sp * dt, Math.sin(ma) * sp * dt); P.step += sp * dt * .25; }
       if (pad.rmag > .3) { touch.aiming = true; touch.aimA = Math.atan2(pad.ry, pad.rx) + camRot(); S.padAim = true; } else if (S.padAim) { S.padAim = false; if (!touch.shoot) touch.aiming = false; }
       if (touch.aiming) P.a = touch.aimA;
       P.cd -= dt; if (act && P.cd <= 0) fire();
@@ -1363,7 +1415,7 @@ function update(dt) {
   // police
   const s = stars();
   if (s > 0) {
-    if (cars.some(c => c.kind === 'police' && (c.ai === 'police' || c.ai === 'block') && dist(c.x, c.y, P.x, P.y) < 430) || (heli && !heli.leave && dist(heli.x, heli.y, P.x, P.y) < 600)) S.unseen = 0; else S.unseen += dt;
+    if (cars.some(c => c.kind === 'police' && (c.ai === 'police' || c.ai === 'block' || c.ai === 'pboat') && dist(c.x, c.y, P.x, P.y) < 430) || (heli && !heli.leave && dist(heli.x, heli.y, P.x, P.y) < 600)) S.unseen = 0; else S.unseen += dt;
     const lose = ((save.perks.radio ? 5 : 7) + lvl() * .04) * (.55 + .45 * ez());
     if (S.unseen > lose && !(L && L.step && L.step.lock)) { S.heat = Math.max(0, s - 1); S.unseen = 0; if (S.heat < 1) { S.heat = 0; msg('Police semée'); policeLeave(); track('escapes'); } }
     let near = false; for (const c of cars) if (c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, P.x, P.y) < (P.car ? 62 : 56) && Math.abs(c.v) < 90) { near = true; break; }
@@ -1383,7 +1435,10 @@ function update(dt) {
   if (L) updLevel(dt);
 }
 function updVip(dt) {
-  updInmates(dt); updAnimals(dt);
+  updInmates(dt); updAnimals(dt); updAllies(dt); updPoliceBoats(dt);
+  if (S.turboE == null) S.turboE = 1;
+  if ((P.turboT || 0) > 0) { P.turboT -= dt; S.turboE = Math.max(0, S.turboE - dt * .34); if (S.turboE <= 0) P.turboT = 0; if (!P.car && Math.random() < dt * 30) parts.push({ x: P.x - Math.cos(P.a) * 14 + rnd(-6, 6), y: P.y - Math.sin(P.a) * 14 + rnd(-6, 6), vx: -Math.cos(P.a) * 90, vy: -Math.sin(P.a) * 90, life: .3, max: .3, r: 3, col: '#21e6ff' }); }
+  else S.turboE = Math.min(1, S.turboE + dt * .09);
   if (world.region.space && S.mode === 'play') { const t0 = tileAt(P.x, P.y), safe = P.car || t0 === PLAZA || t0 === SHOP || t0 === PAD;
     S.o2 = clamp((S.o2 == null ? 100 : S.o2) + dt * (safe ? 14 : -(world.region.id === 'mars' ? 1.6 : 2.2)), 0, 100);
     if (S.o2 <= 0) { hurt(dt * 9); if ((S.o2warn || 0) < S.time) { toast('Plus d’oxygène ! Monte dans un rover ou rejoins un dôme'); S.o2warn = S.time + 4; } }
@@ -2616,6 +2671,7 @@ function render3D(dt) {
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (prison && near(prison.x, prison.y)) sync(prison, makePrison, posePrison);
   for (const an of animals) if (near(an.x, an.y)) sync(an, makeAnimal, poseAnimal);
+  for (const al of allies) if (near(al.x, al.y)) sync(al, e => HUMAN_GLB() ? makeHumanHero(e.look, 'rifle', 'black', e.female) : makeChar(Object.assign({}, e.look, { sleeve: e.look.jacket, longSleeve: true, gun: true, gunId: 'rifle', glow: e.look.jacket })), (m, e) => { m.userData.aimNow = e.shooting; poseChar(m, e.x, e.y, e.a, e.step, false, e.shooting, {}); if (m.userData.bones) heroAim(m, e.a, 0, !!e.shooting); });
   for (const m of inmates) if (near(m.x, m.y)) sync(m, e => makeChar(Object.assign({}, INMATE_LOOK, { skin: e.skin, hair: pick(['#111111', '#3b2414', null]) })), (mm, e) => poseChar(mm, e.x, e.y, e.a, e.step, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar(vip.look || { shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });
   if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
@@ -2664,6 +2720,12 @@ function render3D(dt) {
     R3.q.identity(); R3.s.set(1, 1, 1); R3.gpsM.count = n2; R3.gpsM.instanceMatrix.needsUpdate = true;
     const urgent = st && st.time !== null && !st.survive && gps.len / (P.car ? 300 : 150) > st.time * .8; R3.gpsM.material.color.set(urgent ? 0xff4d5e : 0xffd23f); }
   R3.ring.visible = R3.beam.visible = !!target; if (target && Math.hypot(target.x - R3.cam.position.x, target.y - R3.cam.position.z) < 150) R3.beam.visible = false; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
+  { const oa = $('objArrow'); let show = false;
+    if (target && playing && !S.cine) { const v = new THREE.Vector3(target.x, 25, target.y).project(R3.cam); let x = v.x, y = v.y; const behind = v.z > 1; if (behind) { x = -x; y = -y; }
+      if (behind || Math.abs(x) > .9 || Math.abs(y) > .85) { const k = Math.min(.86 / Math.max(.001, Math.abs(x)), .78 / Math.max(.001, Math.abs(y))); x *= k; y *= k; show = true;
+        oa.style.left = ((x + 1) / 2 * VW) + 'px'; oa.style.top = ((1 - y) / 2 * VH) + 'px'; oa.firstChild.style.transform = `rotate(${Math.atan2(-y, x)}rad)`;
+        const m2 = Math.round((gps.len || dist(P.x, P.y, target.x, target.y)) * .5); setText(oa.lastChild, 'oad', m2 > 999 ? (m2 / 1000).toFixed(1).replace('.', ',') + ' km' : m2 + ' m'); } }
+    if (last.oas !== show) { last.oas = show; oa.hidden = !show; } }
   if (target) { const pu = 1 + .12 * Math.sin(S.time * 4); R3.ring.position.set(target.x, 2, target.y); R3.ring.scale.setScalar(pu); R3.beam.position.set(target.x, 150, target.y); }
   R3.arrow.visible = !!(target && dist(P.x, P.y, target.x, target.y) > 200 && gps.path.length < 2);
   if (R3.arrow.visible) { const a = Math.atan2(target.y - P.y, target.x - P.x), r = P.car ? 58 : 42; R3.arrow.position.set(P.x + Math.cos(a) * r, 6, P.y + Math.sin(a) * r); R3.arrow.rotation.y = -a; }
@@ -2744,6 +2806,7 @@ const SCREENS = {
         <button class="btn primary" data-go="map">${done ? 'Continuer' : 'Jouer'}</button>
         <button class="btn" data-go="shop">Boutique</button>
         <button class="btn" data-go="trophies">Succès</button>
+        <button class="btn" data-trailer="1">Bande-annonce</button>
         <button class="btn" data-go="intro">Introduction</button>
         ${save.premium || PORTAL ? '' : `<button class="btn gold" data-go="unlock">Jeu complet${priceLabel() ? ' · ' + priceLabel() : ''}</button>`}
         ${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}
@@ -2829,10 +2892,17 @@ const SCREENS = {
       <p class="lead">Comme au volant : une pause toutes les heures, c'est mieux. Lève-toi, bois un verre d'eau, repose tes yeux quelques minutes. Ta partie t'attend.</p>
       <div class="col"><button class="btn primary" data-quit="1">Faire une pause</button><button class="btn" data-resume="1">Continuer encore un peu</button></div>
     </div>`,
+  help: () => { const st = L.step, cost = 400 + lvl() * 40; return `<div class="wrap narrow center-col">
+      <p class="eyebrow">${L.free ? 'Balade libre · boulot ' + (L.jobs + 1) : 'Étape ' + (L.idx + 1) + '/10'}</p><h2 class="title">${esc(st.label)}</h2>
+      <p class="lead">Objectif : ${esc(stepDesc(st))}</p>
+      <p class="lead">${esc(STEP_HELP[st.type] || '')}</p>
+      <ul class="feat"><li>Flèches jaunes au sol et flèche au bord de l’écran : la direction de l’objectif.</li><li>TURBO (V) : course ou voiture plus rapides, se recharge tout seul.</li><li>Renforts (G) : deux alliés armés pendant 2 minutes (${fmt(cost)}).</li></ul>
+      <div class="col"><button class="btn primary" data-resume="1">Compris, on y va</button>${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(cost)}</button>`}${L.free ? '<button class="btn" data-skipjob="1">Changer de boulot</button>' : ''}</div>
+    </div>`; },
   pause: () => `<div class="wrap narrow center-col">
       <h2 class="title">Pause</h2>
       <p class="lead">Niveau ${L.n} · ${esc(L.def.t)} · étape ${L.idx + 1}/10</p>
-      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></div>
+      <div class="col"><button class="btn primary" data-resume="1">Reprendre</button>${L.free ? `<button class="btn" data-free="${L.n}">Nouvelle balade</button>` : `<button class="btn" data-start="${L.n}">Recommencer le niveau</button>`}${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(400 + lvl() * 40)}</button>`}<button class="btn" data-photo="1">Photo à partager</button><button class="btn" data-quit="1">Quitter vers la carte</button>${canFull() ? '<button class="btn" data-full="1">Plein écran</button>' : ''}<div class="row center">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></div>
     </div>`,
   result: d => {
     const r = regionOf(d.n);
@@ -3004,6 +3074,9 @@ screenEl.addEventListener('click', e => {
   if (ds.photo) { takePhoto(); return; }
   if (ds.diff) { save.diff = ((save.diff == null ? 1 : save.diff) + 1) % DIFF.length; persist(); if (S.screen === 'brief' && briefN) showScreen('brief', { n: briefN }); else showScreen(S.screen); return; }
   if (ds.train) { train(ds.train); return; }
+  if (ds.allies) { resumeGame(); callAllies(); return; }
+  if (ds.skipjob) { if (L && L.free) { L.idx++; L.step = makeStep(pick(FREE_JOBS.filter(t => t !== L.step.type)), L.n, L.idx); toast('Nouveau boulot : ' + TR(L.step.label)); } resumeGame(); return; }
+  if (ds.trailer) { showTrailer(); return; }
   if (ds.prop) { buyProp(ds.prop); return; }
   if (ds.launch) { launchRocket(+ds.launch); return; }
   if (ds.free) { const n = +ds.free; au('init'); startLevel(n, 0, true); return; }

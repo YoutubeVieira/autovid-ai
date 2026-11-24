@@ -11,9 +11,11 @@ aucune géométrie, texture ou animation reprise d'un autre jeu ou d'un pack. R�
 (`python3 tools/blender/gen_*.py`), mêmes droits que le reste du jeu.
 
 - `car_sedan.glb`, `car_sports.glb`, `car_suv.glb`, `car_van.glb` : voitures (`gen_cars.py`).
-- `human_m.glb`, `human_f.glb` : humains skinnés (version 2 : visage, mains avec pouce, vêtements en volume)
-  avec animations Idle, Walk, Run, Punch, Death, Aim, AimRifle, Crouch (`gen_human.py`). Personnages inventés,
-  ne représentant aucune personne réelle.
+- `human_m.glb`, `human_f.glb`, `human_m2.glb` (trapu, sweat à capuche, casquette), `human_f2.glb` (jupe,
+  queue de cheval) : humains skinnés (version 3 : doigts animés, textures procédurales cuites dans Blender —
+  peau, maille, sergé, semelles — et normal maps tissu, mèches de cheveux en géométrie) avec animations Idle,
+  Walk, Run, Punch, Death, Aim, AimRifle, Crouch (`gen_human.py`, `nb_textures.py`). Personnages inventés,
+  ne représentant aucune personne réelle ; aucune photo ni texture externe.
 - `w_pistol.glb`, `w_uzi.glb`, `w_shotgun.glb`, `w_rifle.glb`, `w_sniper.glb`, `w_rocket.glb`, `w_minigun.glb`,
   `w_lmg.glb`, `w_gl.glb`, `w_rail.glb` : armes (`gen_weapons.py`). Designs génériques inventés : aucune
   reproduction d'une arme réelle, aucune marque.

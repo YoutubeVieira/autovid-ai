@@ -5,7 +5,7 @@ const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..'), out = path.join(root, 'dist-web');
 fs.rmSync(out, { recursive: true, force: true });
 const copy = (rel) => { const s = path.join(root, rel); if (!fs.existsSync(s)) return; fs.cpSync(s, path.join(out, rel), { recursive: true }); };
-['js', 'vendor', 'icons', 'audio', 'models', 'manifest.webmanifest', 'privacy.html'].forEach(copy);
+['js', 'vendor', 'icons', 'audio', 'models', 'media', 'manifest.webmanifest', 'privacy.html'].forEach(copy);
 const stamp = Date.now().toString(36);
 fs.writeFileSync(path.join(out, 'sw.js'), fs.readFileSync(path.join(root, 'sw.js'), 'utf8').replace('__BUILD__', stamp));
 let html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
