@@ -362,6 +362,23 @@ body.playing .hudhelp{display:block}body.cine .hudhelp{display:none}
 /* HUD premium */
 #step{border-radius:var(--r2)!important;background:linear-gradient(180deg,rgba(30,24,60,.72),rgba(12,9,26,.82))!important;border:1px solid var(--glass-b)!important;box-shadow:var(--glass-hi),0 10px 28px rgba(0,0,0,.35)}
 #mini{border-radius:var(--r2)!important}
+
+/* vue aérienne */
+#mini{pointer-events:auto;cursor:zoom-in}
+.aerial{height:100%;max-width:1100px;margin:0 auto;display:grid;grid-template-rows:auto minmax(0,1fr) auto auto;gap:10px;padding:4px 0}
+.aer-top{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.aer-top h2{margin:2px 0 0;font-size:clamp(18px,3vw,26px)}
+.aer-obj{margin:4px 0 0;color:#c9c0e6;font-size:14px}
+.aer-kpi{background:var(--glass);border:1px solid var(--glass-b);border-radius:var(--r2);padding:8px 14px;text-align:right;min-width:110px}
+.aer-kpi span{display:block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.aer-kpi b{font-size:20px;color:var(--cyan);font-variant-numeric:tabular-nums}
+.aer-map{min-height:0;display:flex;align-items:center;justify-content:center}
+.aer-map canvas{border-radius:var(--r3);border:1px solid rgba(33,230,255,.35);box-shadow:0 0 0 1px rgba(0,0,0,.4),0 20px 60px rgba(0,0,0,.5),0 0 40px rgba(33,230,255,.12)}
+.aer-leg{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;font-size:12.5px;color:#d9d2f2}
+.aer-leg i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px;box-shadow:0 0 0 1.5px rgba(0,0,0,.6)}
+.aerial>.btn{justify-self:center;min-width:220px}
+#screen:has(.aerial){overflow:hidden}
+@media (max-height:520px) and (orientation:landscape){.aerial{grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:auto minmax(0,1fr) auto;column-gap:14px}.aer-top{grid-column:2;grid-row:1;flex-direction:column;align-items:stretch}.aer-map{grid-column:1;grid-row:1/4}.aer-leg{grid-column:2;grid-row:2;justify-content:flex-start;align-content:start;flex-direction:column}.aerial>.btn{grid-column:2;grid-row:3;min-width:0;width:100%}.aer-kpi{text-align:left}}
 </style>
 </head>
 <body>

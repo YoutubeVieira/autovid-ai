@@ -1166,6 +1166,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyN') useNitro();
     else if (e.code === 'KeyV') useTurbo();
     else if (e.code === 'KeyI') showHelp();
+    else if (e.code === 'KeyM') openAerial();
     else if (e.code === 'KeyG') callAllies();
     else if (e.code === 'KeyC') cycleCam();
     else if (e.code === 'KeyT') radioNext();
@@ -1173,7 +1174,7 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyR') startReload();
     else if (/^Digit[0-9]$/.test(e.code)) { const w = D.WEAPONS[(+e.code.slice(5) || 10) - 1]; if (w && save.owned[w.id]) { save.weapon = w.id; msg(w.name); } }
     else if (e.code === 'Escape' || e.code === 'KeyP') pauseGame();
-  } else if (S.mode === 'pause' && (e.code === 'Escape' || e.code === 'KeyP')) resumeGame();
+  } else if (S.mode === 'pause' && (e.code === 'Escape' || e.code === 'KeyP' || (e.code === 'KeyM' && S.screen === 'aerial'))) resumeGame();
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; if (S.mode === 'play') pauseGame(); });
@@ -1456,6 +1457,8 @@ function updVip(dt) {
 let DPR = 1, VW = 0, VH = 0;
 function resize() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight; cvs.width = Math.round(VW * DPR); cvs.height = Math.round(VH * DPR); }
 addEventListener('resize', resize); resize();
+addEventListener('resize', () => { if (S.screen === 'aerial') requestAnimationFrame(drawAerial); });
+{ const mn = document.getElementById('mini'); if (mn) { mn.title = 'Vue aérienne (M)'; mn.addEventListener('click', () => openAerial()); mn.addEventListener('touchend', e => { e.preventDefault(); openAerial(); }); } }
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
 function label(txt, x, y, col, size = 11) { ctx.fillStyle = col; ctx.font = size + 'px Bungee, Impact, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(txt, x, y); }
 function drawTile(tx, ty) {
@@ -1637,7 +1640,31 @@ function gpsUpdate(target, dt) {
   if (key !== gps.key && gps.t <= 0) { gps.key = key; gps.t = .35; gps.path = gpsCompute(px, py, target.x, target.y); }
   if (gps.path.length) { gps.path[0] = { x: px, y: py }; let l = 0; for (let i = 1; i < gps.path.length; i++) l += dist(gps.path[i - 1].x, gps.path[i - 1].y, gps.path[i].x, gps.path[i].y); gps.len = l; }
 }
+// ---------- vue aérienne : grande carte (touche M ou appui sur la mini-carte) ----------
+function openAerial() { if (S.mode !== 'play' || !world.mm) return; S.mode = 'pause'; if (PORTAL) PORTAL.stop(); au('duck', true); showScreen('aerial'); }
+function drawAerial() {
+  const cv = screenEl.querySelector('#aerialCv'); if (!cv) return;
+  const box = cv.parentElement.getBoundingClientRect(), sz = Math.max(200, Math.floor(Math.min(box.width, box.height))), dpr = Math.min(2, devicePixelRatio || 1);
+  cv.style.width = cv.style.height = sz + 'px'; cv.width = cv.height = Math.round(sz * dpr);
+  const g = cv.getContext('2d'), k = cv.width / W, target = S.lastTarget;
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(world.mm, 0, 0, cv.width, cv.height);
+  g.fillStyle = 'rgba(8,6,18,.25)'; g.fillRect(0, 0, cv.width, cv.height);
+  const dot = (x, y, c, r, ring) => { g.fillStyle = c; g.beginPath(); g.arc(x * k, y * k, r * dpr, 0, TAU); g.fill(); if (ring) { g.strokeStyle = 'rgba(0,0,0,.7)'; g.lineWidth = 1.5 * dpr; g.stroke(); } };
+  for (const p of world.shops) dot(p.x, p.y, '#a6ff4d', 5, 1);
+  for (const p of world.tunnels) dot(p.x, p.y, '#ffb627', 4.5, 1);
+  for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 4, 1);
+  for (const c of cars) if (c.kind === 'police' && c.ai === 'police') dot(c.x, c.y, '#2e6bff', 5, 1);
+  for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, '#ff4d5e', 4, 1);
+  if (heli) dot(heli.x, heli.y, '#ffffff', 6, 1);
+  if (gps.path.length > 1) { g.lineJoin = g.lineCap = 'round'; for (const [w2, c] of [[9, 'rgba(255,210,63,.25)'], [4.5, '#ffd23f']]) { g.strokeStyle = c; g.lineWidth = w2 * dpr; g.beginPath(); gps.path.forEach((q, i) => i ? g.lineTo(q.x * k, q.y * k) : g.moveTo(q.x * k, q.y * k)); g.stroke(); } }
+  if (target) { g.strokeStyle = '#21e6ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(target.x * k, target.y * k, 14 * dpr, 0, TAU); g.stroke(); dot(target.x, target.y, '#21e6ff', 7, 1); }
+  // joueur : flèche orientée
+  const a = P.car ? P.car.a : (P.a || 0); g.save(); g.translate(P.x * k, P.y * k); g.rotate(a); g.fillStyle = '#ffffff'; g.strokeStyle = '#0a0816'; g.lineWidth = 2.5 * dpr; g.beginPath(); g.moveTo(13 * dpr, 0); g.lineTo(-8 * dpr, 8 * dpr); g.lineTo(-4 * dpr, 0); g.lineTo(-8 * dpr, -8 * dpr); g.closePath(); g.stroke(); g.fill(); g.restore();
+  g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2 * dpr; g.beginPath(); g.arc(P.x * k, P.y * k, 22 * dpr, 0, TAU); g.stroke();
+  const info = screenEl.querySelector('.aer-dist'); if (info) { const m2 = target ? Math.round((gps.len || dist(P.x, P.y, target.x, target.y)) * .5) : 0; info.textContent = target ? (m2 > 999 ? (m2 / 1000).toFixed(1).replace('.', ',') + ' km' : m2 + ' m') : '—'; }
+}
 function drawMini(target) {
+  S.lastTarget = target;
   const s = mini.width / W; mctx.drawImage(world.mm, 0, 0, mini.width, mini.height);
   const dot = (x, y, c, r) => { mctx.fillStyle = c; mctx.beginPath(); mctx.arc(x * s, y * s, r, 0, TAU); mctx.fill(); };
   for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 2.5);
@@ -1663,7 +1690,7 @@ function init3D() {
   if (!window.THREE) return;
   const c3 = $('game3d');
   try {
-    const r = new THREE.WebGLRenderer({ canvas: c3, antialias: (devicePixelRatio || 1) < 2, powerPreference: 'high-performance' });
+    const r = new THREE.WebGLRenderer({ canvas: c3, antialias: true, powerPreference: 'high-performance' });
     r.setPixelRatio(Math.min(touch.on ? 1.25 : 1.75, devicePixelRatio || 1));
     R3.r = r;
   } catch (e) { return; }
@@ -2588,18 +2615,26 @@ function sync(e, make, pose) {
   if (m.parent !== R3.dyn) R3.dyn.add(m);
   R3.seen.add(m); pose(m, e);
 }
-function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); if (R3.composer) { R3.composer.setPixelRatio(R3.r.getPixelRatio()); R3.composer.setSize(VW, VH); } }
+function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = VH; R3.r.setSize(VW, VH, false); R3.cam.aspect = VW / VH; R3.cam.updateProjectionMatrix(); if (R3.composer) { R3.composer.setPixelRatio(R3.r.getPixelRatio()); R3.composer.setSize(VW, VH); if (R3.fxaa) R3.fxaa.uniforms.res.value.set(1 / (VW * R3.r.getPixelRatio()), 1 / (VH * R3.r.getPixelRatio())); } }
 // rendu filmique : étalonnage ACES + halos lumineux (bloom) en qualité haute
 function setupPost() {
   setEnvMap();
   R3.r.toneMapping = THREE.ACESFilmicToneMapping; R3.r.toneMappingExposure = 1.25;
   if (!THREE.EffectComposer || !THREE.UnrealBloomPass || qLevel !== 'high') { R3.composer = null; return; }
-  try { const c = new THREE.EffectComposer(R3.r); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl);
+  try { // rendu hors écran multi-échantillonné (WebGL2) : sinon le composer perd l'anticrénelage et les lignes paraissent hachées
+    let rt; const gl2 = R3.r.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget;
+    if (gl2) { const sz = R3.r.getDrawingBufferSize(new THREE.Vector2()); rt = new THREE.WebGLMultisampleRenderTarget(Math.max(1, sz.x), Math.max(1, sz.y), { format: THREE.RGBAFormat }); rt.samples = 4; }
+    const c = new THREE.EffectComposer(R3.r, rt); c.addPass(new THREE.RenderPass(R3.scene, R3.cam)); const bl = new THREE.UnrealBloomPass(new THREE.Vector2(VW || 1280, VH || 720), .8, .45, .72); c.addPass(bl);
     // passe cinéma : étalonnage par pays, vignette, grain, légère aberration chromatique (plus forte pendant les ralentis)
     if (THREE.ShaderPass) { const cine = new THREE.ShaderPass({ uniforms: { tDiffuse: { value: null }, time: { value: 0 }, tint: { value: new THREE.Vector3(1, 1, 1) }, sat: { value: 1.1 }, slow: { value: 0 } },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
       fragmentShader: 'uniform sampler2D tDiffuse; uniform float time, sat, slow; uniform vec3 tint; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time) * 43758.5453); } void main(){ vec2 d = vUv - .5; float ca = .0015 + slow * .006; vec3 c = vec3(texture2D(tDiffuse, vUv + d * ca).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - d * ca).b); float l = dot(c, vec3(.299, .587, .114)); c = mix(vec3(l), c, sat - slow * .45) * tint; c *= 1. - (.28 + slow * .35) * dot(d, d) * 2.; c += (h(vUv * 800.) - .5) * .03; gl_FragColor = vec4(c, 1.); }' });
-      c.addPass(cine); R3.cine = cine; }
+      c.addPass(cine); R3.cine = cine;
+      if (!gl2) { // repli FXAA quand le multi-échantillonnage n'est pas disponible
+        const fx = new THREE.ShaderPass({ uniforms: { tDiffuse: { value: null }, res: { value: new THREE.Vector2(1 / (VW || 1280), 1 / (VH || 720)) } },
+          vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+          fragmentShader: 'uniform sampler2D tDiffuse; uniform vec2 res; varying vec2 vUv; float L(vec3 c){ return dot(c, vec3(.299,.587,.114)); } void main(){ vec3 m = texture2D(tDiffuse, vUv).rgb; float lm = L(m), nw = L(texture2D(tDiffuse, vUv + vec2(-1.,-1.)*res).rgb), ne = L(texture2D(tDiffuse, vUv + vec2(1.,-1.)*res).rgb), sw = L(texture2D(tDiffuse, vUv + vec2(-1.,1.)*res).rgb), se = L(texture2D(tDiffuse, vUv + vec2(1.,1.)*res).rgb); float mn = min(lm, min(min(nw,ne),min(sw,se))), mx = max(lm, max(max(nw,ne),max(sw,se))); vec2 dir = vec2(-((nw+ne)-(sw+se)), (nw+sw)-(ne+se)); float rd = max((nw+ne+sw+se)*.03125, .0078125); float k = 1. / (min(abs(dir.x), abs(dir.y)) + rd); dir = clamp(dir*k, -8., 8.) * res; vec3 a = .5*(texture2D(tDiffuse, vUv + dir*(1./3.-.5)).rgb + texture2D(tDiffuse, vUv + dir*(2./3.-.5)).rgb); vec3 b = a*.5 + .25*(texture2D(tDiffuse, vUv - dir*.5).rgb + texture2D(tDiffuse, vUv + dir*.5).rgb); float lb = L(b); gl_FragColor = vec4((lb < mn || lb > mx) ? a : b, 1.); }' });
+        c.addPass(fx); R3.fxaa = fx; } }
     R3.composer = c; R3.bloom = bl; R3.w = 0; } catch (e) { R3.composer = null; }
 }
 function render3D(dt) {
@@ -2789,6 +2824,7 @@ function showScreen(name, data) {
   screenEl.innerHTML = SCREENS[name](data || {});
   if (I18) I18.dom(screenEl);
   screenEl.scrollTop = 0;
+  if (name === 'aerial') requestAnimationFrame(drawAerial);
   const f = screenEl.querySelector('[autofocus],.btn.primary'); if (f) setTimeout(() => f.focus({ preventScroll: true }), 30);
   void hudOn;
 }
@@ -2837,6 +2873,7 @@ const SCREENS = {
         <b>B</b><span>Soudoyer la police</span>
         <b>H · N / Maj</b><span>Trousse de soins · nitro</span>
         <b>C</b><span>Changer de caméra (dessus, poursuite, embarquée)</span>
+        <b>M</b><span>Vue aérienne : où tu es, où tu vas</span>
         <b>Tab / clic droit</b><span>Verrouiller une cible, puis la suivante</span>
         <b>T</b><span>Changer de station de radio</span>
       </div></section>
@@ -2904,11 +2941,17 @@ const SCREENS = {
       <p class="lead">Comme au volant : une pause toutes les heures, c'est mieux. Lève-toi, bois un verre d'eau, repose tes yeux quelques minutes. Ta partie t'attend.</p>
       <div class="col"><button class="btn primary" data-quit="1">Faire une pause</button><button class="btn" data-resume="1">Continuer encore un peu</button></div>
     </div>`,
+  aerial: () => { const st = L && L.step; return `<div class="aerial">
+      <div class="aer-top"><div><p class="eyebrow">Vue aérienne · ${esc(TR(world.region.name || ''))}</p><h2>${st ? esc(st.label) : 'Carte'}</h2>${st ? `<p class="aer-obj">${esc(stepDesc(st))}</p>` : ''}</div><div class="aer-kpi"><span>Distance</span><b class="aer-dist">—</b></div></div>
+      <div class="aer-map"><canvas id="aerialCv"></canvas></div>
+      <div class="aer-leg"><span><i style="background:#fff"></i>Toi</span><span><i style="background:#21e6ff"></i>Objectif</span><span><i style="background:#ffd23f"></i>Trajet GPS</span><span><i style="background:#a6ff4d"></i>Boutique</span><span><i style="background:#ffb627"></i>Tunnel</span><span><i style="background:#2e6bff"></i>Police</span><span><i style="background:#ff4d5e"></i>Ennemi</span></div>
+      <button class="btn primary" data-resume="1">Reprendre (M)</button>
+    </div>`; },
   help: () => { const st = L.step, cost = 400 + lvl() * 40; return `<div class="wrap narrow center-col">
       <p class="eyebrow">${L.free ? 'Balade libre · boulot ' + (L.jobs + 1) : 'Étape ' + (L.idx + 1) + '/10'}</p><h2 class="title">${esc(st.label)}</h2>
       <p class="lead">Objectif : ${esc(stepDesc(st))}</p>
       <p class="lead">${esc(STEP_HELP[st.type] || '')}</p>
-      <ul class="feat"><li>Flèches jaunes au sol et flèche au bord de l’écran : la direction de l’objectif.</li><li>TURBO (V) : course ou voiture plus rapides, se recharge tout seul.</li><li>Renforts (G) : deux alliés armés pendant 2 minutes (${fmt(cost)}).</li></ul>
+      <ul class="feat"><li>Flèches jaunes au sol et flèche au bord de l’écran : la direction de l’objectif.</li><li>Vue aérienne (M ou appui sur la mini-carte) : toute la ville, ta position et le trajet.</li><li>TURBO (V) : course ou voiture plus rapides, se recharge tout seul.</li><li>Renforts (G) : deux alliés armés pendant 2 minutes (${fmt(cost)}).</li></ul>
       <div class="col"><button class="btn primary" data-resume="1">Compris, on y va</button>${allies.length ? '' : `<button class="btn" data-allies="1">Appeler des renforts · ${fmt(cost)}</button>`}${L.free ? '<button class="btn" data-skipjob="1">Changer de boulot</button>' : ''}</div>
     </div>`; },
   pause: () => `<div class="wrap narrow center-col">
