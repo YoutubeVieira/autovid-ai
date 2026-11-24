@@ -7549,7 +7549,7 @@ function hurt(n, tag) {
   S.hp -= n; P.hitT = S.time; shake = Math.max(shake, 5); if (n > 2 && (S.hurtSnd || 0) < S.time) { au('hurt'); vib(Math.min(140, 30 + n * 4)); S.hurtSnd = S.time + .35; }
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
 }
-function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n; if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
+function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n * (.4 + .6 * ez()); if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
 function addHeat(n) { S.heat = Math.min(5.99, S.heat + n); if (S.heat < 1) S.heat = 1; S.unseen = 0; }
 function policeLeave() { for (const c of cars) if (c.kind === 'police' && c.ai === 'police') c.ai = 'leave'; }
 function bribeCost() { return Math.round(stars() * (250 + lvl() * 120) * bribeDiscount() / 10) * 10; }
@@ -7869,7 +7869,7 @@ function makeStep(type, n, idx) {
     case 'race': {
       let x = P.x, y = P.y, tot = 0; st.pts = [];
       for (let k = 0; k < 4; k++) { const d = randWalk(800, 1400, x, y); tot += roadLen(x, y, d.x, d.y); st.pts.push(d); x = d.x; y = d.y; }
-      st.k = 0; st.time = Math.round(tot / (225 + n * 2.2) + 18 - n * .25); st.needCar = true;
+      st.k = 0; st.time = Math.round(tot / (195 + n * 3) + 26 - n * .5); // marge : il faut d'abord trouver une voiture st.needCar = true;
       st.desc = () => 'Course : passe les checkpoints (' + st.k + '/4)';
       st.dyn = () => st.pts[st.k];
       st.check = () => { if (dist(P.x, P.y, st.pts[st.k].x, st.pts[st.k].y) < 60) { st.k++; if (st.k < 4) msg('Checkpoint ' + st.k + '/4'); } return st.k >= 4; }; break;

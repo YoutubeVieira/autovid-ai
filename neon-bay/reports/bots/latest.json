@@ -1,12 +1,503 @@
 {
- "date": "2026-11-24T10:25:53.048Z",
+ "date": "2026-11-24T10:58:52.970Z",
  "opts": {
   "from": 1,
-  "to": 3,
-  "maxTries": 5,
+  "to": 10,
+  "maxTries": 3,
   "stepCap": 420
  },
  "results": [
+  {
+   "id": 1,
+   "name": "Débutant prudent",
+   "role": "Mesure si un nouveau joueur finit le jeu en Facile",
+   "levels": [
+    {
+     "n": 1,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "buy",
+       "idx": 3,
+       "time": 97,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 7,
+       "time": 453,
+       "from": 0
+      },
+      {
+       "ok": true,
+       "time": 148,
+       "from": 5
+      }
+     ],
+     "ok": true,
+     "time": 698,
+     "stars": 3,
+     "money": 6645
+    },
+    {
+     "n": 2,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "escort",
+       "idx": 1,
+       "time": 235,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "MC Ozone n’a pas survécu",
+       "step": "escort",
+       "idx": 1,
+       "time": 136,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 176,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 547,
+     "stars": 0,
+     "money": 5252
+    },
+    {
+     "n": 3,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escape",
+       "idx": 6,
+       "time": 374,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escape",
+       "idx": 6,
+       "time": 259,
+       "from": 5
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "escape",
+       "idx": 6,
+       "time": 56,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 689,
+     "stars": 0,
+     "money": 7320
+    },
+    {
+     "n": 4,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "MC Ozone n’a pas survécu",
+       "step": "escort",
+       "idx": 0,
+       "time": 70,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "deliver",
+       "idx": 8,
+       "time": 389,
+       "from": 0
+      },
+      {
+       "ok": true,
+       "time": 152,
+       "from": 5
+      }
+     ],
+     "ok": true,
+     "time": 611,
+     "stars": 3,
+     "money": 15220
+    },
+    {
+     "n": 5,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "destroy",
+       "idx": 1,
+       "time": 48,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "stuck": true,
+       "reason": "bloqué",
+       "step": "destroy",
+       "idx": 1,
+       "time": 432,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 1,
+       "time": 235,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 715,
+     "stars": 0,
+     "money": 19978
+    },
+    {
+     "n": 6,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 75,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 63,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 78,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 216,
+     "stars": 0,
+     "money": 14157
+    },
+    {
+     "n": 7,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "elim",
+       "idx": 1,
+       "time": 44,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "steal",
+       "idx": 5,
+       "time": 416,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "escape",
+       "idx": 7,
+       "time": 168,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 628,
+     "stars": 0,
+     "money": 19436
+    },
+    {
+     "n": 8,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 5,
+       "time": 217,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "destroy",
+       "idx": 6,
+       "time": 336,
+       "from": 5
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 6,
+       "time": 305,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 858,
+     "stars": 0,
+     "money": 21262
+    },
+    {
+     "n": 9,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 5,
+       "time": 345,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escape",
+       "idx": 8,
+       "time": 247,
+       "from": 5
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "tunnel",
+       "idx": 7,
+       "time": 242,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 834,
+     "stars": 0,
+     "money": 25799
+    },
+    {
+     "n": 10,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "escort",
+       "idx": 2,
+       "time": 214,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 5,
+       "time": 320,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escape",
+       "idx": 5,
+       "time": 217,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 751,
+     "stars": 0,
+     "money": 20113
+    }
+   ],
+   "totalGame": 6547,
+   "attempts": 30,
+   "timing": [
+    {
+     "n": 1,
+     "idx": 2,
+     "type": "garage",
+     "time": 83,
+     "route": 2178,
+     "need": 26
+    },
+    {
+     "n": 1,
+     "idx": 2,
+     "type": "garage",
+     "time": 85,
+     "route": 2496,
+     "need": 29
+    },
+    {
+     "n": 1,
+     "idx": 4,
+     "type": "deliver",
+     "time": 83,
+     "route": 3749,
+     "need": 45
+    },
+    {
+     "n": 1,
+     "idx": 9,
+     "type": "race",
+     "time": 119,
+     "route": 7089,
+     "need": 60
+    },
+    {
+     "n": 2,
+     "idx": 3,
+     "type": "race",
+     "time": 113,
+     "route": 6903,
+     "need": 61
+    },
+    {
+     "n": 3,
+     "idx": 4,
+     "type": "garage",
+     "time": 60,
+     "route": 445,
+     "need": 7
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 86,
+     "route": 7000,
+     "need": 81
+    },
+    {
+     "n": 4,
+     "idx": 8,
+     "type": "deliver",
+     "time": 77,
+     "route": 4340,
+     "need": 56
+    },
+    {
+     "n": 4,
+     "idx": 8,
+     "type": "deliver",
+     "time": 83,
+     "route": 3459,
+     "need": 42
+    },
+    {
+     "n": 7,
+     "idx": 6,
+     "type": "garage",
+     "time": 82,
+     "route": 2368,
+     "need": 29
+    },
+    {
+     "n": 8,
+     "idx": 5,
+     "type": "race",
+     "time": 65,
+     "route": 6359,
+     "need": 98
+    },
+    {
+     "n": 8,
+     "idx": 5,
+     "type": "race",
+     "time": 67,
+     "route": 6480,
+     "need": 97
+    },
+    {
+     "n": 8,
+     "idx": 5,
+     "type": "race",
+     "time": 71,
+     "route": 5380,
+     "need": 76
+    },
+    {
+     "n": 9,
+     "idx": 3,
+     "type": "garage",
+     "time": 56,
+     "route": 1600,
+     "need": 29
+    },
+    {
+     "n": 9,
+     "idx": 4,
+     "type": "deliver",
+     "time": 48,
+     "route": 2530,
+     "need": 53
+    },
+    {
+     "n": 10,
+     "idx": 3,
+     "type": "deliver",
+     "time": 54,
+     "route": 4071,
+     "need": 76
+    }
+   ],
+   "gameErrors": 0,
+   "gameError1": "",
+   "errors": [],
+   "wall": 47,
+   "profile": {
+    "diff": 0,
+    "aimErr": 0.26,
+    "think": 0.7,
+    "range": 330,
+    "car": true,
+    "carDist": 700,
+    "drive": 0.55,
+    "run": false,
+    "heal": true,
+    "fightBack": true,
+    "shop": "basic",
+    "strafe": false,
+    "tunnel": false,
+    "nitro": false,
+    "melee": false,
+    "wander": false,
+    "noCheckpoint": false,
+    "copsMax": 2,
+    "id": 1,
+    "name": "Débutant prudent",
+    "role": "Mesure si un nouveau joueur finit le jeu en Facile"
+   }
+  },
   {
    "id": 2,
    "name": "Joueur moyen",
@@ -15,112 +506,6 @@
     {
      "n": 1,
      "tries": [
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 282,
-       "from": 0
-      },
-      {
-       "ok": false,
-       "reason": "Temps écoulé",
-       "step": "race",
-       "idx": 9,
-       "time": 134,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 99,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 209,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 225,
-       "from": 5
-      }
-     ],
-     "ok": false,
-     "time": 949,
-     "stars": 0,
-     "money": 7001
-    },
-    {
-     "n": 2,
-     "tries": [
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "collect",
-       "idx": 6,
-       "time": 395,
-       "from": 0
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 196,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "collect",
-       "idx": 6,
-       "time": 74,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 235,
-       "from": 5
-      },
-      {
-       "ok": false,
-       "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 7,
-       "time": 281,
-       "from": 5
-      }
-     ],
-     "ok": false,
-     "time": 1181,
-     "stars": 0,
-     "money": 6878
-    },
-    {
-     "n": 3,
-     "tries": [
-      {
-       "ok": false,
-       "reason": "Arrêté par la police",
-       "step": "collect",
-       "idx": 2,
-       "time": 59,
-       "from": 0
-      },
       {
        "ok": false,
        "stuck": true,
@@ -132,123 +517,446 @@
       },
       {
        "ok": false,
+       "stuck": true,
+       "reason": "bloqué",
+       "step": "buy",
+       "idx": 3,
+       "time": 453,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "deliver",
+       "idx": 4,
+       "time": 99,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 972,
+     "stars": 0,
+     "money": 3390
+    },
+    {
+     "n": 2,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 137,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 165,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 206,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 508,
+     "stars": 0,
+     "money": 5923
+    },
+    {
+     "n": 3,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "collect",
+       "idx": 2,
+       "time": 380,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "collect",
+       "idx": 2,
+       "time": 102,
+       "from": 0
+      },
+      {
+       "ok": false,
        "reason": "Tu as été mis K.O.",
-       "step": "elim",
-       "idx": 5,
-       "time": 174,
+       "step": "escape",
+       "idx": 6,
+       "time": 285,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 767,
+     "stars": 0,
+     "money": 8053
+    },
+    {
+     "n": 4,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 1,
+       "time": 86,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 1,
+       "time": 104,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 1,
+       "time": 103,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 293,
+     "stars": 0,
+     "money": 8218
+    },
+    {
+     "n": 5,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 2,
+       "time": 281,
        "from": 0
       },
       {
        "ok": false,
        "reason": "Arrêté par la police",
        "step": "escape",
-       "idx": 6,
-       "time": 196,
-       "from": 5
+       "idx": 2,
+       "time": 208,
+       "from": 0
       },
       {
        "ok": false,
        "reason": "Tu as été mis K.O.",
-       "step": "escape",
-       "idx": 6,
-       "time": 131,
+       "step": "elim",
+       "idx": 5,
+       "time": 248,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 737,
+     "stars": 0,
+     "money": 13902
+    },
+    {
+     "n": 6,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 75,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 115,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "deliver",
+       "idx": 2,
+       "time": 159,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 349,
+     "stars": 0,
+     "money": 9707
+    },
+    {
+     "n": 7,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 201,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 112,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 235,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 548,
+     "stars": 0,
+     "money": 14240
+    },
+    {
+     "n": 8,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 3,
+       "time": 181,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 3,
+       "time": 243,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 3,
+       "time": 126,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 550,
+     "stars": 0,
+     "money": 16668
+    },
+    {
+     "n": 9,
+     "tries": [
+      {
+       "ok": false,
+       "stuck": true,
+       "reason": "bloqué",
+       "step": "steal",
+       "idx": 2,
+       "time": 442,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "tunnel",
+       "idx": 7,
+       "time": 295,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 5,
+       "time": 177,
        "from": 5
       }
      ],
      "ok": false,
-     "time": 980,
+     "time": 914,
      "stars": 0,
-     "money": 11546
+     "money": 18895
+    },
+    {
+     "n": 10,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 101,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 170,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 4,
+       "time": 271,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 542,
+     "stars": 0,
+     "money": 21895
     }
    ],
-   "totalGame": 3110,
-   "attempts": 15,
+   "totalGame": 6180,
+   "attempts": 30,
    "timing": [
     {
      "n": 1,
      "idx": 2,
      "type": "garage",
-     "time": 74,
-     "route": 3842,
-     "need": 52
+     "time": 71,
+     "route": 3456,
+     "need": 49
+    },
+    {
+     "n": 1,
+     "idx": 2,
+     "type": "garage",
+     "time": 71,
+     "route": 3453,
+     "need": 49
     },
     {
      "n": 1,
      "idx": 4,
      "type": "deliver",
-     "time": 57,
-     "route": 3075,
-     "need": 54
-    },
-    {
-     "n": 1,
-     "idx": 9,
-     "type": "race",
-     "time": 74,
-     "route": 7047,
-     "need": 95
+     "time": 54,
+     "route": 2749,
+     "need": 51
     },
     {
      "n": 2,
      "idx": 3,
      "type": "race",
-     "time": 65,
-     "route": 5790,
-     "need": 89
-    },
-    {
-     "n": 2,
-     "idx": 5,
-     "type": "deliver",
-     "time": 49,
-     "route": 2349,
-     "need": 48
-    },
-    {
-     "n": 2,
-     "idx": 5,
-     "type": "deliver",
-     "time": 57,
-     "route": 3482,
-     "need": 61
-    },
-    {
-     "n": 2,
-     "idx": 5,
-     "type": "deliver",
      "time": 61,
-     "route": 2626,
-     "need": 43
+     "route": 5618,
+     "need": 92
     },
     {
      "n": 2,
-     "idx": 5,
-     "type": "deliver",
-     "time": 71,
-     "route": 2618,
-     "need": 37
+     "idx": 3,
+     "type": "race",
+     "time": 64,
+     "route": 6119,
+     "need": 96
     },
     {
      "n": 2,
-     "idx": 5,
-     "type": "deliver",
-     "time": 97,
-     "route": 4056,
-     "need": 42
+     "idx": 3,
+     "type": "race",
+     "time": 78,
+     "route": 6291,
+     "need": 81
     },
     {
      "n": 3,
      "idx": 4,
      "type": "garage",
+     "time": 55,
+     "route": 509,
+     "need": 9
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 55,
+     "route": 5727,
+     "need": 104
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 61,
+     "route": 6799,
+     "need": 112
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 73,
+     "route": 6635,
+     "need": 91
+    },
+    {
+     "n": 6,
+     "idx": 2,
+     "type": "deliver",
      "time": 59,
-     "route": 2306,
-     "need": 39
+     "route": 3895,
+     "need": 66
+    },
+    {
+     "n": 9,
+     "idx": 3,
+     "type": "garage",
+     "time": 44,
+     "route": 1984,
+     "need": 45
+    },
+    {
+     "n": 9,
+     "idx": 4,
+     "type": "deliver",
+     "time": 41,
+     "route": 3740,
+     "need": 92
+    },
+    {
+     "n": 10,
+     "idx": 3,
+     "type": "deliver",
+     "time": 43,
+     "route": 3177,
+     "need": 74
     }
    ],
    "gameErrors": 0,
    "gameError1": "",
    "errors": [],
-   "wall": 15,
+   "wall": 39,
    "profile": {
     "diff": 1,
     "aimErr": 0.12,
@@ -271,6 +979,942 @@
     "id": 2,
     "name": "Joueur moyen",
     "role": "Référence : temps typique pour finir les 30 niveaux en Normal"
+   }
+  },
+  {
+   "id": 3,
+   "name": "Expert",
+   "role": "Temps plancher d’un très bon joueur",
+   "levels": [
+    {
+     "n": 1,
+     "tries": [
+      {
+       "ok": false,
+       "stuck": true,
+       "reason": "bloqué",
+       "step": "collect",
+       "idx": 5,
+       "time": 490,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 9,
+       "time": 120,
+       "from": 5
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 7,
+       "time": 256,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 866,
+     "stars": 0,
+     "money": 5923
+    },
+    {
+     "n": 2,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 120,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 165,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "MC Ozone n’a pas survécu",
+       "step": "escort",
+       "idx": 1,
+       "time": 76,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 361,
+     "stars": 0,
+     "money": 4916
+    },
+    {
+     "n": 3,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 6,
+       "time": 379,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "escape",
+       "idx": 6,
+       "time": 255,
+       "from": 5
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escape",
+       "idx": 6,
+       "time": 179,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 813,
+     "stars": 0,
+     "money": 7788
+    },
+    {
+     "n": 4,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "goto",
+       "idx": 3,
+       "time": 336,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "tunnel",
+       "idx": 5,
+       "time": 269,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "stuck": true,
+       "reason": "bloqué",
+       "step": "escort",
+       "idx": 6,
+       "time": 429,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 1034,
+     "stars": 0,
+     "money": 13701
+    },
+    {
+     "n": 5,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 1,
+       "time": 398,
+       "from": 0
+      },
+      {
+       "ok": true,
+       "time": 508,
+       "from": 0
+      }
+     ],
+     "ok": true,
+     "time": 906,
+     "stars": 1,
+     "money": 20461
+    },
+    {
+     "n": 6,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 140,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 79,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tyrell n’a pas survécu",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 90,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 309,
+     "stars": 0,
+     "money": 16491
+    },
+    {
+     "n": 7,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 313,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 110,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 244,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 667,
+     "stars": 0,
+     "money": 18090
+    },
+    {
+     "n": 8,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "bribe",
+       "idx": 4,
+       "time": 296,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "collect",
+       "idx": 3,
+       "time": 120,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 3,
+       "time": 254,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 670,
+     "stars": 0,
+     "money": 22306
+    },
+    {
+     "n": 9,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "goto",
+       "idx": 0,
+       "time": 96,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "collect",
+       "idx": 5,
+       "time": 308,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Arrêté par la police",
+       "step": "tunnel",
+       "idx": 7,
+       "time": 130,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 534,
+     "stars": 0,
+     "money": 24241
+    },
+    {
+     "n": 10,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "goto",
+       "idx": 0,
+       "time": 251,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "deliver",
+       "idx": 3,
+       "time": 142,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escort",
+       "idx": 2,
+       "time": 131,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 524,
+     "stars": 0,
+     "money": 27436
+    }
+   ],
+   "totalGame": 6684,
+   "attempts": 29,
+   "timing": [
+    {
+     "n": 1,
+     "idx": 2,
+     "type": "garage",
+     "time": 65,
+     "route": 2685,
+     "need": 41
+    },
+    {
+     "n": 1,
+     "idx": 4,
+     "type": "deliver",
+     "time": 54,
+     "route": 2689,
+     "need": 50
+    },
+    {
+     "n": 1,
+     "idx": 9,
+     "type": "race",
+     "time": 65,
+     "route": 5804,
+     "need": 89
+    },
+    {
+     "n": 2,
+     "idx": 3,
+     "type": "race",
+     "time": 67,
+     "route": 6561,
+     "need": 98
+    },
+    {
+     "n": 2,
+     "idx": 3,
+     "type": "race",
+     "time": 68,
+     "route": 6717,
+     "need": 99
+    },
+    {
+     "n": 3,
+     "idx": 4,
+     "type": "garage",
+     "time": 64,
+     "route": 3264,
+     "need": 51
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 58,
+     "route": 6001,
+     "need": 104
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 55,
+     "route": 5591,
+     "need": 102
+    },
+    {
+     "n": 5,
+     "idx": 7,
+     "type": "garage",
+     "time": 57,
+     "route": 2754,
+     "need": 48
+    },
+    {
+     "n": 9,
+     "idx": 3,
+     "type": "garage",
+     "time": 41,
+     "route": 1408,
+     "need": 34
+    },
+    {
+     "n": 9,
+     "idx": 4,
+     "type": "deliver",
+     "time": 36,
+     "route": 2716,
+     "need": 76
+    },
+    {
+     "n": 10,
+     "idx": 3,
+     "type": "deliver",
+     "time": 35,
+     "route": 2965,
+     "need": 85
+    }
+   ],
+   "gameErrors": 0,
+   "gameError1": "",
+   "errors": [],
+   "wall": 37,
+   "profile": {
+    "diff": 1,
+    "aimErr": 0.05,
+    "think": 1,
+    "range": 330,
+    "car": true,
+    "carDist": 700,
+    "drive": 1,
+    "run": true,
+    "heal": true,
+    "fightBack": true,
+    "shop": "basic",
+    "strafe": true,
+    "tunnel": false,
+    "nitro": false,
+    "melee": false,
+    "wander": false,
+    "noCheckpoint": false,
+    "copsMax": 2,
+    "id": 3,
+    "name": "Expert",
+    "role": "Temps plancher d’un très bon joueur"
+   }
+  },
+  {
+   "id": 11,
+   "name": "Tunnelier",
+   "role": "Sème la police par les tunnels plutôt qu’en voiture",
+   "levels": [
+    {
+     "n": 1,
+     "tries": [
+      {
+       "ok": true,
+       "time": 195,
+       "from": 0
+      }
+     ],
+     "ok": true,
+     "time": 195,
+     "stars": 3,
+     "money": 4560
+    },
+    {
+     "n": 2,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 3,
+       "time": 122,
+       "from": 0
+      },
+      {
+       "ok": true,
+       "time": 608,
+       "from": 0
+      }
+     ],
+     "ok": true,
+     "time": 730,
+     "stars": 1,
+     "money": 10549
+    },
+    {
+     "n": 3,
+     "tries": [
+      {
+       "ok": true,
+       "time": 531,
+       "from": 0
+      }
+     ],
+     "ok": true,
+     "time": 531,
+     "stars": 1,
+     "money": 16808
+    },
+    {
+     "n": 4,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 1,
+       "time": 91,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "tunnel",
+       "idx": 5,
+       "time": 249,
+       "from": 0
+      },
+      {
+       "ok": true,
+       "time": 134,
+       "from": 5
+      }
+     ],
+     "ok": true,
+     "time": 474,
+     "stars": 3,
+     "money": 24436
+    },
+    {
+     "n": 5,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "boss",
+       "idx": 9,
+       "time": 393,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 8,
+       "time": 280,
+       "from": 5
+      },
+      {
+       "ok": true,
+       "time": 162,
+       "from": 5
+      }
+     ],
+     "ok": true,
+     "time": 835,
+     "stars": 2,
+     "money": 39696
+    },
+    {
+     "n": 6,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "jailbreak",
+       "idx": 1,
+       "time": 204,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 3,
+       "time": 181,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 3,
+       "time": 165,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 550,
+     "stars": 0,
+     "money": 36147
+    },
+    {
+     "n": 7,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 269,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 106,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "destroy",
+       "idx": 2,
+       "time": 95,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 470,
+     "stars": 0,
+     "money": 38509
+    },
+    {
+     "n": 8,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 2,
+       "time": 128,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 2,
+       "time": 112,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 5,
+       "time": 406,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 646,
+     "stars": 0,
+     "money": 39220
+    },
+    {
+     "n": 9,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "garage",
+       "idx": 3,
+       "time": 75,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 9,
+       "time": 289,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Temps écoulé",
+       "step": "race",
+       "idx": 9,
+       "time": 142,
+       "from": 5
+      }
+     ],
+     "ok": false,
+     "time": 506,
+     "stars": 0,
+     "money": 44130
+    },
+    {
+     "n": 10,
+     "tries": [
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 82,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "elim",
+       "idx": 1,
+       "time": 64,
+       "from": 0
+      },
+      {
+       "ok": false,
+       "reason": "Tu as été mis K.O.",
+       "step": "escort",
+       "idx": 2,
+       "time": 112,
+       "from": 0
+      }
+     ],
+     "ok": false,
+     "time": 258,
+     "stars": 0,
+     "money": 47249
+    }
+   ],
+   "totalGame": 5195,
+   "attempts": 25,
+   "timing": [
+    {
+     "n": 1,
+     "idx": 2,
+     "type": "garage",
+     "time": 57,
+     "route": 1602,
+     "need": 28
+    },
+    {
+     "n": 1,
+     "idx": 4,
+     "type": "deliver",
+     "time": 60,
+     "route": 3447,
+     "need": 58
+    },
+    {
+     "n": 1,
+     "idx": 9,
+     "type": "race",
+     "time": 71,
+     "route": 6533,
+     "need": 92
+    },
+    {
+     "n": 2,
+     "idx": 3,
+     "type": "race",
+     "time": 65,
+     "route": 6342,
+     "need": 98
+    },
+    {
+     "n": 2,
+     "idx": 3,
+     "type": "race",
+     "time": 64,
+     "route": 5954,
+     "need": 93
+    },
+    {
+     "n": 2,
+     "idx": 5,
+     "type": "deliver",
+     "time": 61,
+     "route": 4110,
+     "need": 68
+    },
+    {
+     "n": 3,
+     "idx": 4,
+     "type": "garage",
+     "time": 59,
+     "route": 2496,
+     "need": 42
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 58,
+     "route": 6155,
+     "need": 106
+    },
+    {
+     "n": 4,
+     "idx": 1,
+     "type": "race",
+     "time": 62,
+     "route": 6689,
+     "need": 108
+    },
+    {
+     "n": 4,
+     "idx": 8,
+     "type": "deliver",
+     "time": 53,
+     "route": 2124,
+     "need": 40
+    },
+    {
+     "n": 5,
+     "idx": 7,
+     "type": "garage",
+     "time": 44,
+     "route": 893,
+     "need": 20
+    },
+    {
+     "n": 5,
+     "idx": 7,
+     "type": "garage",
+     "time": 44,
+     "route": 832,
+     "need": 19
+    },
+    {
+     "n": 5,
+     "idx": 7,
+     "type": "garage",
+     "time": 67,
+     "route": 2557,
+     "need": 38
+    },
+    {
+     "n": 6,
+     "idx": 2,
+     "type": "deliver",
+     "time": 43,
+     "route": 2632,
+     "need": 61
+    },
+    {
+     "n": 6,
+     "idx": 2,
+     "type": "deliver",
+     "time": 60,
+     "route": 4159,
+     "need": 69
+    },
+    {
+     "n": 8,
+     "idx": 5,
+     "type": "race",
+     "time": 57,
+     "route": 5879,
+     "need": 103
+    },
+    {
+     "n": 9,
+     "idx": 3,
+     "type": "garage",
+     "time": 47,
+     "route": 2688,
+     "need": 57
+    },
+    {
+     "n": 9,
+     "idx": 3,
+     "type": "garage",
+     "time": 45,
+     "route": 2240,
+     "need": 50
+    },
+    {
+     "n": 9,
+     "idx": 4,
+     "type": "deliver",
+     "time": 39,
+     "route": 3177,
+     "need": 82
+    },
+    {
+     "n": 9,
+     "idx": 9,
+     "type": "race",
+     "time": 44,
+     "route": 5830,
+     "need": 133
+    },
+    {
+     "n": 9,
+     "idx": 9,
+     "type": "race",
+     "time": 54,
+     "route": 6093,
+     "need": 113
+    }
+   ],
+   "gameErrors": 0,
+   "gameError1": "",
+   "errors": [],
+   "wall": 1703,
+   "profile": {
+    "diff": 1,
+    "aimErr": 0.12,
+    "think": 1,
+    "range": 330,
+    "car": true,
+    "carDist": 700,
+    "drive": 0.8,
+    "run": true,
+    "heal": true,
+    "fightBack": true,
+    "shop": "basic",
+    "strafe": false,
+    "tunnel": true,
+    "nitro": false,
+    "melee": false,
+    "wander": false,
+    "noCheckpoint": false,
+    "copsMax": 2,
+    "id": 11,
+    "name": "Tunnelier",
+    "role": "Sème la police par les tunnels plutôt qu’en voiture"
    }
   }
  ]
