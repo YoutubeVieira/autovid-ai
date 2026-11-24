@@ -341,6 +341,130 @@ def textures(female):
     return {k: _CACHE[k] for k in (key, "jersey", "jersey_n", "denim", "denim_n", "shoes")}
 
 
+# --------------------------------------------------------------------------- humans v4
+#   mesh / mesh_n       : sports mesh (football shirt, tank top): staggered round perforations
+#   ripstop / ripstop_n : board-shorts ripstop (fine weave + reinforcement grid)
+#   iris                : 64 px radial iris (fibres, collarette, dark limbal ring, black pupil),
+#                         light grey so the Eyes colour shows through (drawn with numpy)
+def _mesh_height(u, v):
+    n = 16                                          # 32 px cells, staggered rows
+    x = frac(u * n + frac(v * n * 0.5) * 0.0)
+    row = frac(v * n * 0.5)
+    sx = frac(u * n + smoothstep(0.49, 0.51, row) * 0.5)
+    y = frac(v * n)
+    d = sqrt((sx - 0.5) * (sx - 0.5) + (y - 0.5) * (y - 0.5))
+    hole = smoothstep(0.17, 0.27, d)
+    knit = 0.85 + 0.15 * sin(frac(u * 64.0) * math.pi) ** 0.6
+    return hole * knit + x * 0.0
+
+
+def _mesh(u, v):
+    h = _mesh_height(u, v)
+    vec, w = torus(u, v, 1.2, 1.2, 13.0)
+    mott = noise(vec, w, scale=1.5, detail=2, rough=0.5) - 0.5
+    return [0.80 + h * 0.15 + mott * 0.03]
+
+
+def _ripstop_height(u, v):
+    n = 64                                          # 8 px weave, 64 px reinforcement grid
+    wx = 0.5 + 0.5 * sin(u * (2 * math.pi * n))
+    wy = 0.5 + 0.5 * sin(v * (2 * math.pi * n))
+    weave = wx * 0.5 + wy * 0.5
+    gx = 1.0 - smoothstep(0.0, 0.035, fabs(frac(u * 8.0) - 0.5) * 2.0 - 0.93)
+    gy = 1.0 - smoothstep(0.0, 0.035, fabs(frac(v * 8.0) - 0.5) * 2.0 - 0.93)
+    grid = vmax(1.0 - gx, 1.0 - gy)
+    return weave * 0.6 + grid * 0.4
+
+
+def _ripstop(u, v):
+    h = _ripstop_height(u, v)
+    vec, w = torus(u, v, 1.0, 1.0, 17.0)
+    mott = noise(vec, w, scale=1.4, detail=2, rough=0.5) - 0.5
+    return [0.86 + h * 0.10 + mott * 0.04]
+
+
+def _iris_png():
+    n = 64
+    yy, xx = np.mgrid[0:n, 0:n].astype(np.float32)
+    x, y = (xx + 0.5) / n * 2 - 1, 1 - (yy + 0.5) / n * 2
+    r = np.sqrt(x * x + y * y)
+    a = np.arctan2(y, x)
+    rng = np.random.RandomState(5)
+    k = np.arange(1, 40)
+    ph = rng.uniform(0, 2 * np.pi, (len(k),))
+    amp = rng.uniform(0.3, 1.0, (len(k),)) / np.sqrt(k)
+    fib = sum(amp[i] * np.cos(k[i] * 3 * a + ph[i] + 6 * r) for i in range(len(k)))
+    fib = (fib - fib.min()) / (fib.max() - fib.min())
+    base = 0.62 + 0.38 * fib
+    collar = np.exp(-((r - 0.46) / 0.07) ** 2) * 0.18                 # lighter collarette
+    limbal = np.clip((r - 0.80) / 0.14, 0, 1) ** 1.5                   # dark ring at the edge
+    val = (base + collar) * (1 - 0.65 * limbal)
+    pupil = np.clip((r - 0.30) / 0.04, 0, 1)
+    val = val * pupil + 0.03 * (1 - pupil)
+    val = np.clip(val, 0, 1)
+    rgb = np.stack([val, val * 0.98, val * 0.95], -1)
+    return _save("iris", rgb, levels=24, mode="RGB")
+
+
+def textures_v4():
+    """Bake (once per process) the v4 human maps; returns {name: png path}."""
+    global _DIR
+    if _DIR is None:
+        _DIR = tempfile.mkdtemp(prefix="nb_tex_")
+    if "mesh" not in _CACHE:
+        _CACHE["mesh"] = _save("mesh", _bake("mesh", _mesh, 1), levels=40)
+        h = _fold(_bake("mesh_h", lambda u, v: [_mesh_height(u, v)], 1)[:, :, 0], 64, 32)
+        _CACHE["mesh_n"] = _save("mesh_n", _normal_from_height(h, 2.4), levels=48, mode="RGB")
+        _CACHE["ripstop"] = _save("ripstop", _bake("ripstop", _ripstop, 1), levels=40)
+        h = _fold(_bake("ripstop_h", lambda u, v: [_ripstop_height(u, v)], 1)[:, :, 0], 64, 64)
+        _CACHE["ripstop_n"] = _save("ripstop_n", _normal_from_height(h, 2.0), levels=48, mode="RGB")
+        _CACHE["iris"] = _iris_png()
+    return {k: _CACHE[k] for k in ("mesh", "mesh_n", "ripstop", "ripstop_n", "iris")}
+
+
+def tattoo_skin(skin_png, out_name, arm_uv):
+    """Copy a baked skin map and draw arm tattoos into its body strip.
+    arm_uv(u, v) -> (side, s, phi) or None: maps strip texels to the arm (s = 0 elbow .. 1 wrist
+    along the forearm, s < 0 upper arm; phi = angle around the arm). Ink is a desaturated blue-black
+    multiplied into the light skin map (the game tints it with the Skin colour)."""
+    from PIL import Image
+    img = np.asarray(Image.open(skin_png).convert("RGB")).astype(np.float32) / 255.0
+    H, W = img.shape[:2]
+    ink = np.zeros((H, W), np.float32)
+    for j in range(H):
+        v = 1 - (j + 0.5) / H
+        for i in range(int(W * 0.25)):
+            u = (i + 0.5) / W
+            m = arm_uv(u, v)
+            if m is None:
+                continue
+            side, s, phi = m
+            val = 0.0
+            # tribal band around the forearm (waves of thorns)
+            band = abs(s - 0.42) - (0.055 + 0.035 * math.sin(phi * 3 + side))
+            val = max(val, 1.0 if band < 0 else 0.0)
+            thorn = abs(s - 0.42 - 0.11 * math.sin(phi * 6)) < 0.018
+            val = max(val, 1.0 if thorn and abs(s - 0.42) < 0.16 else 0.0)
+            # star on the outer forearm, only on the left arm; geometric bands on the right upper arm
+            if side > 0:
+                ds, dp = (s - 0.78) * 3.2, math.atan2(math.sin(phi - 0.4), math.cos(phi - 0.4)) * 1.0
+                rr, aa = math.hypot(ds, dp), math.atan2(dp, ds)
+                star = 0.15 + 0.10 * math.cos(5 * aa)
+                if rr < star and rr > star - 0.045:
+                    val = 1.0
+            else:
+                if -0.75 < s < -0.25:
+                    q = (s + 0.75) / 0.5
+                    if abs(math.sin(q * math.pi * 3 + phi * 0.0)) > 0.93 or (abs(math.sin(phi * 4 + q * 9)) > 0.96):
+                        val = 1.0
+            ink[j, i] = val
+    # soften (ink spread) and multiply
+    soft = (ink + np.roll(ink, 1, 0) + np.roll(ink, -1, 0) + np.roll(ink, 1, 1) + np.roll(ink, -1, 1)) / 5.0
+    col = np.array([0.30, 0.33, 0.40], np.float32)
+    img = img * (1 - soft[..., None] * (1 - col))
+    return _save(out_name, img, levels=64, mode="RGB")
+
+
 # --------------------------------------------------------------------------- weapons (v3)
 # Tiling maps for gen_weapons.py, box-projected at world scale (see WEAPON_TILE there).
 #   poly / poly_n    : moulded polymer: soft mottling + fine stipple (also the Body finish grain)

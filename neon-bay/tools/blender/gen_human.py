@@ -45,7 +45,11 @@ import nb_textures as nbt  # noqa: E402
 
 FPS = 24
 THRESH = 0.6
-ORDER = ["Skin", "Shirt", "Pants", "Shoes", "Hair", "Eyes", "Lips", "EyeWhite", "Hat"]
+ORDER = ["Skin", "Shirt", "Pants", "Shoes", "Hair", "Eyes", "Lips", "EyeWhite", "Hat",
+         # v4 accessories (never recoloured by the game): Gear = black plastic / cord, Metal = whistle,
+         # chains, hoops (gold or silver), Lens = sunglasses, Trim = stripes / numbers / piping,
+         # Sole = white sneaker soles and laces
+         "Gear", "Metal", "Lens", "Trim", "Sole"]
 
 
 def surf(s):
@@ -270,7 +274,8 @@ def body_elements(sp):
     st, wf = sp.stocky, sp.wf
     B = Fam()
     # ---- torso (T-shirt / top: slightly loose volumes; hoodie: looser and longer)
-    B.caps((0, 0.022, 1.40 * k), (0, 0.022, 1.50 * k), 0.040 if f else (0.052 if st else 0.046), "Neck", "Shirt")
+    if not sp.sleeveless:
+        B.caps((0, 0.022, 1.40 * k), (0, 0.022, 1.50 * k), 0.040 if f else (0.052 if st else 0.046), "Neck", "Shirt")
     if f:
         B.ell((0, 0.008, 1.335 * k), (0.135, 0.098, 0.145 * k), "Chest", "Shirt")
         B.caps((-0.11, 0.02, 1.425 * k), (0.11, 0.02, 1.425 * k), 0.050, "Chest", "Shirt")
@@ -494,8 +499,12 @@ def hair_volume_elements(sp):
         return hc + Vector((x, y, z)) * hk
 
     E = Fam()
-    if sp.dress:
-        return E.E                     # pulled-back hair: cap only (+ ponytail built separately)
+    if sp.hair == "bun":               # top bun (afro puff) on the pulled-back cap
+        E.ell(P(0, 0.030, 0.118), (0.056, 0.054, 0.046), "Head", "Hair", s=2.2)
+        E.ell(P(0, 0.034, 0.140), (0.044, 0.044, 0.030), "Head", "Hair", s=2.2)
+        return E.E
+    if sp.hair != "bob":
+        return E.E                     # pulled-back / short hair: cap only (+ ponytail built separately)
     if sp.female:
         E.ell(P(0, 0.016, 0.010), (0.086, 0.102, 0.108), "Head", "Hair")                  # crown volume
         E.ell(P(0, 0.040, -0.085), (0.086, 0.074, 0.112), "Head", "Hair")                 # back
@@ -848,8 +857,8 @@ def lash_line(eye_c, r, sx, hk, mats):
 
 def strand_ridge(sp, d):
     """Hair lock pattern in [-1, 1] at head-local point d (mèches: ridges along the strand flow)."""
-    if sp.dress:                       # pulled back: strands converge to the ponytail tie
-        T = Vector((0, 0.088, -0.005))
+    if sp.pulled:                      # pulled back: strands converge to the ponytail / bun tie
+        T = Vector((0, 0.088, -0.005)) if sp.hair == "ponytail" else Vector((0, 0.035, 0.098))
         F = Vector((0, -0.095, 0.030))
         A = (T - F).normalized()
         U = Vector((0, 0, 1))
@@ -1130,6 +1139,715 @@ def make_drawstrings(sp, npts, mats):
     return out
 
 
+# --------------------------------------------------------------------------- v4 outfit geometry
+def close_normals(obj):
+    """Consistent outward normals for a closed (or nearly closed) small mesh."""
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
+def ribbon(name, pts, nrms, width, thick, mats, mat, closed=False, embed=0.0015, widths=None, bottom=True):
+    """Flat ribbon lying on a surface along pts (surface normals nrms): piping, stripes, digits,
+    plackets. Box section (width x thick), capped when open, so normals can be recomputed."""
+    n = len(pts)
+    verts, faces = [], []
+    for i in range(n):
+        if closed:
+            t = pts[(i + 1) % n] - pts[i - 1]
+        else:
+            t = pts[min(n - 1, i + 1)] - pts[max(0, i - 1)]
+        nn = nrms[i].normalized()
+        a = t.cross(nn).normalized()
+        w = (widths[i] if widths else width) / 2
+        p = pts[i]
+        verts += [p + a * w + nn * thick, p - a * w + nn * thick, p - a * w - nn * embed, p + a * w - nn * embed]
+    for i in range(n if closed else n - 1):
+        j = (i + 1) % n
+        A, B = 4 * i, 4 * j
+        for q in range(4 if bottom else 3):
+            q2 = (q + 1) % 4
+            faces.append((A + q, A + q2, B + q2, B + q))
+    if not closed:
+        faces.append((3, 2, 1, 0))
+        e = 4 * (n - 1)
+        faces.append((e, e + 1, e + 2, e + 3))
+    o = nb.mesh_object(name, verts, faces)
+    close_normals(o)
+    # recalc on a thin ribbon can still pick the inward side: top face must follow the normal
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bm.faces.ensure_lookup_table()
+    f0 = bm.faces[0]
+    if f0.normal.dot(nrms[0]) < 0:
+        for fc in bm.faces:
+            fc.normal_flip()
+    bm.to_mesh(o.data)
+    bm.free()
+    return set_material(o, mats, mat)
+
+
+def project(bvh, p, d=None, reach=0.3, off=0.0):
+    """Surface point + normal: ray from p - d*reach towards d (d None: nearest point)."""
+    if d is None:
+        hit = bvh.find_nearest(p)
+        if hit[0] is None:
+            return None, None
+        return hit[0] + hit[1] * off, hit[1]
+    d = Vector(d).normalized()
+    hit = bvh.ray_cast(p - d * reach, d, reach * 2)
+    if hit[0] is None:
+        return None, None
+    return hit[0] + hit[1] * off, hit[1]
+
+
+def boundary_loops(obj, zmin=-9.0):
+    """Ordered boundary loops (vertex coordinates) of an open mesh piece."""
+    me = obj.data
+    adj = {}
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    for e in bm.edges:
+        if e.is_boundary:
+            a, b = e.verts[0].index, e.verts[1].index
+            adj.setdefault(a, []).append(b)
+            adj.setdefault(b, []).append(a)
+    co = {v.index: v.co.copy() for v in bm.verts}
+    bm.free()
+    seen, loops = set(), []
+    for start in adj:
+        if start in seen:
+            continue
+        loop, prev, cur = [start], None, start
+        seen.add(start)
+        while True:
+            nxt = [q for q in adj[cur] if q != prev and q not in seen]
+            if not nxt:
+                break
+            prev, cur = cur, nxt[0]
+            seen.add(cur)
+            loop.append(cur)
+        if len(loop) > 12:
+            pts = [co[i] for i in loop]
+            if sum(p.z for p in pts) / len(pts) > zmin:
+                loops.append(pts)
+    return loops
+
+
+def resample_loop(pts, step):
+    n = len(pts)
+    L = [0.0]
+    for i in range(n):
+        L.append(L[-1] + (pts[(i + 1) % n] - pts[i]).length)
+    total = L[-1]
+    m = max(12, int(total / step))
+    out, j = [], 0
+    for q in range(m):
+        s = total * q / m
+        while L[j + 1] < s:
+            j += 1
+        t = (s - L[j]) / max(1e-9, L[j + 1] - L[j])
+        out.append(pts[j].lerp(pts[(j + 1) % n], t))
+    return out
+
+
+def seam_piping(name, piece, bvh, mats, mat, zmin, width=0.013, thick=0.0032):
+    """Hide the stair-stepped material seams of a garment piece (swimsuit / tank top cut-outs):
+    each boundary loop is resampled, smoothed, projected back on the body and turned into a
+    piping ribbon that straddles the seam."""
+    out = []
+    for li, loop in enumerate(boundary_loops(piece, zmin)):
+        pts = resample_loop(loop, 0.024)
+        for _ in range(6):
+            pts = [pts[i] * 0.5 + (pts[i - 1] + pts[(i + 1) % len(pts)]) * 0.25 for i in range(len(pts))]
+        P, N = [], []
+        for p in pts:
+            q, nn = project(bvh, p)
+            if q is not None:
+                P.append(q)
+                N.append(nn)
+        if len(P) > 8:
+            o = ribbon("%s%d" % (name, li), P, N, width, thick, mats, mat, closed=True, embed=0.003, bottom=False)
+            o["uv"] = "box:" + mat if mat in TILE else ""
+            out.append(o)
+    return out
+
+
+def torso_bare(sp, c):
+    """True where a swimsuit / tank top leaves the skin bare (neckline, armholes, shoulders)."""
+    x, z = abs(c.x), c.z / sp.k
+    if sp.top == "swim":
+        z_ap, xi, xo, nf, nbk = 1.330, 0.050, 0.094, 1.378, 1.405
+    else:   # tank
+        z_ap, xi, xo, nf, nbk = 1.318, 0.066, 0.122, 1.392, 1.425
+    if z < z_ap:
+        return False
+    s = min(1.0, (z - z_ap) / 0.080)
+    xo_z = xo + (0.25 - xo) * (1 - s) ** 2.2                  # armhole curve up to the strap
+    if x > xo_z:
+        return True
+    if x < xi:
+        nz = nf if c.y < 0.01 else nbk
+        return z > nz + 0.045 * (x / xi) ** 2.5                # scooped neckline rising to the straps
+    return False
+
+
+def hat_frame(sp):
+    """Rim plane of the hat: front point, back point, normal (up-ish)."""
+    if sp.hat != "bucket":
+        return cap_frame(sp)
+    hc, hk = sp.hc, sp.hk
+    front = hc + Vector((0, -0.084, 0.026)) * hk
+    back = hc + Vector((0, 0.100, -0.006)) * hk
+    n = (back - front).cross(Vector((1, 0, 0))).normalized()
+    if n.z < 0:
+        n = -n
+    return front, back, n
+
+
+def make_bucket(sp, bvh, mats):
+    """Bucket hat (bob): soft crown clearing head + hair, flat top, sloping brim. Material Hat."""
+    hk = sp.hk
+    front, back, n = hat_frame(sp)
+    C = (front + back) / 2
+    X = Vector((1, 0, 0))
+    Yp = n.cross(X).normalized()
+    if Yp.y < 0:
+        Yp = -Yp
+    NA, NE = 24, 5
+    rim = []
+    for i in range(NA):
+        az = 2 * math.pi * i / NA
+        d = X * math.sin(az) - Yp * math.cos(az)
+        hit = bvh.ray_cast(C + d * 0.3, -d, 0.3)
+        r = ((hit[0] - C).length if hit[0] is not None else 0.09) + 0.007
+        rim.append((d, r))
+    H = 0.0
+    hit = bvh.ray_cast(C + n * 0.3, -n, 0.3)
+    if hit[0] is not None:
+        H = (hit[0] - C).dot(n)
+    H = max(H + 0.010, 0.088 * hk)
+    rings = []
+    for e in range(NE):
+        h = H * e / (NE - 1) * 0.94
+        ring = []
+        for d, r in rim:
+            taper = 1.0 - 0.10 * (e / (NE - 1)) ** 1.5
+            p = C + n * h + d * r * taper
+            hit = bvh.ray_cast(C + n * h + d * 0.3, -d, 0.3)
+            if hit[0] is not None:
+                rr = (hit[0] - (C + n * h)).length + 0.006
+                if rr > r * taper:
+                    p = C + n * h + d * rr
+            ring.append(p)
+        rings.append(ring)
+    top = C + n * H
+    verts = [v for r in rings for v in r]
+    # flat-ish top: one extra inner ring then the centre
+    last = rings[-1]
+    verts += [top + (p - top) * 0.55 + n * 0.004 for p in last] + [top + n * 0.006]
+    faces = []
+    for e in range(NE - 1):
+        for i in range(NA):
+            i2 = (i + 1) % NA
+            faces.append((e * NA + i, e * NA + i2, (e + 1) * NA + i2, (e + 1) * NA + i))
+    b0 = NE * NA
+    for i in range(NA):
+        i2 = (i + 1) % NA
+        faces.append(((NE - 1) * NA + i, (NE - 1) * NA + i2, b0 + i2, b0 + i))
+    ci = len(verts) - 1
+    faces += [(b0 + i, b0 + (i + 1) % NA, ci) for i in range(NA)]
+    crown = nb.mesh_object("HatCrown", verts, faces)
+    fix_normals_out(crown, lambda c: C + n * (H * 0.4))
+    # brim: two shells (top / bottom) joined at the rolled edge and at the crown
+    NB = 4
+    verts, faces = [], []
+    for i, (d, r) in enumerate(rim):
+        p0 = rings[0][i]
+        for j in range(NB):
+            s = j / (NB - 1)
+            out = d * (0.058 * hk * s) - n * (0.030 * s ** 1.3)
+            verts.append(p0 + out + n * 0.0022)
+        for j in range(NB):
+            s = j / (NB - 1)
+            out = d * (0.058 * hk * s) - n * (0.030 * s ** 1.3)
+            verts.append(p0 + out - n * 0.0022)
+    W = 2 * NB
+    for i in range(NA):
+        a, b = i * W, ((i + 1) % NA) * W
+        for j in range(NB - 1):
+            faces.append((a + j, b + j, b + j + 1, a + j + 1))
+            faces.append((a + NB + j + 1, b + NB + j + 1, b + NB + j, a + NB + j))
+        faces.append((a + NB - 1, b + NB - 1, b + W - 1, a + W - 1))
+        faces.append((a + NB, b + NB, b, a))
+    brim = nb.mesh_object("HatBrim", verts, faces)
+    close_normals(brim)
+    return [set_material(crown, mats, "Hat"), set_material(brim, mats, "Hat")]
+
+
+def trim_under_hat(obj, sp, margin=0.006):
+    front, back, n = hat_frame(sp)
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if (f.calc_center_median() - front).dot(n) > margin],
+                     context="FACES")
+    bm.to_mesh(obj.data)
+    bm.free()
+
+
+def make_sunglasses(sp, bvh_hh, mats):
+    """Sunglasses pushed up on the head: two wrap lenses (Lens), frame + temples (Gear)."""
+    hc, hk = sp.hc, sp.hk
+    w = Vector((0, -0.50, 0.866))
+    hit = bvh_hh.ray_cast(hc + w * 0.3, -w, 0.3)
+    B = (hit[0] if hit[0] is not None else hc + w * 0.11) + w * 0.010
+    X = Vector((1, 0, 0))
+    v = w.cross(X).normalized()                     # lens "up" = towards the back of the head
+    out = []
+    rims = []
+    for sx in (1, -1):
+        c = B + X * (sx * 0.034 * hk)
+        ring = []
+        for i in range(14):
+            a = 2 * math.pi * i / 14
+            lx, ly = math.cos(a) * 0.027 * hk, math.sin(a) * 0.019 * hk
+            ly *= 1.0 + 0.18 * (lx * sx > 0) * (abs(lx) / 0.027)        # wider at the outer side
+            q = c + X * lx + v * (ly - 0.002 * hk)
+            h = bvh_hh.ray_cast(q + w * 0.06, -w, 0.12)
+            if h[0] is not None:
+                gap = (q - h[0]).dot(w) - 0.009
+                if gap > 0:
+                    q = q - w * gap * 0.75
+            ring.append(q)
+        rims.append(ring)
+        cen = sum(ring, Vector()) / len(ring) + w * 0.0015
+        verts = ring + [p - w * 0.0018 for p in ring] + [cen, cen - w * 0.0034]
+        m = len(ring)
+        faces = [(i, (i + 1) % m, 2 * m) for i in range(m)]
+        faces += [(m + (i + 1) % m, m + i, 2 * m + 1) for i in range(m)]
+        faces += [((i + 1) % m, i, m + i, m + (i + 1) % m) for i in range(m)]
+        lens = nb.mesh_object("Lens", verts, faces)
+        close_normals(lens)
+        out.append(set_material(lens, mats, "Lens"))
+        out.append(tube("Frame", ring[::2] + [ring[0]], [0.0017] * (m // 2 + 1), 4, mats, "Gear", cap_end=False))
+        # temple: from the outer hinge back along the side of the head, above the ear
+        hinge = ring[0]
+        tp = [hinge]
+        for y, z in ((0.000, 0.060), (0.035, 0.052), (0.070, 0.036), (0.098, 0.016)):
+            o = hc + Vector((sx * 0.20, y, z)) * hk
+            h = bvh_hh.ray_cast(o, Vector((-sx, 0, 0)), 0.3)
+            print("TEMPLE", sx, o, h[0])
+            tp.append((h[0] + Vector((sx * 0.004, 0, 0))) if h[0] is not None else o)
+        out.append(tube("Temple", tp, [0.0018] * len(tp), 4, mats, "Gear", cap_end=True, cap_start=True))
+    br = [rims[0][7], (rims[0][7] + rims[1][7]) / 2 + w * 0.002, rims[1][7]]
+    out.append(tube("Bridge", br, [0.0018] * 3, 4, mats, "Gear", cap_end=False))
+    return out
+
+
+def neck_ring(npts, ndirs, out, drop):
+    return [p + d * out - Vector((0, 0, drop)) for p, d in zip(npts, ndirs)]
+
+
+def make_whistle(sp, bvh, npts, ndirs, mats):
+    """Lifeguard whistle on a lanyard: cord around the base of the neck, V down to the whistle."""
+    k = sp.k
+    ring = neck_ring(npts, ndirs, 0.005, 0.006)
+    zc = (1.355 if sp.female else 1.325) * k
+    W, Wn = project(bvh, Vector((0, -0.3, zc)), (0, 1, 0), 0.3, 0.0)
+    if W is None:
+        W, Wn = Vector((0, -0.12, zc)), Vector((0, -1, 0))
+    # ring points sorted around the neck, starting at the front (index 0 = front centre)
+    n = len(ring)
+    iL, iR = 2, n - 2
+    pts = []
+    for t in (0.2, 0.4, 0.6, 0.8):
+        a = ring[iR].lerp(W, t)
+        q, nn = project(bvh, a + Vector((0, -0.25, 0)), (0, 1, 0), 0.3)
+        pts.append((q + nn * 0.004) if q is not None else a)
+    cord = [ring[i] for i in range(iL, iR + 1)] + pts[::1] + [W + Wn * 0.006]
+    pts2 = []
+    for t in (0.8, 0.6, 0.4, 0.2):
+        a = ring[iL].lerp(W, t)
+        q, nn = project(bvh, a + Vector((0, -0.25, 0)), (0, 1, 0), 0.3)
+        pts2.append((q + nn * 0.004) if q is not None else a)
+    cord = cord + pts2 + [ring[iL]]
+    out = [tube("Lanyard", cord, [0.0024] * len(cord), 4, mats, "Gear", cap_end=False)]
+    # whistle body hanging along the chest
+    down = Vector((0, 0, -1))
+    ax = (down - Wn * down.dot(Wn)).normalized()
+    c0 = W + Wn * 0.011
+    body = tube("Whistle", [c0 - ax * 0.002, c0 + ax * 0.030], [0.0095, 0.0095], 8, mats, "Metal",
+                cap_end=True, cap_start=True)
+    mouth = tube("WhistleTip", [c0 + ax * 0.028, c0 + ax * 0.046], [0.0055, 0.0045], 6, mats, "Metal",
+                 cap_end=True, cap_start=True)
+    loop = tube("WhistleRing", [c0 - ax * 0.002, W + Wn * 0.006], [0.0020, 0.0020], 4, mats, "Metal")
+    return out + [body, mouth, loop]
+
+
+def make_chain(sp, bvh, npts, ndirs, mats):
+    """Chunky gold chain (bead-modulated tube) hanging on the chest, with a round pendant."""
+    k = sp.k
+    n = len(npts)
+    ring = neck_ring(npts, ndirs, 0.007, 0.012)
+    zb = sum(p.z for p in ring) / n
+    depth = (0.105 if sp.female else 0.135) * k
+    pts, rad = [], []
+    m = 40
+    for q in range(m):
+        a = 2 * math.pi * q / m                     # 0 = front centre
+        f = q * n / m
+        i0 = int(f) % n
+        p = ring[i0].lerp(ring[(i0 + 1) % n], f - int(f))
+        drop = depth * ((1 + math.cos(a)) / 2) ** 1.6
+        target = Vector((p.x, p.y, p.z - drop))
+        d = Vector((p.x, p.y - 0.022, 0)).normalized()
+        if drop > 0.004:
+            qh, nn = project(bvh, target + d * 0.25, -d, 0.3)
+            if qh is not None:
+                target = qh + nn * 0.0055
+        pts.append(target)
+        rad.append(0.0046 if q % 2 else 0.0030)
+    pts.append(pts[0])
+    rad.append(rad[0])
+    out = [tube("Chain", pts, rad, 5, mats, "Metal", cap_end=False)]
+    p0 = pts[0]
+    qh, nn = project(bvh, p0 + Vector((0, -0.25, -0.018)), (0, 1, 0), 0.3)
+    if qh is not None:
+        c = qh + nn * 0.006
+        out.append(tube("Pendant", [c - nn * 0.0015, c + nn * 0.0025], [0.0125, 0.0125], 10, mats, "Metal",
+                        cap_end=True, cap_start=True))
+    return out
+
+
+def make_earrings(sp, mats):
+    hc, hk = sp.hc, sp.hk
+    out = []
+    for sx in (1, -1):
+        lobe = hc + Vector((sx * 0.076, 0.012, -0.050)) * hk
+        c = lobe + Vector((sx * 0.002, 0, -0.012))
+        ring = [c + Vector((0, math.cos(a) * 0.013, math.sin(a) * 0.013)) for a in
+                (2 * math.pi * i / 12 for i in range(13))]
+        out.append(tube("Hoop", ring, [0.0016] * 13, 4, mats, "Metal", cap_end=False))
+    return out
+
+
+def patch(name, bvh, x0, x1, z0, z1, mats, mat, front=True, lift=0.0042, nx=5, nz=4):
+    """Thin patch laid on the body by ray casting (pockets)."""
+    sgn = -1 if front else 1
+    grid = []
+    for j in range(nz):
+        z = z0 + (z1 - z0) * j / (nz - 1)
+        row = []
+        for i in range(nx):
+            x = x0 + (x1 - x0) * i / (nx - 1)
+            q, nn = project(bvh, Vector((x, sgn * 0.5, z)), (0, -sgn, 0), 0.5, 0.0)
+            row.append((q, nn) if q is not None else (Vector((x, sgn * 0.12, z)), Vector((0, sgn, 0))))
+        grid.append(row)
+    verts = [p + nn * lift for row in grid for p, nn in row] + [p - nn * 0.002 for row in grid for p, nn in row]
+    off = nx * nz
+    faces = []
+    for j in range(nz - 1):
+        for i in range(nx - 1):
+            a = j * nx + i
+            faces.append((a, a + 1, a + nx + 1, a + nx))
+    ring = [i for i in range(nx)] + [j * nx + nx - 1 for j in range(1, nz)] + \
+        [(nz - 1) * nx + i for i in range(nx - 2, -1, -1)] + [j * nx for j in range(nz - 2, 0, -1)]
+    for q in range(len(ring)):
+        a, b = ring[q], ring[(q + 1) % len(ring)]
+        faces.append((b, a, a + off, b + off))
+    obj = nb.mesh_object(name, verts, faces)
+    fix_normals_out(obj, lambda c: Vector((0, -sgn * 0.05 + 0.01, c.z)))
+    return set_material(obj, mats, mat)
+
+
+def surface_line(bvh, starts, d, off=0.0):
+    """Project each start point along d onto the surface; returns points, normals."""
+    P, N = [], []
+    for s in starts:
+        q, nn = project(bvh, s, d, 0.35, off)
+        if q is not None:
+            P.append(q)
+            N.append(nn)
+    return P, N
+
+
+def make_stripes(sp, bvh, mats):
+    """Side stripes of the joggers (Trim), hip to cuff, on the outer side of each leg."""
+    J, k = sp.J, sp.k
+    out = []
+    for s, sx in (("L", 1), ("R", -1)):
+        hip, kne, ank = J["hip" + s], J["kne" + s], J["ank" + s]
+        starts = []
+        z0, z1 = sp.waist - 0.03, sp.hem + 0.05
+        for i in range(14):
+            z = z0 + (z1 - z0) * i / 13
+            if z > kne.z:
+                c = hip.lerp(kne, (hip.z - z) / (hip.z - kne.z))
+            else:
+                c = kne.lerp(ank, (kne.z - z) / (kne.z - ank.z))
+            starts.append(Vector((c.x + sx * 0.3, c.y + 0.004, z)))
+        P, N = surface_line(bvh, starts, (-sx, 0, 0))
+        if len(P) > 3:
+            o = ribbon("Stripe" + s, P, N, 0.020, 0.0022, mats, "Trim")
+            out.append(o)
+    return out
+
+
+SEG7 = {"1": "bc", "0": "abcdef"}
+
+
+def make_number(sp, bvh, mats, text="10"):
+    """Football shirt number on the back (7-segment style digits, Trim)."""
+    k = sp.k
+    hgt, wid, bw = 0.17 * k, 0.085, 0.024
+    zc = 1.255 * k
+    out = []
+    xs = [0.058, -0.048] if len(text) == 2 else [0.0]
+    for ch, x in zip(text, xs):
+        segs = {"a": ((-1, 1), (1, 1)), "b": ((1, 1), (1, 0)), "c": ((1, 0), (1, -1)), "d": ((1, -1), (-1, -1)),
+                "e": ((-1, -1), (-1, 0)), "f": ((-1, 0), (-1, 1))}
+        for sg in SEG7[ch]:
+            (u0, v0), (u1, v1) = segs[sg]
+            if ch == "1":
+                u0 = u1 = 0.0
+            starts = []
+            for t in (0.0, 0.25, 0.5, 0.75, 1.0):
+                u, v = u0 + (u1 - u0) * t, v0 + (v1 - v0) * t
+                starts.append(Vector((x - u * (wid - bw) / 2, 0.3, zc + v * (hgt - bw) / 2)))
+            P, N = surface_line(bvh, starts, (0, -1, 0))
+            if len(P) >= 2:
+                ext = (P[-1] - P[0]).normalized() * (bw / 2)
+                P[0], P[-1] = P[0] - ext, P[-1] + ext
+                out.append(ribbon("Digit", P, N, bw, 0.0020, mats, "Trim"))
+    return out
+
+
+def make_flipflops(sp, bvh, mats):
+    """Flip-flops under the bare feet: sole slab (Shoes) + Y strap from the toe post."""
+    J = sp.J
+    out = []
+    g = 0.92 if sp.female else 1.0
+    for s, sx in (("L", 1), ("R", -1)):
+        ank, toe = J["ank" + s], J["toe" + s]
+        outline = []
+        cx, cy = ank.x * 0.97 + toe.x * 0.03, (ank.y + 0.04 + toe.y) / 2
+        for i in range(24):
+            a = 2 * math.pi * i / 24
+            d = Vector((math.cos(a) * 0.55, math.sin(a), 0)).normalized()
+            c = Vector((cx, cy, 0.008))
+            rc = 1.0 / math.hypot(d.x / 0.075, d.y / 0.19)
+            hit = bvh.ray_cast(c + d * rc, -d, rc)
+            p = hit[0] if hit[0] is not None else c + d * 0.05
+            p = Vector((p.x, p.y, 0)) + d * (0.009 + 0.006 * max(0.0, -d.y))
+            outline.append(p)
+        sole = slab_from_outline("FlipSole" + s, outline, 0.0, 0.016, mats, "Shoes")
+        sole["uv"] = "sole"
+        out.append(sole)
+        post = Vector((ank.x + sx * (-0.016 * g), toe.y + 0.052 * g, 0.016))
+        for side in (-1, 1):                    # medial / lateral strap
+            end = Vector((ank.x + sx * side * 0.040 * g, -0.025, 0.018))
+            pts = [post]
+            for t in (0.25, 0.5, 0.75):
+                q = post.lerp(end, t)
+                h = bvh.ray_cast(Vector((q.x, q.y, 0.11)), Vector((0, 0, -1)), 0.11)
+                z = h[0].z + 0.0035 if h[0] is not None else 0.04
+                pts.append(Vector((q.x, q.y, max(z, 0.02))))
+            h = bvh.ray_cast(Vector((end.x + sx * side * 0.1, end.y, 0.024)), Vector((-sx * side, 0, 0)), 0.2)
+            pts.append((h[0] + Vector((sx * side * 0.003, 0, 0))) if h[0] is not None else end)
+            pts.append(Vector((pts[-1].x, pts[-1].y, 0.012)))
+            out.append(tube("Strap", pts, [0.0042] * len(pts), 5, mats, "Shoes", cap_end=True, cap_start=True))
+    return out
+
+
+def make_laces(sp, bvh, mats):
+    """High-top laces: small bars across the instep (Sole material, white)."""
+    J = sp.J
+    out = []
+    for s in ("L", "R"):
+        ank = J["ank" + s]
+        for i in range(5):
+            y = -0.010 - 0.017 * i
+            h = bvh.ray_cast(Vector((ank.x, y, 0.20)), Vector((0, 0, -1)), 0.2)
+            if h[0] is None or h[0].z > 0.16:
+                continue
+            p = h[0] + h[1] * 0.003
+            o = set_material(nb.box("Lace", (0.030, 0.0055, 0.004), p), mats, "Sole")
+            out.append(o)
+    return out
+
+
+def lash_cards(eye_c, r, sx, hk, mats, female):
+    """Upper eyelash card: a thin curved wedge flicking out of the upper lid (Hair material)."""
+    n = 8
+    root, tip = [], []
+    L = (0.0042 if female else 0.0032) * hk
+    for i in range(n):
+        a = math.radians(14 + 152 * i / (n - 1))
+        x = -math.cos(a) * sx
+        p = eye_c + Vector((x * r * 1.0, -r * 0.60 - 0.0006, math.sin(a) * r * 0.82 + 0.0005))
+        out = Vector((x * 0.35, -1.0, 0.75)).normalized()
+        f = 0.55 + 0.45 * math.sin(math.pi * (0.25 + 0.75 * i / (n - 1)))    # longer at the outer corner
+        root.append(p)
+        tip.append(p + out * L * f + Vector((0, 0, L * 0.35 * f)))
+    verts = []
+    for p, t in zip(root, tip):
+        verts += [p + Vector((0, 0, 0.00045)), t, p - Vector((0, 0, 0.00045))]
+    faces = []
+    for i in range(n - 1):
+        a, b = 3 * i, 3 * (i + 1)
+        faces += [(a, b, b + 1, a + 1), (a + 1, b + 1, b + 2, a + 2), (a + 2, b + 2, b, a)]
+    faces += [(0, 1, 2), (3 * (n - 1) + 2, 3 * (n - 1) + 1, 3 * (n - 1))]
+    o = nb.mesh_object("LashCard", verts, faces)
+    close_normals(o)
+    return set_material(o, mats, "Hair")
+
+
+def bvh_side(objs, sx):
+    """BVH of the faces of objs on one side (sign of x) — e.g. one leg of the shorts."""
+    bm = bmesh.new()
+    for o in objs:
+        me = o.data.copy()
+        me.transform(o.matrix_world)
+        bm.from_mesh(me)
+        bpy.data.meshes.remove(me)
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().x * sx <= 0], context="FACES")
+    tree = BVHTree.FromBMesh(bm)
+    bm.free()
+    return tree
+
+
+def clothes_v4(sp, pieces, parts, bvh, bvh_head, body_E, mats, special, seam_src):
+    """Volume / trims of the v4 outfits (bands on the seams, piping, accessories)."""
+    J, k = sp.J, sp.k
+    out = []
+
+    def add(o, uv="", rule=None):
+        o["uv"] = uv
+        if rule:
+            special[o.name] = rule
+        out.append(o)
+        return o
+    Z = Vector((0, 0, 1))
+    npts, ndirs = neckline(bvh_head, body_E, k)
+    # ---- tops
+    if sp.sleeveless and seam_src is not None:
+        for o in seam_piping("Piping", seam_src, bvh, mats, "Shirt", sp.waist + 0.05,
+                             width=0.012 if sp.top == "swim" else 0.015):
+            add(o, "box:Shirt")
+        bpy.data.objects.remove(seam_src)
+    if sp.top in ("crop", "jersey", "jumpsuit"):
+        ch, thick, mat = {"crop": (0.014, 0.0048, "Shirt"), "jersey": (0.020, 0.0060, "Trim"),
+                          "jumpsuit": (0.030, 0.0065, "Shirt")}[sp.top]
+        add(band_from_points("Collar", npts, ndirs, [Z] * len(npts), ch, thick, mat, mats, embed=0.004,
+                             flare=0.005, lift=ch * 0.2), "box:Shirt" if mat == "Shirt" else "")
+        for s in ("L", "R"):
+            sho, elb = J["sho" + s], J["elb" + s]
+            u = (elb - sho).normalized()
+            c = sho + (elb - sho) * sp.sleeve_t
+            if sp.top == "jumpsuit":      # rolled-up sleeve
+                o, _, _ = band("Sleeve" + s, bvh, c, u, Vector((0, -1, 0)), 14, 0.10, 0.034, 0.0075, "Shirt", mats,
+                               flare=0.002)
+            else:
+                o, _, _ = band("Sleeve" + s, bvh, c, u, Vector((0, -1, 0)), 14, 0.10, 0.022, 0.0045,
+                               "Trim" if sp.top == "jersey" else "Shirt", mats, flare=0.002)
+            add(o, "box:Shirt" if sp.top != "jersey" else "")
+    if sp.top == "crop":
+        o, _, _ = band("CropHem", bvh, Vector((0, 0.008, sp.crop)), Z, Vector((0, -1, 0)), 26, 0.30, 0.022, 0.005,
+                       "Shirt", mats, embed=0.003)
+        add(o, "box:Shirt")
+    if sp.top == "jersey":
+        o, _, _ = band("JerseyHem", bvh, Vector((0, 0.008, sp.waist)), Z, Vector((0, -1, 0)), 26, 0.32, 0.026,
+                       0.0055, "Shirt", mats, embed=0.003, flare=0.003)
+        add(o, "box:Shirt")
+        if "number" in sp.extras:
+            for o in make_number(sp, bvh, mats):
+                add(o)
+    if sp.top == "jumpsuit":
+        # front placket from the collar to the waist, zip on top; chest pocket
+        zt = min(p.z for p in npts[:3] + npts[-2:]) - 0.006
+        starts = [Vector((0, -0.3, zt + (sp.waist + 0.03 - zt) * i / 9)) for i in range(10)]
+        P, N = surface_line(bvh, starts, (0, 1, 0))
+        if len(P) > 3:
+            add(ribbon("Placket", P, N, 0.032, 0.0022, mats, "Shirt"), "box:Shirt")
+            add(ribbon("Zip", [p + n * 0.0022 for p, n in zip(P, N)], N, 0.0065, 0.0016, mats, "Gear"))
+        if "pocket" in sp.extras:
+            add(patch("Pocket", bvh, 0.040, 0.118, 1.290 * k, 1.385 * k, mats, "Shirt"), "box:Shirt")
+            # pocket flap
+            add(patch("Flap", bvh, 0.037, 0.121, 1.362 * k, 1.392 * k, mats, "Shirt", lift=0.0068, nz=2),
+                "box:Shirt")
+    # ---- bottoms
+    if sp.bottom == "shorts" or (sp.bottom == "joggers" and sp.top != "jersey") or sp.top == "jumpsuit":
+        hgt = 0.026 if sp.top == "jumpsuit" else 0.036
+        o, bpts, bdirs = band("Waistband", bvh, Vector((0, 0.008, sp.waist)), Z, Vector((0, -1, 0)), 26, 0.28,
+                              hgt, 0.0062, "Pants", mats, embed=0.003)
+        add(o, "box:Pants")
+        if sp.top != "jumpsuit":      # drawstrings hanging from the front of the waistband
+            f0 = bpts[0] + bdirs[0] * 0.0075
+            for sx in (1, -1):
+                q = f0 + Vector((sx * 0.011, 0, -0.006))
+                pts = [q + Vector((sx * 0.003 * t, -0.006 * t, -0.11 * k * t)) for t in (0, 0.3, 0.6, 1.0)]
+                add(tube("Cord", pts, [0.0028, 0.0028, 0.0028, 0.004], 5, mats, "Trim", cap_end=True,
+                         cap_start=True), rule="legs")
+    if sp.bottom == "shorts":
+        for s, sx in (("L", 1), ("R", -1)):
+            hip, kne = J["hip" + s], J["kne" + s]
+            z = sp.shorts_hem
+            c = hip.lerp(kne, (hip.z - z) / (hip.z - kne.z))
+            axis = (hip - kne).normalized()
+            o, _, _ = band("ShortsHem" + s, bvh_side([pieces["Pants"]], sx), c, axis, Vector((0, -1, 0)), 16, 0.16,
+                           0.024, 0.0048, "Pants", mats, embed=0.004, flare=0.004)
+            add(o, "box:Pants")
+    if sp.bottom == "joggers":
+        for s in ("L", "R"):
+            ank = J["ank" + s]
+            o, _, _ = band("Cuff" + s, bvh, Vector((ank.x, ank.y - 0.006, sp.hem + 0.006)), Z, Vector((0, -1, 0)),
+                           14, 0.10, 0.042, 0.0068, "Pants", mats, embed=0.004, flare=0.002)
+            add(o, "box:Pants")
+        if "stripes" in sp.extras:
+            for o in make_stripes(sp, bvh_of([pieces["Pants"]]), mats):
+                add(o, rule="legs")
+    if sp.bottom == "jumpsuit":
+        for s in ("L", "R"):
+            ank = J["ank" + s]
+            o, _, _ = band("Hem" + s, bvh, Vector((ank.x, ank.y - 0.008, sp.hem)), Z, Vector((0, -1, 0)), 14, 0.09,
+                           0.026, 0.005, "Pants", mats, embed=0.003, flare=0.004)
+            add(o, "box:Pants")
+    # ---- feet
+    if sp.feet == "flip":
+        for o in make_flipflops(sp, bvh, mats):
+            add(o, o.get("uv", "shoe"))
+    else:
+        for s in ("L", "R"):
+            ank, toe = J["ank" + s], J["toe" + s]
+            outline = []
+            cx, cy = ank.x * 0.97 + toe.x * 0.03, (ank.y + 0.06 + toe.y) / 2
+            for i in range(22):
+                a = 2 * math.pi * i / 22
+                d = Vector((math.cos(a) * 0.55, math.sin(a), 0)).normalized()
+                c = Vector((cx, cy, 0.016))
+                rc = 1.0 / math.hypot(d.x / 0.075, d.y / 0.19)
+                hit = bvh.ray_cast(c + d * rc, -d, rc)
+                p = hit[0] if hit[0] is not None else c + d * 0.05
+                outline.append(p + d * (0.0045 if sp.feet == "hightop" else 0.0035))
+            if sp.feet == "hightop":
+                add(slab_from_outline("Sole" + s, outline, 0.0, 0.032, mats, "Sole"))
+            else:
+                add(slab_from_outline("Sole" + s, outline, 0.0, 0.024, mats, "Shoes"), "sole")
+        if sp.feet == "hightop":
+            for o in make_laces(sp, bvh, mats):
+                add(o)
+    # ---- neck accessories
+    if "whistle" in sp.extras:
+        for o in make_whistle(sp, bvh, npts, ndirs, mats):
+            add(o, rule="chest")
+    if "chain" in sp.extras:
+        for o in make_chain(sp, bvh, npts, ndirs, mats):
+            add(o, rule="chest")
+    return out
+
+
 # --------------------------------------------------------------------------- textures / UVs (v3)
 def tex_material(name, color, roughness, img, normal=None, nstrength=1.0):
     """Principled material whose base colour is image x colour (glTF baseColorTexture x factor)."""
@@ -1241,6 +1959,50 @@ def uv_ring(obj, center, z0, z1, v0, v1, reps):
 
 
 TILE = {"Shirt": 0.05, "Pants": 0.06, "Hat": 0.055}
+ARM_U = {1: (0.060, 0.152), -1: (0.156, 0.248)}       # armcyl: u range of the left / right arm
+
+
+def arm_coords(sp, c):
+    """(side, s, phi) of a point of the arm: s 0 = elbow .. 1 = wrist, -1 .. 0 = shoulder .. elbow."""
+    side = 1 if c.x >= 0 else -1
+    sd = "L" if side > 0 else "R"
+    sho, elb, wri = sp.J["sho" + sd], sp.J["elb" + sd], sp.J["wri" + sd]
+    fa = wri - elb
+    s = (c - elb).dot(fa) / fa.length_squared
+    ax = fa.normalized()
+    if s < 0:
+        ua = sho - elb
+        s = -(c - elb).dot(ua) / ua.length_squared
+        ax = -ua.normalized()
+    ref = Vector((0, -1, 0))
+    ref = (ref - ax * ref.dot(ax)).normalized()
+    b = ax.cross(ref)
+    r = c - elb
+    return side, s, math.atan2(r.dot(b), r.dot(ref))
+
+
+def uv_armcyl(obj, sp):
+    """Cylindrical UVs around each arm (forearm + upper arm) into the body strip: tattoos wrap."""
+    me = obj.data
+    uv = _uv(obj)
+    for p in me.polygons:
+        vals = []
+        for li in p.loop_indices:
+            side, s, phi = arm_coords(sp, me.vertices[me.loops[li].vertex_index].co)
+            u0, u1 = ARM_U[side]
+            vals.append((u0, u1, (phi + math.pi) / (2 * math.pi), 0.5 - 0.48 * max(-1.0, min(1.0, s))))
+        fr = [q[2] for q in vals]
+        if max(fr) - min(fr) > 0.5:
+            fr = [f + 1.0 if f < 0.5 else f for f in fr]
+        for li, (u0, u1, _, v), f in zip(p.loop_indices, vals, fr):
+            uv.data[li].uv = (u0 + (u1 - u0) * min(1.0, f), v)
+
+
+def arm_uv_inverse(u, v):
+    for side, (u0, u1) in ARM_U.items():
+        if u0 <= u <= u1:
+            return side, (0.5 - v) / 0.48, (u - u0) / (u1 - u0) * 2 * math.pi - math.pi
+    return None
 
 
 def assign_uvs(parts, sp):
@@ -1259,6 +2021,16 @@ def assign_uvs(parts, sp):
             uv_ring(o, Vector((0, 0.008, 0)), sp.waist - 0.02, sp.waist + 0.02, 0.40, 0.90, 9)
         elif mode.startswith("box:"):
             uv_box(o, TILE[mode[4:]])
+        elif mode.startswith("iris:"):
+            ex, ez, ri = (float(x) for x in mode[5:].split(","))
+            uv = _uv(o)
+            for li, lp in enumerate(o.data.loops):
+                c = o.data.vertices[lp.vertex_index].co
+                uv.data[li].uv = (0.5 + (c.x - ex) / (2 * ri), 0.5 + (c.z - ez) / (2 * ri))
+        elif mode == "strip0":
+            uv_strip(o, 0.005, 0.055)
+        elif mode == "armcyl":
+            uv_armcyl(o, sp)
         else:
             _uv(o)
 
@@ -1275,11 +2047,38 @@ COLORS = {   # default glTF colours (the game overrides Skin Shirt Pants Shoes H
                      Hat=(0.55, 0.09, 0.08)),
     "human_f2": dict(Skin=(0.66, 0.45, 0.33), Shirt=(0.86, 0.80, 0.66), Pants=(0.10, 0.12, 0.24),
                      Shoes=(0.12, 0.08, 0.07), Hair=(0.05, 0.035, 0.025), Lips=(0.58, 0.26, 0.27)),
+    # v4
+    "human_f3": dict(Skin=(0.78, 0.55, 0.40), Shirt=(0.78, 0.04, 0.04), Pants=(0.06, 0.10, 0.26),
+                     Shoes=(0.95, 0.70, 0.08), Hair=(0.34, 0.20, 0.09), Lips=(0.66, 0.30, 0.30),
+                     Gear=(0.02, 0.02, 0.025), Metal=(0.82, 0.82, 0.84), Lens=(0.02, 0.025, 0.04),
+                     Trim=(0.92, 0.92, 0.90), Eyes=(0.30, 0.42, 0.22)),
+    "human_m3": dict(Skin=(0.60, 0.38, 0.25), Shirt=(0.80, 0.05, 0.05), Pants=(0.98, 0.64, 0.08),
+                     Shoes=(0.06, 0.06, 0.07), Hair=(0.07, 0.045, 0.03), Lips=(0.48, 0.27, 0.22),
+                     Hat=(0.93, 0.92, 0.86), Gear=(0.75, 0.04, 0.04), Metal=(0.82, 0.82, 0.84),
+                     Trim=(0.92, 0.92, 0.90), Eyes=(0.28, 0.17, 0.08)),
+    "human_f4": dict(Skin=(0.42, 0.26, 0.17), Shirt=(1.00, 0.10, 0.52), Pants=(0.05, 0.05, 0.07),
+                     Shoes=(0.94, 0.94, 0.95), Hair=(0.03, 0.02, 0.018), Lips=(0.36, 0.17, 0.15),
+                     Metal=(1.00, 0.74, 0.28), Trim=(0.35, 1.00, 0.10), Sole=(0.96, 0.96, 0.96),
+                     Eyes=(0.22, 0.12, 0.05)),
+    "human_m4": dict(Skin=(0.52, 0.33, 0.22), Shirt=(1.00, 0.84, 0.04), Pants=(0.04, 0.14, 0.45),
+                     Shoes=(0.07, 0.07, 0.09), Hair=(0.03, 0.02, 0.018), Lips=(0.42, 0.22, 0.18),
+                     Hat=(0.02, 0.50, 0.24), Metal=(1.00, 0.74, 0.28), Trim=(0.02, 0.50, 0.24),
+                     Sole=(0.96, 0.96, 0.96), Eyes=(0.20, 0.11, 0.05)),
+    "human_m5": dict(Skin=(0.74, 0.52, 0.38), Shirt=(1.00, 0.36, 0.04), Pants=(1.00, 0.36, 0.04),
+                     Shoes=(0.90, 0.90, 0.88), Hair=(0.07, 0.05, 0.04), Lips=(0.60, 0.33, 0.28),
+                     Gear=(0.12, 0.12, 0.13), Eyes=(0.25, 0.30, 0.34)),
+}
+# v4 fabric maps per slot: (texture, normal map, tile in metres)
+FABRIC = {
+    "swim": ("jersey", 0.022), "tank": ("mesh", 0.030), "crop": ("jersey", 0.045), "jersey": ("mesh", 0.034),
+    "jumpsuit": ("denim", 0.075), "shorts": ("ripstop", 0.05), "joggers": ("jersey", 0.065),
 }
 
 
 def build_human(female, variant=""):
-    tex = nbt.textures(female)          # bakes in its own scene: before the scene reset
+    tex = dict(nbt.textures(female))    # bakes in its own scene: before the scene reset
+    if Spec(female, variant).v4:
+        tex.update(nbt.textures_v4())
     nb.reset_scene()
     scene = bpy.context.scene
     scene.render.fps = FPS
@@ -1287,17 +2086,33 @@ def build_human(female, variant=""):
     J, k, hk, hc = sp.J, sp.k, sp.hk, sp.hc
     st, dr = sp.stocky, sp.dress
     C = COLORS[sp.name]
+    if sp.v4:
+        top, bot = FABRIC[sp.top], FABRIC[sp.bottom]
+        TILE["Shirt"], TILE["Pants"] = top[1], bot[1]
+    else:
+        top, bot = ("jersey", 0.05), ("denim", 0.06)
+        TILE["Shirt"], TILE["Pants"] = 0.05, 0.06
+    skin_png = tex["skin_f" if female else "skin_m"]
+    if "tattoo" in sp.extras:
+        skin_png = nbt.tattoo_skin(skin_png, "skin_" + sp.name[6:], arm_uv_inverse)
     mats = {
-        "Skin": tex_material("Skin", C["Skin"], 0.55, tex["skin_f" if female else "skin_m"]),
-        "Shirt": tex_material("Shirt", C["Shirt"], 0.8, tex["jersey"], tex["jersey_n"], 0.55),
-        "Pants": tex_material("Pants", C["Pants"], 0.85, tex["denim"], tex["denim_n"], 0.55),
+        "Skin": tex_material("Skin", C["Skin"], 0.55, skin_png),
+        "Shirt": tex_material("Shirt", C["Shirt"], 0.45 if sp.top == "swim" else 0.8, tex[top[0]],
+                              tex[top[0] + "_n"], 0.55),
+        "Pants": tex_material("Pants", C["Pants"], 0.85, tex[bot[0]], tex[bot[0] + "_n"], 0.55),
         "Shoes": tex_material("Shoes", C["Shoes"], 0.5, tex["shoes"]),
         "Hair": nb.material("Hair", C["Hair"], roughness=0.6),
-        "Eyes": nb.material("Eyes", (0.05, 0.035, 0.025), roughness=0.12),
+        "Eyes": (tex_material("Eyes", C["Eyes"], 0.12, tex["iris"]) if sp.v4
+                 else nb.material("Eyes", (0.05, 0.035, 0.025), roughness=0.12)),
         "Lips": nb.material("Lips", C["Lips"], roughness=0.4),
         "EyeWhite": nb.material("EyeWhite", (0.86, 0.83, 0.79), roughness=0.2),
-        "Hat": (tex_material("Hat", C["Hat"], 0.75, tex["denim"], tex["denim_n"], 0.5) if st
+        "Hat": (tex_material("Hat", C["Hat"], 0.75, tex["denim"], tex["denim_n"], 0.5) if sp.hat
                 else nb.material("Hat", (0.5, 0.5, 0.5))),
+        "Gear": nb.material("Gear", C.get("Gear", (0.03, 0.03, 0.035)), roughness=0.45),
+        "Metal": nb.material("Metal", C.get("Metal", (0.8, 0.8, 0.82)), metallic=1.0, roughness=0.25),
+        "Lens": nb.material("Lens", C.get("Lens", (0.02, 0.025, 0.04)), metallic=0.6, roughness=0.08),
+        "Trim": nb.material("Trim", C.get("Trim", (0.9, 0.9, 0.9)), roughness=0.6),
+        "Sole": nb.material("Sole", C.get("Sole", (0.95, 0.95, 0.95)), roughness=0.7),
     }
 
     body_E = body_elements(sp)
@@ -1310,7 +2125,35 @@ def build_human(female, variant=""):
     for m in ORDER:
         body.data.materials.append(mats[m])
 
+    def body_rule_v4(c, reg, bone):
+        if bone in ("Hips", "Spine", "Chest", "Neck"):
+            if c.z <= sp.waist:
+                return "Pants"
+            if sp.top == "crop" and c.z < sp.crop:
+                return "Skin"
+            if sp.sleeveless and torso_bare(sp, c):
+                return "Skin"
+            return "Shirt"
+        if bone.startswith("UpperArm"):
+            if sp.sleeveless:
+                return "Skin"
+            sd = bone[-1]
+            sho, elb = J["sho" + sd], J["elb" + sd]
+            t = (c - sho).dot(elb - sho) / (elb - sho).length_squared
+            return "Shirt" if t < sp.sleeve_t else "Skin"
+        if bone.startswith("LowerArm"):
+            return "Skin"
+        if sp.feet == "flip" and bone.startswith("Foot"):
+            return "Skin"
+        if sp.bottom == "shorts":
+            return "Pants" if c.z > sp.shorts_hem else "Skin"
+        if (c.z < sp.hem or bone.startswith("Foot")) and c.z < sp.hem + 0.01:
+            return "Shoes"
+        return "Pants"
+
     def body_rule(c, reg, bone):
+        if sp.v4:
+            return body_rule_v4(c, reg, bone)
         if bone in ("Hips", "Spine", "Chest", "Neck") and reg in ("Shirt", "Pants", "Skin"):
             reg = "Shirt" if c.z > sp.waist else "Pants"
         elif bone.startswith("UpperArm"):
@@ -1333,7 +2176,18 @@ def build_human(female, variant=""):
         if v.co.z < 0.006:
             v.co.z = 0.0
     pieces = split_by_material(body, mats)
-    if st:
+    seam_src = None
+    if sp.sleeveless:              # garment cut-outs: keep the dense boundary for the piping
+        seam_src = pieces["Shirt"].copy()
+        seam_src.data = pieces["Shirt"].data.copy()
+        nb.link(seam_src)
+    if sp.v4:
+        budget = {"swim": {"Shirt": 820, "Pants": 620, "Skin": 1750},
+                  "tank": {"Shirt": 900, "Pants": 700, "Skin": 1750},
+                  "crop": {"Shirt": 820, "Pants": 1000, "Shoes": 540, "Skin": 800},
+                  "jersey": {"Shirt": 1250, "Pants": 820, "Shoes": 540, "Skin": 470},
+                  "jumpsuit": {"Shirt": 1150, "Pants": 1060, "Shoes": 460, "Skin": 480}}[sp.top]
+    elif st:
         budget = {"Shirt": 1650, "Pants": 900, "Shoes": 460, "Skin": 60}
     elif dr:
         budget = {"Shirt": 880, "Pants": 240, "Shoes": 400, "Skin": 880}
@@ -1341,7 +2195,7 @@ def build_human(female, variant=""):
         budget = {"Shirt": 1150, "Pants": 960, "Shoes": 460, "Skin": 380}
     for name, o in pieces.items():
         decimate(o, budget.get(name, 300))
-        o["uv"] = {"Skin": "strip", "Shoes": "shoe"}.get(name, "box:" + name)
+        o["uv"] = {"Skin": "armcyl" if "tattoo" in sp.extras else "strip", "Shoes": "shoe"}.get(name, "box:" + name)
 
     # ------------------------------------------------ head family
     head = metaball_mesh("HeadMB", head_E, 0.0038)
@@ -1416,9 +2270,11 @@ def build_human(female, variant=""):
         d = (v.co - hc) / hk
         top = max(0.0, min(1.0, (d.z + 0.02) / 0.10))
         rid = strand_ridge(sp, d)
-        if dr:
+        if sp.pulled:
             off = 0.0042 + 0.0030 * top
             off *= 1.0 + 0.32 * rid
+        elif sp.hair == "buzz":            # shaved / buzz cut: a thin even shell
+            off = 0.0019 + 0.0006 * top
         elif female:
             off = 0.008 + 0.006 * top
             off *= 1.0 + 0.22 * rid
@@ -1439,6 +2295,10 @@ def build_human(female, variant=""):
         vol.data.update()
         for v in vol.data.vertices:
             d = (v.co - hc) / hk
+            if sp.hair == "bun":                                   # tight curls on the puff
+                cur = math.sin(d.x * 260 + 1.1) * math.sin(d.y * 240 + 0.4) * math.sin(d.z * 250 + 2.0)
+                v.co = v.co + v.normal * (0.0028 * cur)
+                continue
             fall = max(0.0, min(1.0, (0.06 - d.z) / 0.10))         # locks deepen towards the tips
             v.co = v.co + v.normal * (0.0032 * strand_ridge(sp, d) * (0.4 + 0.6 * fall))
         hair_parts.append(vol)
@@ -1453,9 +2313,10 @@ def build_human(female, variant=""):
             return 0.0
         return 0.1
     decimate(head, 1800 if female else 1850, head_keep)
-    decimate(hair_parts[0], 820 if dr else (560 if female else (520 if st else 980)))
+    decimate(hair_parts[0], 820 if sp.pulled else (560 if female else (
+        520 if sp.hat else (640 if sp.hair == "buzz" else 980))))
     if vol is not None:
-        decimate(vol, 900)
+        decimate(vol, 520 if sp.hair == "bun" else 900)
     head["uv"] = "face"
 
     # ------------------------------------------------ hands
@@ -1464,7 +2325,7 @@ def build_human(female, variant=""):
         h = metaball_mesh("Hand" + s + "MB", hand_E[s], 0.0032)
         set_material(h, mats, "Skin")
         decimate(h, 420)
-        h["uv"] = "strip"
+        h["uv"] = "strip0" if "tattoo" in sp.extras else "strip"
         hands.append(h)
 
     parts = list(pieces.values()) + [head] + hair_parts + hands
@@ -1473,94 +2334,97 @@ def build_human(female, variant=""):
     special = {}                                       # object name -> weight rule
 
     # ------------------------------------------------ clothing volume
-    # shirt collar on the neckline (where the neck leaves the shirt), standing a little
-    npts, ndirs = neckline(bvh_head, body_E, k)
-    ch = 0.016 if female else (0.030 if st else 0.024)
-    collar = band_from_points("Collar", npts, ndirs, [Vector((0, 0, 1))] * len(npts), ch,
-                              0.0085 if st else 0.0055, "Shirt", mats, embed=0.004, flare=0.005, lift=ch * 0.2)
-    collar["uv"] = "box:Shirt"
-    parts.append(collar)
-    if st:
-        for o in make_drawstrings(sp, npts, mats):
+    if sp.v4:
+        parts += clothes_v4(sp, pieces, parts, bvh, bvh_head, body_E, mats, special, seam_src)
+    else:
+        # shirt collar on the neckline (where the neck leaves the shirt), standing a little
+        npts, ndirs = neckline(bvh_head, body_E, k)
+        ch = 0.016 if female else (0.030 if st else 0.024)
+        collar = band_from_points("Collar", npts, ndirs, [Vector((0, 0, 1))] * len(npts), ch,
+                                  0.0085 if st else 0.0055, "Shirt", mats, embed=0.004, flare=0.005, lift=ch * 0.2)
+        collar["uv"] = "box:Shirt"
+        parts.append(collar)
+        if st:
+            for o in make_drawstrings(sp, npts, mats):
+                o["uv"] = "box:Shirt"
+                parts.append(o)
+            pk = make_pocket(sp, bvh, mats)
+            pk["uv"] = "box:Shirt"
+            parts.append(pk)
+        # sleeve hems (rib cuffs at the wrist for the hoodie)
+        for s in ("L", "R"):
+            sho, elb, wri = J["sho" + s], J["elb" + s], J["wri" + s]
+            if sp.long_sleeve:
+                u = (wri - elb).normalized()
+                o, _, _ = band("Cuff" + s, bvh, wri - u * 0.040, u, Vector((0, -1, 0)), 14, 0.09, 0.040, 0.004,
+                               "Shirt", mats, embed=0.003)
+            else:
+                u = (elb - sho).normalized()
+                c = sho + (elb - sho) * sp.sleeve_t
+                o, _, _ = band("Sleeve" + s, bvh, c, u, Vector((0, -1, 0)), 14, 0.075, 0.022, 0.0045, "Shirt", mats,
+                               flare=0.002)
             o["uv"] = "box:Shirt"
             parts.append(o)
-        pk = make_pocket(sp, bvh, mats)
-        pk["uv"] = "box:Shirt"
-        parts.append(pk)
-    # sleeve hems (rib cuffs at the wrist for the hoodie)
-    for s in ("L", "R"):
-        sho, elb, wri = J["sho" + s], J["elb" + s], J["wri" + s]
-        if sp.long_sleeve:
-            u = (wri - elb).normalized()
-            o, _, _ = band("Cuff" + s, bvh, wri - u * 0.040, u, Vector((0, -1, 0)), 14, 0.09, 0.040, 0.004,
-                           "Shirt", mats, embed=0.003)
-        else:
-            u = (elb - sho).normalized()
-            c = sho + (elb - sho) * sp.sleeve_t
-            o, _, _ = band("Sleeve" + s, bvh, c, u, Vector((0, -1, 0)), 14, 0.075, 0.022, 0.0045, "Shirt", mats,
-                           flare=0.002)
-        o["uv"] = "box:Shirt"
-        parts.append(o)
-    if st:
-        # hoodie rib hem instead of the belt
-        o, _, _ = band("HoodHem", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)), Vector((0, -1, 0)),
-                       26, 0.30, 0.050, 0.006, "Shirt", mats, embed=0.004)
-        o["uv"] = "box:Shirt"
-        parts.append(o)
-    elif dr:
-        bvh_b = bvh_of([o for n_, o in pieces.items() if n_ in ("Pants", "Shirt")])
-        sk = make_skirt(sp, bvh_b, mats)
-        sk["uv"] = "box:Pants"
-        special[sk.name] = "skirt"
-        parts.append(sk)
-        o, _, _ = band("Waistband", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)), Vector((0, -1, 0)),
-                       26, 0.26, 0.030, 0.0065, "Pants", mats, embed=0.003)
-        o["uv"] = "box:Pants"
-        parts.append(o)
-    else:
-        # belt + buckle
-        belt, bpts, bdirs = band("Belt", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)),
-                                 Vector((0, -1, 0)), 24, 0.26, 0.036 if not female else 0.03, 0.006, "Shoes", mats,
-                                 embed=0.003)
-        belt["uv"] = "belt"
-        parts.append(belt)
-        front = bpts[0] + bdirs[0] * 0.006
-        bk = set_material(nb.box("Buckle", (0.05, 0.010, 0.040 if not female else 0.034),
-                                 (front.x, front.y - 0.003, sp.waist)), mats, "Shoes")
-        bk["uv"] = "shoe"
-        parts.append(bk)
-        for x in (-0.06, 0.06, -0.12, 0.12):                       # belt loops
-            hit = bvh.ray_cast(Vector((x, -0.4, sp.waist)), Vector((0, 1, 0)))
-            if hit[0] is not None:
-                lp = set_material(nb.box("Loop", (0.012, 0.010, 0.05), hit[0] + Vector((0, -0.006, 0))),
-                                  mats, "Pants")
-                lp["uv"] = "box:Pants"
-                parts.append(lp)
-    # trouser hems (shoe collar for the bare-legged variant) and shoe soles
-    for s in ("L", "R"):
-        ank, toe = J["ank" + s], J["toe" + s]
-        if dr:
-            o, _, _ = band("ShoeTop" + s, bvh, Vector((ank.x, ank.y - 0.004, sp.hem)), Vector((0, 0.35, 1)),
-                           Vector((0, -1, 0)), 14, 0.09, 0.012, 0.0035, "Shoes", mats, embed=0.003, flare=0.001)
-            o["uv"] = "shoe"
-        else:
-            o, _, _ = band("Hem" + s, bvh, Vector((ank.x, ank.y - 0.008, sp.hem)), Vector((0, 0, 1)),
-                           Vector((0, -1, 0)), 14, 0.09, 0.026, 0.005, "Pants", mats, embed=0.003, flare=0.004)
+        if st:
+            # hoodie rib hem instead of the belt
+            o, _, _ = band("HoodHem", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)), Vector((0, -1, 0)),
+                           26, 0.30, 0.050, 0.006, "Shirt", mats, embed=0.004)
+            o["uv"] = "box:Shirt"
+            parts.append(o)
+        elif dr:
+            bvh_b = bvh_of([o for n_, o in pieces.items() if n_ in ("Pants", "Shirt")])
+            sk = make_skirt(sp, bvh_b, mats)
+            sk["uv"] = "box:Pants"
+            special[sk.name] = "skirt"
+            parts.append(sk)
+            o, _, _ = band("Waistband", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)), Vector((0, -1, 0)),
+                           26, 0.26, 0.030, 0.0065, "Pants", mats, embed=0.003)
             o["uv"] = "box:Pants"
-        parts.append(o)
-        outline = []
-        cx, cy = ank.x * 0.97 + toe.x * 0.03, (ank.y + 0.06 + toe.y) / 2
-        for i in range(22):
-            a = 2 * math.pi * i / 22
-            d = Vector((math.cos(a) * 0.55, math.sin(a), 0)).normalized()
-            c = Vector((cx, cy, 0.014))
-            rc = 1.0 / math.hypot(d.x / 0.075, d.y / 0.19)        # start inside an ellipse around the foot
-            hit = bvh.ray_cast(c + d * rc, -d, rc)
-            p = hit[0] if hit[0] is not None else c + d * 0.05
-            outline.append(p + d * 0.0035)
-        sole = slab_from_outline("Sole" + s, outline, 0.0, 0.018 if dr else 0.024, mats, "Shoes")
-        sole["uv"] = "sole"
-        parts.append(sole)
+            parts.append(o)
+        else:
+            # belt + buckle
+            belt, bpts, bdirs = band("Belt", bvh, Vector((0, 0.008, sp.waist)), Vector((0, 0, 1)),
+                                     Vector((0, -1, 0)), 24, 0.26, 0.036 if not female else 0.03, 0.006, "Shoes", mats,
+                                     embed=0.003)
+            belt["uv"] = "belt"
+            parts.append(belt)
+            front = bpts[0] + bdirs[0] * 0.006
+            bk = set_material(nb.box("Buckle", (0.05, 0.010, 0.040 if not female else 0.034),
+                                     (front.x, front.y - 0.003, sp.waist)), mats, "Shoes")
+            bk["uv"] = "shoe"
+            parts.append(bk)
+            for x in (-0.06, 0.06, -0.12, 0.12):                       # belt loops
+                hit = bvh.ray_cast(Vector((x, -0.4, sp.waist)), Vector((0, 1, 0)))
+                if hit[0] is not None:
+                    lp = set_material(nb.box("Loop", (0.012, 0.010, 0.05), hit[0] + Vector((0, -0.006, 0))),
+                                      mats, "Pants")
+                    lp["uv"] = "box:Pants"
+                    parts.append(lp)
+        # trouser hems (shoe collar for the bare-legged variant) and shoe soles
+        for s in ("L", "R"):
+            ank, toe = J["ank" + s], J["toe" + s]
+            if dr:
+                o, _, _ = band("ShoeTop" + s, bvh, Vector((ank.x, ank.y - 0.004, sp.hem)), Vector((0, 0.35, 1)),
+                               Vector((0, -1, 0)), 14, 0.09, 0.012, 0.0035, "Shoes", mats, embed=0.003, flare=0.001)
+                o["uv"] = "shoe"
+            else:
+                o, _, _ = band("Hem" + s, bvh, Vector((ank.x, ank.y - 0.008, sp.hem)), Vector((0, 0, 1)),
+                               Vector((0, -1, 0)), 14, 0.09, 0.026, 0.005, "Pants", mats, embed=0.003, flare=0.004)
+                o["uv"] = "box:Pants"
+            parts.append(o)
+            outline = []
+            cx, cy = ank.x * 0.97 + toe.x * 0.03, (ank.y + 0.06 + toe.y) / 2
+            for i in range(22):
+                a = 2 * math.pi * i / 22
+                d = Vector((math.cos(a) * 0.55, math.sin(a), 0)).normalized()
+                c = Vector((cx, cy, 0.014))
+                rc = 1.0 / math.hypot(d.x / 0.075, d.y / 0.19)        # start inside an ellipse around the foot
+                hit = bvh.ray_cast(c + d * rc, -d, rc)
+                p = hit[0] if hit[0] is not None else c + d * 0.05
+                outline.append(p + d * 0.0035)
+            sole = slab_from_outline("Sole" + s, outline, 0.0, 0.018 if dr else 0.024, mats, "Shoes")
+            sole["uv"] = "sole"
+            parts.append(sole)
 
     # ------------------------------------------------ eyes, lash lines and eyebrows
     for sx in (1, -1):
@@ -1570,9 +2434,18 @@ def build_human(female, variant=""):
         cy = (hit[0].y if hit[0] is not None else hc.y - 0.08) - 0.0015 + r
         eye = nb.uv_sphere("Eye", r, (ex, cy, ez), 10, 6)
         parts.append(set_material(eye, mats, "EyeWhite"))
-        iris = nb.uv_sphere("Iris", 0.0058 * hk, (ex, cy - r + 0.0012, ez), 8, 4, scale=(1, 0.45, 1))
-        parts.append(set_material(iris, mats, "Eyes"))
-        parts.append(lash_line(Vector((ex, cy, ez)), r, sx, hk, mats))
+        if sp.v4:   # textured iris (planar UV), lash line + lash card in the Hair colour
+            ri = 0.0060 * hk
+            iris = nb.uv_sphere("Iris", ri, (ex, cy - r + 0.0013, ez), 10, 5, scale=(1, 0.42, 1))
+            iris["uv"] = "iris:%f,%f,%f" % (ex, ez, ri)
+            parts.append(set_material(iris, mats, "Eyes"))
+            ll = lash_line(Vector((ex, cy, ez)), r, sx, hk, mats)
+            parts.append(set_material(ll, mats, "Hair"))
+            parts.append(lash_cards(Vector((ex, cy, ez)), r, sx, hk, mats, female))
+        else:
+            iris = nb.uv_sphere("Iris", 0.0058 * hk, (ex, cy - r + 0.0012, ez), 8, 4, scale=(1, 0.45, 1))
+            parts.append(set_material(iris, mats, "Eyes"))
+            parts.append(lash_line(Vector((ex, cy, ez)), r, sx, hk, mats))
         # eyebrow: tapered slab following the brow surface (thicker than v2: reads from 10 m)
         n = 7
         top, bot = [], []
@@ -1605,15 +2478,31 @@ def build_human(female, variant=""):
         bmb.free()
         parts.append(set_material(brow, mats, "Hair"))
 
-    # ------------------------------------------------ cap (m2) / ponytail (f2)
-    if st:
+    # ------------------------------------------------ hats / ponytail / bun tie / head accessories
+    if sp.hat:
         bvh_hh = bvh_of([head] + hair_parts)
-        for o in make_cap(sp, bvh_hh, mats):
+        for o in (make_cap(sp, bvh_hh, mats) if sp.hat == "cap" else make_bucket(sp, bvh_hh, mats)):
             o["uv"] = "box:Hat"
             special[o.name] = "head"
             parts.append(o)
-        trim_under_cap(hair_parts[0], sp)
-    if dr:
+        trim_under_hat(hair_parts[0], sp)
+    if "sunglasses" in sp.extras:
+        bvh_hh = bvh_of([head] + hair_parts)
+        for o in make_sunglasses(sp, bvh_hh, mats):
+            special[o.name] = "head"
+            parts.append(o)
+    if "earrings" in sp.extras:
+        for o in make_earrings(sp, mats):
+            special[o.name] = "head"
+            parts.append(o)
+    if sp.hair == "bun":                     # scrunchie at the base of the bun
+        c = hc + Vector((0, 0.030, 0.097)) * hk
+        ring = [c + Vector((math.cos(a) * 0.050, math.sin(a) * 0.048, 0)) * hk
+                for a in (2 * math.pi * i / 14 for i in range(15))]
+        o = tube("Tie", ring, [0.0065 * hk] * 15, 5, mats, "Trim", cap_end=False)
+        special[o.name] = "head"
+        parts.append(o)
+    if sp.hair == "ponytail":
         bvh_av = bvh_of([head] + list(pieces.values()))
         for o in make_ponytail(sp, bvh_av, mats):
             if o.name.startswith("Tie"):
@@ -1665,6 +2554,17 @@ def build_human(female, variant=""):
         rule[a:b] = name
     for i in range(len(co)):
         c = co[i]
+        if rule[i] == "chest":                           # chain / lanyard / whistle
+            keep = [bidx[b] for b in ("Chest", "Neck", "Spine")]
+            sub = W[i, keep].copy()
+            W[i] = 0
+            W[i, keep] = sub
+            if W[i].sum() < 1e-6:
+                W[i, bidx["Chest"]] = 1.0
+            continue
+        if rule[i] == "legs":                            # jogger stripes, cords: never the arms
+            for b in arm_bones:
+                W[i, bidx[b]] = 0
         if rule[i] == "skirt":
             # hips near the waist, more and more the leg of its side towards the hem
             s = min(1.0, max(0.0, (sp.waist - c[2]) / (sp.waist - sp.skirt_hem)))
@@ -2200,6 +3100,112 @@ def crouch_pose(t):
     return p
 
 
+HAND_LOOSE_FIST = (55, 70, 18, 20, 10)   # dancing
+HAND_OPEN = (6, 8, 0, 4, 0)              # waving hands
+
+
+def dance_pose(t):
+    """Baile funk groove (2 s, 4 beats at 120 bpm): knees bounce down on every beat, hips sway
+    side to side (2 sways), chest counter-rotates, fists pump forward/up in alternation."""
+    sp = RIG.sp
+    k = sp.k
+    ph = 2 * math.pi * t
+    beat = 0.5 + 0.5 * math.cos(4 * ph)                   # 1 on the beat (down)
+    sway = math.sin(2 * ph)
+    p = {"_loc": (0.045 * sway, 0.01, -0.055 * k - 0.040 * k * beat)}
+    p["Hips"] = (6 + 4 * beat, 9 * sway, 10 * math.sin(ph))
+    p["Spine"] = (4 - 3 * beat, -5 * sway, -4 * math.sin(ph))
+    p["Chest"] = (2 + 3 * beat, -5 * sway, -6 * math.sin(ph))
+    p["Neck"] = (-2, 2 * sway, 0)
+    p["Head"] = (-4 + 7 * beat, 3 * sway, 4 * math.sin(ph))
+    leg_ik(p, "L", -0.02 * k, 0.0, x=0.165 * k, yaw=16, pole=Vector((0.45, -1, 0)))
+    leg_ik(p, "R", 0.02 * k, 0.0, x=-0.165 * k, yaw=-16, pole=Vector((-0.45, -1, 0)))
+    for side, o in (("L", 0.0), ("R", 0.5)):
+        pump = 0.5 + 0.5 * math.cos(2 * ph * 2 + o * 2 * math.pi)          # one pump per second
+        arms(p, side, -38 - 42 * pump, 95 - 35 * pump, down=8 - 6 * pump, yaw=-14 - 8 * pump, hand=-10 + 12 * pump)
+        fingers(p, side, *HAND_LOOSE_FIST)
+    return p
+
+
+def dance2_pose(t):
+    """Second groove (2 s): body wave (spine / chest / neck in cascade), weight shifting from one
+    foot to the other with the heel lifting, both hands up waving over the head."""
+    sp = RIG.sp
+    k = sp.k
+    ph = 2 * math.pi * t
+    sway = math.sin(ph)
+    beat = 0.5 + 0.5 * math.cos(4 * ph)
+    p = {"_loc": (0.060 * sway, 0.0, -0.035 * k - 0.025 * k * beat)}
+    p["Hips"] = (4 + 5 * math.sin(2 * ph), 7 * sway, -6 * sway)
+    p["Spine"] = (5 * math.sin(2 * ph - 0.9), -4 * sway, 3 * sway)
+    p["Chest"] = (5 * math.sin(2 * ph - 1.8), -4 * sway, 4 * sway)
+    p["Neck"] = (4 * math.sin(2 * ph - 2.7), 0, 0)
+    p["Head"] = (5 * math.sin(2 * ph - 3.6), 4 * sway, -5 * sway)
+    # the unloaded foot lifts its heel
+    liftL = max(0.0, -sway) ** 1.5 * 34
+    liftR = max(0.0, sway) ** 1.5 * 34
+    leg_ik(p, "L", -0.01 * k, liftL, x=0.150 * k, yaw=12, pole=Vector((0.35, -1, 0)))
+    leg_ik(p, "R", 0.01 * k, liftR, x=-0.150 * k, yaw=-12, pole=Vector((-0.35, -1, 0)))
+    for side, o in (("L", 0.0), ("R", math.pi)):
+        sx = 1 if side == "L" else -1
+        w = math.sin(2 * ph + o)
+        p["UpperArm." + side] = (-25 + 8 * w, sx * (-128 + 14 * w), sx * 10)
+        p["LowerArm." + side] = (-(28 + 22 * (0.5 + 0.5 * w)), 0, 0)
+        p["Hand." + side] = (10 * w, 0, sx * 12 * w)
+        fingers(p, side, *HAND_OPEN)
+    return p
+
+
+def sit_pose(t):
+    """Seated on a bench / step (seat ~0.46 m): thighs level, feet flat, forearms on the thighs.
+    Loops (2 s) with a slow breath."""
+    sp = RIG.sp
+    k = sp.k
+    ph = 2 * math.pi * t
+    b = math.sin(ph)
+    hipz = 0.50 * k                                   # hip joints just above a 0.46 m seat
+    p = {"_loc": (0.0, 0.06 * k, hipz - sp.J["hipL"].z)}
+    p["Hips"] = (-4, 0, 0)
+    p["Spine"] = (10 + 0.8 * b, 0, 0)
+    p["Chest"] = (6 - 1.0 * b, 0, 0)
+    p["Neck"] = (-6, 0, 0)
+    p["Head"] = (-6 + 0.6 * b, 0, 3 * math.sin(ph))
+    leg_ik(p, "L", -0.36 * k, 0.0, x=0.14 * k, yaw=8, pole=Vector((0.15, -1, 0.3)))
+    leg_ik(p, "R", -0.37 * k, 0.0, x=-0.14 * k, yaw=-8, pole=Vector((-0.15, -1, 0.3)))
+    G, Hd = fk(p)
+    for side in ("L", "R"):
+        sx = 1 if side == "L" else -1
+        knee = Hd["LowerLeg." + side]
+        hipj = Hd["UpperLeg." + side]
+        on = hipj.lerp(knee, 0.62) + Vector((sx * 0.012, 0, 0.085 * k + 0.002 * b))
+        arm_ik(p, side, on, Vector((sx * 0.7, 0.5, -0.2)), Vector((-sx * 0.15, -1, -0.35)),
+               Vector((-sx * 1, -0.1, 0.2)))
+    return p
+
+
+def workout_pose(t):
+    """Alternating hammer curls (2 s): left arm in the first second, right in the second;
+    upper arms tight on the ribs, fists closed (prop_weights dumbbell can go in the hand)."""
+    sp = RIG.sp
+    k = sp.k
+    ph = 2 * math.pi * t
+    p = {"_loc": (0.0, 0.0, -0.012 * k)}
+    p["Hips"] = (2, 0, 0)
+    p["Spine"] = (2, 0, 0)
+    p["Chest"] = (-2 - 1.5 * math.sin(2 * ph), 0, 0)
+    p["Neck"] = (2, 0, 0)
+    p["Head"] = (2, 0, 0)
+    leg_ik(p, "L", 0.0, 0.0, x=0.13 * k, yaw=10)
+    leg_ik(p, "R", 0.0, 0.0, x=-0.13 * k, yaw=-10)
+    for side, t0 in (("L", 0.0), ("R", 0.5)):
+        q = ((t - t0) % 1.0) * 2.0                    # 0..2 ; curl while q < 1
+        c = math.sin(math.pi * q) ** 2 if q < 1 else 0.0
+        arms(p, side, -6 - 14 * c, 12 + 118 * c, down=ARM_DOWN + 5, yaw=-6, hand=-6 + 18 * c)
+        fingers(p, side, *HAND_GRIP)
+    p["Spine"] = (2 + 2 * math.sin(4 * ph), 0, 0)
+    return p
+
+
 ACTIONS = [
     # name, frames, pose fn, loop
     ("Idle", 48, idle_pose, True),
@@ -2210,6 +3216,11 @@ ACTIONS = [
     ("Aim", 48, aim_pose, True),
     ("AimRifle", 48, aim_rifle_pose, True),
     ("Crouch", 48, crouch_pose, True),
+    # v4 clips (every human): Dance / Dance2 loops for the baile funk scenes, Sit and Workout (prison yard)
+    ("Dance", 48, dance_pose, True),
+    ("Dance2", 48, dance2_pose, True),
+    ("Sit", 48, sit_pose, True),
+    ("Workout", 48, workout_pose, True),
 ]
 
 
@@ -2245,7 +3256,7 @@ def make_actions(armobj, sp):
 
 
 if __name__ == "__main__":
-    which = sys.argv[1:] or ["m", "f", "m2", "f2"]
+    which = sys.argv[1:] or ["m", "f", "m2", "f2", "f3", "m3", "f4", "m4", "m5"]
     for w in which:
         p, t = build_human(w.startswith("f"), w[1:])
         print("[human] %s: %d tris" % (p, t))
