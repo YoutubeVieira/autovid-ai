@@ -156,7 +156,8 @@ let booms = [], scorch = [], prison = null, inmates = [];
 let cars = [], peds = [], bullets = [], parts = [], picks = [], enemies = [], cases = [], vip = null, agent = null;
 let L = null; // niveau en cours
 const cam = { x: 0, y: 0, z: 1 };
-let shake = 0, shootersNow = 0;
+let shake = 0, shootersNow = 0; const casings = []; // douilles éjectées (3D)
+const KICK = { pistol: 2.2, uzi: 1.4, shotgun: 7, rifle: 2.6, sniper: 8, rocket: 9, minigun: 1.6, lmg: 3, gl: 6, rail: 10 };
 const DIRA = [0, PI / 2, PI, -PI / 2], DX = [1, 0, -1, 0], DY = [0, 1, 0, -1];
 const CIV = ['#ff5d8f', '#ffd23f', '#3ee0c5', '#8b7bff', '#ff8a3d', '#e7e3f5', '#4da3ff', '#b5ff5c', '#c13cff'];
 const PEDC = ['#ffcf99', '#e0a070', '#8d5a3b', '#f2d3b3', '#5c3a24', '#c68b59'];
@@ -651,6 +652,8 @@ function fire() {
     bullets.push({ x: P.x + Math.cos(aa) * 12, y: P.y + Math.sin(aa) * 12, vx: Math.cos(aa) * w.speed, vy: Math.sin(aa) * w.speed, life: w.life, dmg: w.dmg, from: 'player', explosive: w.explosive });
   }
   parts.push({ x: P.x + Math.cos(a) * 14, y: P.y + Math.sin(a) * 14, vx: 0, vy: 0, life: .06, max: .06, r: w.explosive ? 10 : 7, col: '#fff2a8' });
+  shake = Math.max(shake, KICK[w.id] || 2); S.muzzle = { a, t: .055, big: w.explosive || w.pellets > 1 || w.id === 'sniper' };
+  if (!w.explosive && w.id !== 'rail') { const ea = a + PI / 2 + rnd(-.35, .35), sp2 = rnd(60, 110); casings.push({ x: P.x + Math.cos(a) * 10, y: P.y + Math.sin(a) * 10, z: 34, vx: Math.cos(ea) * sp2, vy: Math.sin(ea) * sp2, vz: rnd(70, 120), r: rnd(TAU), vr: rnd(-25, 25), life: 2.4, big: w.pellets > 1 }); if (casings.length > 60) casings.shift(); }
   P.cd = w.rate; P.lastShot = S.time; S.flash = { x: P.x + Math.cos(a) * 18, y: P.y + Math.sin(a) * 18, i: w.explosive ? 3 : 1.6 }; panic(P.x, P.y, 380); au('shot', w.id, 0, 1); if (touch.on) vib({ shotgun: 35, sniper: 50, rocket: 70, rifle: 12, minigun: 6, uzi: 6 }[w.id] || 10);
 }
 // radio de voiture : stations originales générées par le jeu
@@ -1440,6 +1443,7 @@ function update(dt) {
   enemies = enemies.filter(e => e.hp > 0 || (e.dead = (e.dead || 0) + dt) < 8);
   for (const b of booms) b.t += dt; booms = booms.filter(b => b.t < 3.2); for (const sc of scorch) sc.t += dt;
   for (const p of parts) { p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .92; p.vy *= .92; if (p.grow) p.r += p.grow * dt; }
+  for (let i = casings.length - 1; i >= 0; i--) { const c = casings[i]; c.life -= dt; if (c.life <= 0) { casings.splice(i, 1); continue; } c.vz -= 520 * dt; c.x += c.vx * dt; c.y += c.vy * dt; c.z += c.vz * dt; c.r += c.vr * dt; if (c.z < 1) { c.z = 1; if (c.vz < -40) { c.vz *= -.35; c.vx *= .5; c.vy *= .5; c.vr *= .6; if (!c.tink) { c.tink = 1; } } else { c.vz = 0; c.vx *= .8; c.vy *= .8; c.vr *= .8; } } }
   parts = parts.filter(p => p.life > 0); if (parts.length > 600) parts.splice(0, parts.length - 600);
   if (L) updLevel(dt);
 }
@@ -1739,6 +1743,11 @@ function init3D() {
   R3.bul.instanceMatrix.setUsage(THREE.DynamicDrawUsage); R3.bul.frustumCulled = false; sc.add(R3.bul);
   R3.bulE = new THREE.InstancedMesh(bx(12, 2.5, 2.5), new THREE.MeshBasicMaterial({ color: 0xff5a5a }), 300);
   R3.bulE.instanceMatrix.setUsage(THREE.DynamicDrawUsage); R3.bulE.frustumCulled = false; sc.add(R3.bulE);
+  R3.cas = new THREE.InstancedMesh(cyl(.38, .38, 1.5, 6), new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: .9, roughness: .3, emissive: 0x2a1a04 }), 60);
+  R3.cas.instanceMatrix.setUsage(THREE.DynamicDrawUsage); R3.cas.frustumCulled = false; R3.cas.count = 0; sc.add(R3.cas);
+  { const mc = document.createElement('canvas'); mc.width = mc.height = 64; const g = mc.getContext('2d'), gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,255,235,1)'); gr.addColorStop(.25, 'rgba(255,214,120,.95)'); gr.addColorStop(.6, 'rgba(255,120,30,.35)'); gr.addColorStop(1, 'rgba(255,80,0,0)'); g.fillStyle = gr; g.beginPath(); for (let k = 0; k < 16; k++) { const rr = k % 2 ? 12 : 32, aa = k / 16 * TAU; g.lineTo(32 + Math.cos(aa) * rr, 32 + Math.sin(aa) * rr); } g.closePath(); g.fill();
+    const mm = new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(mc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });
+    const mz = new THREE.Group(); const p1 = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mm), p2 = p1.clone(), p3 = p1.clone(); p2.rotation.x = PI / 2; p3.rotation.y = PI / 2; mz.add(p1, p2, p3); mz.visible = false; mz.renderOrder = 20; sc.add(mz); R3.muz = mz; }
   R3.ring = new THREE.Mesh(new THREE.TorusGeometry(38, 3, 8, 40), bmat('#21e6ff', .9)); R3.ring.rotation.x = -PI / 2; sc.add(R3.ring);
   R3.beam = new THREE.Mesh(new THREE.CylinderGeometry(30, 30, 300, 24, 1, true), bmat('#21e6ff', .16, true)); sc.add(R3.beam);
   const cone = new THREE.Mesh(new THREE.ConeGeometry(9, 24, 4), new THREE.MeshBasicMaterial({ color: 0x21e6ff, depthTest: false }));
@@ -2761,6 +2770,8 @@ function render3D(dt) {
   if (!R3.gren) { R3.gren = []; }
   while (R3.gren.length < grenades.length) { const gg = new THREE.Group(); gg.add(new THREE.Mesh(sph(3.4, 8, 6), mat('#2f3a24'))); const ring = new THREE.Mesh(new THREE.RingGeometry(70, 84, 32), new THREE.MeshBasicMaterial({ color: 0xff2e4d, transparent: true, opacity: .6, depthWrite: false, side: THREE.DoubleSide })); ring.rotation.x = -PI / 2; gg.add(ring); gg.userData.ring = ring; R3.scene.add(gg); R3.gren.push(gg); }
   R3.gren.forEach((gg, i) => { const g2 = grenades[i]; gg.visible = !!g2; if (!g2) return; gg.children[0].position.set(g2.x, (g2.h || 0) + 4, g2.y); const ring = gg.userData.ring; ring.position.set(g2.tx, .9, g2.ty); ring.material.opacity = .25 + .45 * (Math.sin(S.time * 18) > 0 ? 1 : 0); });
+  if (R3.cas) { let nc = 0; for (const c of casings) { if (nc >= 60) break; R3.v.set(c.x, c.z, c.y); R3.q.setFromEuler(R3.eul || (R3.eul = new THREE.Euler())); R3.eul.set(c.z > 1.5 ? c.r : PI / 2, c.r * .3, c.z > 1.5 ? c.r * .7 : 0); R3.q.setFromEuler(R3.eul); R3.s.set(c.big ? 1.5 : 1, c.big ? 1.5 : 1, c.big ? 1.5 : 1); R3.m4.compose(R3.v, R3.q, R3.s); R3.cas.setMatrixAt(nc++, R3.m4); } R3.cas.count = nc; R3.cas.instanceMatrix.needsUpdate = true; }
+  if (R3.muz) { const mzz = S.muzzle; if (mzz && mzz.t > 0 && !P.car) { mzz.t -= R3.dt || .016; const sz = (mzz.big ? 30 : 18) * rnd(.8, 1.2); R3.muz.visible = true; R3.muz.position.set(P.x + Math.cos(mzz.a) * 30, 34, P.y + Math.sin(mzz.a) * 30); R3.muz.rotation.set(0, -mzz.a, rnd(TAU)); R3.muz.scale.set(sz * 1.6, sz, sz); } else R3.muz.visible = false; }
   R3.bul.count = Math.min(nb, 300); R3.bulE.count = Math.min(ne, 300); R3.bul.instanceMatrix.needsUpdate = true; R3.bulE.instanceMatrix.needsUpdate = true;
   // particules
   const pos = R3.pts.geometry.attributes.position, colA = R3.pts.geometry.attributes.color; let n = 0;
