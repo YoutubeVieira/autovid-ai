@@ -548,7 +548,7 @@ function hurt(n, tag) {
   if (S.hp <= 0) { S.hp = 0; failLevel('Tu as été mis K.O.'); }
 }
 function hurtVip(n) { if (!vip || vip.hp <= 0) return; vip.hp -= n * (.4 + .6 * ez()); if (vip.hp <= 0) { vip.hp = 0; failLevel(vip.name + ' n’a pas survécu'); } }
-function addHeat(n) { S.heat = Math.min(5.99, S.heat + n); if (S.heat < 1) S.heat = 1; S.unseen = 0; }
+function addHeat(n) { S.heat = Math.min(5.99, S.heat + n); if (S.heat < 1) S.heat = 1; S.unseen = 0; if (!S.tipTunnel && lvl() <= 5 && S.mode === 'play') { S.tipTunnel = 1; setTimeout(() => toast('Astuce : un tunnel (point orange sur la carte) sème la police tout de suite'), 900); } }
 function policeLeave() { for (const c of cars) if (c.kind === 'police' && c.ai === 'police') c.ai = 'leave'; }
 function bribeCost() { return Math.round(stars() * (250 + lvl() * 120) * bribeDiscount() / 10) * 10; }
 function nearCop() { const tx = P.x, ty = P.y; return cars.some(c => c.kind === 'police' && c.ai === 'police' && !c.wreck && dist(c.x, c.y, tx, ty) < 170); }
@@ -804,7 +804,7 @@ function makeStep(type, n, idx) {
     }
     case 'escape': {
       S.heat = Math.max(S.heat, Math.min(5, (n < 4 ? 1 : 2) + Math.floor(n / 8))); S.unseen = 0; st.time = 150; st.grace = 2;
-      st.desc = 'La police te traque : sème-la (tunnel, atelier de peinture ou pot-de-vin)';
+      st.desc = 'La police te traque : sème-la (tunnel, atelier de peinture ou pot-de-vin)'; if (n <= 5 && !S.tipTunnel) { S.tipTunnel = 1; setTimeout(() => toast('Astuce : un tunnel (point orange sur la carte) sème la police tout de suite'), 900); }
       st.check = dt => { st.grace -= dt; return st.grace <= 0 && stars() === 0; }; break;
     }
     case 'survive': {
@@ -887,7 +887,7 @@ function startLevel(n, from = 0, free = false) {
   const region = regionOf(n); au('init'); au('setMusic', region.id); au('setIntensity', 0);
   if (!world || world.region !== region) world = buildWorld(region);
   booms = []; scorch = []; prison = null; inmates = []; cars = []; peds = []; bullets = []; parts = []; picks = []; enemies = []; cases = []; vip = null; agent = null;
-  S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = maxHp(); S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0;
+  S.heat = 0; S.unseen = 0; S.bust = 0; S.hp = maxHp(); S.dead = 0; S.tunnelCd = 0; S.spawnPol = 0; S.tipTunnel = 0;
   P.car = null; P.x = world.hospital.x; P.y = world.hospital.y + 20; P.a = PI / 2; P.armor = armorMax(); P.nitro = 0; P.cd = 0; P.turboT = 0; S.turboE = 1; allies = []; S.pboatCd = 0;
   if (!save.owned[save.weapon]) save.weapon = 'pistol';
   grenades.length = 0; skids.length = 0; skidI = 0;
