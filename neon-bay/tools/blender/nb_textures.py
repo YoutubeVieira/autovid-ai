@@ -341,8 +341,72 @@ def textures(female):
     return {k: _CACHE[k] for k in (key, "jersey", "jersey_n", "denim", "denim_n", "shoes")}
 
 
+# --------------------------------------------------------------------------- weapons (v3)
+# Tiling maps for gen_weapons.py, box-projected at world scale (see WEAPON_TILE there).
+#   poly / poly_n    : moulded polymer: soft mottling + fine stipple (also the Body finish grain)
+#   checker_n        : diamond checkering of rubber grips (16 x 16 pyramids per tile)
+#   steel            : brushed / tool-marked steel tint (light grey, streaks along u)
+WSIZE = 256
+
+
+def _poly_height(u, v):
+    vec, w = torus(u, v, 2.2, 2.2, 11.0)
+    cells = voronoi(vec, w, scale=7.0, randomness=0.9)
+    vec2, w2 = torus(u, v, 1.0, 1.0, 3.0)
+    soft = noise(vec2, w2, scale=2.0, detail=2, rough=0.5)
+    return smoothstep(0.05, 0.45, cells) * 0.75 + soft * 0.25
+
+
+def _poly(u, v):
+    vec, w = torus(u, v, 0.9, 0.9, 5.0)
+    mott = noise(vec, w, scale=1.5, detail=3, rough=0.55) - 0.5
+    return [0.9 + mott * 0.08 + (_poly_height(u, v) - 0.5) * 0.05]
+
+
+def _checker_height(u, v):
+    n = 16
+    a = fabs(frac(u * n + v * n) - 0.5) * 2.0
+    b = fabs(frac(u * n - v * n) - 0.5) * 2.0
+    return smoothstep(0.0, 0.85, vmin(a, b))
+
+
+def _steel(u, v):
+    vec, w = torus(u, v, 0.6, 9.0, 2.0)          # streaks: slow along u, fast along v
+    streak = noise(vec, w, scale=1.2, detail=3, rough=0.6) - 0.5
+    vec2, w2 = torus(u, v, 1.0, 1.0, 8.0)
+    blot = noise(vec2, w2, scale=1.8, detail=2, rough=0.5) - 0.5
+    return [0.88 + streak * 0.14 + blot * 0.07]
+
+
+def _blur(h):
+    """3x3 wrap-around blur (softer stipple, smaller PNG)."""
+    acc = sum(np.roll(np.roll(h, i, 0), j, 1) * w for i, wi in ((-1, 1), (0, 2), (1, 1))
+              for j, wj in ((-1, 1), (0, 2), (1, 1)) for w in (wi * wj / 16.0,))
+    return acc
+
+
+def weapon_textures():
+    """Bake (once per process) the weapon maps; returns {name: png path}."""
+    global _DIR, SIZE
+    if _DIR is None:
+        _DIR = tempfile.mkdtemp(prefix="nb_tex_")
+    if "poly_n" not in _CACHE:
+        keep, SIZE = SIZE, WSIZE
+        try:
+            _CACHE["poly"] = _save("poly", _bake("poly", _poly, 1), levels=64)
+            h = _blur(_bake("poly_h", lambda u, v: [_poly_height(u, v)], 1)[:, :, 0])
+            _CACHE["poly_n"] = _save("poly_n", _normal_from_height(h, 4.0), levels=20, mode="RGB")
+            h = _fold(_bake("checker_h", lambda u, v: [_checker_height(u, v)], 1)[:, :, 0], 16, 16)
+            _CACHE["checker_n"] = _save("checker_n", _normal_from_height(h, 2.5), levels=48, mode="RGB")
+            _CACHE["steel"] = _save("steel", _bake("steel", _steel, 1), levels=32)
+        finally:
+            SIZE = keep
+    return {k: _CACHE[k] for k in ("poly", "poly_n", "checker_n", "steel")}
+
+
 if __name__ == "__main__":
     import sys
-    out = textures(len(sys.argv) > 1 and sys.argv[1] == "f")
+    arg = sys.argv[1] if len(sys.argv) > 1 else ""
+    out = weapon_textures() if arg == "w" else textures(arg == "f")
     for k, p in out.items():
         print(k, p, os.path.getsize(p))
