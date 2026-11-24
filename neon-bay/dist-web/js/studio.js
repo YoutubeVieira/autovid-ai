@@ -95,9 +95,11 @@
     const sz = R.getDrawingBufferSize(new THREE.Vector2()); if (hudCv.width !== sz.x || hudCv.height !== sz.y) { hudCv.width = sz.x; hudCv.height = sz.y; }
     const c = hudCtx, W = hudCv.width, H = hudCv.height; c.clearRect(0, 0, W, H); let any = false;
     const k = W / Math.max(1, recording ? fw : view.clientWidth || W); fx *= k; fy *= k; fw *= k; fh *= k; const u = fh / 720;
+    const vert = fh > fw * 1.2;
     for (const ti of (P.titles || [])) { if (t < ti.t || t > ti.t + ti.d) continue; any = true;
-      const age = t - ti.t, left = ti.t + ti.d - t, a = Math.min(1, age / .35, left / .35), sc = 1 + (1 - Math.min(1, age / .6)) * .06;
+      const age = t - ti.t, left = ti.t + ti.d - t, a = ti.cut ? 1 : Math.min(1, age / .35, left / .35), sc = 1 + (1 - Math.min(1, age / .6)) * .06;
       c.save(); c.globalAlpha = a; c.textAlign = 'center'; c.textBaseline = 'middle'; const cx = fx + fw / 2;
+      if (vert) { drawVert(c, ti, age, sc, fx, fy, fw, fh); c.restore(); continue; }
       if (ti.style === 'card') { c.fillStyle = '#000'; c.fillRect(fx, fy, fw, fh); c.fillStyle = '#f4f1ea'; c.font = `600 ${Math.round(46 * u * sc)}px ${TITLE_FONT}`; c.fillText(ti.text.toUpperCase(), cx, fy + fh / 2 - (ti.sub ? 22 * u : 0)); if (ti.sub) { c.font = `400 ${Math.round(22 * u)}px ${TITLE_FONT}`; c.fillStyle = '#a9a3c2'; c.fillText(ti.sub, cx, fy + fh / 2 + 34 * u); } }
       else if (ti.style === 'logo') { c.font = `700 ${Math.round(150 * u * sc)}px ${TITLE_FONT}`; c.shadowColor = "#ff2e93"; c.shadowBlur = 40 * u; c.fillStyle = '#ffe3f1'; c.fillText(ti.text.split('|')[0], cx, fy + fh * .4); c.shadowColor = '#21e6ff'; c.fillStyle = '#d9fbff'; c.fillText(ti.text.split("|")[1] || "", cx, fy + fh * .4 + 140 * u); if (ti.sub) { c.shadowBlur = 0; c.font = `600 ${Math.round(22 * u)}px ${TITLE_FONT}`; c.fillStyle = '#ffd23f'; c.fillText(ti.sub, cx, fy + fh * .4 + 236 * u); } }
       else if (ti.style === 'sub') { c.textAlign = 'left'; c.font = `700 ${Math.round(30 * u)}px ${TITLE_FONT}`; c.fillStyle = '#fff'; c.shadowColor = 'rgba(0,0,0,.8)'; c.shadowBlur = 12 * u; c.fillText(ti.text.toUpperCase(), fx + 60 * u, fy + fh - 110 * u); if (ti.sub) { c.font = `400 ${Math.round(20 * u)}px ${TITLE_FONT}`; c.fillStyle = '#21e6ff'; c.fillText(ti.sub, fx + 60 * u, fy + fh - 76 * u); } c.fillStyle = '#ff2e93'; c.fillRect(fx + 60 * u, fy + fh - 140 * u, 60 * u * Math.min(1, age * 2), 4 * u); }
@@ -107,6 +109,38 @@
     const fadeA = P.fades ? Math.max(t < .8 ? 1 - t / .8 : 0, t > P.duration - .9 ? (t - (P.duration - .9)) / .9 : 0) : 0;
     if (fadeA > 0) { any = true; c.fillStyle = `rgba(0,0,0,${Math.min(1, fadeA)})`; c.fillRect(fx, fy, fw, fh); }
     hudTex.needsUpdate = true; return any;
+  }
+  // format vertical (TikTok, Reels, Shorts) : textes dimensionnés sur la largeur, retour à la ligne automatique,
+  // et zone sûre (15 % en haut, 25 % en bas, 12 % à droite) pour ne pas passer sous les boutons de l'application
+  function wrapLines(c, text, maxW) { const out = []; let cur = ''; for (const w of String(text).split(/\s+/).filter(Boolean)) { const nx = cur ? cur + ' ' + w : w; if (cur && c.measureText(nx).width > maxW) { out.push(cur); cur = w; } else cur = nx; } if (cur) out.push(cur); return out; }
+  function fitLines(c, text, maxW, px, weight, maxLines) { let s = px, lines = []; for (let i = 0; i < 14; i++) { c.font = `${weight} ${Math.round(s)}px ${TITLE_FONT}`; lines = String(text).split('\n').flatMap(l => wrapLines(c, l, maxW)); if (lines.length <= maxLines && lines.every(l => c.measureText(l).width <= maxW)) break; s *= .9; } return { lines, s }; }
+  function drawVert(c, ti, age, sc, fx, fy, fw, fh) {
+    const u = fw / 720, L = fx + fw * .07, Rr = fx + fw * .86, B = fy + fh * .75, cx = (L + Rr) / 2, mw = Rr - L, k = ti.size || 1, st = ti.style || 'title';
+    const Y = d => fy + fh * (ti.y != null ? ti.y : d), up = s => st === 'caption' ? String(s) : String(s).toUpperCase();
+    // bloc de lignes centré sur cy ; mode : 'stroke' (contour noir), 'box' (fond plein par ligne), 'shadow'
+    const block = (text, px, weight, cy, mode, fill, bg, maxLines = 4, align = 'center') => {
+      const { lines, s } = fitLines(c, up(text), mw - (mode === 'box' ? 40 * u : 0), px, weight, maxLines), lh = s * (mode === 'box' ? 1.32 : 1.12);
+      c.textAlign = align; let y = cy - (lines.length - 1) * lh / 2; const x = align === 'left' ? L : cx;
+      for (const ln of lines) { const w = c.measureText(ln).width;
+        if (mode === 'box') { c.save(); c.shadowColor = 'rgba(0,0,0,.45)'; c.shadowBlur = 14 * u; c.fillStyle = bg; const pw = 20 * u, x0 = align === 'left' ? x - pw : x - w / 2 - pw; c.fillRect(x0, y - lh / 2 + 3 * u, w + pw * 2, lh - 6 * u); c.restore(); }
+        else if (mode === 'stroke') { c.lineJoin = 'round'; c.lineWidth = Math.max(4, s * .16); c.strokeStyle = 'rgba(0,0,0,.9)'; c.strokeText(ln, x, y); }
+        else { c.shadowColor = 'rgba(0,0,0,.85)'; c.shadowBlur = 16 * u; }
+        c.fillStyle = fill; c.fillText(ln, x, y); c.shadowBlur = 0; y += lh; }
+      return { top: cy - lines.length * lh / 2, bottom: cy + lines.length * lh / 2 };
+    };
+    if (st === 'card') { c.fillStyle = '#000'; c.fillRect(fx, fy, fw, fh); if (ti.text) { const r = block(ti.text, 72 * u * k * sc, 700, Y(.45), 'shadow', '#f4f1ea'); if (ti.sub) block(ti.sub, 34 * u, 400, r.bottom + 40 * u, 'shadow', '#a9a3c2', null, 3); } }
+    else if (st === 'logo') { const cy = Y(.36), [w1, w2] = ti.text.split('|'); c.font = `700 ${Math.round(190 * u * k * sc)}px ${TITLE_FONT}`;
+      const s1 = Math.min(1, mw / Math.max(1, c.measureText(w1).width, c.measureText(w2 || '').width)); c.font = `700 ${Math.round(190 * u * k * sc * s1)}px ${TITLE_FONT}`;
+      c.shadowBlur = 44 * u; c.shadowColor = '#ff2e93'; c.fillStyle = '#ffe3f1'; c.fillText(w1, cx, cy); c.shadowColor = '#21e6ff'; c.fillStyle = '#d9fbff'; c.fillText(w2 || '', cx, cy + 180 * u * k * s1); c.shadowBlur = 0;
+      if (ti.sub) block(ti.sub, 44 * u, 700, cy + 180 * u * k * s1 + 150 * u, 'stroke', '#ffd23f', null, 3); }
+    else if (st === 'sub') { const s1 = fitLines(c, up(ti.text), mw, 54 * u * k, 700, 3), lh = s1.s * 1.12, s2 = ti.sub ? fitLines(c, ti.sub, mw, 34 * u, 600, 2) : null;
+      const h2 = s2 ? s2.lines.length * s2.s * 1.2 + 14 * u : 0, bottom = B - 16 * u, top = bottom - h2 - s1.lines.length * lh;
+      block(ti.text, 54 * u * k, 700, top + s1.lines.length * lh / 2, 'stroke', '#fff', null, 3, 'left');
+      if (s2) block(ti.sub, 34 * u, 600, bottom - h2 / 2 + 7 * u, 'stroke', '#21e6ff', null, 2, 'left');
+      c.fillStyle = ti.bg || '#ff2e93'; c.fillRect(L, top - 26 * u, 90 * u * Math.min(1, age * 2), 7 * u); }
+    else if (st === 'hook') { const r = block(ti.text, 88 * u * k * sc, 800, Y(.27), 'box', ti.fg || '#fff', ti.bg || '#ff2e93', 4); if (ti.sub) block(ti.sub, 40 * u, 700, r.bottom + 46 * u, 'stroke', '#fff', null, 2); }
+    else if (st === 'caption') block(ti.text, 44 * u * k, 700, Y(.66), 'box', ti.fg || '#fff', ti.bg || 'rgba(0,0,0,.62)', 3);
+    else { const r = block(ti.text, 80 * u * k * sc, 800, Y(.45), 'stroke', ti.fg || '#fff', null, 4); if (ti.sub) block(ti.sub, 36 * u, 600, r.bottom + 36 * u, 'stroke', '#21e6ff', null, 2); }
   }
   function setupComposer(cam) {
     composer = new THREE.EffectComposer(R); composer.addPass(new THREE.RenderPass(scene, cam));

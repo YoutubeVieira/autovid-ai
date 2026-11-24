@@ -6,12 +6,14 @@ const { chromium } = require('playwright');
 const { spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..', '..');
+// NB_WEB=dossier : rend depuis une copie du site (par défaut dist-web) ; utile quand dist-web est en cours de reconstruction
+const web = process.env.NB_WEB ? path.resolve(process.env.NB_WEB) : path.join(root, 'dist-web');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 const tpl = arg('template', file ? null : 'chase');
 const fps = +arg('fps', 30), res = +arg('res', 1080);
 (async () => {
-  const studio = path.join(root, 'dist-web', 'studio.html');
+  const studio = path.join(web, 'studio.html');
   if (!fs.existsSync(studio)) { console.error('Lance d’abord : node tools/build-web.js'); process.exit(1); }
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
@@ -32,7 +34,7 @@ const fps = +arg('fps', 30), res = +arg('res', 1080);
   ff.stdin.end(); await new Promise(r => ff.on('close', r));
   const music = arg('music', null);
   if (music) {
-    const g = await b.newPage(); await g.goto('file://' + path.join(root, 'dist-web', 'index.html')); await g.waitForFunction(() => window.NB_AUDIO, null, { timeout: 30000 });
+    const g = await b.newPage(); await g.goto('file://' + path.join(web, 'index.html')); await g.waitForFunction(() => window.NB_AUDIO, null, { timeout: 30000 });
     const hot = (arg('hot', '') || '').split(',').filter(Boolean).map(x => { const [a, z] = x.split('-').map(Number); return { hot: true, t: a, d: z - a }; });
     const b64 = await g.evaluate(async ([st, secs, ev]) => { const buf = await window.NB_AUDIO.renderOffline(st, secs, ev); let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); }, [music, Math.ceil(dur) + 1, hot]);
     const wav = out.replace(/\.mp4$/, '.wav'), tmp = out.replace(/\.mp4$/, '.tmp.mp4'); fs.writeFileSync(wav, Buffer.from(b64, 'base64')); fs.renameSync(out, tmp);
