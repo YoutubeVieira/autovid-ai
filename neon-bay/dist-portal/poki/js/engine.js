@@ -2279,13 +2279,16 @@ function makeGlbChar(md) {
   return g;
 }
 function poseGlb(m, x, y, a, step, ko, punching) {
-  const u = m.userData, md = u.glb; m.position.set(x, 0, y); m.rotation.set(0, -a, 0);
+  const u = m.userData, md = u.glb; m.position.set(x, 0, y);
+  // rotation lissée et légère inclinaison dans les virages (plus de demi-tour instantané)
+  { const dtr = Math.max(.008, R3.dt || .016); if (u.yaw === undefined || ko) u.yaw = a; const d = angDiff(a, u.yaw), k = Math.min(1, dtr * 14); u.yaw += d * k; const turn = clamp(d * k / dtr, -6, 6); u.lean = (u.lean || 0) + ((-turn * .025 * Math.min(1, (u.ms || 0) / 2.5)) - (u.lean || 0)) * Math.min(1, dtr * 8); m.rotation.set(0, -u.yaw, 0); m.rotateX(u.lean); }
   const ds = step - (u.ls < 0 ? step : u.ls); u.ls = step; u.spd += (Math.min(8, Math.abs(ds) * 60) - u.spd) * .2;
   // vitesse réelle (m/s) pour caler la foulée sur le déplacement : plus de pieds qui glissent
   const dtt = Math.max(.008, R3.dt || .016), mv = u.px === undefined ? 0 : Math.hypot(x - u.px, y - u.py) / dtt; u.px = x; u.py = y; const ms = (u.ms = (u.ms || 0) + (Math.min(12, mv / (md.scale || 30) / Math.max(.6, m.scale.x)) - (u.ms || 0)) * .25);
-  const want = ko ? 'death' : punching ? 'punch' : ms > 2.6 ? 'run' : ms > .25 ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
+  const runOn = u.curName === 'run' ? ms > 2.2 : ms > 2.9, walkOn = u.curName === 'walk' || u.curName === 'run' ? ms > .18 : ms > .32; // hystérésis : pas de clignotement entre marche et course
+  const want = ko ? 'death' : punching ? 'punch' : runOn ? 'run' : walkOn ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
   const act = md.acts[want] || md.acts.idle;
-  if (act && u.cur !== act) { if (u.cur) u.cur.fadeOut(.2); act.reset().fadeIn(.2).play(); u.cur = act; }
+  if (act && u.cur !== act) { const loco = (want === 'walk' || want === 'run') && (u.curName === 'walk' || u.curName === 'run'); if (u.cur) u.cur.fadeOut(loco ? .35 : .22); act.reset().fadeIn(loco ? .35 : .22).play(); if (loco && u.cur) act.time = (u.cur.time / u.cur.getClip().duration) * act.getClip().duration; u.cur = act; u.curName = want; }
   if (act) act.timeScale = want === 'walk' ? clamp(ms / 1.0, .6, 2.4) : want === 'run' ? clamp(ms / 2.4, .7, 2.4) : 1;
   md.mixer.update(Math.min(.05, R3.dt || .016));
 }
