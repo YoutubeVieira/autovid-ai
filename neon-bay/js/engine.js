@@ -679,7 +679,11 @@ function updLock() {
   if (P.lock && !lockAlive(P.lock)) { const was = P.lock; P.lock = null; if (was.hp !== undefined ? was.hp <= 0 : was.wreck) { const nx = lockCandidates()[0]; if (nx) { P.lock = nx; P.lockT = S.time; au('lock'); } } }
 }
 const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['car', 'Caméra embarquée']];
-function cycleCam() { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); toast(CAMS.find(c => c[0] === save.cam)[1]); }
+function defCam() { return touch.on || (VW && VW < 900) ? 'top' : 'chase'; } // PC : vue poursuite par défaut (montre villes et personnages)
+const PALS = { std: { shop: '#a6ff4d', enemy: '#ff4d5e', tunnel: '#ffb627', police: '#2e6bff' }, cb: { shop: '#4da6ff', enemy: '#ff9f1c', tunnel: '#ffe14d', police: '#c78bff' } };
+function pal() { return save.cb ? PALS.cb : PALS.std; }
+function applyA11y() { const b = document.body; b.classList.toggle('ts115', save.ts === 115); b.classList.toggle('ts130', save.ts === 130); b.classList.toggle('cbmode', !!save.cb); }
+function cycleCam() { const i = CAMS.findIndex(c => c[0] === (save.cam || defCam())); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); toast(CAMS.find(c => c[0] === save.cam)[1]); }
 const canVib = () => typeof navigator !== 'undefined' && 'vibrate' in navigator;
 function vib(p) { if (save.vib === false || !canVib()) return; try { navigator.vibrate(p); } catch (e) {} }
 function cycleWeapon(dir = 1) {
@@ -1457,6 +1461,7 @@ function updVip(dt) {
 let DPR = 1, VW = 0, VH = 0;
 function resize() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight; cvs.width = Math.round(VW * DPR); cvs.height = Math.round(VH * DPR); }
 addEventListener('resize', resize); resize();
+try { applyA11y(); } catch (e) {}
 addEventListener('resize', () => { if (S.screen === 'aerial') requestAnimationFrame(drawAerial); });
 { const mn = document.getElementById('mini'); if (mn) { mn.title = 'Vue aérienne (M)'; mn.addEventListener('click', () => openAerial()); mn.addEventListener('touchend', e => { e.preventDefault(); openAerial(); }); } }
 function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
@@ -1650,11 +1655,12 @@ function drawAerial() {
   g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high'; g.drawImage(world.mm, 0, 0, cv.width, cv.height);
   g.fillStyle = 'rgba(8,6,18,.25)'; g.fillRect(0, 0, cv.width, cv.height);
   const dot = (x, y, c, r, ring) => { g.fillStyle = c; g.beginPath(); g.arc(x * k, y * k, r * dpr, 0, TAU); g.fill(); if (ring) { g.strokeStyle = 'rgba(0,0,0,.7)'; g.lineWidth = 1.5 * dpr; g.stroke(); } };
-  for (const p of world.shops) dot(p.x, p.y, '#a6ff4d', 5, 1);
-  for (const p of world.tunnels) dot(p.x, p.y, '#ffb627', 4.5, 1);
+  const PL = pal();
+  for (const p of world.shops) dot(p.x, p.y, PL.shop, 5, 1);
+  for (const p of world.tunnels) dot(p.x, p.y, PL.tunnel, 4.5, 1);
   for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 4, 1);
-  for (const c of cars) if (c.kind === 'police' && c.ai === 'police') dot(c.x, c.y, '#2e6bff', 5, 1);
-  for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, '#ff4d5e', 4, 1);
+  for (const c of cars) if (c.kind === 'police' && c.ai === 'police') dot(c.x, c.y, PL.police, 5, 1);
+  for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, PL.enemy, 4, 1);
   if (heli) dot(heli.x, heli.y, '#ffffff', 6, 1);
   if (gps.path.length > 1) { g.lineJoin = g.lineCap = 'round'; for (const [w2, c] of [[9, 'rgba(255,210,63,.25)'], [4.5, '#ffd23f']]) { g.strokeStyle = c; g.lineWidth = w2 * dpr; g.beginPath(); gps.path.forEach((q, i) => i ? g.lineTo(q.x * k, q.y * k) : g.moveTo(q.x * k, q.y * k)); g.stroke(); } }
   if (target) { g.strokeStyle = '#21e6ff'; g.lineWidth = 3 * dpr; g.beginPath(); g.arc(target.x * k, target.y * k, 14 * dpr, 0, TAU); g.stroke(); dot(target.x, target.y, '#21e6ff', 7, 1); }
@@ -1668,11 +1674,12 @@ function drawMini(target) {
   const s = mini.width / W; mctx.drawImage(world.mm, 0, 0, mini.width, mini.height);
   const dot = (x, y, c, r) => { mctx.fillStyle = c; mctx.beginPath(); mctx.arc(x * s, y * s, r, 0, TAU); mctx.fill(); };
   for (const p of world.pads) dot(p.x, p.y, '#ff2e93', 2.5);
-  for (const p of world.shops) dot(p.x, p.y, '#a6ff4d', 3);
-  for (const p of world.tunnels) dot(p.x, p.y, '#ffb627', 2.5);
+  const PL = pal();
+  for (const p of world.shops) dot(p.x, p.y, PL.shop, 3);
+  for (const p of world.tunnels) dot(p.x, p.y, PL.tunnel, 2.5);
   for (const c of cars) if (c.kind === 'police' && c.ai === 'police') dot(c.x, c.y, Math.sin(S.time * 10) > 0 ? '#ff2e4d' : '#2e6bff', 2.5);
-  for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, '#ff4d5e', 2);
-  for (const c of cars) if (c.ai === 'gang' && !c.wreck) dot(c.x, c.y, '#ff4d5e', 3);
+  for (const e of enemies) if (e.hp > 0 && e.alert) dot(e.x, e.y, PL.enemy, 2);
+  for (const c of cars) if (c.ai === 'gang' && !c.wreck) dot(c.x, c.y, PL.enemy, 3);
   if (heli) dot(heli.x, heli.y, '#ffffff', 4);
   if (gps.path.length > 1) { const s2 = mini.width / W; mctx.strokeStyle = '#ffd23f'; mctx.lineWidth = 2.4; mctx.beginPath(); gps.path.forEach((q, i) => i ? mctx.lineTo(q.x * s2, q.y * s2) : mctx.moveTo(q.x * s2, q.y * s2)); mctx.stroke(); }
   if (target) dot(target.x, target.y, '#21e6ff', 4.5);
@@ -2642,7 +2649,7 @@ function render3D(dt) {
   if (R3.world !== world) build3DWorld();
   resize3D();
   const playing = S.mode !== 'menu' && L;
-  const mode = playing ? (save.cam || 'top') : 'top';
+  const mode = playing ? (save.cam || defCam()) : 'top';
   const head = P.car ? P.car.a : P.a;
   if (mode === 'top') R3.yaw = -PI / 2;
   else { if (R3.mode !== mode || R3.yaw === undefined) R3.yaw = head; R3.yaw += angDiff(head, R3.yaw) * Math.min(1, dt * (P.car ? 3.2 : 1.7)); }
@@ -2758,7 +2765,7 @@ function render3D(dt) {
       acc += L2; }
     R3.q.identity(); R3.s.set(1, 1, 1); R3.gpsM.count = n2; R3.gpsM.instanceMatrix.needsUpdate = true;
     const urgent = st && st.time !== null && !st.survive && gps.len / (P.car ? 300 : 150) > st.time * .8; R3.gpsM.material.color.set(urgent ? 0xff4d5e : 0xffd23f); }
-  R3.ring.visible = R3.beam.visible = !!target; if (target && Math.hypot(target.x - R3.cam.position.x, target.y - R3.cam.position.z) < 150) R3.beam.visible = false; R3.beam.material.opacity = (save.cam || 'top') === 'top' ? .16 : .06;
+  R3.ring.visible = R3.beam.visible = !!target; if (target && Math.hypot(target.x - R3.cam.position.x, target.y - R3.cam.position.z) < 150) R3.beam.visible = false; R3.beam.material.opacity = (save.cam || defCam()) === 'top' ? .16 : .06;
   { const oa = $('objArrow'); let show = false;
     if (target && playing && !S.cine) { const v = new THREE.Vector3(target.x, 25, target.y).project(R3.cam); let x = v.x, y = v.y; const behind = v.z > 1; if (behind) { x = -x; y = -y; }
       if (behind || Math.abs(x) > .9 || Math.abs(y) > .85) { const k = Math.min(.86 / Math.max(.001, Math.abs(x)), .78 / Math.max(.001, Math.abs(y))); x *= k; y *= k; show = true;
@@ -2863,7 +2870,7 @@ const SCREENS = {
   },
   options: () => `<div class="wrap narrow">
       <div class="top"><button class="btn small" data-optback="1">← Retour</button><h2>Options</h2><span></span></div>
-      <section class="opts"><h3>Réglages</h3><div class="optgrid">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || 'top')) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></section>
+      <section class="opts"><h3>Réglages</h3><div class="optgrid">${AU ? `<button class="btn small" data-snd="music">Musique : ${AU.prefs.music ? 'oui' : 'non'}</button><button class="btn small" data-snd="sfx">Bruitages : ${AU.prefs.sfx ? 'oui' : 'non'}</button>` : ''}<button class="btn small" data-camset="1">Caméra : ${(CAMS.find(c => c[0] === (save.cam || defCam())) || CAMS[0])[1]}</button>${canVib() ? `<button class="btn small" data-vib="1">Vibrations : ${save.vib === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-qual="1">Qualité : ${qualityLabel()}</button><button class="btn small" data-diff="1">Difficulté : ${dif().name}</button>${canVoice() ? `<button class="btn small" data-voice="1">Voix off : ${save.voice === false ? 'non' : 'oui'}</button>` : ''}<button class="btn small" data-ghost="1">Traverser les immeubles : ${save.ghost === false ? 'non' : 'oui'}</button><button class="btn small" data-assist="1">Aide à la conduite : ${save.driveAssist === false ? 'non' : 'oui'}</button><button class="btn small" data-slowmo="1">Ralentis cinéma : ${save.slowmo === false ? 'non' : 'oui'}</button><button class="btn small" data-tsize="1">Taille du texte : ${save.ts || 100} %</button><button class="btn small" data-cbm="1">Mode daltonien : ${save.cb ? 'oui' : 'non'}</button><button class="btn small" data-realchar="1">Personnages réalistes : ${save.realChar === false ? 'non' : 'oui'}</button></div></section>
       <section class="opts"><h3>Langue</h3><div class="row">${I18 ? I18.LANGS.map(l => `<button class="chip ${I18.lang === l ? 'on' : ''}" data-lang="${l}">${I18.NAMES[l]}</button>`).join('') : ''}</div></section>
       <section class="opts"><h3>Commandes au clavier</h3><div class="keys">
         <b>ZQSD / flèches</b><span>Marcher, conduire</span>
@@ -2941,10 +2948,10 @@ const SCREENS = {
       <p class="lead">Comme au volant : une pause toutes les heures, c'est mieux. Lève-toi, bois un verre d'eau, repose tes yeux quelques minutes. Ta partie t'attend.</p>
       <div class="col"><button class="btn primary" data-quit="1">Faire une pause</button><button class="btn" data-resume="1">Continuer encore un peu</button></div>
     </div>`,
-  aerial: () => { const st = L && L.step; return `<div class="aerial">
+  aerial: () => { const st = L && L.step, PL = pal(); return `<div class="aerial">
       <div class="aer-top"><div><p class="eyebrow">Vue aérienne · ${esc(TR(world.region.name || ''))}</p><h2>${st ? esc(st.label) : 'Carte'}</h2>${st ? `<p class="aer-obj">${esc(stepDesc(st))}</p>` : ''}</div><div class="aer-kpi"><span>Distance</span><b class="aer-dist">—</b></div></div>
       <div class="aer-map"><canvas id="aerialCv"></canvas></div>
-      <div class="aer-leg"><span><i style="background:#fff"></i>Toi</span><span><i style="background:#21e6ff"></i>Objectif</span><span><i style="background:#ffd23f"></i>Trajet GPS</span><span><i style="background:#a6ff4d"></i>Boutique</span><span><i style="background:#ffb627"></i>Tunnel</span><span><i style="background:#2e6bff"></i>Police</span><span><i style="background:#ff4d5e"></i>Ennemi</span></div>
+      <div class="aer-leg"><span><i style="background:#fff"></i>Toi</span><span><i style="background:#21e6ff"></i>Objectif</span><span><i style="background:#ffd23f"></i>Trajet GPS</span><span><i style="background:${PL.shop}"></i>Boutique</span><span><i style="background:${PL.tunnel}"></i>Tunnel</span><span><i style="background:${PL.police}"></i>Police</span><span><i style="background:${PL.enemy}"></i>Ennemi</span></div>
       <button class="btn primary" data-resume="1">Reprendre (M)</button>
     </div>`; },
   help: () => { const st = L.step, cost = 400 + lvl() * 40; return `<div class="wrap narrow center-col">
@@ -3138,10 +3145,12 @@ screenEl.addEventListener('click', e => {
   if (ds.free) { const n = +ds.free; au('init'); startLevel(n, 0, true); return; }
   if (ds.voice) { save.voice = save.voice === false; persist(); if (save.voice) say(TR('Voix off activée'), VLOC[(I18 && I18.lang) || 'fr']); else try { speechSynthesis.cancel(); } catch (e) {} showScreen(S.screen); return; }
   if (ds.realchar) { save.realChar = save.realChar === false; P._m = null; persist(); showScreen(S.screen); return; }
+  if (ds.tsize) { save.ts = save.ts === 115 ? 130 : save.ts === 130 ? 100 : 115; persist(); applyA11y(); showScreen(S.screen); return; }
+  if (ds.cbm) { save.cb = !save.cb; persist(); applyA11y(); showScreen(S.screen); return; }
   if (ds.slowmo) { save.slowmo = save.slowmo === false; persist(); showScreen(S.screen); return; }
   if (ds.assist) { save.driveAssist = save.driveAssist === false; persist(); showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
-  if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || 'top')); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
+  if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || defCam())); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
   if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }

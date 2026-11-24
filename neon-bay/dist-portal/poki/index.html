@@ -375,6 +375,11 @@ body.playing .hudhelp{display:block}body.cine .hudhelp{display:none}
 .aerial>.btn{justify-self:center;min-width:220px}
 #screen:has(.aerial){overflow:hidden}
 @media (max-height:520px) and (orientation:landscape){.aerial{grid-template-columns:minmax(0,1fr) 230px;grid-template-rows:auto minmax(0,1fr) auto;column-gap:14px}.aer-top{grid-column:2;grid-row:1;flex-direction:column;align-items:stretch}.aer-map{grid-column:1;grid-row:1/4}.aer-leg{grid-column:2;grid-row:2;justify-content:flex-start;align-content:start;flex-direction:column}.aerial>.btn{grid-column:2;grid-row:3;min-width:0;width:100%}.aer-kpi{text-align:left}}
+
+/* accessibilité : taille du texte et mode daltonien */
+body.ts115 #screen .wrap,body.ts115 .aerial{zoom:1.12}body.ts130 #screen .wrap,body.ts130 .aerial{zoom:1.25}
+@media (min-width:900px) and (min-height:600px){body.ts115 .hud{zoom:1.1}body.ts130 .hud{zoom:1.2}body.ts115 .hudhelp{left:calc(50% + 231px + 10px)}body.ts130 .hudhelp{left:calc(50% + 252px + 12px)}}
+body.cbmode .lvl.done{border-color:rgba(77,166,255,.5)!important}
 </style>
 </head>
 <body>
