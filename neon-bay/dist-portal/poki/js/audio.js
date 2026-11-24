@@ -115,7 +115,9 @@ window.NB_AUDIO = (() => {
   const win = () => { if (!playFile('win', sfxBus, 0, .8)) blips([523, 659, 784, 1047, 784, 1047, 1319], 'square', .11, .3, .2); };
   const fail = () => { if (!playFile('fail', sfxBus, 0, .8)) blips([392, 330, 262, 196], 'sawtooth', .16, .3, .25); };
   const buy = () => blips([784, 1175, 1568], 'square', .05, .25, .1);
-  const click = () => blips([1200], 'square', .01, .12, .03);
+  // sons d'interface doux (style menu de console) : survol = tic feutré, clic = « toc » grave et court
+  const click = () => { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .5); tone(d, now(), 'sine', 880, 520, .07, .5, .002); noise(d, now(), .03, 'bandpass', 2400, 2, .25); };
+  const hover = () => { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .18); tone(d, now(), 'sine', 1760, 1640, .035, .4, .002); };
   const deny = () => blips([220, 180], 'square', .08, .2, .09);
   function whoosh() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .7); noise(d, now(), 1, 'bandpass', 300, .7, .8, .3, 3000); }
   function door() { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, .5); noise(d, now(), .08, 'lowpass', 700, 1, .7); tone(d, now() + .06, 'sine', 140, 90, .08, .4); }
@@ -310,6 +312,6 @@ window.NB_AUDIO = (() => {
     return out.buffer;
   }
   function setMute(m) { if (ctx) master.gain.setTargetAtTime(m ? 0 : .9, now(), .05); }
-  const api = { lock, alarm, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  const api = { lock, alarm, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, hover, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
   return api;
 })();

@@ -3128,6 +3128,7 @@ function flashNote(t) { const n = document.createElement('div'); n.className = '
 function pauseGame() { if (S.mode !== 'play') return; $('rotate').hidden = true; S.rot = false; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
 function resumeGame() { if (PORTAL) PORTAL.start(); S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
 function goLevel(n) { if (n > 1 && !save.premium && !PORTAL) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
+{ let lastHov = null, hovT = 0; screenEl.addEventListener('mouseover', e => { const b = e.target.closest('button,a,.mm'); if (!b || b === lastHov) return; lastHov = b; const t = performance.now(); if (t - hovT > 60) { hovT = t; au('hover'); } }); }
 screenEl.addEventListener('click', e => {
   const b = e.target.closest('button,a'); if (!b) return;
   const ds = b.dataset;
