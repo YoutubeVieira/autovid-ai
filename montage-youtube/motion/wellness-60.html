@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gentle Wellness After 60</title>
+<style>
+  html, body { margin: 0; background: #10201f; }
+  canvas { display: block; width: 100vw; height: auto; }
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 12px; font: 14px Inter, sans-serif; color: #fff; background: #0008; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<div id="bar">Preview. <span id="tc"></span> Add ?t=SECONDS to the address to jump.</div>
+<script>
+/* Motion design "Gentle Wellness After 60". render(t) draws frame at time t (seconds), deterministic.
+   Rendered to MP4 by render.js (one frame at a time). Opening this file in a browser plays a preview. */
+"use strict";
+const C = document.getElementById("c"), X = C.getContext("2d");
+const W = 1920, H = 1080;
+const FONT = "Inter, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
+const COL = {
+  bg0: "#f6efe6", bg1: "#e6f1ee", ink: "#1f3b3a", soft: "#5d7472", accent: "#e07a5f", teal: "#2f8f83",
+  shirt: "#2f8f83", pants: "#3b4a6b", skin: "#efc3a0", hair: "#dfe3e8", hairLine: "#b9c0c9", shoe: "#ffffff",
+  chair: "#b88a5a", chairDark: "#8f6740", card: "#ffffff"
+};
+
+/* ---------------------------------------------------------- easing and helpers */
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const ease = k => (k = clamp(k), k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const outBack = k => { k = clamp(k); const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2); };
+const lerp = (a, b, k) => a + (b - a) * k;
+/* appear at time a over d seconds, disappear at segment end */
+function inOut(t, a, d, dur, outD = 0.5) { return clamp((t - a) / d) * clamp((dur - t) / outD); }
+
+function rr(x, y, w, h, r) { X.beginPath(); X.roundRect(x, y, w, h, r); }
+function text(s, x, y, size, opt = {}) {
+  X.font = `${opt.weight || 600} ${size}px ${FONT}`;
+  X.fillStyle = opt.color || COL.ink; X.textAlign = opt.align || "left"; X.textBaseline = opt.base || "alphabetic";
+  X.fillText(s, x, y);
+  return X.measureText(s).width;
+}
+function wrap(s, maxW, size, weight = 600) {
+  X.font = `${weight} ${size}px ${FONT}`;
+  const words = s.split(" "), lines = []; let line = "";
+  for (const w of words) { const tst = line ? line + " " + w : w; if (X.measureText(tst).width > maxW && line) { lines.push(line); line = w; } else line = tst; }
+  if (line) lines.push(line);
+  return lines;
+}
+
+/* ---------------------------------------------------------- figure (senior woman) */
+const K = ["head", "neck", "shL", "shR", "elL", "elR", "haL", "haR", "hiL", "hiR", "knL", "knR", "ftL", "ftR"];
+function P(o) { const p = {}; for (const k of K) p[k] = o[k].slice(); p.look = o.look || 0; p.side = !!o.side; p.toe = o.toe || 0; return p; }
+function mix(a, b, k) { const p = P(a); for (const key of K) { p[key][0] = lerp(a[key][0], b[key][0], k); p[key][1] = lerp(a[key][1], b[key][1], k); } p.look = lerp(a.look || 0, b.look || 0, k); p.toe = lerp(a.toe || 0, b.toe || 0, k); return p; }
+function shift(p, keys, dx, dy) { for (const k of keys) { p[k][0] += dx; p[k][1] += dy; } return p; }
+const UPPER = ["head", "neck", "shL", "shR", "elL", "elR", "haL", "haR"];
+
+const STAND = { head: [0, -505], neck: [0, -452], shL: [-62, -437], shR: [62, -437], elL: [-76, -340], elR: [76, -340], haL: [-80, -248], haR: [80, -248],
+  hiL: [-38, -265], hiR: [38, -265], knL: [-40, -137], knR: [40, -137], ftL: [-44, 0], ftR: [44, 0] };
+const SEAT = { head: [0, -412], neck: [0, -360], shL: [-60, -345], shR: [60, -345], elL: [-80, -262], elR: [80, -262], haL: [-54, -192], haR: [54, -192],
+  hiL: [-40, -182], hiR: [40, -182], knL: [-50, -160], knR: [50, -160], ftL: [-52, 0], ftR: [52, 0] };
+const SEAT_S = { side: 1, head: [8, -412], neck: [-4, -362], shL: [-14, -347], shR: [-8, -345], elL: [4, -262], elR: [10, -262], haL: [55, -196], haR: [60, -193],
+  hiL: [-26, -178], hiR: [-20, -176], knL: [80, -172], knR: [86, -170], ftL: [82, 0], ftR: [90, 0] };
+const LEAN_S = { side: 1, head: [96, -362], neck: [76, -328], shL: [60, -316], shR: [65, -314], elL: [88, -240], elR: [93, -238], haL: [124, -184], haR: [129, -182],
+  hiL: [-16, -184], hiR: [-10, -182], knL: [82, -172], knR: [88, -170], ftL: [82, 0], ftR: [90, 0] };
+const MID_S = { side: 1, head: [108, -425], neck: [90, -390], shL: [78, -376], shR: [83, -374], elL: [108, -302], elR: [113, -300], haL: [146, -244], haR: [151, -242],
+  hiL: [24, -228], hiR: [30, -226], knL: [100, -152], knR: [106, -150], ftL: [82, 0], ftR: [90, 0] };
+const STAND_S = { side: 1, head: [74, -505], neck: [64, -452], shL: [58, -437], shR: [63, -435], elL: [64, -340], elR: [69, -338], haL: [72, -250], haR: [77, -248],
+  hiL: [52, -265], hiR: [57, -263], knL: [70, -135], knR: [75, -133], ftL: [82, 0], ftR: [90, 0] };
+
+function limb(a, b, w, col) { X.strokeStyle = col; X.lineWidth = w; X.lineCap = "round"; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function shade(hex, f) { const n = parseInt(hex.slice(1), 16); const c = [n >> 16, n >> 8 & 255, n & 255].map(v => Math.round(v * f)); return `rgb(${c})`; }
+
+function drawFigure(p) {
+  const far = p.side ? 0.82 : 1;
+  const leg = (h, k, f, fr) => {
+    limb(h, k, 36, shade(COL.pants, fr)); limb(k, f, 32, shade(COL.pants, fr));
+    X.fillStyle = shade(COL.shoe, fr * 0.97); X.beginPath();
+    if (p.side) X.ellipse(f[0] + 14, f[1] - 8 - p.toe * 0.3, 30, 13, -p.toe * 0.02, 0, 7); else X.ellipse(f[0], f[1] - 8 - p.toe * 0.3, 22, 13, 0, 0, 7);
+    X.fill(); X.strokeStyle = "#0000001a"; X.lineWidth = 2; X.stroke();
+  };
+  const arm = (s, e, h, fr) => {
+    limb(s, e, 27, shade(COL.shirt, fr)); limb(e, h, 22, shade(COL.skin, fr));
+    X.fillStyle = shade(COL.skin, fr); X.beginPath(); X.arc(h[0], h[1], 14, 0, 7); X.fill();
+  };
+  // far side first in profile
+  if (p.side) { arm(p.shL, p.elL, p.haL, far); leg(p.hiL, p.knL, p.ftL, far); leg(p.hiR, p.knR, p.ftR, 1); }
+  else { leg(p.hiL, p.knL, p.ftL, 1); leg(p.hiR, p.knR, p.ftR, 1); }
+  // hips
+  limb(p.hiL, p.hiR, 40, COL.pants);
+  // torso
+  const c = [(p.shL[0] + p.shR[0]) / 2, (p.shL[1] + p.shR[1]) / 2], h = [(p.hiL[0] + p.hiR[0]) / 2, (p.hiL[1] + p.hiR[1]) / 2];
+  X.fillStyle = COL.shirt; X.strokeStyle = COL.shirt; X.lineJoin = "round"; X.lineWidth = 34;
+  X.beginPath();
+  if (p.side) { const n = [-(h[1] - c[1]), h[0] - c[0]], L = Math.hypot(...n) || 1, d = 34; X.moveTo(c[0] - n[0] / L * d, c[1] - n[1] / L * d); X.lineTo(c[0] + n[0] / L * d, c[1] + n[1] / L * d); X.lineTo(h[0] + n[0] / L * d, h[1] + n[1] / L * d); X.lineTo(h[0] - n[0] / L * d, h[1] - n[1] / L * d); }
+  else { X.moveTo(p.shL[0] + 6, p.shL[1]); X.lineTo(p.shR[0] - 6, p.shR[1]); X.lineTo(p.hiR[0] + 6, p.hiR[1] - 10); X.lineTo(p.hiL[0] - 6, p.hiL[1] - 10); }
+  X.closePath(); X.fill(); X.stroke();
+  // neck
+  limb(p.neck, [lerp(p.neck[0], p.head[0], 0.5), lerp(p.neck[1], p.head[1], 0.5)], 22, COL.skin);
+  if (!p.side) { arm(p.shL, p.elL, p.haL, 1); arm(p.shR, p.elR, p.haR, 1); } else arm(p.shR, p.elR, p.haR, 1);
+  drawHead(p);
+}
+
+function drawHead(p) {
+  const [x, y] = p.head, r = 44, lk = p.look;
+  X.save(); X.translate(x, y);
+  // hair back + bun
+  X.fillStyle = COL.hair; X.strokeStyle = COL.hairLine; X.lineWidth = 3;
+  if (p.side) { X.beginPath(); X.arc(-30, -30, 20, 0, 7); X.fill(); X.stroke(); }
+  else { X.beginPath(); X.arc(lk * 6, -r - 10, 19, 0, 7); X.fill(); X.stroke(); }
+  X.beginPath(); X.arc(0, -2, r + 6, 0, 7); X.fill();
+  // face
+  X.fillStyle = COL.skin; X.beginPath();
+  if (p.side) X.ellipse(8, 6, r - 4, r, 0, 0, 7); else X.ellipse(lk * 6, 6, r - 2, r, 0, 0, 7);
+  X.fill();
+  // fringe
+  X.fillStyle = COL.hair; X.beginPath();
+  if (p.side) { X.moveTo(-40, -10); X.quadraticCurveTo(-10, -62, 46, -26); X.quadraticCurveTo(10, -30, -40, 4); }
+  else { X.moveTo(-46 + lk * 6, -4); X.quadraticCurveTo(lk * 6, -70, 46 + lk * 6, -4); X.quadraticCurveTo(10 + lk * 10, -30, -46 + lk * 6, -4); }
+  X.fill();
+  // eyes, smile, cheeks
+  X.fillStyle = COL.ink; X.strokeStyle = COL.ink; X.lineWidth = 3.5; X.lineCap = "round";
+  if (p.side) {
+    X.beginPath(); X.arc(28, 2, 4.5, 0, 7); X.fill();
+    X.beginPath(); X.arc(28, 18, 11, 0.2, 1.3); X.stroke();
+    X.fillStyle = "#e9967a66"; X.beginPath(); X.arc(18, 18, 8, 0, 7); X.fill();
+  } else {
+    const ex = lk * 16;
+    X.beginPath(); X.arc(-15 + ex, 2, 4.5, 0, 7); X.arc(15 + ex, 2, 4.5, 0, 7); X.fill();
+    X.beginPath(); X.arc(ex, 14, 13, 0.35, Math.PI - 0.35); X.stroke();
+    X.fillStyle = "#e9967a66"; X.beginPath(); X.arc(-26 + ex, 18, 8, 0, 7); X.arc(26 + ex, 18, 8, 0, 7); X.fill();
+    // glasses
+    X.strokeStyle = "#7a5c48"; X.lineWidth = 2.5; X.beginPath(); X.arc(-15 + ex, 2, 11, 0, 7); X.moveTo(26 + ex, 2); X.arc(15 + ex, 2, 11, 0, 7); X.moveTo(-4 + ex, 2); X.lineTo(4 + ex, 2); X.stroke();
+  }
+  X.restore();
+}
+
+function drawChairFront() {
+  X.fillStyle = COL.chairDark; rr(-92, -420, 184, 30, 12); X.fill(); rr(-86, -400, 16, 250, 8); X.fill(); rr(70, -400, 16, 250, 8); X.fill();
+  X.fillStyle = COL.chair; rr(-104, -170, 208, 28, 12); X.fill();
+  X.fillStyle = COL.chairDark; rr(-96, -150, 16, 150, 8); X.fill(); rr(80, -150, 16, 150, 8); X.fill();
+}
+function drawChairSide(x0 = 0, backLeft = true) {
+  X.save(); X.translate(x0, 0); if (!backLeft) X.scale(-1, 1);
+  X.fillStyle = COL.chairDark; rr(-90, -390, 18, 390, 9); X.fill();
+  X.fillStyle = COL.chair; rr(-90, -168, 150, 24, 10); X.fill();
+  X.fillStyle = COL.chairDark; rr(42, -150, 16, 150, 8); X.fill();
+  X.restore();
+}
+
+/* ---------------------------------------------------------- poses for each exercise (u = time inside the demo) */
+const cyc = (u, period) => (u % period) / period;
+const MOVES = [
+  { name: "Belly breathing", tag: "CALM", reps: "5 slow breaths", chair: "front",
+    cues: ["Sit tall, feet flat on the floor", "Breathe in through your nose for 4", "Breathe out slowly for 6", "Let your shoulders drop"],
+    pose(u) { const k = Math.sin(cyc(u, 10) * Math.PI * 2 - Math.PI / 2) * 0.5 + 0.5;
+      const p = P(SEAT); p.haL = [-20, -238]; p.haR = [22, -232]; p.elL = [-84, -268]; p.elR = [84, -268];
+      shift(p, ["head", "neck", "shL", "shR", "elL", "elR"], 0, -8 * k); p.shL[0] -= 4 * k; p.shR[0] += 4 * k; return p; },
+    breath: true },
+  { name: "Neck turns", tag: "MOBILITY", reps: "5 each side", chair: "front",
+    cues: ["Look slowly to the right", "Come back to center", "Now look to the left", "Small and easy, never force it"],
+    pose(u) { const s = Math.sin(cyc(u, 6) * Math.PI * 2); const p = P(SEAT); p.look = s; p.head[0] += 6 * s; return p; } },
+  { name: "Shoulder rolls", tag: "MOBILITY", reps: "8 slow circles", chair: "front",
+    cues: ["Lift your shoulders toward your ears", "Roll them back and down", "Big, slow circles", "Then switch direction"],
+    pose(u) { const a = cyc(u, 3.2) * Math.PI * 2; const p = P(SEAT); p.haL = [-62, -195]; p.haR = [62, -195];
+      const dy = -16 * (0.5 + 0.5 * Math.sin(a)), dx = 7 * Math.cos(a);
+      shift(p, ["shL", "elL"], -dx, dy); shift(p, ["shR", "elR"], dx, dy); p.neck[1] += dy * 0.3; return p; } },
+  { name: "Seated march", tag: "WARM-UP", reps: "About 30 seconds", chair: "front",
+    cues: ["Lift one knee, then the other", "Swing your arms gently", "Keep your back tall", "Go at your own pace"],
+    pose(u) { const s = Math.sin(cyc(u, 1.8) * Math.PI * 2), l = Math.max(0, s), r = Math.max(0, -s); const p = P(SEAT);
+      p.knL[1] -= 60 * l; p.ftL[1] -= 62 * l; p.knL[0] -= 6 * l; p.knR[1] -= 60 * r; p.ftR[1] -= 62 * r; p.knR[0] += 6 * r;
+      p.elL = [-86, -272]; p.elR = [86, -272]; p.haL = [-74, -205 - 50 * r]; p.haR = [74, -205 - 50 * l]; p.elL[1] -= 18 * r; p.elR[1] -= 18 * l; return p; } },
+  { name: "Overhead reach", tag: "STRETCH", reps: "6 each side", chair: "front",
+    cues: ["Reach one arm up high", "Feel the stretch along your side", "Lower it and switch arms", "Breathe out as you reach"],
+    pose(u) { const ph = cyc(u, 6), side = ph < 0.5 ? 1 : -1, k = Math.sin((ph % 0.5) * 2 * Math.PI); const p = P(SEAT);
+      const up = side > 0 ? ["elR", "haR", "shR"] : ["elL", "haL", "shL"], sx = side;
+      const target = { el: [70 * sx, -452], ha: [42 * sx, -548] };
+      p[up[0]] = [lerp(p[up[0]][0], target.el[0], k), lerp(p[up[0]][1], target.el[1], k)];
+      p[up[1]] = [lerp(p[up[1]][0], target.ha[0], k), lerp(p[up[1]][1], target.ha[1], k)];
+      p[up[2]][1] -= 10 * k; shift(p, ["head", "neck"], -14 * sx * k, 0); shift(p, ["shL", "shR", "elL", "elR", "haL", "haR"], -8 * sx * k, 0);
+      p[up[0]][0] += 8 * sx * k; p[up[1]][0] += 8 * sx * k; return p; } },
+  { name: "Sit to stand", tag: "STRENGTH", reps: "8 to 10 times", chair: "side",
+    cues: ["Scoot to the edge of the chair", "Lean forward, nose over toes", "Push through your heels to stand", "Sit down slowly, count to 3"],
+    pose(u) { const T = 7, x = u % T;
+      const keys = [[0, SEAT_S], [0.7, SEAT_S], [1.5, LEAN_S], [2.1, MID_S], [2.8, STAND_S], [3.5, STAND_S], [4.6, MID_S], [5.6, LEAN_S], [6.5, SEAT_S], [7, SEAT_S]];
+      for (let i = 0; i < keys.length - 1; i++) if (x >= keys[i][0] && x <= keys[i + 1][0]) return mix(keys[i][1], keys[i + 1][1], ease((x - keys[i][0]) / (keys[i + 1][0] - keys[i][0] || 1)));
+      return P(SEAT_S); } },
+  { name: "Heel raises", tag: "STRENGTH", reps: "10 times", chair: "right",
+    cues: ["Hold the back of the chair", "Rise up onto your toes", "Pause, then lower slowly", "Stand tall the whole time"],
+    pose(u) { const k = ease(Math.min(1, Math.max(0, Math.sin(cyc(u, 3.4) * Math.PI * 2) * 1.4 + 0.2))); const p = P(STAND);
+      p.elL = [-98, -330]; p.haL = [-48, -272]; shift(p, K.filter(k2 => !k2.startsWith("ft") && k2 !== "haR"), 0, -26 * k);
+      p.haR = [168, -392]; p.elR = [128, -410 - 6 * k]; p.toe = 20 * k; p.ftL[1] -= 4 * k; p.ftR[1] -= 4 * k; return p; } },
+  { name: "One-leg balance", tag: "BALANCE", reps: "3 times each side", chair: "right",
+    cues: ["Hold the chair with one hand", "Lift one foot a few inches", "Hold for 10 seconds, keep breathing", "Switch sides"],
+    pose(u) { const ph = cyc(u, 16), side = ph < 0.5 ? "L" : "R", loc = (ph % 0.5) * 2;
+      const k = ease(clamp(loc / 0.15)) * ease(clamp((1 - loc) / 0.15)); const p = P(STAND);
+      p.elL = [-98, -330]; p.haL = [-48, -272]; p.haR = [168, -392]; p.elR = [128, -410];
+      const sway = Math.sin(u * 2.3) * 3 * k; shift(p, UPPER.filter(q => q !== "haR"), sway, 0);
+      p["kn" + side][1] -= 40 * k; p["kn" + side][0] += (side === "L" ? -6 : 6) * k; p["ft" + side][1] -= 70 * k; p["ft" + side][0] += (side === "L" ? -10 : 10) * k;
+      if (side === "R") { /* lean slightly onto left leg */ shift(p, ["hiL", "hiR", "shL", "shR", "neck", "head"], -6 * k, 0); }
+      return p; } }
+];
+
+/* ---------------------------------------------------------- timeline */
+const INTRO = 2.6, DEMO = 18;
+const SEGS = [{ id: "title", dur: 7 }, { id: "why", dur: 12 }, { id: "safety", dur: 11 }];
+MOVES.forEach((m, i) => SEGS.push({ id: "move", move: i, dur: INTRO + DEMO }));
+SEGS.push({ id: "plan", dur: 12 }, { id: "outro", dur: 8 });
+let acc = 0; for (const s of SEGS) { s.start = acc; acc += s.dur; }
+const DURATION = acc;
+window.DURATION = DURATION;
+window.CHIMES = SEGS.filter(s => s.id === "move").map(s => s.start + 0.2);
+
+/* ---------------------------------------------------------- background */
+function background(t) {
+  const g = X.createLinearGradient(0, 0, W, H); g.addColorStop(0, COL.bg0); g.addColorStop(1, COL.bg1);
+  X.fillStyle = g; X.fillRect(0, 0, W, H);
+  const blobs = [[300, 200, 260, "#f2c9b6"], [1650, 260, 300, "#cfe6df"], [1400, 900, 340, "#f7dcc4"], [200, 950, 220, "#d4e8e2"]];
+  blobs.forEach(([x, y, r, c], i) => {
+    const bx = x + Math.sin(t * 0.15 + i * 1.7) * 60, by = y + Math.cos(t * 0.12 + i) * 40;
+    const rg = X.createRadialGradient(bx, by, 0, bx, by, r); rg.addColorStop(0, c + "cc"); rg.addColorStop(1, c + "00");
+    X.fillStyle = rg; X.beginPath(); X.arc(bx, by, r, 0, 7); X.fill();
+  });
+  // floating leaves / dots
+  for (let i = 0; i < 14; i++) {
+    const x = (i * 337 + t * (12 + i % 4 * 5)) % (W + 80) - 40, y = 120 + (i * 151) % 840 + Math.sin(t * 0.6 + i) * 14;
+    X.fillStyle = i % 3 ? "#2f8f8318" : "#e07a5f1c"; X.beginPath(); X.arc(x, y, 6 + (i % 3) * 4, 0, 7); X.fill();
+  }
+}
+
+function brand(t) {
+  X.globalAlpha = clamp(t / 1.2);
+  X.fillStyle = COL.teal; X.beginPath(); X.ellipse(84, 70, 16, 26, 0.7, 0, 7); X.fill();
+  X.strokeStyle = "#fff"; X.lineWidth = 3; X.beginPath(); X.moveTo(72, 84); X.lineTo(96, 56); X.stroke();
+  text("Gentle Moves 60+", 116, 82, 30, { weight: 700, color: COL.ink });
+  X.globalAlpha = 1;
+}
+
+function routineDots(t) {
+  const cur = SEGS.find(s => t >= s.start && t < s.start + s.dur) || SEGS[SEGS.length - 1];
+  const x0 = W - 80 - 8 * 46, y = 72;
+  text("ROUTINE", x0 - 24, y + 8, 20, { weight: 700, color: COL.soft, align: "right" });
+  for (let i = 0; i < 8; i++) {
+    const s = SEGS.find(q => q.move === i), done = t >= s.start + s.dur, now = cur === s;
+    X.fillStyle = done ? COL.teal : now ? COL.accent : "#1f3b3a22";
+    X.beginPath(); X.arc(x0 + i * 46, y, now ? 14 : 11, 0, 7); X.fill();
+    if (now) { X.strokeStyle = COL.accent + "55"; X.lineWidth = 6; X.beginPath(); X.arc(x0 + i * 46, y, 22 + Math.sin(t * 4) * 2, 0, 7); X.stroke(); }
+  }
+}
+
+function stage(cx, fy, scale, drawFn) {
+  X.save(); X.translate(cx, fy);
+  X.fillStyle = "#1f3b3a14"; X.beginPath(); X.ellipse(0, 6, 300 * scale, 40 * scale, 0, 0, 7); X.fill();
+  X.scale(scale, scale); drawFn(); X.restore();
+}
+
+/* ---------------------------------------------------------- segments */
+function segTitle(t, dur) {
+  const a = inOut(t, 0, 0.8, dur);
+  X.globalAlpha = a;
+  const wave = Math.sin(t * 5) * 0.5 + 0.5;
+  stage(560, 930, 1.05, () => { const p = P(STAND); p.elR = [120, -500]; p.haR = [lerp(120, 160, wave), -600]; drawFigure(p); });
+  const words = ["Gentle", "wellness", "after 60"];
+  words.forEach((w, i) => {
+    const k = outBack((t - 0.4 - i * 0.25) / 0.7);
+    X.globalAlpha = a * clamp(k);
+    text(w, 960, 380 + i * 130 + (1 - k) * 60, 124, { weight: 800, color: i === 2 ? COL.accent : COL.ink });
+  });
+  X.globalAlpha = a * clamp((t - 1.6) / 0.8);
+  text("8 easy moves. One chair. About ten minutes a day.", 966, 720, 34, { weight: 500, color: COL.soft });
+  X.globalAlpha = 1;
+}
+
+function card(x, y, w, h, k) {
+  X.save(); X.shadowColor = "#1f3b3a22"; X.shadowBlur = 40; X.shadowOffsetY = 14;
+  X.fillStyle = COL.card; rr(x, y, w, h, 28); X.fill(); X.restore();
+}
+
+function icon(kind, x, y, s = 1, col = COL.teal) {
+  X.save(); X.translate(x, y); X.scale(s, s); X.strokeStyle = col; X.fillStyle = col; X.lineWidth = 7; X.lineCap = "round"; X.lineJoin = "round";
+  X.beginPath();
+  if (kind === "stairs") { X.moveTo(-34, 30); X.lineTo(-34, 12); X.lineTo(-12, 12); X.lineTo(-12, -8); X.lineTo(10, -8); X.lineTo(10, -28); X.lineTo(34, -28); X.stroke(); }
+  else if (kind === "balance") { X.moveTo(-34, 0); X.lineTo(34, 0); X.moveTo(0, 0); X.lineTo(0, 30); X.stroke(); X.beginPath(); X.arc(-34, 0, 9, 0, 7); X.arc(34, 0, 9, 0, 7); X.fill(); X.beginPath(); X.moveTo(0, -30); X.lineTo(0, -12); X.stroke(); }
+  else if (kind === "heart") { X.moveTo(0, 30); X.bezierCurveTo(-50, -4, -28, -44, 0, -18); X.bezierCurveTo(28, -44, 50, -4, 0, 30); X.fill(); }
+  else if (kind === "chair") { X.moveTo(-20, -34); X.lineTo(-20, 32); X.moveTo(-20, 4); X.lineTo(24, 4); X.lineTo(24, 32); X.stroke(); }
+  else if (kind === "slow") { X.arc(0, 0, 30, 0, 7); X.stroke(); X.beginPath(); X.moveTo(0, -16); X.lineTo(0, 0); X.lineTo(12, 8); X.stroke(); }
+  else if (kind === "doctor") { X.lineWidth = 12; X.moveTo(0, -28); X.lineTo(0, 28); X.moveTo(-28, 0); X.lineTo(28, 0); X.stroke(); }
+  else if (kind === "check") { X.moveTo(-14, 0); X.lineTo(-4, 10); X.lineTo(16, -12); X.stroke(); }
+  else if (kind === "calendar") { X.strokeRect(-30, -24, 60, 54); X.beginPath(); X.moveTo(-30, -8); X.lineTo(30, -8); X.moveTo(-14, -34); X.lineTo(-14, -18); X.moveTo(14, -34); X.lineTo(14, -18); X.stroke(); }
+  else if (kind === "stop") { X.arc(0, 0, 30, 0, 7); X.stroke(); X.beginPath(); X.moveTo(-20, 20); X.lineTo(20, -20); X.stroke(); }
+  X.restore();
+}
+
+function segCards(t, dur, title, sub, items, cols = 3) {
+  const a = clamp((dur - t) / 0.5);
+  X.globalAlpha = a * clamp(t / 0.6);
+  text(title, W / 2, 300 - (1 - ease(t / 0.8)) * 30, 84, { weight: 800, align: "center" });
+  if (sub) text(sub, W / 2, 370, 34, { weight: 500, color: COL.soft, align: "center" });
+  const cw = 480, gap = 60, x0 = (W - (cw * cols + gap * (cols - 1))) / 2;
+  items.forEach((it, i) => {
+    const k = outBack((t - 1 - i * 0.9) / 0.7);
+    if (k <= 0) return;
+    X.globalAlpha = a * clamp(k);
+    const x = x0 + i * (cw + gap), y = 450 + (1 - k) * 80;
+    card(x, y, cw, 360, k);
+    X.fillStyle = (it.col || COL.teal) + "1f"; X.beginPath(); X.arc(x + cw / 2, y + 100, 62, 0, 7); X.fill();
+    icon(it.icon, x + cw / 2, y + 100, 1.15, it.col || COL.teal);
+    wrap(it.text, cw - 70, 38, 700).forEach((l, j) => text(l, x + cw / 2, y + 230 + j * 48, 38, { weight: 700, align: "center" }));
+  });
+  X.globalAlpha = 1;
+}
+
+function segWhy(t, dur) {
+  segCards(t, dur, "Why move a little every day?", null, [
+    { icon: "stairs", text: "Stairs and getting up feel easier" },
+    { icon: "balance", text: "You feel steadier on your feet", col: COL.accent },
+    { icon: "heart", text: "More energy for the things you love" }]);
+  X.globalAlpha = clamp((t - 4.5) / 0.8) * clamp((dur - t) / 0.5);
+  text("The CDC advises strength and balance work every week for adults 65 and older.", W / 2, 920, 30, { weight: 500, color: COL.soft, align: "center" });
+  X.globalAlpha = 1;
+}
+
+function segSafety(t, dur) {
+  segCards(t, dur, "Before you start", null, [
+    { icon: "chair", text: "Use a sturdy chair without wheels" },
+    { icon: "slow", text: "Move slowly and stay pain-free", col: COL.accent },
+    { icon: "doctor", text: "Heart, joint or balance issue? Ask your doctor first" }]);
+}
+
+function segMove(t, dur, i) {
+  const m = MOVES[i], u = Math.max(0, t - INTRO), out = clamp((dur - t) / 0.5);
+  // intro card
+  if (t < INTRO + 0.6) {
+    const k = ease(t / 0.6) * clamp((INTRO + 0.6 - t) / 0.6);
+    X.globalAlpha = k;
+    X.fillStyle = COL.teal; X.beginPath(); X.arc(W / 2, 420, 110 * outBack(t / 0.6), 0, 7); X.fill();
+    text(String(i + 1), W / 2, 420, 120, { weight: 800, color: "#fff", align: "center", base: "middle" });
+    text(m.name, W / 2, 640 + (1 - ease((t - 0.2) / 0.6)) * 40, 96, { weight: 800, align: "center" });
+    text(m.tag, W / 2, 720, 32, { weight: 700, color: COL.accent, align: "center" });
+    X.globalAlpha = 1;
+  }
+  if (t < INTRO - 0.2) return;
+  const a = clamp((t - INTRO + 0.2) / 0.6) * out;
+  X.globalAlpha = a;
+  // stage
+  const cx = 600, fy = 940;
+  if (m.breath) {
+    const k = Math.sin(cyc(u, 10) * Math.PI * 2 - Math.PI / 2) * 0.5 + 0.5;
+    X.fillStyle = "#2f8f8314"; X.beginPath(); X.arc(cx, 560, 260 + 90 * k, 0, 7); X.fill();
+    X.strokeStyle = "#2f8f8340"; X.lineWidth = 4; X.beginPath(); X.arc(cx, 560, 260 + 90 * k, 0, 7); X.stroke();
+    const inhale = cyc(u, 10) < 0.5;
+    text(inhale ? "Breathe in..." : "Breathe out...", cx, 180, 46, { weight: 700, color: COL.teal, align: "center" });
+  }
+  stage(cx, fy, 1.18, () => {
+    if (m.chair === "front") drawChairFront();
+    if (m.chair === "side") drawChairSide(0, true);
+    if (m.chair === "right") { X.save(); X.translate(190, 0); X.fillStyle = COL.chairDark; rr(-18, -400, 20, 400, 9); X.fill(); X.fillStyle = COL.chair; rr(-18, -168, 130, 24, 10); X.fill(); X.fillStyle = COL.chairDark; rr(94, -150, 16, 150, 8); X.fill(); X.restore(); }
+    drawFigure(m.pose(u));
+  });
+  // panel
+  const px = 1080, pw = 740;
+  text(`MOVE ${i + 1} OF 8`, px, 230, 26, { weight: 700, color: COL.soft });
+  const tw = text(m.name, px, 315, 80, { weight: 800 });
+  X.fillStyle = COL.accent + "22"; rr(px, 345, 40 + X.measureText(m.tag).width * 0 + m.tag.length * 19, 46, 23); X.fill();
+  text(m.tag, px + 20, 378, 24, { weight: 800, color: COL.accent });
+  const step = DEMO / m.cues.length;
+  m.cues.forEach((c, j) => {
+    const ts = j * step + 0.3, k = ease((u - ts) / 0.6);
+    if (k <= 0) return;
+    const now = u >= ts && u < ts + step, y = 470 + j * 96;
+    X.globalAlpha = a * k * (now ? 1 : 0.55);
+    if (now) { X.fillStyle = "#ffffffcc"; rr(px - 20, y - 52, pw, 80, 22); X.fill(); }
+    X.fillStyle = now ? COL.accent : COL.teal; X.beginPath(); X.arc(px + 20, y - 12, 20, 0, 7); X.fill();
+    if (now) text(String(j + 1), px + 20, y - 11, 24, { weight: 800, color: "#fff", align: "center", base: "middle" });
+    else icon("check", px + 20, y - 12, 0.9, "#fff");
+    const lines = wrap(c, pw - 90, 38, now ? 700 : 500);
+    lines.forEach((l, q) => text(l, px + 60 + (1 - k) * 30, y + q * 42, lines.length > 1 ? 34 : 38, { weight: now ? 700 : 500 }));
+  });
+  X.globalAlpha = a;
+  // reps chip + progress
+  const y2 = 900;
+  X.fillStyle = COL.teal; rr(px - 20, y2 - 50, 380, 72, 36); X.fill();
+  text("Do: " + m.reps, px + 10, y2 - 2, 32, { weight: 700, color: "#fff" });
+  X.fillStyle = "#1f3b3a1a"; rr(px - 20, y2 + 50, pw, 10, 5); X.fill();
+  X.fillStyle = COL.accent; rr(px - 20, y2 + 50, pw * clamp(u / DEMO), 10, 5); X.fill();
+  X.globalAlpha = 1;
+}
+
+function segPlan(t, dur) {
+  const a = clamp(t / 0.6) * clamp((dur - t) / 0.5);
+  X.globalAlpha = a;
+  text("Your simple plan", W / 2, 260, 84, { weight: 800, align: "center" });
+  const rows = [["calendar", "Every day", "Moves 1 to 5, about five minutes", COL.teal], ["calendar", "Three times a week", "Add moves 6 to 8 for strength and balance", COL.accent], ["stop", "Anytime", "Stop if something feels sharp or painful", "#b5544a"]];
+  rows.forEach(([ic, h, s, col], i) => {
+    const k = outBack((t - 0.8 - i * 0.8) / 0.7);
+    if (k <= 0) return;
+    X.globalAlpha = a * clamp(k);
+    const y = 340 + i * 190 + (1 - k) * 50, x = 380;
+    card(x, y, 1160, 160);
+    X.fillStyle = col + "1f"; X.beginPath(); X.arc(x + 90, y + 80, 52, 0, 7); X.fill(); icon(ic, x + 90, y + 80, 0.9, col);
+    text(h, x + 180, y + 72, 44, { weight: 800, color: col });
+    text(s, x + 180, y + 122, 34, { weight: 500, color: COL.soft });
+  });
+  X.globalAlpha = 1;
+}
+
+function segOutro(t, dur) {
+  const a = clamp(t / 0.6) * clamp((dur - t) / 1.2);
+  X.globalAlpha = a;
+  const wave = Math.sin(t * 5) * 0.5 + 0.5;
+  stage(560, 930, 1.05, () => { const p = P(STAND); p.elR = [120, -500]; p.haR = [lerp(120, 160, wave), -600]; p.elL = [-120, -500]; p.haL = [lerp(-120, -160, 1 - wave), -600]; drawFigure(p); });
+  ["You showed up.", "That counts."].forEach((w, i) => {
+    const k = outBack((t - 0.3 - i * 0.5) / 0.7); X.globalAlpha = a * clamp(k);
+    text(w, 960, 430 + i * 130 + (1 - k) * 50, 110, { weight: 800, color: i ? COL.accent : COL.ink });
+  });
+  const k = ease((t - 1.8) / 0.6); X.globalAlpha = a * k;
+  X.fillStyle = "#cc3d3d"; rr(966, 640, 310, 84, 42); X.fill();
+  X.fillStyle = "#fff"; X.beginPath(); X.moveTo(1006, 664); X.lineTo(1006, 700); X.lineTo(1036, 682); X.fill();
+  text("Subscribe", 1056, 696, 40, { weight: 800, color: "#fff" });
+  text("for a new gentle routine every week", 966, 790, 38, { weight: 500, color: COL.soft });
+  X.globalAlpha = 1;
+}
+
+function render(t) {
+  X.setTransform(1, 0, 0, 1, 0, 0);
+  background(t);
+  const s = SEGS.find(q => t >= q.start && t < q.start + q.dur) || SEGS[SEGS.length - 1];
+  const lt = t - s.start;
+  if (s.id === "title") segTitle(lt, s.dur);
+  else if (s.id === "why") segWhy(lt, s.dur);
+  else if (s.id === "safety") segSafety(lt, s.dur);
+  else if (s.id === "move") segMove(lt, s.dur, s.move);
+  else if (s.id === "plan") segPlan(lt, s.dur);
+  else segOutro(lt, s.dur);
+  brand(t);
+  if (s.id === "move") routineDots(t);
+}
+window.render = render;
+
+/* preview in a browser */
+if (!navigator.webdriver) {
+  const q = new URLSearchParams(location.search), t0 = Number(q.get("t") || 0), start = performance.now();
+  const loop = () => { const t = (t0 + (performance.now() - start) / 1000) % DURATION; render(t); document.getElementById("tc").textContent = t.toFixed(1) + " s / " + DURATION + " s"; requestAnimationFrame(loop); };
+  loop();
+} else document.getElementById("bar").remove();
+</script>
+</body>
+</html>
