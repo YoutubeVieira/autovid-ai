@@ -10237,8 +10237,10 @@ init3D();
 if (R3.ok) setupPost();
 // modèles .glb animés (optionnels)
 R3.models = {};
-if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries(D.MODELS)) {
-  const onGl = gl => { const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = !o.isSkinnedMesh && k !== 'robot'; if (k !== 'robot' && o.material) o.material = glbMat(o.material, o.isSkinnedMesh); } });
+// chargement progressif : héros, voitures et arme de départ d'abord, le reste ensuite (3 à la fois)
+function loadModel(k, url, fin) {
+  let doneOnce = false; const done = () => { if (!doneOnce) { doneOnce = true; fin(); } }; setTimeout(done, 4000);
+  const onGl = gl => { done(); const scene = gl.scene; scene.traverse(o => { if (o.isMesh) { o.castShadow = !!R3.shadow; o.frustumCulled = !o.isSkinnedMesh && k !== 'robot'; if (k !== 'robot' && o.material) o.material = glbMat(o.material, o.isSkinnedMesh); } });
     const mixer = new THREE.AnimationMixer(scene), find = re => { const c = gl.animations.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
     const acts = { idle: find(/idle/i), walk: find(/walk(?!jump)/i), run: find(/run/i), punch: find(/punch|attack/i), death: find(/death|die/i) };
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
@@ -10249,12 +10251,19 @@ if (R3.ok && THREE.GLTFLoader && D.MODELS) for (const [k, url] of Object.entries
   const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
   try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }
 }
+if (R3.ok && THREE.GLTFLoader && D.MODELS) {
+  const FIRST = ['robot', 'human_m', 'car_sedan', 'car_sports', 'w_pistol'], all = Object.entries(D.MODELS);
+  const queue = all.filter(([k]) => !FIRST.includes(k)); let running = 0, firstLeft = 0;
+  const pump = () => { while (running < 3 && queue.length) { const [k, url] = queue.shift(); running++; loadModel(k, url, () => { running--; pump(); }); } };
+  for (const [k, url] of all) if (FIRST.includes(k)) { firstLeft++; loadModel(k, url, () => { if (--firstLeft === 0) pump(); }); }
+  if (!firstLeft) pump();
+}
 setQuality((save.quality || 'auto') === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality);
 if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
-window.__nb = { sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
 
 </script>
