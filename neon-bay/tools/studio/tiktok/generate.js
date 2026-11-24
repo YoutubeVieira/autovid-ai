@@ -41,7 +41,7 @@ function posAt(o, t) {
 const add = (a, b) => a.map((v, i) => +(v + b[i]).toFixed(3));
 const ln = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
 // sous la route : point invisible qui sert de cible à la caméra
-const pivot = (id, p, keys) => obj('cube', { id, name: 'Repère ' + id, base: at(p, 0, [.001, .001, .001]), keys: keys || [] });
+const pivot = (id, p, keys) => obj('cube', { id, name: 'Repère ' + id, base: at(p, 0, [.001, .001, .001]), keys: (keys || []).map(k => Object.assign(k, { s: [.001, .001, .001] })) });
 
 // ---------- montage : la caméra est une suite de plans séparés par des coupes franches ----------
 class Edit {
@@ -66,7 +66,7 @@ class Edit {
   text(t, d, text, style = 'title', x = {}) { this.titles.push(Object.assign({ t: +t.toFixed(3), d: +d.toFixed(3), text, style }, x)); }
   end(lang) {
     const t = +this.t.toFixed(3), d = 1.8;
-    this.titles.push({ t, d, text: '', style: 'card', cut: true }, { t, d, text: 'NÉON|BAY', sub: lang === 'en' ? 'Play free · link in bio' : 'Joue gratuitement · lien en bio', style: 'logo' });
+    this.titles.push({ t, d, text: '', style: 'card', cut: true }, { t, d, text: 'NÉON|BAY', sub: lang === 'en' ? 'Play free\nlink in bio' : 'Joue gratuitement\nlien en bio', style: 'logo' });
     this.plan.push({ t, d, label: 'carte finale' }); this.t += d;
   }
 }
@@ -102,11 +102,11 @@ const T = (fr, en) => ({ fr, en });
 const S_CHASE = {
   key: 'poursuite', name: 'Poursuite de police',
   v: [
-    { c: 'usa', car: 'car_sports', title: 'Poursuite sous la pluie', hook: 'Ils t’ont repéré.', mid: 'Tu cours ou tu payes ?', line: 'Tout le quartier filme.', leg: 'Trois voitures de police, une rue mouillée et pas de plan B.\nTu tiendrais combien de temps ?' },
+    { c: 'usa', car: 'car_sports', title: 'Poursuite sous la pluie', hook: 'Ils t’ont repéré.', mid: 'Tu cours ou tu payes ?', line: 'Tout le quartier filme.', leg: 'Deux voitures de police, une rue mouillée et pas de plan B.\nTu tiendrais combien de temps ?' },
     { c: 'bra', car: 'car_sedan', amb: 'night', title: 'Fuite à Morro Azul', hook: '10 secondes d’avance.', mid: 'Pas une de plus.', line: 'Sème-les avant le pont.', leg: 'Morro Azul, minuit. La police a 10 secondes de retard.\nDis-nous en commentaire par où tu passes.' },
     { c: 'ita', car: 'car_sports', title: 'Porto Lumi ne lâche rien', hook: 'La police de Porto Lumi ne lâche rien.', mid: 'Prends la ruelle.', line: 'Les sirènes résonnent jusqu’au port.', leg: 'Coucher de soleil, sirènes et pavés.\nQui conduit mieux que ça ?' },
-    { c: 'usa', car: 'car_suv', amb: 'storm', title: 'Poursuite dans l’orage', hook: 'Sirènes derrière. Orage devant.', mid: 'Personne ne s’arrête au rouge.', line: 'Visibilité zéro. Pied au plancher.', leg: 'Orage sur Néon Bay, deux patrouilles au cul.\nTu freines ou tu passes ?' },
-    { c: 'usa', car: 'car_sedan', en: 1, title: 'Night chase (EN)', hook: 'They spotted you.', mid: 'Run or pay?', line: 'The whole block is filming.', leg: 'Three cop cars, wet streets, no plan B.\nHow long would you last?' },
+    { c: 'usa', car: 'car_suv', amb: 'storm', title: 'Poursuite dans l’orage', hook: 'Sirènes derrière. Orage devant.', mid: 'Personne ne s’arrête au rouge.', line: 'Visibilité zéro. Pied au plancher.', leg: 'Orage sur Néon Bay, deux patrouilles aux trousses.\nTu freines ou tu passes ?' },
+    { c: 'usa', car: 'car_sedan', en: 1, title: 'Night chase (EN)', hook: 'They spotted you.', mid: 'Run or pay?', line: 'The whole block is filming.', leg: 'Two cop cars, wet streets, no plan B.\nHow long would you last?' },
   ],
   tags: ['#poursuite', '#jeuvideo', '#mondeouvert', '#jeumobile', '#gaming'],
   tagsEn: ['#carchase', '#openworld', '#indiegame', '#mobilegame', '#gaming'],
@@ -121,12 +121,12 @@ const S_CHASE = {
     e.follow(1.3, cop, [8, .9, -3.6], [6.5, .8, -3.2], { ty: 1.1, f: 52, sh: 1.5 }, 'accroche : gyrophare en gros plan');
     e.text(0, 1.6, V.hook, 'hook', { cut: true });
     const h0 = posAt(hero, e.t), h1 = posAt(hero, e.t + 2);
-    e.shot(2, { from: [h0[0] - 14, 34, -30], to: [h1[0] + 4, 20, -22], tg: 'hero', ty: 0, f: 50, ease: 'ease' }, 'travelling aérien lent');
+    e.shot(2, { from: [h0[0] - 45, 30, 0], to: [h1[0] - 22, 15, 1], tg: 'hero', ty: 0, f: 50, ease: 'ease' }, 'travelling aérien lent');
     e.flash(); e.follow(1, hero, [-1, .6, -5.5], [1.5, .7, -5.2], { f: 60, sh: 2, ty: .6, hot: 1 }, 'travelling latéral bas');
-    const pass = posAt(hero, e.t + .9); e.shot(.9, { from: [pass[0] + 3, .45, .6], to: [pass[0] + 3.4, .5, .6], tg: 'hero', ty: .5, f: 72, hot: 1 }, 'la voiture frôle la caméra');
+    const pass = posAt(hero, e.t + .9); e.shot(.9, { from: [pass[0] + 1, .45, 6.2], to: [pass[0] + 1.4, .5, 6.2], tg: 'hero', ty: .5, f: 72, hot: 1 }, 'la voiture frôle la caméra');
     e.text(e.t + .1, 1.9, c.city, 'sub', { sub: lang === 'en' ? c.en + ' · 2 AM' : c.fr + ' · 2 h du matin' });
     e.follow(2, hero, [-3, 1.2, 5], [3, 1, 5.5], { f: 50, slow: .25, ty: .7, hot: 1 }, 'ralenti : la caméra tourne autour');
-    e.flash(); e.follow(.8, cop, [-6, 1.4, -1], [-5.4, 1.3, -.6], { tg: 'hero', ty: .6, f: 45, sh: 3, hot: 1 }, 'derrière la police');
+    e.flash(); e.follow(.8, cop, [-5, 2.4, 0], [-4.4, 2.3, 0], { tg: 'hero', ty: .6, f: 45, sh: 3, hot: 1 }, 'derrière la police');
     const ph = posAt(hero, e.t + .8); e.shot(1.6, { from: [ph[0] - 2, 1.6, 10.5], to: [ph[0], 1.6, 10.3], tg: 'hero', ty: .7, f: 62, sh: 3, hot: 1 }, 'filmé au téléphone depuis le trottoir');
     e.text(e.t - 1.5, 1.4, V.line, 'caption');
     e.black(.4);
@@ -157,7 +157,7 @@ const S_ARRIVAL = {
     const objs = city(c, { len: 260 }).concat([hero, cab, npc, walker(-60, -9.5, 1, 16, { asset: 'human_m', shirt: '#f2f2f2' }), obj('bench', { name: 'Banc', base: at([-12, .18, 11], PI) })]);
     e.follow(1.4, hero, [2.6, .5, -1.2], [2.3, .6, -1], { ty: 1.5, f: 50 }, 'contre-plongée sur le héros qui avance');
     e.text(0, 1.7, V.hook, 'hook', { cut: true, bg: c.light === '#a6ff4d' ? '#1f9e4a' : undefined });
-    e.shot(3, { from: [-70, 48, 46], to: [-48, 30, 34], tg: 'street', ty: 4, f: 46, ease: 'ease' }, 'établissement aérien très lent');
+    e.shot(3, { from: [-110, 34, 1], to: [-75, 22, 1], tg: 'hero', ty: 0, f: 46, ease: 'ease' }, 'établissement aérien très lent');
     e.text(1.8, 2.6, c.city, 'sub', { sub: lang === 'en' ? c.en : c.fr });
     const cp = posAt(cab, e.t + .6); e.flash(); e.shot(1.1, { from: [cp[0] - 2, .5, -.4], to: [cp[0] - 3, .55, -.4], tg: 'cab', ty: .5, f: 70, hot: 1 }, 'le cabriolet passe au ras de la caméra');
     e.follow(1, hero, [-3, 1.65, .6], [-2.6, 1.65, .5], { ty: 1.5, f: 60, sh: 2.5, hot: 1 }, 'au téléphone, dans le dos du héros');
@@ -189,16 +189,16 @@ const S_DUEL = {
     if (V.kind === 'duel') {
       const a = obj('human_m', { id: 'a', name: 'Rafa', color: { Shirt: '#16141c', Hair: '#0c0c0c' }, clip: 'Aim', weapon: 'pistol', base: at([-3, 0, 0], PI / 2) });
       const b = obj('human_f', { id: 'b', name: 'Lia', color: { Shirt: '#c8102e' }, clip: 'AimRifle', weapon: v === 2 ? 'shotgun' : 'rifle', base: at([3, 0, 0], -PI / 2) });
-      objs.push(a, b, pivot('mid', [0, .9, 0]), obj('car_sedan', { name: 'Voiture phares allumés', color: { Paint: '#101016' }, base: at([12, 0, -1], PI) }),
-        obj('light', { name: 'Lumière néon', color: { Color: c.light }, intensity: 5, base: at([-6, 2, 4]) }));
-      e.shot(1.2, { from: [-1.5, 1.5, -1.1], to: [-1.4, 1.5, -1.0], tg: 'a', ty: 1.45, f: 34 }, 'très gros plan : Rafa vise');
+      objs.push(a, b, pivot('mid', [0, .9, 0]), obj('car_sedan', { name: 'Voiture phares allumés', color: { Paint: '#101016' }, base: at([20, 0, -3], 0) }),
+        obj('light', { name: 'Lumière néon', color: { Color: c.light }, intensity: 2, base: at([-6, 3, -5]) }));
+      e.shot(1.2, { from: [1.7, 1.55, 1.2], to: [1.55, 1.55, 1.05], tg: 'b', ty: 1.5, f: 34 }, 'très gros plan : Lia met en joue');
       e.text(0, 1.6, V.hook, 'hook', { cut: true });
-      e.shot(2.2, { from: [0, 1.1, 13], to: [0, 1.5, 8.5], tg: 'mid', ty: .5, f: 52, ease: 'ease' }, 'plan large lent entre les deux');
+      e.shot(2.2, { from: [-13, 1.3, 2.2], to: [-9, 1.5, 1.6], tg: 'mid', ty: .6, f: 46, ease: 'ease' }, 'plan large lent dans l’axe des deux');
       e.text(1.4, 2, c.city, 'sub', { sub: lang === 'en' ? c.en : c.fr });
       e.shot(.8, { from: [-4.4, 1.7, .9], to: [-4.3, 1.7, .8], tg: 'b', ty: 1.5, f: 40 }, 'par-dessus l’épaule de Rafa');
       e.shot(.8, { from: [4.4, 1.7, -.9], to: [4.3, 1.7, -.8], tg: 'a', ty: 1.5, f: 40 }, 'contrechamp');
       e.shot(.7, { from: [1.6, 1.55, 1.1], to: [1.5, 1.55, 1.0], tg: 'b', ty: 1.55, f: 30 }, 'gros plan Lia');
-      e.flash(); e.shot(3, { path: [[0, 1.3, 4.5], [3.2, 1.4, 3.2], [4.5, 1.5, 0]], tg: 'mid', ty: .6, f: 50, slow: .2, hot: 1 }, 'bullet time : la caméra tourne, le temps s’arrête');
+      e.flash(); e.shot(3, { path: [[1, 1.4, 2.8], [3.4, 1.5, 3.2], [5.6, 1.5, 1.4]], tg: 'b', ty: 1.3, f: 50, slow: .2, hot: 1 }, 'bullet time : la caméra tourne, le temps s’arrête');
       e.text(e.t - 2.6, 2.2, V.line, 'title');
     } else {
       const van = obj('car_van', { id: 'van', name: 'Fourgon', color: { Paint: '#1a1a22' }, base: at([2, 0, -4]) });
@@ -218,7 +218,7 @@ const S_DUEL = {
     e.black(.4);
     e.text(e.t, 1.5, V.mid, 'card'); e.shot(1.5, { from: [0, 30, 40], tg: 'mid', ty: 0, f: 40 }, 'carton titre');
     e.end(lang);
-    return { e, objs, amb, rain: amb === 'storm' || (c.rain && amb === 'night'), wet: amb !== 'day', grade: V.kind === 'duel' && v === 0 ? 'neon' : c.grade, music: c.music };
+    return { e, objs, amb, rain: amb === 'storm' || (c.rain && amb === 'night'), wet: amb !== 'day', grade: c.grade, music: c.music };
   },
 };
 
@@ -244,16 +244,16 @@ const S_BOAT = {
     if (v !== 1 && v !== 3) objs.push(obj('gen', { id: 'helico', name: 'Hélicoptère', spec: HELICO, keys: track(t => [-140 + 16 * t, 22, 36 + zig(t - 1)], 0, 16, .5) }),
       obj('light', { id: 'spot', name: 'Projecteur', color: { Color: '#fff2c8' }, intensity: 9, keys: track(t => [-138 + 16 * t, 3, 31 + zig(t)], 0, 16, .5, false) }));
     const hot = { hot: 1 };
-    e.follow(1.3, boat, [-5, .6, 2.6], [-3.5, .7, 2.2], { ty: 1, f: 54, sh: 2 }, 'au ras de l’eau derrière la vedette');
+    e.follow(1.3, boat, [-13, 1.6, 5], [-10, 1.5, 4], { ty: 1, f: 48, sh: 2 }, 'au ras de l’eau derrière la vedette');
     e.text(0, 1.6, V.hook, 'hook', { cut: true });
     e.shot(2.2, { from: [posAt(boat, 1.3)[0] - 30, 40, 90], to: [posAt(boat, 3.5)[0] - 6, 22, 70], tg: 'boat', ty: 0, f: 46, ease: 'ease' }, 'aérien lent, la ville au fond');
     e.text(1.6, 2.2, c.city, 'sub', { sub: lang === 'en' ? c.en + ' · offshore' : c.fr + ' · au large' });
-    e.flash(); e.follow(1.1, boat, [-1, 1.2, 8], [2, 1.2, 7.5], Object.assign({ f: 55, sh: 1.5 }, hot), 'travelling latéral');
+    e.flash(); e.follow(1.1, boat, [-2, 1.4, 12], [3, 1.4, 11], Object.assign({ f: 55, sh: 1.5 }, hot), 'travelling latéral');
     e.follow(1, cg, [7, 1.8, -2], [6, 1.6, -1.5], Object.assign({ tg: 'boat', ty: .8, f: 40, sh: 2.5 }, hot), 'depuis la proue des garde-côtes');
-    e.follow(2.2, boat, [6, .8, -4], [-2, 1, -6], Object.assign({ f: 50, slow: .25, ty: .9 }, hot), 'ralenti : la vedette fend la vague');
+    e.follow(2.2, boat, [13, 1.2, -6], [2, 1.5, -11], Object.assign({ f: 48, slow: .25, ty: .9 }, hot), 'ralenti : la vedette fend la vague');
     e.text(e.t - 1.9, 1.6, V.line, 'caption');
     if (objs.some(o => o.id === 'helico')) e.follow(1, boat, [-12, 26, -6], [-6, 24, -5], Object.assign({ ty: 0, f: 46, sh: 1 }, hot), 'vue depuis l’hélicoptère');
-    else e.follow(1, boat, [14, .5, 3], [10, .5, 3], Object.assign({ ty: .9, f: 62 }, hot), 'la vedette fonce vers la caméra');
+    else e.follow(1, boat, [22, .8, 3], [16, .8, 3], Object.assign({ ty: .9, f: 62 }, hot), 'la vedette fonce vers la caméra');
     e.black(.4);
     e.follow(1.7, boat, [-16, 4, 10], [-26, 14, 16], { ty: .8, f: 48, ease: 'ease' }, 'la caméra recule et s’élève');
     e.text(e.t - 1.6, 1.6, V.mid, 'title');
@@ -266,7 +266,7 @@ const S_BOAT = {
 const S_ROCKET = {
   key: 'fusee', name: 'Fusée vers la Lune et Mars',
   v: [
-    { kind: 'launch', amb: 'night', title: 'Décollage de nuit', hook: '3… 2… 1…', mid: 'Prochain arrêt : la Lune.', line: 'Quand la ville devient trop petite.', leg: 'Quand la police de 4 pays te cherche, il reste une solution : la fusée.\nLune ou Mars, tu choisis quoi ?', music: 'moon' },
+    { kind: 'launch', amb: 'night', title: 'Décollage de nuit', hook: '3… 2… 1…', mid: 'Prochain arrêt :\nla Lune.', line: 'Quand la ville devient trop petite.', leg: 'Quand la police de 4 pays te cherche, il reste une solution : la fusée.\nLune ou Mars, tu choisis quoi ?', music: 'moon' },
     { kind: 'moon', amb: 'moon', title: 'Base Tranquille, sur la Lune', hook: 'La Terre est au-dessus de ta tête.', mid: 'Gravité faible. Oxygène compté.', line: 'Base Tranquille · Lune', leg: 'Le jeu ne s’arrête pas sur Terre : il y a une base sur la Lune.\nLa Terre se lève derrière le dôme.', music: 'moon' },
     { kind: 'mars', amb: 'sunset', title: 'Colonie Ares, sur Mars', hook: 'Bienvenue sur Mars.', mid: 'Un ciel couleur rouille.', line: 'Colonie Ares · Mars', leg: 'Colonie Ares : tempêtes de poussière et colons armés.\nTu tiendrais combien de jours ?', music: 'mars' },
     { kind: 'launch', amb: 'sunset', title: 'Décollage au coucher du soleil', hook: 'Tout le monde te cherche. Tu pars.', mid: 'Tu quittes la Terre.', line: 'Fuir la Terre, c’est une option.', leg: 'Fin de la partie sur Terre, début de la partie dans l’espace.\nQui monte avec toi ?', music: 'mars' },
@@ -281,11 +281,11 @@ const S_ROCKET = {
       objs = [obj('street', { id: 'street', name: 'Ville', seed: 21, length: 200, base: at([0, 0, -50]) }), rk,
         obj('human_m', { id: 'hero', name: 'Toi', color: { Shirt: '#21e6ff' }, base: at([12, 0, 26], PI + .7) }), obj('car_suv', { name: 'Rover', color: { Paint: '#f4f4f4' }, base: at([-14, 0, 16], .7) })];
       for (let i = 0; i < 3; i++) objs.push(obj('lamp', { name: 'Projecteur', base: at([-12 + i * 12, 0, 10], PI) }));
-      e.shot(1.3, { from: [2.5, 1.5, 4.5], to: [2.4, 1.3, 4.2], tg: 'rocket', ty: .5, f: 56, sh: .8 }, 'les tuyères s’allument');
+      e.shot(1.3, { from: [9, 1, 15], to: [8.6, 1, 14.4], tg: 'rocket', ty: 15, f: 62, sh: .8 }, 'contre-plongée : la fusée, les tuyères s’allument');
       e.text(0, 1.5, V.hook, 'hook', { cut: true, size: 1.3 });
       e.shot(2.1, { from: [40, 3, 70], to: [32, 4, 56], tg: 'rocket', ty: 16, f: 42, ease: 'ease' }, 'plan large lent : la fusée sur son pas de tir');
       e.text(1.5, 2.1, lang === 'en' ? 'Launch pad' : 'Pas de tir', 'sub', { sub: lang === 'en' ? 'Néon Bay · 3 AM' : 'Néon Bay · 3 h du matin' });
-      e.follow(1.2, rk, [11, 1.6, 22], [11, 1.6, 22], { tg: 'hero', ty: 1.5, f: 40, sh: .5 }, 'le héros regarde');
+      e.shot(1.2, { from: [14, 1.2, 30], to: [13.8, 1.2, 29.6], tg: 'rocket', ty: 8, f: 46, sh: .5 }, 'par-dessus l’épaule du héros qui regarde');
       e.flash(); e.shot(2.4, { from: [24, 2, 40], to: [26, 3, 44], tg: 'rocket', ty: 10, f: 44, sh: 6, slow: .3, hot: 1 }, 'ralenti du décollage, la caméra tremble');
       e.text(e.t - 2, 1.8, V.line, 'caption');
       e.shot(1.4, { from: [-5, 1.6, 30], to: [-4, 1.6, 30], tg: 'rocket', ty: 10, f: 60, sh: 3, hot: 1 }, 'au téléphone depuis la rue');
@@ -301,9 +301,11 @@ const S_ROCKET = {
         obj('sphere', { id: 'dome', name: 'Dôme', color: { Color: '#e8e8ee' }, base: at([-26, -6, -30], 0, [26, 18, 26]) }),
         obj('sphere', { name: 'Dôme 2', color: { Color: '#d8dae2' }, base: at([-2, -3, -46], 0, [14, 10, 14]) }),
         obj('neon', { name: 'Balise', color: { Color: mars ? '#ff7a3d' : '#21e6ff' }, base: at([-26, 3, -17], 0, [3, 1, 1]) }),
-        obj('light', { name: 'Lumière base', color: { Color: mars ? '#ffb27a' : '#cfe6ff' }, intensity: 6, base: at([-10, 3, 0]) })];
+        obj('light', { name: 'Lumière base', color: { Color: mars ? '#ffb27a' : '#cfe6ff' }, intensity: 6, base: at([-10, 3, 0]) }),
+        pivot('earth', [-300, 420, -1400]), obj('cylinder', { name: 'Sol', color: { Color: rock }, base: at([0, -.49, 0], 0, [600, .5, 600]) })];
       for (let i = 0; i < 9; i++) objs.push(obj('sphere', { name: 'Rocher', color: { Color: rock }, base: at([-60 + i * 15, -.6, (i % 2 ? 20 : -14) + i], 0, [2 + i % 3, 1.2 + i % 2, 2.5]) }));
-      e.follow(1.3, robot, [2.2, 1.2, 1.8], [1.9, 1.2, 1.6], { ty: 1.6, f: 44, sh: .6 }, 'l’astronaute avance vers nous');
+      if (mars) e.follow(1.3, robot, [4, 1.3, 3.2], [3.4, 1.3, 2.8], { ty: 1.3, f: 44, sh: .6 }, 'l’astronaute avance vers nous');
+      else e.follow(1.3, robot, [1.5, .6, 6], [1.3, .6, 5.5], { tg: 'earth', ty: 0, f: 50, sh: .6 }, 'l’astronaute sous la Terre');
       e.text(0, 1.6, V.hook, 'hook', { cut: true, bg: mars ? '#c2461f' : '#2b3d63' });
       e.shot(2.6, { from: [60, 28, 70], to: [40, 16, 50], tg: 'dome', ty: 6, f: 46, ease: 'ease' }, 'établissement : la base, très lent');
       e.text(1.6, 2.4, V.line.split(' · ')[0], 'sub', { sub: V.line.split(' · ')[1] });
@@ -311,7 +313,7 @@ const S_ROCKET = {
       e.flash(); e.follow(2.4, robot, [3, 1.4, -3], [-3, 1.6, -3.5], { ty: 1.4, f: 46, slow: .3, hot: 1 }, 'ralenti autour de l’astronaute');
       e.shot(1.3, { from: [10, 1.6, 10], to: [11, 1.6, 10], tg: 'rocket', ty: 18, f: 50, sh: 2.5, hot: 1 }, 'au téléphone vers la fusée');
       e.black(.4);
-      e.shot(1.8, { from: [-40, 4, 40], to: [-50, 10, 50], tg: 'dome', ty: 18, f: 50, ease: 'ease' }, mars ? 'le ciel rouille' : 'la Terre dans le ciel');
+      e.shot(1.8, { from: [-40, 4, 40], to: [-50, 10, 50], tg: mars ? 'dome' : 'earth', ty: mars ? 18 : 0, f: 50, ease: 'ease' }, mars ? 'le ciel rouille' : 'la Terre dans le ciel');
       e.text(e.t - 1.7, 1.7, V.mid, 'title');
       grade = mars ? 'warm' : 'teal';
     }
@@ -353,7 +355,7 @@ const S_POV = {
     const cpp = posAt(cop, e.t + .6); e.shot(1, { from: [cpp[0] - 6, 1.65, 8.6], to: [cpp[0] - 7, 1.65, 8.6], tg: 'cop', ty: .9, f: 58, sh: 2.5, hot: 1 }, 'la police déboule');
     e.black(.4);
     e.text(e.t, 1.7, V.l[2], 'title');
-    e.shot(1.7, { from: [-6, 30, 26], to: [-6, 36, 30], tg: 'gun', ty: 0, f: 46 }, 'plongée : on te voit d’en haut');
+    e.shot(1.7, { from: [-20, 24, 1], to: [-26, 30, 1], tg: 'gun', ty: 0, f: 46 }, 'plongée : on te voit d’en haut');
     e.end(lang);
     return { e, objs, amb: c.amb, rain: false, wet: c.amb === 'night', grade: c.grade, music: c.music };
   },
@@ -392,10 +394,10 @@ const S_SECRETS = {
     const me = obj('human_m2', { id: 'me', name: 'Toi', color: { Shirt: c.paint }, base: at([5, .18, 8.8], -PI / 2 - .4) });
     const rk = obj('rocket', { id: 'rocket', name: 'Fusée', ignite: 0, keys: track(t => [-240, Math.max(0, t - 9) ** 2 * 3, 0], 0, 16, .25, false) });
     const sign = obj('neon', { id: 'sign', name: 'Tag néon', color: { Color: '#a6ff4d' }, base: at([-20, 2.6, -11.85], 0, [1.2, 2.4, 1]) });
-    const objs = city(c, { len: 220 }).concat([car, cop, guy, me, rk, sign, obj('light', { name: 'Halo', color: { Color: '#a6ff4d' }, intensity: 4, base: at([-20, 1.6, -9.5]) }),
+    const objs = city(c, { len: 220 }).concat([car, cop, guy, me, rk, sign, obj('light', { name: 'Halo', color: { Color: '#a6ff4d' }, intensity: 1.2, base: at([-20, 2.2, -9]) }),
       ...Array.from({ length: 3 }, (_, i) => obj('lamp', { name: 'Projecteur', base: at([-252 + i * 12, 0, 10], PI) }))]);
     const shotOf = (kind, d, label) => {
-      if (kind === 'neon') return e.shot(d, { from: [-23, 1.5, -6], to: [-21.5, 1.6, -7], tg: 'sign', ty: 0, f: 44, sh: .8 }, label + ' : le tag néon');
+      if (kind === 'neon') return e.shot(d, { from: [-26, 1.6, -3], to: [-24, 1.7, -3.5], tg: 'sign', ty: 0, f: 44, sh: .8 }, label + ' : le tag néon');
       if (kind === 'cop') return e.shot(d, { from: [-1, 1.6, 10], to: [0, 1.6, 10.4], tg: 'guy', ty: 1.4, f: 46, sh: 1.2 }, label + ' : face au flic');
       if (kind === 'rocket') return e.shot(d, { from: [-210, 3, 40], to: [-212, 3, 44], tg: 'rocket', ty: 14, f: 46, sh: 2.5 }, label + ' : la fusée');
       if (kind === 'car') return e.follow(d, car, [-6, 1, -4], [-4, 1, -4.5], { ty: .7, f: 54, sh: 1 }, label + ' : la voiture');
@@ -430,7 +432,7 @@ const S_BEFORE = {
   tags: ['#avantapres', '#gamedev', '#3d', '#jeuvideo', '#devlog'],
   tagsEn: ['#beforeandafter', '#gamedev', '#3d', '#indiegame', '#devlog'],
   build(V, v, lang) {
-    const c = C[V.c], e = new Edit(), X = 600, grey = '#8d8d96';
+    const c = C[V.c], e = new Edit(), X = 600, grey = '#dcdce2';
     const carPath = (x0) => t => [x0 - 40 + 10 * t, 0, -2.4];
     const car = obj('car_sports', { id: 'car', name: 'Voiture', color: { Paint: c.paint }, keys: track(carPath(0), 0, 16, .5) });
     const box = obj('cube', { id: 'box', name: 'Cube voiture', color: { Color: grey }, keys: track(t => { const p = carPath(X)(t); p[1] = 0; return p; }, 0, 16, .5).map(k => Object.assign(k, { s: [4.4, 1.3, 1.9] })) });
@@ -438,22 +440,22 @@ const S_BEFORE = {
     const cyl = obj('cylinder', { id: 'cyl', name: 'Cylindre perso', color: { Color: grey }, keys: track(t => [X - 20 + 1.4 * t, .18, 9.5], 0, 16, 1).map(k => Object.assign(k, { s: [.55, 1.8, .55] })) });
     const objs = city(c, { len: 200 }).concat([car, hero, box, cyl]);
     // maquette : des blocs gris à la place des immeubles, éclairés sobrement
-    for (const sz of [-1, 1]) for (let i = 0; i < 12; i++) objs.push(obj('cube', { name: 'Bloc', color: { Color: i % 2 ? '#7a7a84' : grey }, base: at([X - 90 + i * 15, 0, sz * 18], 0, [12, 10 + (i * 7) % 22, 10]) }));
-    objs.push(obj('cube', { name: 'Route maquette', color: { Color: '#5a5a62' }, base: at([X, -.48, 0], 0, [200, 1, 14]) }), obj('light', { name: 'Lumière maquette', color: { Color: '#ffffff' }, intensity: 8, base: at([X - 20, 10, 0]) }), obj('light', { name: 'Lumière maquette 2', color: { Color: '#ffffff' }, intensity: 8, base: at([X + 15, 10, 4]) }));
+    for (const sz of [-1, 1]) for (let i = 0; i < 12; i++) objs.push(obj('cube', { name: 'Bloc', color: { Color: i % 2 ? '#8a8a94' : '#4e4e58' }, base: at([X - 90 + i * 15, 0, sz * 18], 0, [12, 10 + (i * 7) % 22, 10]) }));
+    objs.push(obj('cube', { name: 'Route maquette', color: { Color: '#2a2a30' }, base: at([X, -.48, 0], 0, [200, 1, 14]) }), obj('light', { name: 'Lumière maquette', color: { Color: '#ffffff' }, intensity: 2.5, base: at([X - 20, 10, 0]) }), obj('light', { name: 'Lumière maquette 2', color: { Color: '#ffffff' }, intensity: 2.5, base: at([X + 15, 10, 4]) }));
     const pair = (d, o1, o2, off0, off1, s, label) => { e.follow(d, o1, off0, off1, Object.assign({}, s), label + ' (maquette)'); e.flash(); e.follow(d, o2, off0, off1, Object.assign({}, s, { hot: 1 }), label + ' (rendu)'); };
     // 1re paire : la voiture
     e.text(0, 1.5, V.hook, 'hook', { cut: true, size: 1.4, bg: '#55555e' });
-    e.follow(1.5, box, [-5, 1.2, -5], [-3, 1.1, -5.5], { tg: 'box', ty: .6, f: 52 }, 'accroche : la voiture en cube');
+    e.follow(1.5, box, [-9, 2, -9], [-6, 1.8, -9.5], { tg: 'box', ty: .6, f: 52 }, 'accroche : la voiture en cube');
     e.text(e.t, 1.6, V.after, 'hook', { cut: true, size: 1.4 }); e.flash();
-    e.follow(1.6, car, [-5, 1.2, -5], [-3, 1.1, -5.5], { ty: .6, f: 52, hot: 1 }, 'la même voiture, rendu final');
+    e.follow(1.6, car, [-9, 2, -9], [-6, 1.8, -9.5], { ty: .6, f: 52, hot: 1 }, 'la même voiture, rendu final');
     // 2e paire : le personnage
     e.text(e.t, 1.3, lang === 'en' ? 'Before' : 'Avant', 'caption'); e.text(e.t + 1.3, 1.3, lang === 'en' ? 'After' : 'Après', 'caption');
     pair(1.3, cyl, hero, [3, 1.3, -1.6], [2.5, 1.4, -1.4], { ty: 1.2, f: 46 }, 'le personnage');
     // 3e paire : la rue entière, ralenti sur le rendu
     e.text(e.t, 1.4, lang === 'en' ? 'Before' : 'Avant', 'caption');
-    e.shot(1.4, { from: [X - 50, 22, 26], to: [X - 40, 18, 22], tg: 'box', ty: 0, f: 50 }, 'la rue (maquette)');
+    e.shot(1.4, { from: [X - 75, 20, 1], to: [X - 62, 15, 1], tg: 'box', ty: 0, f: 50 }, 'la rue (maquette)');
     e.flash(); e.text(e.t, 2.2, lang === 'en' ? 'After' : 'Après', 'caption');
-    e.shot(2.2, { from: [-50, 22, 26], to: [-40, 18, 22], tg: 'car', ty: 0, f: 50, slow: .35, hot: 1 }, 'la rue (rendu), ralenti');
+    e.shot(2.2, { from: [-75, 20, 1], to: [-62, 15, 1], tg: 'car', ty: 0, f: 50, slow: .35, hot: 1 }, 'la rue (rendu), ralenti');
     e.black(.4);
     e.text(e.t, 1.7, V.mid, 'title', { size: .85 });
     e.follow(1.7, car, [6, .6, -3], [8, .9, -2], { ty: .7, f: 56 }, 'la voiture s’éloigne');
@@ -484,7 +486,7 @@ const S_BROWSER = {
     const objs = city(c, { len: 300 }).concat([hero, cop, moto, a]);
     e.follow(1.5, hero, [5, .6, -3], [4, .6, -2.6], { ty: .6, f: 58, sh: 1 }, 'accroche : la voiture fonce vers la caméra');
     e.text(0, 1.7, V.hook, 'hook', { cut: true, size: .85 });
-    e.shot(2, { from: [-80, 36, -40], to: [-58, 24, -30], tg: 'hero', ty: 0, f: 48, ease: 'ease' }, 'aérien lent');
+    e.shot(2, { from: [posAt(hero, 1.5)[0] - 50, 30, 1], to: [posAt(hero, 3.5)[0] - 25, 16, 1], tg: 'hero', ty: 0, f: 48, ease: 'ease' }, 'aérien lent');
     e.text(1.8, 2, V.l[0], 'caption');
     e.flash(); e.follow(1.2, cop, [-5, 1.2, 4], [-3, 1.2, 4.4], { tg: 'hero', ty: .6, f: 50, sh: 2, hot: 1 }, 'la police colle au pare-chocs');
     e.text(e.t - 1.2, 2.2, V.l[1], 'caption');
@@ -520,13 +522,13 @@ const S_VIBES = {
     const walkerH = obj('human_f2', { id: 'w', name: 'Promeneuse', color: { Shirt: c.neon[0] }, clip: 'Walk', keys: track(t => [-10 + 1.3 * t, .18, 9.5], 0, 16, 1) });
     const objs = city(c, { len: 240, parked: false, palms: true }).concat([cab, moto, boat, walkerH, obj('sea', { id: 'sea', name: 'Mer', size: 300, base: at([0, 0, 170]) })]);
     if (!c.palms) for (let x = -100; x < 100; x += 16) objs.push(obj('palm', { name: 'Palmier', base: at([x, .18, 11], x) }));
-    e.shot(1.6, { from: [-30, 1.2, 30], to: [-26, 1.4, 28], tg: 'cab', ty: 1, f: 40 }, 'contre-jour : palmiers et cabriolet');
+    e.shot(1.6, { from: [-50, .9, 10], to: [-47, 1, 10], tg: 'cab', ty: 1.5, f: 44 }, 'contre-jour : palmiers et cabriolet');
     e.text(0, 1.8, V.hook, 'hook', { cut: true, bg: '#ff7a3d' });
-    e.shot(3, { from: [-60, 30, 60], to: [-30, 22, 50], tg: 'street', ty: 3, f: 46, ease: 'ease' }, 'très lent travelling sur la ville');
+    e.shot(3, { from: [-120, 30, 1], to: [-80, 20, 2], tg: 'cab', ty: 0, f: 46, ease: 'ease' }, 'très lent travelling sur la ville');
     e.follow(2, cab, [-1, 1, -5], [2, 1.1, -5], { ty: .8, f: 54 }, 'travelling sur le cabriolet');
     e.text(e.t - 1.8, 2, V.line, 'caption');
     e.follow(1.4, walkerH, [-2.6, 1.6, .8], [-2.2, 1.6, .6], { ty: 1.5, f: 56, sh: 2 }, 'au téléphone derrière la promeneuse');
-    e.follow(2, moto, [4, .7, 3], [-3, .9, 3.5], { ty: .8, f: 48, slow: .35 }, 'ralenti : la moto passe');
+    e.follow(2, moto, [7, 1, 4.5], [-5, 1.2, 5.5], { ty: .8, f: 48, slow: .35 }, 'ralenti : la moto passe');
     e.follow(1.6, boat, [-20, 4, -16], [-16, 4, -14], { ty: .6, f: 44 }, 'la vedette au large');
     e.black(.35);
     e.shot(1.6, { from: [0, 40, 20], to: [0, 48, 16], tg: 'street', ty: 0, f: 50 }, 'plongée finale');

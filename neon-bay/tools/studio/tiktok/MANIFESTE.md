@@ -66,7 +66,7 @@ Versions anglaises (10) : n° 5, 10, 15, 20, 25, 30, 35, 40, 45, 50.
 Fichier : `marketing/tiktok/01-poursuite-sous-la-pluie.mp4` · série : Poursuite de police · musique : usa · 13,4 s
 
 ```
-Trois voitures de police, une rue mouillée et pas de plan B.
+Deux voitures de police, une rue mouillée et pas de plan B.
 Tu tiendrais combien de temps ?
 #poursuite #jeuvideo #mondeouvert #jeumobile #gaming #neonbay
 ```
@@ -93,7 +93,7 @@ Qui conduit mieux que ça ?
 Fichier : `marketing/tiktok/04-poursuite-dans-l-orage.mp4` · série : Poursuite de police · musique : usa · 13,4 s
 
 ```
-Orage sur Néon Bay, deux patrouilles au cul.
+Orage sur Néon Bay, deux patrouilles aux trousses.
 Tu freines ou tu passes ?
 #poursuite #jeuvideo #mondeouvert #jeumobile #gaming #neonbay
 ```
@@ -102,7 +102,7 @@ Tu freines ou tu passes ?
 Fichier : `marketing/tiktok/05-night-chase-en.mp4` · série : Poursuite de police · musique : usa · 13,4 s
 
 ```
-Three cop cars, wet streets, no plan B.
+Two cop cars, wet streets, no plan B.
 How long would you last?
 #carchase #openworld #indiegame #mobilegame #gaming #neonbay
 ```

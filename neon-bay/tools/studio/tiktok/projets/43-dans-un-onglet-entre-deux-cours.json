@@ -67,9 +67,9 @@
     {
      "t": 1.501,
      "p": [
-      -80,
-      36,
-      -40
+      -133,
+      30,
+      1
      ],
      "r": [
       0,
@@ -90,9 +90,9 @@
     {
      "t": 3.5,
      "p": [
-      -58,
-      24,
-      -30
+      -72,
+      16,
+      1
      ],
      "r": [
       0,
@@ -4727,7 +4727,7 @@
    "t": 10.75,
    "d": 1.8,
    "text": "NÉON|BAY",
-   "sub": "Joue gratuitement · lien en bio",
+   "sub": "Joue gratuitement\nlien en bio",
    "style": "logo"
   }
  ],

@@ -21,9 +21,9 @@
     {
      "t": 0,
      "p": [
-      -9.8,
-      1.2,
-      9.8
+      -10.5,
+      0.6,
+      14
      ],
      "r": [
       0,
@@ -35,18 +35,18 @@
       1,
       1
      ],
-     "f": 44,
-     "tg": "bot",
-     "ty": 1.6,
+     "f": 50,
+     "tg": "earth",
+     "ty": 0,
      "sh": 0.6,
      "ease": "linear"
     },
     {
      "t": 1.3,
      "p": [
-      -8.54,
-      1.2,
-      9.6
+      -9.14,
+      0.6,
+      13.5
      ],
      "r": [
       0,
@@ -58,9 +58,9 @@
       1,
       1
      ],
-     "f": 44,
-     "tg": "bot",
-     "ty": 1.6,
+     "f": 50,
+     "tg": "earth",
+     "ty": 0,
      "sh": 0.6,
      "ease": "cut"
     },
@@ -266,8 +266,8 @@
       1
      ],
      "f": 50,
-     "tg": "dome",
-     "ty": 18,
+     "tg": "earth",
+     "ty": 0,
      "sh": 0,
      "ease": "ease"
     },
@@ -289,8 +289,8 @@
       1
      ],
      "f": 50,
-     "tg": "dome",
-     "ty": 18,
+     "tg": "earth",
+     "ty": 0,
      "sh": 0,
      "ease": "cut"
     }
@@ -1455,7 +1455,59 @@
    "intensity": 6
   },
   {
-   "id": "sphere4",
+   "id": "earth",
+   "asset": "cube",
+   "name": "Repère earth",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -300,
+     420,
+     -1400
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     0.001,
+     0.001,
+     0.001
+    ]
+   }
+  },
+  {
+   "id": "cylinder4",
+   "asset": "cylinder",
+   "name": "Sol",
+   "color": {
+    "Color": "#8a8a92"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     0,
+     -0.49,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     600,
+     0.5,
+     600
+    ]
+   }
+  },
+  {
+   "id": "sphere5",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1482,7 +1534,7 @@
    }
   },
   {
-   "id": "sphere5",
+   "id": "sphere6",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1509,7 +1561,7 @@
    }
   },
   {
-   "id": "sphere6",
+   "id": "sphere7",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1536,7 +1588,7 @@
    }
   },
   {
-   "id": "sphere7",
+   "id": "sphere8",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1563,7 +1615,7 @@
    }
   },
   {
-   "id": "sphere8",
+   "id": "sphere9",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1590,7 +1642,7 @@
    }
   },
   {
-   "id": "sphere9",
+   "id": "sphere10",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1617,7 +1669,7 @@
    }
   },
   {
-   "id": "sphere10",
+   "id": "sphere11",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1644,7 +1696,7 @@
    }
   },
   {
-   "id": "sphere11",
+   "id": "sphere12",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1671,7 +1723,7 @@
    }
   },
   {
-   "id": "sphere12",
+   "id": "sphere13",
    "asset": "sphere",
    "name": "Rocher",
    "color": {
@@ -1738,7 +1790,7 @@
    "t": 11.1,
    "d": 1.8,
    "text": "NÉON|BAY",
-   "sub": "Play free · link in bio",
+   "sub": "Play free\nlink in bio",
    "style": "logo"
   }
  ],
@@ -1776,7 +1828,7 @@
    {
     "t": 0,
     "d": 1.3,
-    "label": "l’astronaute avance vers nous"
+    "label": "l’astronaute sous la Terre"
    },
    {
     "t": 1.3,
