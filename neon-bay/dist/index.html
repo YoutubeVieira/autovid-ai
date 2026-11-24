@@ -380,6 +380,9 @@ body.playing .hudhelp{display:block}body.cine .hudhelp{display:none}
 body.ts115 #screen .wrap,body.ts115 .aerial{zoom:1.12}body.ts130 #screen .wrap,body.ts130 .aerial{zoom:1.25}
 @media (min-width:900px) and (min-height:600px){body.ts115 .hud{zoom:1.1}body.ts130 .hud{zoom:1.2}body.ts115 .hudhelp{left:calc(50% + 231px + 10px)}body.ts130 .hudhelp{left:calc(50% + 252px + 12px)}}
 body.cbmode .lvl.done{border-color:rgba(77,166,255,.5)!important}
+
+/* vue cinéma : bandes noires fines (format 2,39) */
+body.playing.cinecam #game3d{clip-path:inset(5.5vh 0 5.5vh 0)}
 </style>
 </head>
 <body>
@@ -6366,6 +6369,7 @@ window.NB_I18N = (() => {
     'Vue aérienne (M)': { en: 'Aerial view (M)', es: 'Vista aérea (M)', pt: 'Visão aérea (M)' },
     'Ta voiture prend feu : sors vite (E) !': { en: 'Your car is on fire: get out now (E)!', es: '¡Tu coche está ardiendo: sal ya (E)!', pt: 'Seu carro está pegando fogo: saia já (E)!' },
     'Astuce : un tunnel (point orange sur la carte) sème la police tout de suite': { en: 'Tip: a tunnel (orange dot on the map) loses the cops instantly', es: 'Consejo: un túnel (punto naranja en el mapa) despista a la policía al instante', pt: 'Dica: um túnel (ponto laranja no mapa) despista a polícia na hora' },
+    'Vue cinéma': { en: 'Cinematic view', es: 'Vista cine', pt: 'Visão cinema' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
@@ -7175,11 +7179,12 @@ const trainNeed = lv => lv * 4 + 1;
 const maxHp = () => 100 + 15 * trainLv('end');
 const ez = () => { const n = lvl(); return n >= 11 ? 1 : .5 + .05 * (n - 1); };
 // qualité graphique : auto (selon les images par seconde), haute, moyenne, basse
-const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, label: 'Haute' }, medium: { pr: 1.25, peds: 24, traffic: 13, lod: 600, fx: true, label: 'Moyenne' }, low: { pr: 1, peds: 14, traffic: 8, lod: 350, fx: false, label: 'Basse' } };
+const QUAL = { high: { pr: 1.75, peds: 36, traffic: 18, lod: 900, fx: true, label: 'Haute' }, ultra: { pr: 2, peds: 44, traffic: 22, lod: 1100, fx: true, label: 'Ultra (4K)' }, medium: { pr: 1.25, peds: 24, traffic: 13, lod: 600, fx: true, label: 'Moyenne' }, low: { pr: 1, peds: 14, traffic: 8, lod: 350, fx: false, label: 'Basse' } };
 const QORDER = ['high', 'medium', 'low'];
 let Q = QUAL.high, qLevel = 'high';
 const fpsMon = { t: 0, n: 0, slow: 0 };
-function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { setEnvMap(); if (l === 'high' && !R3.composer) setupPost(); R3.r.setPixelRatio(Math.min(Q.pr, devicePixelRatio || 1)); R3.w = 0; if (R3.shadow && l !== 'high') { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
+const hiQ = () => qLevel === 'high' || qLevel === 'ultra';
+function setQuality(l) { qLevel = l; Q = QUAL[l]; if (R3.ok) { setEnvMap(); if (hiQ() && !R3.composer) setupPost(); R3.r.setPixelRatio(l === 'ultra' ? 2 : Math.min(Q.pr, devicePixelRatio || 1)); if (R3.moon && R3.moon.shadow) { const ms = l === 'ultra' ? 4096 : 2048; if (R3.moon.shadow.mapSize.x !== ms) { R3.moon.shadow.mapSize.set(ms, ms); if (R3.moon.shadow.map) { R3.moon.shadow.map.dispose(); R3.moon.shadow.map = null; } } } R3.w = 0; if (R3.shadow && !hiQ()) { R3.shadow = false; R3.r.shadowMap.enabled = false; R3.moon.castShadow = false; R3.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(mm => mm.needsUpdate = true); }); } } }
 function qualityLabel() { return (save.quality || 'auto') === 'auto' ? 'Auto (' + QUAL[qLevel].label + ')' : QUAL[save.quality].label; }
 function monitorFps(dt) {
   if ((save.quality || 'auto') !== 'auto' || S.mode !== 'play' || S.cine) return;
@@ -7681,7 +7686,7 @@ function lockNext() {
 function updLock() {
   if (P.lock && !lockAlive(P.lock)) { const was = P.lock; P.lock = null; if (was.hp !== undefined ? was.hp <= 0 : was.wreck) { const nx = lockCandidates()[0]; if (nx) { P.lock = nx; P.lockT = S.time; au('lock'); } } }
 }
-const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['car', 'Caméra embarquée']];
+const CAMS = [['top', 'Vue de dessus'], ['chase', 'Vue poursuite'], ['cine', 'Vue cinéma'], ['car', 'Caméra embarquée']];
 function defCam() { return touch.on || (VW && VW < 900) ? 'top' : 'chase'; } // PC : vue poursuite par défaut (montre villes et personnages)
 const PALS = { std: { shop: '#a6ff4d', enemy: '#ff4d5e', tunnel: '#ffb627', police: '#2e6bff' }, cb: { shop: '#4da6ff', enemy: '#ff9f1c', tunnel: '#ffe14d', police: '#c78bff' } };
 function pal() { return save.cb ? PALS.cb : PALS.std; }
@@ -8849,7 +8854,7 @@ function build3DWorld() {
   const wt = R3.wt || (R3.wt = windowTex());
   const side = R3.sideMat = worldUV(new THREE.MeshLambertMaterial({ map: wt.m, emissiveMap: wt.em, emissive: 0xffffff, emissiveIntensity: .85 }));
   const gt = R3.gt || (R3.gt = glassTex()), bt = R3.bt || (R3.bt = brickTex());
-  const glassM = R3.glassMat = worldUV(qLevel === 'high' ? new THREE.MeshStandardMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, metalness: .6, roughness: .12, envMapIntensity: 1.1 }) : new THREE.MeshPhongMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, shininess: 80, specular: 0x8899aa }));
+  const glassM = R3.glassMat = worldUV(hiQ() ? new THREE.MeshStandardMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, metalness: .6, roughness: .12, envMapIntensity: 1.1 }) : new THREE.MeshPhongMaterial({ map: gt.m, emissiveMap: gt.em, emissive: 0xffffff, emissiveIntensity: .8, shininess: 80, specular: 0x8899aa }));
   const brickM = R3.brickMat = worldUV(new THREE.MeshLambertMaterial({ map: bt.m, emissiveMap: bt.em, emissive: 0xffffff, emissiveIntensity: .8 }));
   const roof = new THREE.MeshLambertMaterial({ color: 0xffffff });
   const lk0 = world.region.look || {}, kinds = { a: [], gl: [], br: [] };
@@ -9202,10 +9207,21 @@ function makeChar(o) {
   return g;
 }
 // matériaux glTF -> Phong (même éclairage que le reste de la ville, plus léger sur mobile)
+// personnages : diffusion sous la peau (teinte chaude dans les ombres et sur les bords) et liseré de lumière façon cinéma
+function charShade(q, isSkin) {
+  q.onBeforeCompile = sh => {
+    sh.fragmentShader = sh.fragmentShader.replace('vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;',
+      'vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;\n' +
+      '{ float ndv = clamp(dot(normal, geometry.viewDir), 0.0, 1.0); float rim = pow(1.0 - ndv, 3.0);' +
+      (isSkin ? ' outgoingLight += diffuseColor.rgb * vec3(0.55, 0.16, 0.10) * (0.10 + 0.35 * rim) + vec3(1.0, 0.82, 0.70) * rim * 0.10;' : ' outgoingLight += vec3(0.62, 0.72, 1.0) * rim * 0.09;') + ' }');
+  };
+  q.customProgramCacheKey = () => isSkin ? 'nbskin' : 'nbcloth';
+}
 function glbMat(m, skin) {
   const n = m.name || '', em = m.emissive && (m.emissive.r + m.emissive.g + m.emissive.b) > .05;
-  if (qLevel === 'high' && m.isMeshStandardMaterial) { // matières physiques + reflets d'environnement (comme le studio)
+  if (hiQ() && m.isMeshStandardMaterial) { // matières physiques + reflets d'environnement (comme le studio)
     const q = m.clone(); q.skinning = !!skin; q.envMapIntensity = .75; q.userData.envBase = .75; ENVMATS.push(q);
+    if (skin) charShade(q, /skin|lips/i.test(n));
     if (/paint/i.test(n)) { q.metalness = .55; q.roughness = .28; } else if (/glass/i.test(n)) { q.metalness = .3; q.roughness = .05; } else if (/tyre|tire/i.test(n)) { q.roughness = .92; q.metalness = 0; } else if (/rim|chrome|metal/i.test(n)) { q.metalness = .9; q.roughness = .22; }
     return q; }
   const shiny = /paint|glass|chrome|rim|metal|trim/i.test(n);
@@ -9213,8 +9229,8 @@ function glbMat(m, skin) {
   p.name = n; return p;
 }
 const PMATS = {}, ENVMATS = [];
-function pmat(col) { if (qLevel !== 'high') return mat(col); if (!PMATS[col]) { PMATS[col] = new THREE.MeshStandardMaterial({ color: col, metalness: .55, roughness: .3, envMapIntensity: .9 }); PMATS[col].userData.envBase = .9; ENVMATS.push(PMATS[col]); } return PMATS[col]; }
-function setEnvMap() { if (!R3.ok) return; if (qLevel === 'high') { if (!R3.envTex && THREE.RoomEnvironment) { try { const pm = new THREE.PMREMGenerator(R3.r); R3.envTex = pm.fromScene(new THREE.RoomEnvironment(), .04).texture; } catch (e) {} } R3.scene.environment = R3.envTex || null; } else R3.scene.environment = null; }
+function pmat(col) { if (!hiQ()) return mat(col); if (!PMATS[col]) { PMATS[col] = new THREE.MeshStandardMaterial({ color: col, metalness: .55, roughness: .3, envMapIntensity: .9 }); PMATS[col].userData.envBase = .9; ENVMATS.push(PMATS[col]); } return PMATS[col]; }
+function setEnvMap() { if (!R3.ok) return; if (hiQ()) { if (!R3.envTex && THREE.RoomEnvironment) { try { const pm = new THREE.PMREMGenerator(R3.r); R3.envTex = pm.fromScene(new THREE.RoomEnvironment(), .04).texture; } catch (e) {} } R3.scene.environment = R3.envTex || null; } else R3.scene.environment = null; }
 const HUMAN_GLB = () => qLevel !== 'low' && THREE.SkeletonUtils && R3.models.human_m && R3.models.human_f;
 // silhouettes : homme, femme, homme trapu (sweat + casquette), femme (jupe + queue de cheval)
 const HATC = ['#c8102e', '#16161c', '#1f5fae', '#f2f2f2', '#ffb627', '#2e8b57'];
@@ -9633,7 +9649,7 @@ function resize3D() { if (R3.w === VW && R3.h === VH) return; R3.w = VW; R3.h = 
 function setupPost() {
   setEnvMap();
   R3.r.toneMapping = THREE.ACESFilmicToneMapping; R3.r.toneMappingExposure = 1.25;
-  if (!THREE.EffectComposer || !THREE.UnrealBloomPass || qLevel !== 'high') { R3.composer = null; return; }
+  if (!THREE.EffectComposer || !THREE.UnrealBloomPass || !hiQ()) { R3.composer = null; return; }
   try { // rendu hors écran multi-échantillonné (WebGL2) : sinon le composer perd l'anticrénelage et les lignes paraissent hachées
     let rt; const gl2 = R3.r.capabilities.isWebGL2 && THREE.WebGLMultisampleRenderTarget;
     if (gl2) { const sz = R3.r.getDrawingBufferSize(new THREE.Vector2()); rt = new THREE.WebGLMultisampleRenderTarget(Math.max(1, sz.x), Math.max(1, sz.y), { format: THREE.RGBAFormat }); rt.samples = 4; }
@@ -9659,7 +9675,7 @@ function render3D(dt) {
   const head = P.car ? P.car.a : P.a;
   if (mode === 'top') R3.yaw = -PI / 2;
   else { if (R3.mode !== mode || R3.yaw === undefined) R3.yaw = head; R3.yaw += angDiff(head, R3.yaw) * Math.min(1, dt * (P.car ? 3.2 : 1.7)); }
-  if (R3.mode !== mode) { R3.mode = mode; R3.cam.fov = mode === 'top' ? 46 : mode === 'chase' ? 62 : 72; R3.cam.updateProjectionMatrix(); R3.cp = null; }
+  if (R3.mode !== mode) { R3.mode = mode; R3.cam.fov = mode === 'top' ? 46 : mode === 'chase' ? 62 : mode === 'cine' ? 48 : 72; document.body.classList.toggle('cinecam', mode === 'cine'); R3.cam.updateProjectionMatrix(); R3.cp = null; }
   const fogN = mode === 'top' ? 1150 : 520, fogF = mode === 'top' ? 2700 : 1750;
   if (R3.scene.fog) { R3.scene.fog.near = fogN; R3.scene.fog.far = fogF; }
   const sp = P.car && playing ? Math.abs(P.car.v) : 0;
@@ -9679,6 +9695,7 @@ function render3D(dt) {
     const px = P.car ? P.car.x : P.x, pz = P.car ? P.car.y : P.y;
     let back, h, look, lh, side = 0;
     if (mode === 'chase') { back = P.car ? 150 + sp * .1 : 110; h = P.car ? 82 : 72; look = P.car ? 140 : 80; lh = P.car ? 14 : 30; }
+    else if (mode === 'cine') { if (P.car) { back = 190 + sp * .08; h = 46; look = 220; lh = 18; side = 26; } else { back = 78; h = 44; look = 180; lh = 40; side = 24; } } // caméra basse à l'épaule, focale longue : rendu cinéma
     else if (P.car) { back = -16; h = 22; look = 320; lh = 16; }
     else { back = 50; h = 54; look = 140; lh = 42; side = 16; }
     if (VW < VH && mode === 'chase') { back *= 1.15; h *= 1.1; }
@@ -9688,7 +9705,7 @@ function render3D(dt) {
     const attached = mode === 'car' && P.car;
     if (!R3.cp || attached) R3.cp = { x: tx, z: tz, h };
     else { const kk = Math.min(1, dt * 9); R3.cp.x += (tx - R3.cp.x) * kk; R3.cp.z += (tz - R3.cp.z) * kk; R3.cp.h += (h - R3.cp.h) * kk; }
-    { const base = mode === 'chase' ? 62 : 72, f2 = base + Math.min(14, sp / 40) + (P.nitro > 0 ? 8 : 0); if (Math.abs(R3.cam.fov - f2) > .2) { R3.cam.fov += (f2 - R3.cam.fov) * Math.min(1, dt * 3); R3.cam.updateProjectionMatrix(); } }
+    { const base = mode === 'chase' ? 62 : mode === 'cine' ? 48 : 72, f2 = base + Math.min(14, sp / 40) + (P.nitro > 0 ? 8 : 0); if (Math.abs(R3.cam.fov - f2) > .2) { R3.cam.fov += (f2 - R3.cam.fov) * Math.min(1, dt * 3); R3.cam.updateProjectionMatrix(); } }
     R3.cam.position.set(R3.cp.x + sx * .4 + (sp > 380 ? rnd(-.6, .6) : 0), R3.cp.h, R3.cp.z + sy * .4);
     R3.cam.lookAt(px + fx * look + rx * side * .4, lh, pz + fz * look + rz * side * .4);
     cam.x = px; cam.y = pz; cam.z = 400;
@@ -9718,7 +9735,7 @@ function render3D(dt) {
   R3.seen.clear();
   for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
   for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; if (HUMAN_GLB() && Math.random() < .75) return makeHuman(humanModel(f, Math.random() < .45), { Skin: e.skin, Shirt: e.shirt, Pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a', '#c2a878']), Shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']), Hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a']) }); return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
-  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; if (qLevel === 'high' && HUMAN_GLB()) { const gid = e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle'; const hm = makeHumanHero({ alt: !e2.boss && hash(Math.round(e2.y), Math.round(e2.x)) % 2 === 0, skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b']), shirt: lk.shirt || e2.color, jacket: lk.jacket || (e2.boss ? e2.color : null), pants: lk.pants || '#1a1a20', hair: '#1a120c' }, gid, e2.boss ? 'gold' : 'black', !e2.boss && hash(Math.round(e2.x), Math.round(e2.y)) % 3 === 0); if (e2.boss) hm.scale.setScalar(1.3); hm.userData.bar = hpBar(hm, 30, 16); return hm; } const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
+  for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; if (hiQ() && HUMAN_GLB()) { const gid = e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle'; const hm = makeHumanHero({ alt: !e2.boss && hash(Math.round(e2.y), Math.round(e2.x)) % 2 === 0, skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b']), shirt: lk.shirt || e2.color, jacket: lk.jacket || (e2.boss ? e2.color : null), pants: lk.pants || '#1a1a20', hair: '#1a120c' }, gid, e2.boss ? 'gold' : 'black', !e2.boss && hash(Math.round(e2.x), Math.round(e2.y)) % 3 === 0); if (e2.boss) hm.scale.setScalar(1.3); hm.userData.bar = hpBar(hm, 30, 16); return hm; } const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
     (m, e2) => { m.userData.aimNow = e2.alert && e2.hp > 0; poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); if (m.userData.bones && e2.hp > 0) heroAim(m, e2.a, S.time - (e2.firedT || -9) < .08 ? 1 : 0, !!e2.alert); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (prison && near(prison.x, prison.y)) sync(prison, makePrison, posePrison);
@@ -9789,7 +9806,7 @@ function render3D(dt) {
   if (R3.ray.ray.intersectPlane(R3.plane, R3.hit)) { mouse.wx = R3.hit.x; mouse.wy = R3.hit.z; }
   cineCamera(playing);
   { const nn = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.r.toneMappingExposure = .82 + nn * .43; }
-  if (R3.composer && qLevel === 'high') { const night = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.bloom.strength = .12 + night * .95; R3.bloom.threshold = .9 - night * .2;
+  if (R3.composer && hiQ()) { const night = (Math.cos((playing ? S.tod || 0 : .95) * TAU) + 1) / 2; R3.bloom.strength = .12 + night * .95; R3.bloom.threshold = .9 - night * .2;
     if (R3.cine) { const u = R3.cine.uniforms, T = { usa: [1.02, .96, 1.08], ita: [1.08, 1.0, .9], col: [.96, 1.05, 1.0], bra: [1.08, 1.0, .92], moon: [.96, .98, 1.06], mars: [1.1, .95, .85] }[world.region.id] || [1, 1, 1]; u.tint.value.set(T[0], T[1], T[2]); u.time.value = S.time; u.slow.value += ((S.slowUntil ? 1 : 0) - u.slow.value) * .2; u.sat.value = world.region.id === 'moon' ? .8 : 1.12; }
     R3.composer.render(); } else R3.r.render(R3.scene, R3.cam);
   if (playing) drawMini(target);
@@ -10158,7 +10175,7 @@ screenEl.addEventListener('click', e => {
   if (ds.assist) { save.driveAssist = save.driveAssist === false; persist(); showScreen(S.screen); return; }
   if (ds.ghost) { save.ghost = save.ghost === false; persist(); showScreen(S.screen); return; }
   if (ds.camset) { const i = CAMS.findIndex(c => c[0] === (save.cam || defCam())); save.cam = CAMS[(i + 1) % CAMS.length][0]; persist(); showScreen(S.screen); return; }
-  if (ds.qual) { const opts = ['auto', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
+  if (ds.qual) { const opts = touch.on ? ['auto', 'high', 'medium', 'low'] : ['auto', 'ultra', 'high', 'medium', 'low'], i = opts.indexOf(save.quality || 'auto'); save.quality = opts[(i + 1) % opts.length]; persist(); setQuality(save.quality === 'auto' ? (touch.on ? 'medium' : 'high') : save.quality); showScreen(S.screen); return; }
   if (ds.vib) { save.vib = save.vib === false; persist(); if (save.vib) vib(60); showScreen(S.screen); return; }
   if (ds.snd) { AU && AU.toggle(ds.snd); showScreen(S.screen === 'pause' ? 'pause' : S.screen); return; }
   if (ds.opening) { screenEl.querySelector('.op-start').hidden = true; playOpening(); return; }

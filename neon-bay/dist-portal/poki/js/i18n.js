@@ -147,6 +147,7 @@ window.NB_I18N = (() => {
     'Vue aérienne (M)': { en: 'Aerial view (M)', es: 'Vista aérea (M)', pt: 'Visão aérea (M)' },
     'Ta voiture prend feu : sors vite (E) !': { en: 'Your car is on fire: get out now (E)!', es: '¡Tu coche está ardiendo: sal ya (E)!', pt: 'Seu carro está pegando fogo: saia já (E)!' },
     'Astuce : un tunnel (point orange sur la carte) sème la police tout de suite': { en: 'Tip: a tunnel (orange dot on the map) loses the cops instantly', es: 'Consejo: un túnel (punto naranja en el mapa) despista a la policía al instante', pt: 'Dica: um túnel (ponto laranja no mapa) despista a polícia na hora' },
+    'Vue cinéma': { en: 'Cinematic view', es: 'Vista cine', pt: 'Visão cinema' },
     'Jouer': { en: 'Play', es: 'Jugar', pt: 'Jogar' },
     'Continuer': { en: 'Continue', es: 'Continuar', pt: 'Continuar' },
     '+50 santé (touche H). Max 5.': { en: '+50 health (H key). Max 5.', es: '+50 de salud (tecla H). Máx. 5.', pt: '+50 de saúde (tecla H). Máx. 5.' },
