@@ -1822,13 +1822,18 @@ function glbInst(g, key, list, h) {
   const md = R3.models && R3.models[key]; if (!md || !list.length || qLevel === 'low') return false;
   const k = h / (md.size.y || 1); md.scene.updateMatrixWorld(true);
   const M = new THREE.Matrix4(), base = new THREE.Matrix4(), q = new THREE.Quaternion(), up = new THREE.Vector3(0, 1, 0), v = new THREE.Vector3(), sc = new THREE.Vector3(k, k, k);
-  md.scene.traverse(o => { if (!o.isMesh || o.isSkinnedMesh) return; const im = new THREE.InstancedMesh(o.geometry, o.material, list.length);
-    list.forEach((it, i) => { v.set(it[0], 0, it[1]); q.setFromAxisAngle(up, it[2] || 0); base.compose(v, q, it[3] ? new THREE.Vector3(k * it[3], k * it[3], k * it[3]) : sc); M.multiplyMatrices(base, o.matrixWorld); im.setMatrixAt(i, M); });
-    im.castShadow = !!R3.shadow && key === 'palm'; g.add(im); });
+  // découpage en zones de ~650 unités : seules les zones visibles par la caméra sont dessinées (avant : toute la ville à chaque image)
+  const CH = 650, zones = {}; for (const it of list) { const zk = Math.floor(it[0] / CH) + ',' + Math.floor(it[1] / CH); (zones[zk] = zones[zk] || []).push(it); }
+  R3.propZones = R3.propZones || [];
+  for (const zk in zones) { const zl = zones[zk], [zx, zy] = zk.split(',').map(Number), ims = [];
+    md.scene.traverse(o => { if (!o.isMesh || o.isSkinnedMesh) return; const im = new THREE.InstancedMesh(o.geometry, o.material, zl.length);
+      zl.forEach((it, i) => { v.set(it[0], 0, it[1]); q.setFromAxisAngle(up, it[2] || 0); base.compose(v, q, it[3] ? new THREE.Vector3(k * it[3], k * it[3], k * it[3]) : sc); M.multiplyMatrices(base, o.matrixWorld); im.setMatrixAt(i, M); });
+      im.castShadow = !!R3.shadow && key === 'palm'; im.frustumCulled = false; g.add(im); ims.push(im); });
+    R3.propZones.push({ ims, sphere: new THREE.Sphere(new THREE.Vector3((zx + .5) * CH, h * .5, (zy + .5) * CH), CH * .75 + h) }); }
   return true;
 }
 function build3DWorld() {
-  const sc = R3.scene;
+  const sc = R3.scene; R3.propZones = [];
   if (R3.static) { sc.remove(R3.static); R3.static.traverse(o => { if (o.geometry && !o.geometry.parameters) o.geometry.dispose(); }); }
   const g = R3.static = new THREE.Group(); R3.world = world;
   const p = world.region.pal;
@@ -2770,6 +2775,8 @@ function render3D(dt) {
   if (!R3.gren) { R3.gren = []; }
   while (R3.gren.length < grenades.length) { const gg = new THREE.Group(); gg.add(new THREE.Mesh(sph(3.4, 8, 6), mat('#2f3a24'))); const ring = new THREE.Mesh(new THREE.RingGeometry(70, 84, 32), new THREE.MeshBasicMaterial({ color: 0xff2e4d, transparent: true, opacity: .6, depthWrite: false, side: THREE.DoubleSide })); ring.rotation.x = -PI / 2; gg.add(ring); gg.userData.ring = ring; R3.scene.add(gg); R3.gren.push(gg); }
   R3.gren.forEach((gg, i) => { const g2 = grenades[i]; gg.visible = !!g2; if (!g2) return; gg.children[0].position.set(g2.x, (g2.h || 0) + 4, g2.y); const ring = gg.userData.ring; ring.position.set(g2.tx, .9, g2.ty); ring.material.opacity = .25 + .45 * (Math.sin(S.time * 18) > 0 ? 1 : 0); });
+  if (R3.propZones && R3.propZones.length) { const fr = R3.frustum || (R3.frustum = new THREE.Frustum()), pm = R3.pm4 || (R3.pm4 = new THREE.Matrix4()); R3.cam.updateMatrixWorld(); pm.multiplyMatrices(R3.cam.projectionMatrix, R3.cam.matrixWorldInverse); fr.setFromProjectionMatrix(pm); const cp = R3.cam.position, far2 = Math.pow((Q.lod || 900) * 2.2, 2);
+    for (const z of R3.propZones) { const vis2 = fr.intersectsSphere(z.sphere) && z.sphere.center.distanceToSquared(cp) < far2; if (z.vis !== vis2) { z.vis = vis2; for (const im of z.ims) im.visible = vis2; } } }
   if (R3.cas) { let nc = 0; for (const c of casings) { if (nc >= 60) break; R3.v.set(c.x, c.z, c.y); R3.q.setFromEuler(R3.eul || (R3.eul = new THREE.Euler())); R3.eul.set(c.z > 1.5 ? c.r : PI / 2, c.r * .3, c.z > 1.5 ? c.r * .7 : 0); R3.q.setFromEuler(R3.eul); R3.s.set(c.big ? 1.5 : 1, c.big ? 1.5 : 1, c.big ? 1.5 : 1); R3.m4.compose(R3.v, R3.q, R3.s); R3.cas.setMatrixAt(nc++, R3.m4); } R3.cas.count = nc; R3.cas.instanceMatrix.needsUpdate = true; }
   if (R3.muz) { const mzz = S.muzzle; if (mzz && mzz.t > 0 && !P.car) { mzz.t -= R3.dt || .016; const sz = (mzz.big ? 30 : 18) * rnd(.8, 1.2); R3.muz.visible = true; R3.muz.position.set(P.x + Math.cos(mzz.a) * 30, 34, P.y + Math.sin(mzz.a) * 30); R3.muz.rotation.set(0, -mzz.a, rnd(TAU)); R3.muz.scale.set(sz * 1.6, sz, sz); } else R3.muz.visible = false; }
   R3.bul.count = Math.min(nb, 300); R3.bulE.count = Math.min(ne, 300); R3.bul.instanceMatrix.needsUpdate = true; R3.bulE.instanceMatrix.needsUpdate = true;
@@ -3292,5 +3299,5 @@ if (PORTAL) PORTAL.loaded();
 if (ST) ST.init().then(st => { if (st.owned && !save.premium) { save.premium = true; persist(); } if (['home', 'unlock', 'map'].includes(S.screen)) showScreen(S.screen); });
 showScreen(save.seenOpen ? 'home' : 'intro');
 requestAnimationFrame(frame);
-window.__nb = { models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
+window.__nb = { scene: () => R3.scene, cam: () => R3.cam, perf: () => R3.r ? Object.assign({}, R3.r.info.render, { geo: R3.r.info.memory.geometries, tex: R3.r.info.memory.textures, prog: R3.r.info.programs.length }) : null, models: () => Object.keys(R3.models || {}).length + '/' + Object.keys(D.MODELS || {}).length, sim: (dt, n) => { for (let i = 0; i < n && S.mode === 'play'; i++) { S.cine = null; const st = L && L.step; try { gpsUpdate(st ? (st.dyn ? st.dyn() : st.target) : null, dt); update(dt); } catch (e) { S.simErrs = (S.simErrs || 0) + 1; if (!S.simErr1) S.simErr1 = String(e && e.stack || e).slice(0, 400); } } }, gps, resumeGame: () => resumeGame(), useMedkit: () => useMedkit(), train: k => train(k), stars: () => stars(), wepDef: id => wepDef(id), get world2() { return world; }, W, route: (a, b, c, d) => gpsCompute(a, b, c, d), contextAction2: () => contextAction(), step: dt => tick(dt), failLevel: r => failLevel(r), nextStep: () => nextStep(), S, P, save, toggleCar, contextAction, fire: () => fire(), get P2() { return P; }, get lock() { return P.lock; }, get heli() { return heli; }, get peds() { return peds; }, hitEnemy, damageCar, get vip() { return vip; }, get agent() { return agent; }, get world() { return world; }, showScreen, get L() { return L; }, startLevel, nextStep, get enemies() { return enemies; }, get cars() { return cars; }, validCode, codeCheck, buy, D };
 })();
