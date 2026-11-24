@@ -54,6 +54,27 @@ def surf(s):
 
 
 # --------------------------------------------------------------------------- body spec
+# v4 outfits (new variants; human_m / f / m2 / f2 keep their v3 geometry):
+#   top    : swim (one-piece swimsuit) | tank | crop | jersey (football) | jumpsuit
+#   bottom : shorts (board shorts) | joggers | jumpsuit
+#   feet   : flip (bare feet + flip-flops) | hightop (high-top sneakers, white Sole) | shoes
+#   hair   : ponytail | bun (pulled back + top bun) | short | buzz
+#   hat    : bucket | cap | None ;  extras: sunglasses (on the head), whistle, chain, earrings,
+#            pocket, tattoo (texture on the arms), stripes (Trim stripes on the joggers), number
+OUTFITS = {
+    "human_f3": dict(H=1.70, top="swim", bottom="shorts", feet="flip", hair="ponytail", hat=None,
+                     extras=("sunglasses", "whistle"), shorts_hem=0.70),
+    "human_m3": dict(H=1.80, top="tank", bottom="shorts", feet="flip", hair="short", hat="bucket",
+                     extras=("whistle",), shorts_hem=0.60, wf=1.04, lf=1.04),
+    "human_f4": dict(H=1.68, top="crop", bottom="joggers", feet="hightop", hair="bun", hat=None,
+                     extras=("chain", "earrings", "stripes")),
+    "human_m4": dict(H=1.78, top="jersey", bottom="joggers", feet="hightop", hair="short", hat="cap",
+                     extras=("chain", "stripes", "number")),
+    "human_m5": dict(H=1.81, top="jumpsuit", bottom="jumpsuit", feet="shoes", hair="buzz", hat=None,
+                     extras=("tattoo", "pocket"), wf=1.09, lf=1.10),
+}
+
+
 class Spec:
     def __init__(self, female, variant=""):
         self.female = f = female
@@ -61,12 +82,21 @@ class Spec:
         self.stocky = st = (not f) and variant == "2"     # human_m2: shorter, broader, hoodie + cap
         self.dress = (f and variant == "2")               # human_f2: top + skirt, bare legs, ponytail
         self.name = ("human_f" if f else "human_m") + variant
-        self.H = 1.71 if f else (1.765 if st else 1.80)
+        o = self.o = OUTFITS.get(self.name)                # v4 outfit (None for the v3 variants)
+        self.v4 = o is not None
+        self.top = o["top"] if o else ("hoodie" if st else "tee")
+        self.bottom = o["bottom"] if o else ("skirt" if self.dress else "jeans")
+        self.feet = o["feet"] if o else ("ballet" if self.dress else "shoes")
+        self.hair = o["hair"] if o else ("ponytail" if self.dress else ("bob" if f else "short"))
+        self.hat = o["hat"] if o else ("cap" if st else None)
+        self.extras = set(o["extras"]) if o else set()
+        self.pulled = self.hair in ("ponytail", "bun")     # hair pulled back (cap only + tie)
+        self.H = o["H"] if o else (1.71 if f else (1.765 if st else 1.80))
         k = self.k = self.H / 1.80
-        self.wf = 1.12 if st else 1.0                     # torso width factor
-        self.lf = 1.10 if st else 1.0                     # limb girth factor
-        sh = 0.166 if f else (0.197 if st else 0.186)     # shoulder joint half-width
-        hip = 0.090 if f else (0.097 if st else 0.092)
+        self.wf = (o or {}).get("wf", 1.12 if st else 1.0)    # torso width factor
+        self.lf = (o or {}).get("lf", 1.10 if st else 1.0)    # limb girth factor
+        sh = 0.166 if f else (0.197 if st else 0.186 * (1 + (self.wf - 1) * 0.6))  # shoulder joint half-width
+        hip = 0.090 if f else (0.097 if st else 0.092 * (1 + (self.wf - 1) * 0.4))
         th = self.th = math.radians(24)         # arm A-pose angle from vertical (same for every variant:
         J = {}                                  # the weapon grip quaternions depend on it)
         J["hips"] = Vector((0, 0.0, 0.985 * k))
@@ -98,6 +128,23 @@ class Spec:
         self.sleeve_t = 0.50 if f else 0.48               # sleeve hem along the upper arm
         self.long_sleeve = st                             # hoodie: sleeves down to the wrist
         self.skirt_hem = 0.585 * k                        # dress variant: skirt hem height
+        self.sleeveless = self.top in ("swim", "tank")
+        if self.top == "jersey":
+            self.sleeve_t = 0.66                          # loose football shirt, long short sleeves
+            self.waist = 0.93 * k                         # worn untucked: hem below the belt line
+        elif self.top == "crop":
+            self.sleeve_t = 0.40
+        elif self.top == "jumpsuit":
+            self.sleeve_t = 0.52
+        if self.top == "crop":
+            self.crop = self.waist + 0.085 * k            # crop-top hem (bare midriff down to the waist)
+        if self.bottom == "shorts":
+            self.shorts_hem = o["shorts_hem"] * k         # board shorts hem (bare legs below)
+            self.waist = (0.985 if f else 0.975) * k
+        if self.feet == "hightop":
+            self.hem = 0.150 * k                          # high-top collar = jogger cuff
+        elif self.feet == "flip":
+            self.hem = -1.0                               # bare feet
         self.hand = {s: self._hand(s) for s in ("L", "R")}
 
     def _hand(self, s):
@@ -253,10 +300,14 @@ def body_elements(sp):
             for sx in (1, -1):
                 B.ell((sx * 0.07, 0.066, 0.90 * k), (0.082, 0.068, 0.085 * k), "Hips", "Pants")
         else:
-            B.ell((0, -0.002, 1.16 * k), (0.136, 0.097, 0.12 * k), "Spine", "Shirt")
-            B.ell((0, 0.010, 0.99 * k), (0.158, 0.105, 0.105 * k), "Hips", "Pants")
+            B.ell((0, -0.002, 1.16 * k), (0.136 * wf, 0.097 * wf, 0.12 * k), "Spine", "Shirt")
+            B.ell((0, 0.010, 0.99 * k), (0.158 * wf, 0.105 * wf, 0.105 * k), "Hips", "Pants")
             for sx in (1, -1):
                 B.ell((sx * 0.068, 0.064, 0.93 * k), (0.078, 0.064, 0.085 * k), "Hips", "Pants")
+            if sp.top == "jersey":   # loose football shirt falling over the hips
+                B.ell((0, 0.004, 1.04 * k), (0.160, 0.112, 0.11 * k), "Spine", "Shirt")
+            if sp.top == "jumpsuit":  # baggy overall: fuller belly / back
+                B.ell((0, 0.0, 1.10 * k), (0.150 * wf, 0.108 * wf, 0.10 * k), "Spine", "Shirt")
     # ---- arms
     a = 0.86 if f else (1.08 if st else 1.0)
     for s, sx in (("L", 1), ("R", -1)):
@@ -271,16 +322,38 @@ def body_elements(sp):
             B.caps(elb + (wri - elb) * 0.5, wri - (wri - elb).normalized() * 0.03, 0.040 * a,
                    "LowerArm." + s, "Shirt")
             continue
-        B.caps(sho + u * 0.04, sho + u * (L * sp.sleeve_t + 0.02), 0.054 * a, "UpperArm." + s, "Shirt")
-        B.caps(sho + u * (L * 0.45), elb, 0.041 * a, "UpperArm." + s, "Skin")                    # biceps
-        B.ell(elb + (wri - elb) * 0.30, (0.042 * a, 0.039 * a, 0.10 * k), "LowerArm." + s, "Skin",
+        if sp.sleeveless:     # bare shoulder and upper arm (swimsuit, tank top)
+            B.caps(sho + u * 0.03, sho + u * (L * 0.55), 0.046 * a * sp.lf, "UpperArm." + s, "Skin")
+            B.ell(sho + u * (L * 0.50) + Vector((0, 0.004, 0)), (0.041 * a * sp.lf, 0.044 * a * sp.lf, 0.10 * k),
+                  "UpperArm." + s, "Skin", axis=u)                                                 # biceps / triceps
+        else:
+            sl = 1.12 if sp.top in ("jersey", "jumpsuit") else 1.0                                # looser sleeves
+            B.caps(sho + u * 0.04, sho + u * (L * sp.sleeve_t + 0.02), 0.054 * a * sl * (sp.lf if sp.v4 else 1),
+                   "UpperArm." + s, "Shirt")
+        B.caps(sho + u * (L * 0.45), elb, 0.041 * a * (sp.lf if sp.v4 else 1), "UpperArm." + s, "Skin")  # biceps
+        la = sp.lf if sp.v4 else 1.0
+        B.ell(elb + (wri - elb) * 0.30, (0.042 * a * la, 0.039 * a * la, 0.10 * k), "LowerArm." + s, "Skin",
               axis=wri - elb)
-        B.caps(elb + (wri - elb) * 0.5, wri, 0.028 * a, "LowerArm." + s, "Skin")
+        B.caps(elb + (wri - elb) * 0.5, wri, 0.028 * a * la, "LowerArm." + s, "Skin")
     # ---- legs (straight trousers; bare legs under the skirt) and shoes
     lg = 0.94 if f else (1.08 if st else 1.0)
     for s, sx in (("L", 1), ("R", -1)):
         hip, kne, ank, toe = J["hip" + s], J["kne" + s], J["ank" + s], J["toe" + s]
-        if sp.dress:
+        if sp.bottom == "shorts":
+            # bare legs (athletic) + loose board shorts down to sp.shorts_hem
+            g = 0.94 if f else 1.04 * sp.lf
+            B.ball(hip + Vector((sx * 0.014, 0.0, -0.05)), 0.094 * (1.0 if f else 1.04), "UpperLeg." + s, "Pants")
+            zt = (hip.z - sp.shorts_hem) / max(1e-3, hip.z - kne.z)
+            B.ell(hip + (kne - hip) * (zt * 0.5) + Vector((sx * 0.006, 0, 0)),
+                  (0.088 * g + 0.006, 0.090 * g + 0.006, (zt * 0.5 + 0.03) * (hip - kne).length), "UpperLeg." + s,
+                  "Pants", axis=kne - hip)                                                         # loose leg
+            B.ell(hip + (kne - hip) * 0.42, (0.076 * g, 0.078 * g, 0.21 * k), "UpperLeg." + s, "Skin", axis=kne - hip)
+            B.ell(hip + (kne - hip) * 0.78, (0.057 * g, 0.059 * g, 0.10 * k), "UpperLeg." + s, "Skin", axis=kne - hip)
+            B.ball(kne + Vector((0, -0.006, 0.012)), 0.047 * g, "UpperLeg." + s, "Skin")             # knee
+            B.ell(kne + (ank - kne) * 0.28 + Vector((0, 0.016, 0)), (0.051 * g, 0.054 * g, 0.12 * k),
+                  "LowerLeg." + s, "Skin", axis=ank - kne)                                         # calf
+            B.caps(kne + (ank - kne) * 0.45, ank + Vector((0, 0, 0.03)), 0.031 * g, "LowerLeg." + s, "Skin")
+        elif sp.dress:
             B.ball(hip + Vector((sx * 0.012, 0.0, -0.05)), 0.088, "UpperLeg." + s, "Pants")
             B.ell(hip + (kne - hip) * 0.40, (0.074, 0.076, 0.21 * k), "UpperLeg." + s, "Skin", axis=kne - hip)
             B.ell(hip + (kne - hip) * 0.78, (0.056, 0.058, 0.10 * k), "UpperLeg." + s, "Skin", axis=kne - hip)
@@ -289,15 +362,36 @@ def body_elements(sp):
                   "LowerLeg." + s, "Skin", axis=ank - kne)                                         # calf
             B.caps(kne + (ank - kne) * 0.45, ank + Vector((0, 0, 0.03)), 0.030, "LowerLeg." + s, "Skin")
         else:
-            B.ball(hip + Vector((sx * 0.012, 0.0, -0.05)), 0.090 * (1.04 if f else lg), "UpperLeg." + s, "Pants")
-            B.ell(hip + (kne - hip) * 0.42, (0.080 * lg, 0.084 * lg, 0.21 * k), "UpperLeg." + s, "Pants",
+            lg2 = lg * {"jumpsuit": 1.07, "joggers": 1.04}.get(sp.bottom, 1.0)
+            low = 0.88 if sp.bottom == "joggers" else 1.0          # joggers taper to the cuff
+            B.ball(hip + Vector((sx * 0.012, 0.0, -0.05)), 0.090 * (1.04 if f else lg2), "UpperLeg." + s, "Pants")
+            B.ell(hip + (kne - hip) * 0.42, (0.080 * lg2, 0.084 * lg2, 0.21 * k), "UpperLeg." + s, "Pants",
                   axis=kne - hip)
-            B.ball(kne + Vector((0, -0.002, 0.02)), 0.054 * lg, "UpperLeg." + s, "Pants")
-            B.ell(kne + (ank - kne) * 0.30 + Vector((0, 0.012, 0)), (0.060 * lg, 0.064 * lg, 0.15 * k),
+            B.ball(kne + Vector((0, -0.002, 0.02)), 0.054 * lg2, "UpperLeg." + s, "Pants")
+            B.ell(kne + (ank - kne) * 0.30 + Vector((0, 0.012, 0)), (0.060 * lg2, 0.064 * lg2, 0.15 * k),
                   "LowerLeg." + s, "Pants", axis=ank - kne)
-            B.caps(kne + (ank - kne) * 0.5, ank + Vector((0, 0, 0.045)), 0.052 * lg, "LowerLeg." + s, "Pants")
+            B.caps(kne + (ank - kne) * 0.5, ank + Vector((0, 0, 0.045 + (0.03 if low < 1 else 0))),
+                   0.052 * lg2 * low, "LowerLeg." + s, "Pants")
+        if sp.feet == "flip":
+            # bare foot: heel, sole, instep, ball of the foot and five toes (flip-flop built separately)
+            g = 0.92 if f else 1.0
+            B.ball(Vector((ank.x, 0.030, 0.040)), 0.036 * g, "Foot." + s, "Skin")
+            B.ell(Vector((ank.x - sx * 0.004, -0.030, 0.040)), (0.036 * g, 0.075 * g, 0.026), "Foot." + s, "Skin",
+                  axis=(0, -1, 0.25), lateral=(1, 0, 0))
+            B.caps(Vector((ank.x, 0.0, ank.z - 0.012)), Vector((ank.x, -0.06, 0.035)), 0.026 * g, "Foot." + s, "Skin")
+            B.ell(Vector((ank.x + sx * 0.004, toe.y + 0.060, 0.026)), (0.043 * g, 0.026 * g, 0.020), "Foot." + s,
+                  "Skin", axis=(1, 0, 0), lateral=(0, 1, 0))                                     # ball of the foot
+            for i, (dx, dy, r) in enumerate(((-0.026, 0.0, 0.0125), (-0.006, 0.010, 0.0092), (0.010, 0.016, 0.0086),
+                                             (0.024, 0.024, 0.0080), (0.036, 0.034, 0.0074))):
+                c = Vector((ank.x + sx * (dx * g + 0.002), toe.y + 0.028 + dy * g, 0.013))
+                B.caps(c + Vector((0, 0.010, 0.003)), c, r * g, "Foot." + s, "Skin", s=3)
+            continue
+        if sp.feet == "hightop":
+            # high-top sneaker: padded collar above the ankle, chunky toe box
+            B.ell(Vector((ank.x, 0.018, 0.120 * k)), (0.050 * lg, 0.058, 0.050), "Foot." + s, "Shoes")
+            B.ball(Vector((ank.x, 0.034, 0.070)), 0.052 * lg, "Foot." + s, "Shoes")
         # shoe: heel, instep, foot, toe box (low ballerina-like shoe for the dress variant)
-        sl = 0.93 if sp.dress else 1.0
+        sl = 0.93 if sp.dress else (1.05 if sp.feet == "hightop" else 1.0)
         B.ball(Vector((ank.x, 0.032, 0.052 * sl)), 0.047 * lg * sl, "Foot." + s, "Shoes")
         B.ell(Vector((ank.x, -0.010, 0.068 * sl)), (0.044 * lg, 0.06, 0.035 * sl), "Foot." + s, "Shoes")
         B.ell(Vector((toe.x * 0.95 + ank.x * 0.05, -0.052 * k, 0.040)), (0.049 * lg, 0.037 * sl, 0.128 * k),
