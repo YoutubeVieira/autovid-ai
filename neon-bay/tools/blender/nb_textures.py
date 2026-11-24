@@ -286,7 +286,7 @@ def _jersey(u, v):
     vec, w = torus(u, v, 1.3, 1.3, 2.0)
     heather = noise(vec, w, scale=1.6, detail=3, rough=0.6) - 0.5
     vec2, w2 = torus(u, v, 6.0, 6.0, 7.0)
-    fib = noise(vec2, w2, scale=2.5, detail=2, rough=0.5) - 0.5
+    fib = noise(vec2, w2, scale=2.5, detail=1, rough=0.5) - 0.5
     return [0.885 + h * 0.085 + heather * 0.05 + fib * 0.03]
 
 
@@ -301,9 +301,9 @@ def _denim_height(u, v):
 def _denim(u, v):
     h = _denim_height(u, v)
     vec, w = torus(u, v, 7.0, 0.7, 4.0)              # vertical slubs (warp threads)
-    slub = noise(vec, w, scale=1.4, detail=3, rough=0.6) - 0.5
+    slub = noise(vec, w, scale=1.4, detail=1, rough=0.5) - 0.5
     vec2, w2 = torus(u, v, 1.0, 1.0, 9.0)
-    fade = noise(vec2, w2, scale=1.3, detail=2, rough=0.5) - 0.5
+    fade = noise(vec2, w2, scale=1.3, detail=1, rough=0.5) - 0.5
     return [0.86 + h * 0.12 + slub * 0.09 + fade * 0.06]
 
 
@@ -327,14 +327,14 @@ def textures(female):
         _DIR = tempfile.mkdtemp(prefix="nb_tex_")
     key = "skin_f" if female else "skin_m"
     if key not in _CACHE:
-        _CACHE[key] = _save(key, _bake(key, _skin(female), 3), levels=96, mode="RGB")
+        _CACHE[key] = _save(key, _bake(key, _skin(female), 3), levels=64, mode="RGB")
     if "jersey" not in _CACHE:
         g = _bake("jersey", _jersey, 1)
-        _CACHE["jersey"] = _save("jersey", g, levels=64)
+        _CACHE["jersey"] = _save("jersey", g, levels=40)
         h = _fold(_bake("jersey_h", lambda u, v: [_jersey_height(u, v)], 1)[:, :, 0], 16, 16)
         _CACHE["jersey_n"] = _save("jersey_n", _normal_from_height(h, 2.2), levels=64, mode="RGB")
         g = _bake("denim", _denim, 1)
-        _CACHE["denim"] = _save("denim", g, levels=64)
+        _CACHE["denim"] = _save("denim", g, levels=40)
         h = _fold(_bake("denim_h", lambda u, v: [_denim_height(u, v)], 1)[:, :, 0], 8, 4)
         _CACHE["denim_n"] = _save("denim_n", _normal_from_height(h, 2.0), levels=64, mode="RGB")
         _CACHE["shoes"] = _save("shoes", _bake("shoes", _shoes, 1), levels=64)

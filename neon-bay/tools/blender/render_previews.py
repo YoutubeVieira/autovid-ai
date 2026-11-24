@@ -13,7 +13,7 @@ debug close-ups: @front, @side (head), @feet, @hands (left hand);
 "<name>@<Clip>:<frame>/handR" (or /handL, /face, /far, /top): a view of a posed clip, e.g.
 "human_m@Aim:0/handR+w_pistol" = close-up of the right hand holding the pistol;
 "<human>@<Clip>:<frame>+w_<id>" puts a weapon in the right hand (grip rule of check_glb_three.js);
-NB_PREVIEW_VIEW=side|front forces the camera direction, NB_PREVIEW_OUT=<dir> redirects the output.
+NB_PREVIEW_VIEW=side|front|back forces the camera direction, NB_PREVIEW_OUT=<dir> redirects the output.
 Weapons (w_*) are framed from their right side (+Z glTF), slightly from above.
 Tries Eevee first; headless machines without GPU fall back to Cycles CPU.
 """
@@ -166,6 +166,8 @@ def render_model(spec):
         d = Vector((1.0, 0.0, 0.08))
     elif os.environ.get("NB_PREVIEW_VIEW") == "front":
         d = Vector((0.0, -1.0, 0.08))
+    elif os.environ.get("NB_PREVIEW_VIEW") == "back":
+        d = Vector((0.6, 1.0, 0.25))
     elif name.startswith("car_"):
         d = Vector((1.25, -1.0, 0.55))
     elif name.startswith("w_"):

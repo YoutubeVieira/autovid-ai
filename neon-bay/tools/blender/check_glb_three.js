@@ -25,8 +25,12 @@ const CONTRACT = {
   human: { mats: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair', 'Eyes'], clips: HUMAN_CLIPS,
            // three.js strips '.' from node names: UpperArm.L -> UpperArmL
            nodes: ['Hips', 'Spine', 'Chest', 'Neck', 'Head', 'UpperArmL', 'UpperArmR', 'LowerArmL', 'LowerArmR',
-                   'HandL', 'HandR', 'UpperLegL', 'UpperLegR', 'LowerLegL', 'LowerLegR', 'FootL', 'FootR'],
-           maxTris: 9000 },
+                   'HandL', 'HandR', 'UpperLegL', 'UpperLegR', 'LowerLegL', 'LowerLegR', 'FootL', 'FootR',
+                   // v3 finger bones (children of HandL / HandR)
+                   'ThumbL', 'ThumbR', 'Thumb2L', 'Thumb2R', 'FingersL', 'FingersR', 'Fingers2L', 'Fingers2R'],
+           // baked textures: colour map on these slots (x material.color), fabric normal maps
+           textured: ['Skin', 'Shirt', 'Pants', 'Shoes'], normals: ['Shirt', 'Pants'],
+           maxTris: 9000, maxBytes: 900 * 1024 },
   weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 2500, maxBytes: 120 * 1024 },
   lamp: { mats: ['Bulb'], maxTris: 1500 },
   prop: { mats: [], maxTris: 1500 },
@@ -58,7 +62,7 @@ function contractFor(name) {
       const bin = atob(b64), u8 = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
       const gltf = await new Promise((res, rej) => new THREE.GLTFLoader().parse(u8.buffer, '', res, rej));
-      const meshes = [], mats = new Set(), nodes = [];
+      const meshes = [], mats = new Set(), nodes = [], texd = {};
       let tris = 0, skinned = 0;
       const box = new THREE.Box3().setFromObject(gltf.scene);
       gltf.scene.traverse(o => {
@@ -69,7 +73,9 @@ function contractFor(name) {
         const t = g.index ? g.index.count / 3 : g.attributes.position.count / 3;
         tris += t;
         const ms = Array.isArray(o.material) ? o.material : [o.material];
-        ms.forEach(m => mats.add(m.name));
+        ms.forEach(m => { mats.add(m.name);
+          if (m.map) texd[m.name] = (texd[m.name] || '') + 'map' + m.map.image.width + 'x' + m.map.image.height;
+          if (m.normalMap) texd[m.name] = (texd[m.name] || '') + '+normal'; });
         meshes.push(o.name + '(' + ms.map(m => m.name).join('/') + ')');
       });
       // loop clips must end on their first pose
@@ -125,7 +131,7 @@ function contractFor(name) {
           boneYalongHand: +along.dot(localY).toFixed(3), attach };
       }
       return {
-        meshes, mats: [...mats], tris, skinned, nodes, loopErr, human,
+        meshes, mats: [...mats], texd, tris, skinned, nodes, loopErr, human,
         clips: gltf.animations.map(a => a.name + ':' + a.duration.toFixed(2) + 's/' + a.tracks.length + 'tr'),
         clipNames: gltf.animations.map(a => a.name),
         size: box.getSize(new THREE.Vector3()).toArray().map(v => +v.toFixed(3)),
@@ -150,7 +156,11 @@ function contractFor(name) {
       if (!(info.min[0] < 0 && info.min[1] < 0 && info.max[1] > 0)) errs.push('origin not inside the grip area');
     }
     if (c === CONTRACT.human) {
-      const h = name === 'human_f' ? [1.66, 1.76] : [1.75, 1.85];
+      // human_f / human_f2: 1.71 m (+ hair); human_m: 1.80 m; human_m2: 1.765 m + cap
+      const h = name.startsWith('human_f') ? [1.66, 1.76] : [1.75, 1.85];
+      c.textured.forEach(m => { if (!/map512x512/.test(info.texd[m] || '')) errs.push('no 512x512 texture on ' + m); });
+      c.normals.forEach(m => { if (!/normal/.test(info.texd[m] || '')) errs.push('no normal map on ' + m); });
+      if (name === 'human_m2' && !info.mats.includes('Hat')) errs.push('missing material Hat');
       if (info.size[1] < h[0] || info.size[1] > h[1]) errs.push('height ' + info.size[1] + ' outside ' + h);
       if (Math.abs(info.min[1]) > 0.005) errs.push('feet not on y=0 (min y ' + info.min[1] + ')');
       if (!info.human || !(info.human.handLx > 0 && info.human.handRx < 0)) errs.push('not facing +Z (HandL must be at +X)');
@@ -160,6 +170,7 @@ function contractFor(name) {
     console.log('  materials:', info.mats.join(', '));
     if (info.skinned) console.log('  skinned meshes:', info.skinned);
     if (info.clips.length) console.log('  clips    :', info.clips.join(', '));
+    if (Object.keys(info.texd).length) console.log('  textures :', Object.entries(info.texd).map(([k, v]) => k + ':' + v).join(', '));
     if (info.human) {
       console.log('  bones    : HandL.x=' + info.human.handLx + ' HandR.x=' + info.human.handRx +
         ' Head.y=' + info.human.headY + '  (HandR local +Y along the hand: dot=' + info.human.boneYalongHand + ')');

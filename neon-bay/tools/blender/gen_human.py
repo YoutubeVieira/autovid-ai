@@ -1,7 +1,11 @@
-"""Neon Bay - procedural skinned humans with animations (version 2).
+"""Neon Bay - procedural skinned humans with animations (version 3).
 
-    python3 tools/blender/gen_human.py          # human_m + human_f
-    python3 tools/blender/gen_human.py f        # only human_f
+    python3 tools/blender/gen_human.py          # human_m human_f human_m2 human_f2
+    python3 tools/blender/gen_human.py f m2     # only human_f and human_m2
+
+v3: finger bones (Thumb/Thumb2/Fingers/Fingers2 .L/.R under Hand), baked procedural textures
+(nb_textures.py, UVs per part), hair locks in the geometry, stronger brows / lash lines / chin,
+variants m2 (stocky, hoodie, cap = material Hat) and f2 (top + skirt = Pants, ponytail).
 
 The body is sculpted with metaballs (ellipsoids / capsules / balls, some
 negative ones for eye sockets, mouth and ears) in four separate families,
@@ -21,7 +25,7 @@ Contract (glTF, export_yup): up +Y, character faces +Z (Blender -Y), origin
 between the feet on the ground (soles at y=0), A-pose bind, 1.80 m / 1.71 m.
 Bones: Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R
        UpperLeg.L/R LowerLeg.L/R Foot.L/R  (three.js strips the dot: UpperArmL)
-Materials: Skin Shirt Pants Shoes Hair Eyes (+ Lips, optional for the game)
+Materials: Skin Shirt Pants Shoes Hair Eyes (+ Lips, EyeWhite; Hat on human_m2 only)
 Actions (24 fps): Idle Walk Run Aim AimRifle Crouch (loops), Punch, Death
 (one-shot). Budget < 9000 triangles.
 """
@@ -314,7 +318,7 @@ def head_elements(sp):
     # neck: lower part follows the chest, upper part the neck bone
     nr = 0.047 if f else 0.054
     H.caps((0, 0.022, 1.39 * k), (0, 0.022, 1.47 * k), nr, "Chest", "Skin")
-    H.caps((0, 0.022, 1.47 * k), P(0, 0.006, -0.075), nr * 0.97, "Neck", "Skin")
+    H.caps((0, 0.022, 1.47 * k), P(0, 0.018, -0.088), nr * 0.95, "Neck", "Skin")
     # skull + face masses
     H.ell(P(0, 0, 0), (0.074 * hk, 0.093 * hk, 0.102 * hk), "Head", "Skin")                  # skull
     H.ell(P(0, -0.034, -0.058), (0.054 * hk, 0.052 * hk, 0.068 * hk), "Head", "Skin")          # face mass
@@ -343,9 +347,9 @@ def head_elements(sp):
     H.ell(P(0, -0.086, 0.012), (0.014 * hk, 0.009 * hk, 0.011 * hk), "Head", "Skin", s=3)        # glabella
     # nose: bridge, tip, wings, nostrils
     nz = 0.9 if f else 1.0
-    H.ell(P(0, -0.091, -0.024), (0.0058 * hk, 0.009 * hk, 0.026 * hk * nz), "Head", "Skin",
-          axis=(0, -0.45, 1), s=6)
-    H.ball(P(0, -0.1035 + (0.003 if f else 0), -0.049), 0.0078 * hk * nz, "Head", "Skin", s=6)
+    H.ell(P(0, -0.0935, -0.025), (0.0060 * hk, 0.0095 * hk, 0.027 * hk * nz), "Head", "Skin",
+          axis=(0, -0.50, 1), s=6)
+    H.ball(P(0, -0.1065 + (0.003 if f else 0), -0.049), 0.0080 * hk * nz, "Head", "Skin", s=6)
     for sx in (1, -1):
         H.ell(P(sx * 0.0105, -0.094, -0.054), (0.0060 * hk, 0.0070 * hk, 0.0060 * hk), "Head", "Skin", s=6)
         H.ell(P(sx * 0.0075, -0.099, -0.059), (0.003, 0.0035, 0.0022), "Head", "Skin", s=5, neg=True)
@@ -357,10 +361,10 @@ def head_elements(sp):
     H.caps(P(-0.020, -0.094, -0.0889), P(0.020, -0.094, -0.0889), 0.0016, "Head", "Skin", s=6, neg=True)
     # chin, with a defined underside: a negative volume under the jaw separates the chin from
     # the neck (the overhang casts the chin shadow seen from above / 3/4)
-    H.ell(P(0, -0.074, -0.121), ((0.018 if f else 0.022) * hk, 0.017 * hk, 0.017 * hk), "Head", "Skin", s=3)
-    H.ell(P(0, -0.060, -0.156), (0.026 * hk, 0.016 * hk, 0.009 * hk), "Head", "Skin", s=1.5, neg=True)
-    for sx in (1, -1):   # jaw line: fuller mandible corner + hollow behind it
-        H.ell(P(sx * 0.044, -0.010, -0.098), (0.010 * hk, 0.020 * hk, 0.016 * hk), "Head", "Skin", s=2.0)
+    H.ell(P(0, -0.077, -0.122), ((0.018 if f else 0.022) * hk, 0.017 * hk, 0.018 * hk), "Head", "Skin", s=3)
+    H.ell(P(0, -0.034, -0.116), ((0.036 if f else 0.042) * hk, 0.042 * hk, 0.011 * hk), "Head", "Skin",
+          s=3.0)                                                                           # jaw floor
+    H.ell(P(0, -0.050, -0.152), (0.030 * hk, 0.022 * hk, 0.010 * hk), "Head", "Skin", s=1.6, neg=True)
     return H.E
 
 
@@ -928,7 +932,7 @@ def make_skirt(sp, bvh_body, mats):
     Outer + inner shell joined by a hem rim."""
     k = sp.k
     zw, zh = sp.waist + 0.012, sp.skirt_hem
-    NA, NR = 30, 8
+    NA, NR = 24, 7
     outer = []
     for r in range(NR):
         s = r / (NR - 1)
@@ -1237,7 +1241,7 @@ def build_human(female, variant=""):
     if st:
         budget = {"Shirt": 1650, "Pants": 900, "Shoes": 460, "Skin": 60}
     elif dr:
-        budget = {"Shirt": 900, "Pants": 260, "Shoes": 420, "Skin": 1000}
+        budget = {"Shirt": 880, "Pants": 240, "Shoes": 400, "Skin": 880}
     else:
         budget = {"Shirt": 1150, "Pants": 960, "Shoes": 460, "Skin": 380}
     for name, o in pieces.items():
@@ -1489,9 +1493,10 @@ def build_human(female, variant=""):
             top.append((hu[0], hu[1]))
             bot.append((hd[0], hd[1]))
         verts, faces = [], []
-        th_b = 0.0030 if female else 0.0040
-        for (pt, nt), (pb, nbm) in zip(top, bot):
-            verts += [pt + nt * 0.0006, pb + nbm * 0.0006, pb + nbm * th_b * 0.8, pt + nt * th_b]
+        th_b = 0.0024 if female else 0.0031
+        for i, ((pt, nt), (pb, nbm)) in enumerate(zip(top, bot)):
+            tb = th_b * (0.55 + 0.45 * math.sin(math.pi * (0.15 + 0.85 * i / max(1, len(top) - 1))))
+            verts += [pt + nt * 0.0006, pb + nbm * 0.0006, pb + nbm * tb * 0.8, pt + nt * tb]
         for i in range(len(top) - 1):
             a, b = 4 * i, 4 * (i + 1)
             faces += [(a + 3, a + 2, b + 2, b + 3), (a, a + 3, b + 3, b), (a + 2, a + 1, b + 1, b + 2)]
@@ -1822,7 +1827,7 @@ def fingers(p, side, f1, f2, t1=0.0, t2=0.0, opp=0.0):
 
 HAND_RELAXED = (16, 20, 4, 10, 0)        # every clip except Aim / AimRifle / Punch
 HAND_GRIP = (62, 92, 22, 30, -10)        # right hand closed on a pistol grip (Aim, AimRifle)
-HAND_SUPPORT = (40, 62, 8, 12, 14)       # left hand under a handguard (AimRifle)
+HAND_SUPPORT = (28, 44, 6, 10, 10)       # left hand under a handguard (AimRifle)
 HAND_FIST = (88, 104, 34, 40, 22)        # Punch
 
 
@@ -2069,7 +2074,7 @@ def aim_rifle_pose(t):
     hdL = Vector((-0.30, -0.90, 0.05)).normalized()
     arm_ik(p, "R", grip - hdR * (0.075 * k) + Vector((-0.012, 0, 0)), Vector((-0.6, 0.15, -0.8)),
            hdR, Vector((0.35, -0.8, 0.3)))
-    arm_ik(p, "L", fore - hdL * (0.07 * k) + Vector((0, 0, -0.02)), Vector((0.45, 0.0, -1)),
+    arm_ik(p, "L", fore - hdL * (0.07 * k) + Vector((0, 0, -0.004)), Vector((0.45, 0.0, -1)),
            hdL, Vector((-0.1, -0.35, 1)))
     fingers(p, "R", *HAND_GRIP)
     fingers(p, "L", *HAND_SUPPORT)

@@ -18,11 +18,12 @@ Depuis `neon-bay/` (Blender n'est pas nécessaire : le module `bpy` 5.3 est inst
 python3 tools/blender/gen_cars.py            # car_sedan, car_sports, car_suv, car_van
 python3 tools/blender/gen_cars.py sedan van  # seulement certaines
 python3 tools/blender/gen_props.py           # palm, lamp, hydrant, bench, traffic_light
-python3 tools/blender/gen_human.py           # human_m + human_f   (arg "m" ou "f" pour un seul) ~5 s
+python3 tools/blender/gen_human.py           # human_m human_f human_m2 human_f2 (args "m" "f" "m2" "f2") ~10 s chacun
 python3 tools/blender/gen_weapons.py         # w_pistol w_uzi w_shotgun w_rifle w_sniper w_rocket
                                              # w_minigun w_lmg w_gl w_rail  (args : ids, ex. "pistol rail")
 python3 tools/blender/render_previews.py     # models/previews/<nom>.png pour chaque .glb
 python3 tools/blender/render_previews.py "human_m@AimRifle:0+w_rifle" human_f@face   # variantes
+python3 tools/blender/render_previews.py "human_m@Aim:0/handR+w_pistol" human_m@far  # main en gros plan, vue à 10 m
 node tools/blender/check_glb_three.js        # vérifie le chargement three.js r128 + contrats
 ```
 
@@ -32,7 +33,8 @@ déterministe (graine fixe) et idempotent : relancer réécrit les mêmes fichie
 (`window.NB_MODEL_DATA.<nom>='<base64>'`), la copie de secours que le jeu charge si le .glb
 ne peut pas être servi (file://, Android). Ne jamais éditer le .glb.js à la main.
 
-Fichiers : `tools/blender/nb_common.py` (scène, matériaux, maillages, lissage auto, application
+Fichiers : `tools/blender/nb_textures.py` (textures procédurales cuites des humains),
+`tools/blender/nb_common.py` (scène, matériaux, maillages, lissage auto, application
 des modificateurs sans `bpy.ops`, export glb + .glb.js), un `gen_*.py` par famille,
 `render_previews.py`, `check_glb_three.js`.
 
@@ -45,10 +47,40 @@ au centre de l'objet.
 | Famille | Avant | Taille | Noms obligatoires |
 |---|---|---|---|
 | Voitures `car_*.glb` | **+X** | ~4,4 m de long (SUV 4,6, van 4,8) | matériaux `Paint` (carrosserie, recolorée par le jeu), `Glass`, `Tyre`, `Rim`, `LightFront` (émissif), `LightRear` (émissif), `Trim` ; roues = objets séparés `Wheel_FL`, `Wheel_FR`, `Wheel_RL`, `Wheel_RR`, origine au moyeu, sans rotation : l'essieu est l'axe local Z (latéral), donc faire rouler = `wheel.rotation.z -= v*dt/R` ; enfants de `Body` |
-| Humains `human_m/f.glb` | **+Z** (glTF) | 1,80 m / 1,71 m au crâne (1,815 / 1,73 avec les cheveux), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips` lèvres, `EyeWhite` blanc de l'œil, jamais recolorés par le jeu) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` |
+| Humains `human_m/f/m2/f2.glb` | **+Z** (glTF) | m 1,80 m / f et f2 1,71 m au crâne (1,82 / 1,72 avec les cheveux) ; m2 1,765 m (1,79 avec la casquette), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` + doigts (v3) `Thumb.L/R Thumb2.L/R` (pouce, enfants de Hand) et `Fingers.L/R Fingers2.L/R` (4 doigts : phalange proximale puis moyenne+distale) ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips`, `EyeWhite`, jamais recolorés par le jeu ; + `Hat` casquette, **human_m2 seulement**, non recoloré par le jeu actuel) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` ; textures 512×512 sur `Skin Shirt Pants Shoes` (+`Hat`), normal maps sur `Shirt Pants` (+`Hat`) ; < 9 000 triangles et < 900 Ko |
 | Armes `w_<id>.glb` | canon **+X**, haut **+Y**, côté droit +Z | réelle : pistol 0,23 m, uzi 0,47, shotgun 1,04, rifle 0,94, sniper 1,25, rocket 1,13, minigun 1,01, lmg 1,06, gl 0,77, rail 1,02 | origine = centre de la poignée (main droite ; poignée arrière pour rocket/minigun) ; matériaux `Body` (couleur principale, recolorée pour les peintures), `Metal`, `Grip`, `Glow` (émissif : points de visée, LED, bobines du rail) sur toutes, `Lens` (optiques) sur rifle, sniper, rocket, gl, rail ; un seul maillage, pas d'animation |
 | Lampadaire `lamp.glb` | bras vers +Z | 6 m | matériau émissif `Bulb` (+ `Metal`) |
 | Autres props | façade vers +Z | réelle | `palm` (Trunk/Leaves/Coconut), `hydrant` (HydrantPaint/Metal), `bench` (Wood/Metal), `traffic_light` (Metal/Housing/LightRed/LightYellow/LightGreen) |
+
+Variantes : `human_m2` = silhouette trapue (1,765 m, épaules/torse/membres plus larges, ventre),
+sweat à capuche (slot `Shirt` : manches longues + poignets, capuche posée sur les épaules, poche
+kangourou, cordons ; ourlet bas à la place de la ceinture), jean `Pants`, baskets `Shoes`,
+casquette (slot `Hat`, tête) ; `human_f2` = haut ajusté (`Shirt`), **jupe = slot `Pants`**
+(+ ceinture de jupe, short `Pants` caché dessous), jambes nues (`Skin`), ballerines `Shoes`,
+cheveux tirés en **queue de cheval** (mèches en tubes, élastique en `Shirt`). Mêmes os, mêmes
+clips, même prise d'arme que human_m/f.
+
+Textures (v3) : `nb_textures.py` construit des graphes de nœuds procéduraux (bruits 4D
+« torus » pour que ça boucle, motifs périodiques), les cuit en Cycles (bake EMIT) sur un plan
+1×1, puis écrit des PNG optimisés (normal maps dérivées de la hauteur cuite, repliée sur sa
+période : boucle exacte et ~3 Ko). Elles sont **en gris clair quasi neutre** (moyenne ~0,9) et
+le .glb exporte `baseColorFactor × baseColorTexture` : le jeu garde la couleur via
+`material.color`. `skin_m/f` (RGB : u 0–0,25 = bande « peau simple » bras/mains/jambes,
+u 0,25–1 = projection de face de la tête : rougeurs joues/nez/oreilles, cernes légers, ombre
+de barbe pour l'homme, pores), `jersey` (+`_n`, maille du t-shirt/sweat, tuile 5 cm),
+`denim` (+`_n`, sergé + flammes verticales, tuile 6 cm ; aussi la casquette), `shoes`
+(v 0,32–1 grain du cuir pour dessus/ceinture, v 0–0,26 flanc de semelle à rainures). Les UV
+sont posés par morceau avant la jointure (`o["uv"]` → `assign_uvs` : `box:<slot>` projection
+cubique à l'échelle réelle, `face`, `strip`, `shoe`, `sole`, `belt`). Le jeu en qualité
+« high » garde les cartes (clone du matériau standard) ; en Phong (qualités inférieures) elles
+sont ignorées, sans erreur. Budget : ~210 Ko de PNG par humain.
+
+Doigts (v3) : `Spec._hand` calcule repère de main et articulations ; `fingers(p, côté, f1, f2,
+t1, t2, opp)` pose les doigts (degrés, + = vers la paume). Préréglages : `HAND_RELAXED`
+(tous les clips sauf ci-dessous, ajouté automatiquement), `HAND_GRIP` (main droite d'Aim et
+AimRifle, refermée sur la poignée), `HAND_SUPPORT` (main gauche d'AimRifle sous le
+garde-main), `HAND_FIST` (Punch). Le jeu en visée mobile (`aimArms`) remet HandR à l'identité
+mais pas les doigts : ils gardent alors la pose du clip en cours (détendue).
 
 Attention : three.js (`PropertyBinding.sanitizeNodeName`) **supprime les points** des noms de
 nœuds : dans le jeu les os s'appellent `UpperArmL`, `HandR`, etc. Les noms de matériaux, eux,
@@ -61,7 +93,7 @@ Animations humaines : 24 i/s, une action Blender par clip, poussée dans une pis
 l'avant-pied, bassin qui monte/descend et tourne, bras en balancier opposé), `Run` (0,67 s,
 phase de vol, talon qui remonte, coudes ~90°), `Aim` (2 s, debout, bras droit tendu devant à
 hauteur d'épaule, buste légèrement de profil, bras gauche détendu, respiration), `AimRifle`
-(2 s, deux mains, crosse au creux de l'épaule droite, main gauche sous le garde-main ~0,29 m
+(2 s, deux mains, crosse au creux de l'épaule droite, main gauche sous le garde-main ~0,28 m
 devant la droite, joue inclinée), `Crouch` (2 s, accroupi bas : pied gauche à plat devant,
 genou droit près du sol sur la pointe du pied, buste penché). Ne bouclent pas : `Punch`
 (0,67 s, part de la garde et y revient) et `Death` (1,5 s, finit allongé, à jouer en
@@ -82,7 +114,7 @@ enfant de l'os `HandR` ; l'axe local +Y de `HandR` suit la main (poignet → doi
 poigne dans le repère de l'os : `(0.016, 0.078, -0.007)` (7,8 cm le long de la main, 1,8 cm
 vers la paume). Rotation locale pour que le canon pointe vers l'avant du personnage (+Z) et
 le haut vers +Y, à t=0 : `Aim` quaternion (x,y,z,w) `(-0.3496, -0.348, 0.6307, 0.5991)`,
-`AimRifle` `(-0.3471, -0.164, 0.8898, 0.2467)` (mêmes valeurs pour human_m et human_f ;
+`AimRifle` `(-0.3471, -0.164, 0.8898, 0.2467)` (mêmes valeurs pour human_m, f, m2 et f2, inchangées en v3 ;
 recalculées à chaque check). Dans le jeu, diviser la position par l'échelle appliquée au modèle
 si l'arme est mise à l'échelle séparément.
 
@@ -91,10 +123,10 @@ si l'arme est mise à l'échelle séparément.
 | Asset | Budget | Actuel (env.) |
 |---|---|---|
 | Voiture (carrosserie + 4 roues) | ≤ ~4 000 | 3 600–3 800 |
-| Humain (tout compris) | < 9 000 | m 8 100 / f 8 600 (~425–440 Ko avec 8 clips) |
+| Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 877 Ko (dont ~210 Ko de textures) |
 | Arme | < 2 500 et < 120 Ko | 900–2 050 tris, 39–75 Ko |
 | Prop | ≤ ~1 500 | 450–1 100 |
-| Total de tous les .glb | ≤ ~3 Mo | ~1,9 Mo |
+| Total de tous les .glb | ≤ ~4,5 Mo | ~4,3 Mo |
 
 Leviers : voitures → nombre de sections du loft (`build_body`), segments des roues (`lathe(...,
 14)`), biseaux des petites pièces ; humains → budgets par morceau (`budget = {"Shirt": ...}`
@@ -122,7 +154,7 @@ taille d'arme) est dépassé.
   (`hand_elements`, ~3,4 mm, une famille par main : paume, 4 doigts légèrement fléchis, pouce
   séparé), cheveux. Chaque élément porte son os et sa zone de vêtement ; `classify()` donne les
   matériaux avant décimation (ourlets droits : plan de ceinture `sp.waist`, plan de manche
-  `sp.sleeve_t`, plan d'ourlet `sp.hem`), puis le corps est séparé par matériau et chaque
+  `sp.sleeve_t`, plan d'ourlet `sp.hem` ; variantes : `Spec(female, "2")` → `sp.stocky` / `sp.dress`), puis le corps est séparé par matériau et chaque
   morceau décimé (les coutures deviennent des bords, préservés). Volume des vêtements : bandes
   posées par lancer de rayons (`band`, `band_from_points`) : col sur la ligne exacte où le cou
   sort du t-shirt (`neckline`), ourlets de manches, ceinture + boucle + passants, ourlets de
@@ -130,7 +162,13 @@ taille d'arme) est dépassé.
   cuir chevelu dense (`scalp()` = ligne frontale, golfes temporaux, pattes, contour d'oreilles),
   ligne lissée et reprojetée, épaisseur variable (plus haute sur le dessus, mèches) qui
   s'amincit sur 7 anneaux ; la femme ajoute des volumes (carré long jusqu'aux épaules, frange
-  balayée, pointes) avec une métaballe négative qui dégage le visage. Sourcils = lamelles
+  balayée, pointes) avec une métaballe négative qui dégage le visage. v3 : mèches en géométrie
+  (`strand_ridge` module l'épaisseur selon le sens des cheveux : depuis la couronne pour
+  l'homme, en chute pour le carré, vers l'élastique pour la queue de cheval), arcades et
+  sourcils plus marqués, ligne de cils sombre (`lash_line`, matériau Eyes), plancher de
+  mâchoire + creux sous le menton (ombre sous le menton vue de dessus / 3/4). Accessoires
+  v3 : `make_cap`, `trim_under_cap`, `make_pocket`, `make_drawstrings`, `make_skirt` (poids :
+  Hips en haut → jambe de son côté vers l'ourlet), `make_ponytail`. Sourcils = lamelles
   posées sur l'arcade, lèvres = tubes effilés posés sur la bouche (`make_lips`), yeux = sphère
   `EyeWhite` + iris `Eyes`. Les poids de peau viennent du même champ implicite (articulations
   douces) ; cheveux/yeux → `Head` (cheveux longs : mélange Neck/Chest sous la nuque), col →
@@ -163,7 +201,9 @@ taille d'arme) est dépassé.
 lumières + sol, 640×400, et écrit `models/previews/<nom>.png`. Les humains sont posés à
 l'image 1 de `Idle`. Variantes : `human_m@Walk:6` (clip + image), `human_f@face` (gros plan
 tête ; `@front`, `@side`, `@feet`, `@hands` pour déboguer), `human_m@AimRifle:0+w_rifle` (arme
-dans la main droite, même règle de poigne que le check). `NB_PREVIEW_VIEW=side|front` force la
+dans la main droite, même règle de poigne que le check), `human_m@Aim:0/handR+w_pistol` (vue
+après « / » : `handR`, `handL`, `face`, `far`, `top`), `@far` / `@top` (corps entier à 10 m,
+lecture en jeu). `NB_PREVIEW_VIEW=side|front|back` force la
 caméra, `NB_PREVIEW_OUT=<dossier>` écrit ailleurs (aperçus de travail), `NB_SAMPLES=8` accélère. Sans écran, Eevee
 plante (pas d'EGL/Vulkan) : le script passe donc automatiquement en **Cycles CPU, 32 échantillons,
 débruitage OIDN** (~6 s par image). Forcer un moteur avec `NB_RENDER_ENGINE=CYCLES` ou
@@ -186,3 +226,9 @@ débruitage OIDN** (~6 s par image). Forcer un moteur avec `NB_RENDER_ENGINE=CYC
   nouvelle couture visible.
 - Le jeu reconstruit les matériaux en Phong (`glbMat`) sans couleurs de sommets : ne pas
   coder de couleur dans les sommets, utiliser un matériau nommé.
+- Les textures des humains sont des PNG emballés : le bruit coûte cher en PNG. Garder les
+  motifs à période entière en pixels (32 ou 64 répétitions sur 512) et quantifier (`levels`) ;
+  `check_glb_three.js` échoue au-delà de 900 Ko par humain.
+- Contrôle : hauteur attendue selon le préfixe (`human_f*` 1,66–1,76 m, sinon 1,75–1,85 m),
+  textures 512×512 sur Skin/Shirt/Pants/Shoes, normal maps sur Shirt/Pants, os des doigts,
+  `Hat` pour human_m2.
