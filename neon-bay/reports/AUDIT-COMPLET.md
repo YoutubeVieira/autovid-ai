@@ -18,7 +18,7 @@ Notes sur 10. **10 = au niveau d'un jeu commercial de sa catégorie (jeu web et 
 |---|---|---|
 | Interface et mise en page | 7/10 (5 avant aujourd'hui) | Refonte faite aujourd'hui : accueil en deux colonnes, écran Options, panneaux et arrondis cohérents. Restent la carte des niveaux, les icônes et les animations d'entrée. |
 | Rendu 3D | 6/10 | Humains Blender animés, voitures PBR, façades détaillées, lumière jour/nuit, ralentis. La caméra de dessus reste la vue par défaut et trahit le côté « jeu web ». |
-| Gameplay et équilibrage | voir section 5 | Beaucoup de systèmes (police, bateaux, fusée, prison, turbo, alliés). La difficulté reste le risque n° 1 : les testeurs automatiques échouaient en masse avant les corrections du 21/11. |
+| Gameplay et équilibrage | 5/10 | Beaucoup de systèmes (police, bateaux, fusée, prison, turbo, alliés). La difficulté reste le risque n° 1 : les testeurs automatiques échouaient en masse avant les corrections du 21/11. |
 | Écriture et textes | 5/10 | Missions lisibles et aide sur l'objectif. Pas encore de vraie voix d'auteur : satire, radio, personnages récurrents. |
 | Son | 4/10 | Musique et bruitages synthétisés, voix off par pays. Pas de radio, pas d'ambiance de ville riche. |
 | Performance et poids | 6/10 | 1,5 Mo de code, mais environ 5 Mo de modèles 3D chargés dès le lancement, et 33 Mo pour la version web complète. |
@@ -122,7 +122,29 @@ Chiffres sourcés dans `reports/RECHERCHE-AAA.md` :
 - reprise à l'étape 6 ;
 - 5 niveaux de difficulté.
 
-**Testeurs automatiques :** RESULTATS_BOTS
+**Testeurs automatiques :** rejoués le 24/11 sur les niveaux 1 à 10, 4 profils, 3 essais par niveau.
+- **Avant les corrections du jour,** le joueur moyen mourait dès la 1re étape du niveau 1. Selon le journal des dégâts, la cause était un mélange de voitures qui le renversaient, d'explosions en chaîne et d'hélicoptère de police.
+- **Corrections apportées :**
+  - une voiture détruite par des chocs brûle 3,5 s avant d'exploser, ce qui supprime les explosions en chaîne ;
+  - les dégâts de collision et d'explosion sont adoucis jusqu'au niveau 10 ;
+  - pas d'hélicoptère avant le niveau 3 ;
+  - le chrono des courses laisse plus de marge au début ;
+  - les personnages à protéger sont plus résistants au début.
+- **Résultat :**
+
+| Testeur | Niveaux 1 à 10 réussis |
+|---|---|
+| Tunnelier (sème la police par les tunnels) | 7/10 |
+| Débutant prudent | 0 à 2/10 selon les essais |
+| Joueur moyen | 0/10 |
+| Expert | 0 à 1/10 |
+
+- **Lecture :** jouer « comme le jeu l'explique », c'est-à-dire semer la police par les tunnels, permet d'avancer. Les profils qui se battent avec la police ou qui conduisent mal échouent encore souvent. Les causes principales sont le chrono des courses, les K.O. pendant les ramassages et les destructions, et le chrono de l'atelier.
+- **Limites :** les testeurs conduisent et visent moins bien qu'un humain, et les résultats varient beaucoup d'une série à l'autre. **C'est le principal risque restant** : un jeu jugé trop dur dans les 10 premières minutes perd ses joueurs.
+- **Prochaines étapes conseillées :**
+  - faire jouer 5 vraies personnes au niveau 1 à 3, en les filmant ;
+  - mettre la difficulté « Facile » par défaut pour une première partie ;
+  - afficher un conseil « prends un tunnel » au premier avis de recherche.
 
 **Recommandations :**
 - Garder le test de non-régression des 30 niveaux (`t3`) et la relance des testeurs après chaque modification d'équilibrage.
