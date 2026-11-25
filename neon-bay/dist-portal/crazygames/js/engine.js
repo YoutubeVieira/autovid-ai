@@ -910,7 +910,7 @@ function startLevel(n, from = 0, free = false) {
   for (let k = 0; k < 3; k++) { const p = freeNear(P.x + 60, P.y + 40, 80); parkedCar(p.x, p.y); }
   for (let i = 0; i < 25; i++) spawnPed();
   for (let i = 0; i < 14; i++) spawnTraffic();
-  spawnBoats(); spawnAnimals(); spawnArmyBase();
+  spawnBoats(); spawnAnimals(); spawnArmyBase(); spawnScenes();
   L = { n, free, jobs: 0, def: free ? { t: 'Balade libre', s: '', steps: [] } : D.LEVELS[n - 1], region, idx: from - 1, cp: from, earned: 0, time: 0, step: null, kos: 0 };
   S.tod = ((n * .23) % 1) * .6 + .7; if (S.tod > 1) S.tod -= 1;
   S.rain = n > 1 && !region.space && Math.random() < (['col', 'bra'].includes(region.id) ? .4 : .25); S.o2 = 100; if (region.space) S.tod = .5;
@@ -966,21 +966,50 @@ function updAllies(dt) {
     if (d > 70) { const a2 = Math.atan2(ty - al.y, tx - al.x); if (!foe) al.a = a2; const sp = d > 220 ? 230 : 150; moveBody(al, Math.cos(a2) * sp * dt, Math.sin(a2) * sp * dt); al.step += sp * dt * .25; } }
   allies = allies.filter(al => al.t > 0);
 }
-let animals = [];
+let animals = [], extras = []; // extras : figurants fixes (sauveteurs, plagistes, danseurs du baile)
+// plage (sauveteurs, parasols, serviettes) et baile funk au Brésil : décors Blender + figurants animés
+function spawnScenes() {
+  extras = []; world.sceneProps = []; const E = (world.region.look || {}).edges || {}, rid = world.region.id;
+  const beachEdge = Object.keys(E).find(k => E[k] === 'beach');
+  if (beachEdge) { // bande de sable de 300 unités au-delà du bord de la carte
+    const pt = (u, d) => beachEdge === 's' ? [u, W + d] : beachEdge === 'n' ? [u, -d] : beachEdge === 'e' ? [W + d, u] : [-d, u];
+    const seaA = beachEdge === 's' ? PI / 2 : beachEdge === 'n' ? -PI / 2 : beachEdge === 'e' ? 0 : PI;
+    for (let u = 500; u < W - 300; u += 1100) {
+      const [tx, ty] = pt(u, 150); world.sceneProps.push({ k: 'prop_lifeguard_tower', x: tx, y: ty, a: seaA + PI, s: 30 });
+      [[-.5, 0], [.5, 1]].forEach(([o, f]) => { const [lx, ly] = pt(u + o * 70, 205); extras.push({ x: lx, y: ly, a: seaA, model: f ? 'human_f3' : 'human_m3', clip: 'idle', col: { Skin: pick(PEDC) } }); });
+      for (let k = 0; k < 4; k++) { const [px, py] = pt(u + 220 + k * 120, 110 + (k % 2) * 60); world.sceneProps.push({ k: 'prop_parasol', x: px, y: py, a: rnd(TAU), s: 30 }); const [wx, wy] = pt(u + 250 + k * 120, 125 + (k % 2) * 60); world.sceneProps.push({ k: 'prop_towel', x: wx, y: wy, a: seaA + PI / 2, s: 30 });
+        if (k % 2 === 0) extras.push({ x: wx, y: wy, a: seaA, model: Math.random() < .5 ? 'human_f' : 'human_m2', clip: 'sit', col: { Skin: pick(PEDC), Shirt: pick(SHIRT) } }); }
+    }
+  }
+  if (rid === 'bra') { // baile funk : scène, enceintes et foule qui danse, sur une place près du centre
+    // place dégagée : le carré de 3×3 tuiles de parc ou de place le plus proche du centre
+    let c0 = null, bd = 1e9; for (let ty = 2; ty < N - 2; ty++) for (let tx = 2; tx < N - 2; tx++) { let ok = true; for (let dy = -1; dy <= 1 && ok; dy++) for (let dx = -1; dx <= 1; dx++) { const t = world.map[(ty + dy) * N + tx + dx]; if (t !== PARK && t !== PLAZA) { ok = false; break; } } if (!ok) continue; const x = (tx + .5) * T, y = (ty + .5) * T, d = dist(x, y, W / 2, W / 2); if (d < bd) { bd = d; c0 = { x, y }; } }
+    if (!c0) c0 = randWalk(500, 1100, W / 2, W / 2) || { x: W / 2, y: W / 2 }; world.baile = { x: c0.x, y: c0.y };
+    world.sceneProps.push({ k: 'prop_dj_booth', x: c0.x, y: c0.y - 55, a: PI / 2, s: 30 }, { k: 'prop_speaker_stack', x: c0.x - 60, y: c0.y - 55, a: PI / 2, s: 30 }, { k: 'prop_speaker_stack', x: c0.x + 60, y: c0.y - 55, a: PI / 2, s: 30 });
+    extras.push({ x: c0.x, y: c0.y - 75, a: PI / 2, model: 'human_m4', clip: 'dance2', col: { Shirt: '#ffd23f' } });
+    for (let i = 0; i < 16; i++) { const r = 20 + Math.random() * 70, a2 = rnd(-1.4, 1.4); extras.push({ x: c0.x + Math.sin(a2) * r, y: c0.y + 5 + Math.cos(a2) * r * .6, a: -PI / 2 + rnd(-.4, .4), model: pick(['human_f4', 'human_m4', 'human_f', 'human_m', 'human_f2']), clip: Math.random() < .5 ? 'dance' : 'dance2', col: { Shirt: pick(['#ff2e93', '#21e6ff', '#ffd23f', '#a6ff4d', '#ffffff']), Skin: pick(PEDC) } }); }
+  }
+}
+function makeExtra(ex) { const md = R3.models[ex.model] || humanModel(/f/.test(ex.model), false); if (!md || !THREE.SkeletonUtils) return new THREE.Group(); const m = makeHuman(md, Object.assign({}, ex.col)); m.userData.force = ex.clip; m.userData.speed = rnd(.9, 1.1); return m; }
+function poseExtra(m, ex) { poseChar(m, ex.x, ex.y, ex.a, 0, false, false); }
 function spawnAnimals() {
   animals = []; const E = (world.region.look || {}).edges || {};
   const wet = Object.values(E).some(k => k === 'beach' || k === 'sea') || world.map.some(t => t === WATER);
   if (wet) for (let i = 0; i < 10; i++) animals.push({ kind: 'gull', cx: rnd(0, W), cy: rnd(0, W), r: rnd(80, 260), ph: rnd(TAU), sp: rnd(.25, .5), h: rnd(70, 140), x: 0, y: 0, a: 0 });
   for (let i = 0; i < 8; i++) { const p = randWalk(200, W, W / 2, W / 2); if (p) animals.push({ kind: 'dog', x: p.x, y: p.y, a: rnd(TAU), t: rnd(3), step: 0, col: pick(['#8a5a2b', '#2b2018', '#d8c49a', '#f2efe6']) }); }
+  for (let i = 0; i < 6; i++) { const p = randWalk(200, W, W / 2, W / 2); if (p) animals.push({ kind: 'cat', x: p.x, y: p.y, a: rnd(TAU), t: rnd(3), step: 0, col: pick(['#9a9aa2', '#2b2018', '#e0a060', '#f2efe6']) }); }
+  if (['bra', 'col'].includes(world.region.id)) for (let i = 0; i < 7; i++) animals.push({ kind: 'parrot', cx: rnd(0, W), cy: rnd(0, W), r: rnd(60, 180), ph: rnd(TAU), sp: rnd(.4, .7), h: rnd(60, 110), x: 0, y: 0, a: 0 });
+  { const be = Object.keys(E).find(k => E[k] === 'beach'); if (be) for (let i = 0; i < 10; i++) { const u = rnd(200, W - 200), d = rnd(40, 260), cx = be === 's' ? u : be === 'n' ? u : be === 'e' ? W + d : -d, cy = be === 's' ? W + d : be === 'n' ? -d : u; animals.push({ kind: 'crab', cx, cy, x: cx, y: cy, a: rnd(TAU), ph: rnd(TAU) }); } }
   for (let i = 0; i < 14; i++) { const p = randWalk(100, W, W / 2, W / 2); if (p) animals.push({ kind: 'pigeon', x: p.x + rnd(-10, 10), y: p.y + rnd(-10, 10), a: rnd(TAU), h: 0, fly: 0 }); }
 }
 function updAnimals(dt) {
   for (const an of animals) {
-    if (an.kind === 'gull') { an.ph += an.sp * dt; an.x = an.cx + Math.cos(an.ph) * an.r; an.y = an.cy + Math.sin(an.ph) * an.r; an.a = an.ph + PI / 2; continue; }
+    if (an.kind === 'crab') { an.ph += dt * 1.2; const o = Math.sin(an.ph) * 18; an.x = an.cx + Math.cos(an.a + PI / 2) * o; an.y = an.cy + Math.sin(an.a + PI / 2) * o; an.mv = Math.abs(Math.cos(an.ph)) > .2; continue; }
+    if (an.kind === 'gull' || an.kind === 'parrot') { an.ph += an.sp * dt; an.x = an.cx + Math.cos(an.ph) * an.r; an.y = an.cy + Math.sin(an.ph) * an.r; an.a = an.ph + PI / 2; continue; }
     if (an.kind === 'pigeon') { if (!an.fly && dist(an.x, an.y, P.x, P.y) < (P.car ? 120 : 60)) { an.fly = 1; an.a = Math.atan2(an.y - P.y, an.x - P.x) + rnd(-.5, .5); }
       if (an.fly) { an.fly += dt; an.h = Math.min(160, an.h + dt * 90); an.x += Math.cos(an.a) * 140 * dt; an.y += Math.sin(an.a) * 140 * dt; if (an.fly > 6) { const p = randWalk(300, 1200, P.x, P.y); if (p) { an.x = p.x; an.y = p.y; } an.fly = 0; an.h = 0; } }
       else if (Math.random() < dt * .5) an.a = rnd(TAU); continue; }
-    if (an.kind === 'dog') { an.t -= dt; const scared = S.time - (P.lastShot || -9) < 2 && dist(an.x, an.y, P.x, P.y) < 400;
+    if (an.kind === 'dog' || an.kind === 'cat') { an.t -= dt; const scared = S.time - (P.lastShot || -9) < 2 && dist(an.x, an.y, P.x, P.y) < 400;
       if (scared) an.a = Math.atan2(an.y - P.y, an.x - P.x); else if (an.t <= 0) { an.t = rnd(2, 5); an.a = rnd(TAU); an.stop = Math.random() < .3; }
       const sp = scared ? 200 : an.stop ? 0 : 60; const nx = an.x + Math.cos(an.a) * sp * dt, ny = an.y + Math.sin(an.a) * sp * dt; const tt = tileAt(nx, ny);
       if (sp && (tt === WALK || tt === PARK || tt === PLAZA || tt === SAND)) { an.x = nx; an.y = ny; an.step += sp * dt * .3; } else if (sp) an.a += PI / 2; }
@@ -1359,6 +1388,7 @@ const PCOUNT = [0, 1, 2, 3, 5, 7];
 function update(dt) {
   S.time += dt; S.msgCd -= dt; mouse.aim -= dt; S.tunnelCd -= dt;
   if (P.nitro > 0) P.nitro -= dt;
+  if (world.baile) { const nearB = !P.car && dist(P.x, P.y, world.baile.x, world.baile.y) < 520; if (nearB !== !!S.atBaile) { S.atBaile = nearB; if (nearB) { au('setMusic', 'funk'); toast('Baile funk ! La fête bat son plein'); } else radioOff(); } }
   if (save.parole > 0) { save.parole -= dt; if (save.parole <= 0) { save.parole = 0; toast('Conditionnelle terminée : tu es vraiment libre'); } }
   if (peds.length < Q.peds && Math.random() < .5) spawnPed();
   if (cars.filter(c => c.ai === 'traffic').length < Q.traffic && Math.random() < .3) spawnTraffic();
@@ -2303,7 +2333,7 @@ function makeHuman(md, col) {
   const sc = THREE.SkeletonUtils.clone(md.scene); if (col.Skin && !col.Lips) col.Lips = '#' + new THREE.Color(col.Skin).multiplyScalar(.72).getHexString();
   sc.traverse(o => { if (o.isMesh) { o.frustumCulled = false; const c = col[o.material.name]; if (c) { o.material = o.material.clone(); o.material.color.set(c); } } });
   const mixer = new THREE.AnimationMixer(sc), find = re => { const c = md.anims.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
-  const acts = { idle: find(/idle/i), walk: find(/walk/i), run: find(/run/i), punch: find(/punch/i), death: find(/death/i), aim: find(/^aim$/i), aimrifle: find(/aimrifle/i), crouch: find(/crouch/i) };
+  const acts = { idle: find(/idle/i), walk: find(/walk/i), run: find(/run/i), punch: find(/punch/i), death: find(/death/i), aim: find(/^aim$/i), aimrifle: find(/aimrifle/i), crouch: find(/crouch/i), dance: find(/^dance$/i), dance2: find(/^dance2$/i), sit: find(/^sit$/i), workout: find(/workout/i) };
   if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
   const m = makeGlbChar({ scene: sc, mixer, acts, hand: null, scale: md.scale }); m.userData.human = true; return m;
 }
@@ -2356,7 +2386,7 @@ function poseGlb(m, x, y, a, step, ko, punching) {
   // vitesse réelle (m/s) pour caler la foulée sur le déplacement : plus de pieds qui glissent
   const dtt = Math.max(.008, R3.dt || .016), mv = u.px === undefined ? 0 : Math.hypot(x - u.px, y - u.py) / dtt; u.px = x; u.py = y; const ms = (u.ms = (u.ms || 0) + (Math.min(12, mv / (md.scale || 30) / Math.max(.6, m.scale.x)) - (u.ms || 0)) * .25);
   const runOn = u.curName === 'run' ? ms > 2.2 : ms > 2.9, walkOn = u.curName === 'walk' || u.curName === 'run' ? ms > .18 : ms > .32; // hystérésis : pas de clignotement entre marche et course
-  const want = ko ? 'death' : punching ? 'punch' : runOn ? 'run' : walkOn ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
+  const want = u.force && md.acts[u.force] ? u.force : ko ? 'death' : punching ? 'punch' : runOn ? 'run' : walkOn ? 'walk' : u.aimNow && md.acts.aim ? (u.twoHand && md.acts.aimrifle ? 'aimrifle' : 'aim') : 'idle';
   const act = md.acts[want] || md.acts.idle;
   if (act && u.cur !== act) { const loco = (want === 'walk' || want === 'run') && (u.curName === 'walk' || u.curName === 'run'); if (u.cur) u.cur.fadeOut(loco ? .35 : .22); act.reset().fadeIn(loco ? .35 : .22).play(); if (loco && u.cur) act.time = (u.cur.time / u.cur.getClip().duration) * act.getClip().duration; u.cur = act; u.curName = want; }
   if (act) act.timeScale = want === 'walk' ? clamp(ms / 1.0, .6, 2.4) : want === 'run' ? clamp(ms / 2.4, .7, 2.4) : 1;
@@ -2510,7 +2540,16 @@ function posePrison(g, e) {
   u.gate.position.x += ((e.open ? 50 : 0) - u.gate.position.x) * .05;
   u.spots.forEach((p, i) => { p.rotation.set(.75 + Math.sin(S.time * .7 + i) * .2, S.time * .5 + i * 1.6, 0); });
 }
+const ANIM_MODEL = { dog: 'animal_dog', cat: 'animal_cat', gull: 'animal_bird', pigeon: 'animal_bird', parrot: 'animal_parrot', crab: 'animal_crab' };
 function makeAnimal(an) {
+  const md = R3.models && R3.models[ANIM_MODEL[an.kind]];
+  if (md && THREE.SkeletonUtils && qLevel !== 'low') { // animaux Blender animés (marche, course, assis, vol)
+    const g = new THREE.Group(), sc = THREE.SkeletonUtils.clone(md.scene), fur = an.kind === 'pigeon' ? '#8a8f9a' : an.col;
+    sc.traverse(o => { if (o.isMesh) { o.frustumCulled = false; o.material = glbMat(o.material, o.isSkinnedMesh); if (fur && /^fur$/i.test(o.material.name || '')) { o.material = o.material.clone(); o.material.color.set(fur); } } });
+    sc.scale.setScalar(an.kind === 'pigeon' ? 20 : an.kind === 'crab' ? 34 : 30); g.add(sc);
+    const mixer = new THREE.AnimationMixer(sc), A = {}; for (const c of md.anims || []) A[c.name.toLowerCase()] = mixer.clipAction(c);
+    g.userData.mix = { mixer, A, cur: null }; return g;
+  }
   const g = new THREE.Group(), add = (geo, m, x, y, z) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
   if (an.kind === 'gull' || an.kind === 'pigeon') { const pg = an.kind === 'pigeon', col = pg ? '#8a8f9a' : '#f4f4f0', s2 = pg ? .7 : 1;
     add(sph(3 * s2, 7, 5), mat(col), 0, 0, 0).scale.set(1.8, .8, .8); add(bx(2, 1, 1), mat('#ffb627'), 5.5 * s2, 0, 0);
@@ -2521,6 +2560,14 @@ function makeAnimal(an) {
   return g;
 }
 function poseAnimal(g, an) {
+  const mx = g.userData.mix;
+  if (mx) {
+    const fl = an.kind === 'gull' || an.kind === 'parrot' ? an.h : an.kind === 'pigeon' ? an.h : 0; g.position.set(an.x, fl, an.y); g.rotation.y = -an.a;
+    const flying = an.kind === 'gull' || an.kind === 'parrot' || (an.kind === 'pigeon' && an.fly), moving = an.kind === 'crab' ? an.mv : (an.kind === 'dog' || an.kind === 'cat') && !an.stop;
+    const want = flying ? 'fly' : moving ? (an.kind === 'dog' && S.time - (P.lastShot || -9) < 2 ? 'run' : 'walk') : (an.kind === 'dog' || an.kind === 'cat') && an.stop ? 'sit' : 'idle';
+    const act = mx.A[want] || mx.A.idle || mx.A.walk; if (act && mx.cur !== act) { if (mx.cur) mx.cur.fadeOut(.25); act.reset().fadeIn(.25).play(); mx.cur = act; }
+    mx.mixer.update(Math.min(.05, R3.dt || .016)); return;
+  }
   const fl = an.kind === 'gull' ? an.h : an.kind === 'pigeon' ? an.h + 1.5 : 0; g.position.set(an.x, fl, an.y); g.rotation.y = -an.a;
   if (g.userData.wings) { const flap = an.kind === 'pigeon' && !an.fly ? .1 : Math.sin(S.time * (an.kind === 'gull' ? 5 : 14)) * .6; g.userData.wings[0].rotation.x = -flap; g.userData.wings[1].rotation.x = flap; }
   if (g.userData.legs) g.userData.legs.forEach((l, i) => { l.rotation.z = Math.sin(an.step + (i % 2) * PI) * .5; });
@@ -2807,6 +2854,8 @@ function render3D(dt) {
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
   if (prison && near(prison.x, prison.y)) sync(prison, makePrison, posePrison);
   for (const an of animals) if (near(an.x, an.y)) sync(an, makeAnimal, poseAnimal);
+  if (HUMAN_GLB()) for (const ex of extras) if (near(ex.x, ex.y)) sync(ex, makeExtra, poseExtra);
+  if (world.sceneProps) for (const sp of world.sceneProps) if (near(sp.x, sp.y) && R3.models[sp.k]) sync(sp, e => { const g = new THREE.Group(), sc = R3.models[e.k].scene.clone(true); sc.traverse(o => { if (o.isMesh) o.material = glbMat(o.material, false); }); sc.scale.setScalar(e.s); g.add(sc); return g; }, (g, e) => { g.position.set(e.x, 0, e.y); g.rotation.y = -e.a; });
   for (const al of allies) if (near(al.x, al.y)) sync(al, e => HUMAN_GLB() ? makeHumanHero(e.look, 'rifle', 'black', e.female) : makeChar(Object.assign({}, e.look, { sleeve: e.look.jacket, longSleeve: true, gun: true, gunId: 'rifle', glow: e.look.jacket })), (m, e) => { m.userData.aimNow = e.shooting; poseChar(m, e.x, e.y, e.a, e.step, false, e.shooting, {}); if (m.userData.bones) heroAim(m, e.a, 0, !!e.shooting); });
   for (const m of inmates) if (near(m.x, m.y)) sync(m, e => makeChar(Object.assign({}, INMATE_LOOK, { skin: e.skin, hair: pick(['#111111', '#3b2414', null]) })), (mm, e) => poseChar(mm, e.x, e.y, e.a, e.step, false));
   if (vip && vip.hp > 0 && !vip.inCar && !vip.done && near(vip.x, vip.y)) sync(vip, () => { const m = makeChar(vip.look || { shirt: '#ffd700', sleeve: '#1a1a1a', pants: '#1a1a1a', skin: '#8d5a3b', hat: '#ffffff', chain: true, glow: '#ffd700' }); m.userData.bar = hpBar(m, 30, 18); return m; }, (m, v) => { poseChar(m, v.x, v.y, v.a, v.step, false); setBar(m.userData.bar, v.hp / v.max, '#ffd700', true, v.a); });

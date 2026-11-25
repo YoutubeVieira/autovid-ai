@@ -296,7 +296,7 @@ window.NB_AUDIO = (() => {
     musBus = ctx.createGain(); musBus.gain.value = .5; musBus.connect(master);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate); const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     const st = STYLES[style] || STYLES.usa, spb = 60 / st.bpm / 4, prevI = mus.intensity;
-    for (let i = 0, t = 0; t < seconds; i++, t += spb) { mus.intensity = events.some(e => e.hot && t >= e.t && t < e.t + e.d) ? 1 : 0; playStep(st, i, t, spb); }
+    if (style !== 'none') for (let i = 0, t = 0; t < seconds; i++, t += spb) { mus.intensity = events.some(e => e.hot && t >= e.t && t < e.t + e.d) ? 1 : 0; playStep(st, i, t, spb); }
     mus.intensity = prevI;
     for (const e of events) { if (!e.fn) continue; tOff = e.t; try { api[e.fn](...(e.args || [])); } catch (err) {} }
     tOff = 0;
