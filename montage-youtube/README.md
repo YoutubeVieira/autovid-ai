@@ -60,4 +60,11 @@ python music.py --duration 214.8 --chimes 30.2,50.8,71.4,92,112.6,133.2,153.8,17
 ffmpeg -i ../build/wellness-60/video-muette.mp4 -i ../build/wellness-60/musique.wav -c:v copy -c:a aac -b:a 192k -af loudnorm=I=-16:TP=-1.5 -shortest ../build/wellness-60/wellness-60.mp4
 ```
 
+Sound design (comme dans la vidéo TikTok « Claude sound designer ») : l'animation liste elle-même les 81 moments qui demandent un son (changement de scène, carte qui apparaît, nouvelle consigne, bouton S'abonner, respiration guidée) ; `sfx.py` fabrique les sons et les pose à la milliseconde :
+
+```bash
+node render.js wellness-60.html --events ../build/wellness-60/sons.json
+python sfx.py ../build/wellness-60/sons.json --music ../build/wellness-60/musique.wav --out ../build/wellness-60/mix.wav --video ../build/wellness-60/video-muette.mp4 --final ../build/wellness-60/wellness-60-sound-design.mp4
+```
+
 La musique est synthétisée par `music.py` (aucun morceau extérieur, donc pas de problème de droits). Les textes et l'animation se modifient dans le fichier HTML (tableau `MOVES`).

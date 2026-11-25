@@ -210,6 +210,28 @@ let acc = 0; for (const s of SEGS) { s.start = acc; acc += s.dur; }
 const DURATION = acc;
 window.DURATION = DURATION;
 window.CHIMES = SEGS.filter(s => s.id === "move").map(s => s.start + 0.2);
+/* Sound design: every moment that needs a sound, taken from the same timings as the animation.
+   whoosh = scene change, pop = card or word appears, tick = new instruction, click = subscribe button,
+   breath = breathing guide. Read by render.js --events, mixed by sfx.py. */
+window.SFX = (() => {
+  const ev = [], add = (t, type, gain = 1) => ev.push({ t: +t.toFixed(3), type, gain });
+  for (const s of SEGS) {
+    if (s.start > 0) add(s.start - 0.25, "whoosh");
+    if (s.id === "title") { [0.4, 0.65, 0.9].forEach((d, i) => add(s.start + d + 0.05, "pop", 0.8 + i * 0.1)); add(s.start + 1.6, "tick", 0.6); }
+    if (s.id === "why" || s.id === "safety") [0, 1, 2].forEach(i => add(s.start + 1 + i * 0.9 + 0.05, "pop"));
+    if (s.id === "why") add(s.start + 4.5, "tick", 0.5);
+    if (s.id === "move") {
+      add(s.start + 0.05, "pop", 1.1);
+      add(s.start + INTRO - 0.15, "whoosh", 0.6);
+      const m = MOVES[s.move];
+      m.cues.forEach((c, j) => add(s.start + INTRO + j * (DEMO / m.cues.length) + 0.3, "tick"));
+      if (m.breath) for (let b = 0; b < DEMO; b += 10) { add(s.start + INTRO + b, "breathIn", 0.8); add(s.start + INTRO + b + 5, "breathOut", 0.8); }
+    }
+    if (s.id === "plan") [0, 1, 2].forEach(i => add(s.start + 0.8 + i * 0.8 + 0.05, "pop"));
+    if (s.id === "outro") { add(s.start + 0.35, "pop"); add(s.start + 0.85, "pop", 1.1); add(s.start + 1.85, "click"); }
+  }
+  return ev;
+})();
 
 /* ---------------------------------------------------------- background */
 function background(t) {

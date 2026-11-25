@@ -4,6 +4,7 @@
 
      node render.js wellness-60.html --stills 3,20,60     # quelques images PNG pour vérifier
      node render.js wellness-60.html --out video.mp4      # la vidéo complète, sans son
+     node render.js wellness-60.html --events sons.json   # la liste des moments qui demandent un son (pour sfx.py)
 */
 "use strict";
 const { chromium } = require("playwright");
@@ -21,6 +22,11 @@ const FPS = Number(opt("--fps", 30));
   await page.goto("file://" + page0);
   await page.evaluate(() => document.fonts.ready);
   const dur = await page.evaluate(() => window.DURATION);
+  const events = opt("--events");
+  if (events) {
+    fs.writeFileSync(events, JSON.stringify(await page.evaluate(() => ({ duration: window.DURATION, chimes: window.CHIMES || [], sfx: window.SFX || [] })), null, 1));
+    console.log("Moments sonores : " + events); await browser.close(); return;
+  }
   const stills = opt("--stills");
   if (stills) {
     const dir = opt("--dir", "stills"); fs.mkdirSync(dir, { recursive: true });
