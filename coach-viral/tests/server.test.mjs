@@ -95,11 +95,17 @@ test("les entrées vides ou invalides sont refusées sans appeler l'IA", async (
   assert.equal(client.calls.length, 0);
 });
 
-test("le code d'accès protège l'IA mais pas la page", async () => {
+test("le code d'accès protège l'IA depuis le tunnel, pas sur le PC lui-même", async () => {
   const client = fakeClient({ output: SAMPLES.ideas });
   await withServer(client, async (base) => {
-    assert.equal((await post(base, "/api/ideas", { niche: "x" })).status, 401);
-    assert.equal((await post(base, "/api/ideas", { niche: "x" }, { "x-code-acces": "secret" })).status, 200);
+    const tunnel = { "cf-connecting-ip": "203.0.113.9" };
+    const r401 = await post(base, "/api/ideas", { niche: "x" }, tunnel);
+    assert.equal(r401.status, 401);
+    assert.equal((await r401.json()).code_requis, true);
+    assert.equal((await post(base, "/api/ideas", { niche: "x" }, { ...tunnel, "x-code-acces": "faux" })).status, 401);
+    assert.equal((await post(base, "/api/ideas", { niche: "x" }, { "x-forwarded-for": "198.51.100.1" })).status, 401);
+    assert.equal((await post(base, "/api/ideas", { niche: "x" }, { ...tunnel, "x-code-acces": "secret" })).status, 200);
+    assert.equal((await post(base, "/api/ideas", { niche: "x" })).status, 200, "sur le PC, sans tunnel : pas de code");
     assert.equal((await fetch(base + "/")).status, 200);
     const sante = await (await fetch(base + "/api/sante")).json();
     assert.equal(sante.code_requis, true);

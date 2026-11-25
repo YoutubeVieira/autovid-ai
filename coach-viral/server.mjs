@@ -81,6 +81,14 @@ export const routes = {
   }
 };
 
+/* Demande faite sur le PC lui-même (pas via le tunnel ni un proxy) : pas besoin du code d'accès. */
+export function isLocal(req) {
+  const ip = req.socket.remoteAddress || "";
+  const loopback = ip === "127.0.0.1" || ip === "::1" || ip === "::ffff:127.0.0.1";
+  const h = req.headers;
+  return loopback && !h["cf-connecting-ip"] && !h["x-forwarded-for"] && !h["forwarded"] && !h["x-real-ip"];
+}
+
 /* ---------- Limite de débit simple par adresse ---------- */
 
 const hits = new Map();
@@ -284,7 +292,7 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
     }
 
     /* Accès */
-    if (!sale && accessCode && req.headers["x-code-acces"] !== accessCode) return send(res, 401, { erreur: "Code d'accès incorrect." });
+    if (!sale && accessCode && req.headers["x-code-acces"] !== accessCode && !isLocal(req)) return send(res, 401, { erreur: "Code d'accès incorrect.", code_requis: true });
     const user = who(req);
     if (!user) return send(res, 402, { erreur: "Abonnement requis.", abonnement: true });
 

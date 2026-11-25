@@ -76,14 +76,15 @@ for ($i = 0; $i -lt 60 -and -not $adresse; $i++) {
 
 Write-Host ''
 if ($adresse) {
-  Set-Clipboard $adresse
-  Write-Host '  Sur le telephone, ouvrez :' -ForegroundColor Yellow
-  Write-Host "     $adresse" -ForegroundColor White
+  $lien = "$adresse/?code=$($r.code_acces)"
+  Set-Clipboard $lien
+  Write-Host '  Sur le telephone, ouvrez ce lien (le code d acces est dedans) :' -ForegroundColor Yellow
+  Write-Host "     $lien" -ForegroundColor White
   Write-Host '     (copiee dans le presse-papiers ; elle change a chaque demarrage)' -ForegroundColor Gray
 } else {
   Write-Host "  Adresse telephone indisponible (tunnel Cloudflare). L'application marche sur ce PC." -ForegroundColor Yellow
 }
-Write-Host "  Code d'acces (Reglages > Code d'acces) : $($r.code_acces)" -ForegroundColor Yellow
+Write-Host "  Code d'acces : $($r.code_acces)   (sur ce PC, aucun code n'est demande)" -ForegroundColor Yellow
 Write-Host ''
 # Mode test (robot) : on laisse tourner le serveur et on rend la main.
 if ($env:COACH_TEST -eq '1') { Write-Host "  Mode test : serveur laisse en marche ($local)."; return }

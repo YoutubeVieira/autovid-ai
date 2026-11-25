@@ -15,7 +15,7 @@
     return Object.assign({ "x-code-acces": store.get("code", ""), "x-cle": store.get("cle", "") }, extra || {});
   }
 
-  async function request(method, service, body, type) {
+  async function request(method, service, body, type, retried) {
     var res;
     var init = { method: method, headers: headers(type ? { "Content-Type": type } : {}) };
     if (body !== undefined) init.body = body;
@@ -27,6 +27,11 @@
     var data = {};
     try { data = await res.json(); } catch (e) { /* réponse vide */ }
     if (res.status === 402 && g.CV && g.CV.subscribe) g.CV.subscribe();
+    /* Code d'accès manquant ou faux : on le demande tout de suite, puis on réessaie une fois. */
+    if (res.status === 401 && data.code_requis && !retried) {
+      var code = g.prompt("Code d'accès : il est affiché dans la fenêtre « Coach Viral » sur votre PC.", store.get("code", ""));
+      if (code && code.trim()) { store.set("code", code.trim()); return request(method, service, body, type, true); }
+    }
     if (!res.ok) throw new Error(data.erreur || "Erreur " + res.status);
     return data;
   }

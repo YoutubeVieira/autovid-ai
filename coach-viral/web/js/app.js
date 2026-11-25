@@ -298,6 +298,16 @@
     d.showModal();
   }
 
+  /* Lien ouvert avec ?code=… (affiché par le PC) : le code est enregistré, puis retiré de l'adresse. */
+  (function codeFromUrl() {
+    var p = new URLSearchParams(location.search);
+    var c = p.get("code");
+    if (!c) return;
+    store.set("code", c.trim());
+    p.delete("code");
+    history.replaceState(null, "", location.pathname + (p.toString() ? "?" + p : ""));
+  })();
+
   async function activateFromUrl() {
     var p = new URLSearchParams(location.search);
     var sid = p.get("abonnement");
