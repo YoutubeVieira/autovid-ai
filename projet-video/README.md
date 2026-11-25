@@ -6,10 +6,11 @@ Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Trois parties :
 2. **11 skills Claude Code** (`.claude/skills/`) qui font le travail d'une chaîne YouTube.
 3. **Un gabarit Remotion** (`remotion/`) qui rend des Shorts/Reels au format des vidéos analysées : visuels en haut, facecam en bas, sous-titres mot à mot avec mot-clé rouge.
 
-## Les 6 agents
+## Les 7 agents
 
 | Agent | Rôle |
 |-------|------|
+| `directeur-creatif` | vidéo dans l'un des 7 styles (motion, claymation, explainer, chanté, pub, 3D, cartoon) : choisit l'outil, estime le coût, fait valider, pilote |
 | `stratege-youtube` | planning, audit, vidéos virales, SEO, rétention, commentaires |
 | `scenariste` | script dans ta voix, hook, titre + miniature |
 | `monteur-video` | prise brute → coupes → sous-titres → `video.json` → MP4 |
@@ -36,6 +37,13 @@ L'outil `outils/couper-silences.py brut.mp4 sortie.mp4` (ffmpeg) coupe les silen
 | `/yt-seo` | mot-clé, description, tags |
 | `/yt-shorts` | extrait des Shorts d'une vidéo longue |
 | `/yt-audit` | audit complet de la chaîne et plan d'action |
+
+## Les 7 styles de création MP4
+Motion, Claymation, Explainer, Singing, Commercial, Animation 3D, Cartoon : voir [`styles/STYLES.md`](styles/STYLES.md) (outil public le plus proche, clés, coût, licence). Installation sur votre PC :
+```bash
+bash outils/installer-styles.sh        # Windows : powershell -ExecutionPolicy Bypass -File outils\installer-styles.ps1
+```
+Puis demandez par exemple « une pub claymation de 20 s pour mon livre » : l'agent `directeur-creatif` s'occupe du reste.
 
 ## Démarrer
 ```bash

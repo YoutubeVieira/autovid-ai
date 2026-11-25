@@ -5,6 +5,7 @@ Production de vidéos YouTube et de Shorts au format décrit dans `../ANALYSE.md
 ## Quel agent pour quoi
 | Besoin | Agent |
 |--------|-------|
+| vidéo dans un style précis (claymation, explainer, chanté, pub, 3D, cartoon, motion) | `directeur-creatif` |
 | quoi publier, quand, audit, SEO, viral, commentaires | `stratege-youtube` |
 | script, hook, titre, miniature | `scenariste` |
 | montage d'une prise brute → MP4 | `monteur-video` |
@@ -18,6 +19,9 @@ Prises brutes et voix off : `entrees/<slug>/` (voir `entrees/LISEZMOI.md`). Ne j
 ## Chaîne de production
 `stratege-youtube` (sujet) → `scenariste` (`scripts/<slug>.md`) → tournage → `monteur-video` (`remotion/data/<slug>.json`) → `sound-designer` (si les sons automatiques ne suffisent pas) → rendu `remotion/out/<slug>.mp4` → `decoupeur-shorts`.
 Les agents se passent le travail par fichiers : chacun lit ce que le précédent a écrit.
+
+## Styles de création (7)
+Catalogue, outils, clés et coûts : `styles/STYLES.md`. Installation sur le PC : `bash outils/installer-styles.sh` (ou `.ps1`). Les outils tiers vont dans `externes/` et `.claude/skills/<style>`, jamais dans git ; les clés dans `.env`, jamais dans le chat.
 
 ## Commandes
 - Vérifier le gabarit : `cd remotion && npx tsc --noEmit`

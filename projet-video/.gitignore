@@ -3,3 +3,11 @@ entrees/**/*.*
 !entrees/.gitkeep
 __pycache__/
 .venv-earshot/
+# Styles tiers installés par outils/installer-styles.* (licences propres, jamais versionnés)
+externes/
+.claude/skills/claymation-ads/
+.claude/skills/seedance/
+.claude/skills/talking-explainer/
+.claude/skills/explainer-kit/
+.claude/skills/spatial-film/
+.env

@@ -56,3 +56,26 @@ CTA : « commente SFX sous ma vidéo sur Instagram ».
 - **Openverse** : `outils/chercher-sons.py` (dans les deux projets) cherche et télécharge un son, refuse les licences non commerciales, écrit le crédit à côté du fichier ; le projet senior le reprend dans la description YouTube. À lancer sur le PC (API non joignable depuis une session cloud).
 - **Sons par défaut** synthétisés et versionnés (`projet-video/remotion/public/sfx/`, `projet-senior-us/sons/`) pour que tout fonctionne sans téléchargement.
 - **Earshot** est intégré aux deux projets vidéo : skills `earshot` et `real-sound` copiées (commit 7a7f7c5, MIT), script `outils/installer-earshot.sh` / `.ps1` qui l'installe sur le PC et déclare son serveur MCP. Testé ici : installation, génération de sons, serveur MCP (20 outils, appel `make`). Les modèles d'écoute (≈ 1,1 Go) n'ont pas pu être téléchargés depuis la session cloud. Les sons par défaut des deux projets sont désormais générés par earshot.
+
+---
+
+# Vidéo 4 — « Ce skill Claude crée… » (7 styles de création MP4)
+
+TikTok vertical de 43 s (576×1024, @henriexploria, même créateur que la vidéo 3). Facecam, sous-titres mot à mot, et pour chaque style une carte `Skill.md` (nom du style) avec un exemple de vidéo générée tenu devant la caméra.
+
+**Script reconstitué** : sept skills Claude, chacun présenté par « ce skill Claude crée… »
+| Carte | Promesse |
+|-------|----------|
+| Motion | des animations en motion design haut de gamme, comme un designer professionnel |
+| Claymation | des publicités en pâte à modeler, comme une vraie agence de pub |
+| Explainer | des vidéos explicatives complètes, comme un documentaire Netflix |
+| Singing | des histoires chantées, comme une comédie musicale Disney |
+| Commercial | des pubs IA à fort taux de conversion, cinématographiques, comme une vraie équipe de tournage |
+| Animation | des films d'animation en 3D, comme un vrai studio hollywoodien |
+| Cartoon | des épisodes complets de dessins animés pour enfants, comme une série |
+CTA : « commente Compétences sous ma vidéo sur Instagram et je te les envoie avec le guide complet en message privé ».
+
+**Constat** : ces sept skills ne sont pas publiés (aimant à prospects). Les exemples montrés (personnages en pâte à modeler, brocoli qui chante, prisonnier, chat cartoon) sont des vidéos générées par des modèles payants (type Seedance / Kling / ElevenLabs), que Claude orchestre sans les produire lui-même.
+
+## Ce que le dépôt en tire
+`projet-video/styles/STYLES.md` associe à chaque style l'équivalent public le plus proche, vérifié (dépôt cloné et lu, commit épinglé) : skills `claymation-ads` et `seedance` (fal.ai, payants, sans licence publiée → téléchargés sur le PC, jamais copiés ici), `talking-explainer` (MIT, présentateur cartoon avec lip-sync), et OpenMontage (AGPL-3.0, 13 pipelines dont `animated-explainer`, `animation`, `cinematic`, `character-animation`, `documentary-montage`). Le style **Singing** n'a pas d'équivalent public : il est assemblé à partir des outils d'OpenMontage (musique avec voix + lip-sync). Installation par `outils/installer-styles.sh` / `.ps1` ; agent `directeur-creatif` pour choisir l'outil, estimer le coût et faire valider avant toute génération payante.
