@@ -34,3 +34,25 @@ Deux Reels/Shorts verticaux (1080×1920, 60 i/s, en portugais du Brésil), même
 ## Ce que ce dépôt en tire
 - [`projet-video/`](projet-video/) — 5 agents (stratège, scénariste, monteur, découpeur de Shorts, motion designer), le pack **AutoVid YouTube Agent** (11 skills `/yt-*` en français) + un gabarit **Remotion** qui rend des vidéos dans ce format exact à partir d'un JSON.
 - [`projet-app/`](projet-app/) — 7 agents (chercheur produit, architecte, designer, dev web, dev mobile, QA, lanceur) et le pack **Replica** (11 skills `/replica-*` en français) pour concevoir, construire, tester, monétiser et lancer une application.
+
+---
+
+# Vidéo 3 — « Claude est nul en montage vidéo, sauf si… » (effets sonores)
+
+TikTok vertical de 52 s (576×1024, en français, @henriexploria). Facecam plein écran, sous-titres mot à mot blancs sans pastille, quelques encarts (logos d'outils, bulles « Claude ne peut pas entendre », « Comment Claude sait-il où le placer ? »).
+
+**Script reconstitué** (d'après les sous-titres incrustés) : Claude est nul en montage vidéo sauf avec trois outils ; le visuel est devenu bon, mais les effets sonores « sonnent comme du contenu IA bâclé ».
+1. **Openverse** : accès à des millions de sons libres que l'agent cherche et télécharge seul.
+2. **Earshot** : « Claude ne peut pas entendre » → l'outil écoute les sons, choisit celui qui marche, en génère un sinon.
+3. **Real SFX** : regarde le montage, repère chaque moment qui demande un son (« un whoosh quand un élément apparaît ») et le place au bon endroit.
+CTA : « commente SFX sous ma vidéo sur Instagram ».
+
+**Vérification des outils** : Openverse existe (API publique `api.openverse.org/v1/audio/`, sons sous licences Creative Commons). Earshot existe (boîte à outils open source tierce qui donne des fonctions d'écoute aux agents de code). Aucune trace publique d'un outil nommé « Real SFX ».
+
+## Ce que le dépôt en tire
+- **Placement des sons sans « voir » la vidéo** : nos deux générateurs connaissent déjà l'instant exact de chaque apparition (scènes Remotion, segments de séance). Les sons sont donc placés de façon déterministe — c'est le rôle annoncé de « Real SFX », sans outil supplémentaire.
+  - `projet-video` : whoosh à chaque nouveau visuel, impact sur les gros chiffres, pop sur les listes, clics sur les lignes de terminal (`remotion/src/sfx.ts`) ; agent `sound-designer`.
+  - `projet-senior-us` : profil doux et rare — souffle au début des exercices, cloche de repos, cloche de fin (`sfx_plan` dans `autovideo.py`) ; agent `designer-sonore`.
+- **Openverse** : `outils/chercher-sons.py` (dans les deux projets) cherche et télécharge un son, refuse les licences non commerciales, écrit le crédit à côté du fichier ; le projet senior le reprend dans la description YouTube. À lancer sur le PC (API non joignable depuis une session cloud).
+- **Sons par défaut** synthétisés et versionnés (`projet-video/remotion/public/sfx/`, `projet-senior-us/sons/`) pour que tout fonctionne sans téléchargement.
+- **Earshot** n'est pas intégré : outil tiers non testé ici ; on vérifie plutôt les sons par mesure (`silencedetect`, `volumedetect`).

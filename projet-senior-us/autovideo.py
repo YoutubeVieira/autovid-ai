@@ -479,7 +479,38 @@ def voice_plan(segs, brand, work, use_tts=True, full_voice=False):
     return plan
 
 
-def build_audio(plan, total, brand, work, full_voice=None, music_file=None):
+SFX_EVENTS = ("exercise_start", "rest_start", "outro")
+
+
+def sfx_plan(session, segs, brand, end):
+    """Effets sonores doux, placés d'après la timeline : jamais de bip à chaque seconde.
+
+    exercise_start : souffle léger au début de chaque exercice (sauf le 1er, qui suit l'intro)
+    rest_start     : petite cloche au début d'un repos
+    outro          : cloche de fin de séance
+    Un fichier entrees/<slug>/sons/<événement>.* remplace le son par défaut ;
+    "sfx": false (séance ou segment) coupe, "sfx": "chemin" impose un son sur un segment.
+    """
+    cfg = brand.cfg.get("sfx", {})
+    if not cfg.get("enabled") or session.get("sfx") is False:
+        return []
+    inbox = session["_inbox"] / "sons"
+    sound = {ev: find_media(inbox, ev) or (ROOT / cfg["events"][ev] if cfg["events"].get(ev) else None) for ev in SFX_EVENTS}
+    out, first_ex = [], True
+    for seg in segs:
+        if seg["start"] >= end or seg.get("sfx") is False:
+            continue
+        ev = {"exercise": "exercise_start", "rest": "rest_start", "outro": "outro"}.get(seg["type"])
+        if ev == "exercise_start" and first_ex:
+            first_ex = False
+            continue
+        f = (ROOT / seg["sfx"]) if isinstance(seg.get("sfx"), str) else sound.get(ev)
+        if f and Path(f).exists():
+            out.append((seg["start"], Path(f), float(cfg.get("volume", 0.35))))
+    return out
+
+
+def build_audio(plan, total, brand, work, full_voice=None, music_file=None, sfx=()):
     args = ["-f", "lavfi", "-t", f"{total:.3f}", "-i", "anullsrc=r=48000:cl=stereo"]
     filt, labels, n = [], ["[0:a]"], 1
     for t0, _, _, audio in plan:
@@ -493,6 +524,12 @@ def build_audio(plan, total, brand, work, full_voice=None, music_file=None):
     if full_voice:
         args += ["-i", str(full_voice)]
         filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo[a{n}]")
+        labels.append(f"[a{n}]")
+        n += 1
+    for t0, f, vol in sfx:
+        args += ["-i", str(f)]
+        ms = int(t0 * 1000)
+        filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo,volume={vol},adelay={ms}|{ms}[a{n}]")
         labels.append(f"[a{n}]")
         n += 1
     music = brand.cfg["music"]
@@ -538,12 +575,26 @@ def chapters(segs, brand):
     return [(0.0 if i == 0 else t, n) for i, (t, n, _) in enumerate(merged)]
 
 
-def write_youtube(session, segs, total, brand, ydir):
+def sound_credits(files):
+    """Crédits des sons utilisés : fichier <son>.txt écrit par outils/chercher-sons.py (licences CC-BY…)."""
+    seen, out = set(), []
+    for f in files:
+        txt = Path(f).with_suffix(".txt")
+        if f and txt.exists() and txt not in seen:
+            seen.add(txt)
+            out.append(txt.read_text(encoding="utf-8").strip())
+    return out
+
+
+def write_youtube(session, segs, total, brand, ydir, used_files=()):
     ydir.mkdir(parents=True, exist_ok=True)
     chap = chapters(segs, brand)
     lines = [session.get("title", ""), "", session.get("description", session.get("promise", "")), ""]
     if len(chap) >= 3:
         lines += [f"{fmt_ts(t)} {n}" for t, n in chap] + [""]
+    credits = sound_credits(used_files)
+    if credits:
+        lines += ["Sounds:"] + [f"- {c}" for c in credits] + [""]
     lines += ["⚠️ " + brand.copy["disclaimer"], "", " ".join(session.get("hashtags", ["#seniorfitness", "#chairexercise", "#gentleworkout"]))]
     (ydir / "description.txt").write_text("\n".join(lines), encoding="utf-8")
     (ydir / "title.txt").write_text(session.get("title", "") + "\n", encoding="utf-8")
@@ -663,6 +714,8 @@ def cmd_check(a):
         if abs(d - total) > 1:
             warn.append(f"voix complète de {d:.1f} s pour une séance de {total:.1f} s")
     print(f'musique : {rel(session["_music"])}')
+    sfx = sfx_plan(session, segs, brand, total)
+    print("effets sonores : " + (", ".join(f'{fmt_ts(t)} {f.stem}' for t, f, _ in sfx) or "aucun"))
     if not any(x["_coach"] for x in segs):
         warn.append("aucune vidéo du coach : la silhouette d'emplacement sera utilisée")
     target = session.get("target_minutes")
@@ -726,7 +779,8 @@ def cmd_render(a):
     plan = [p for p in plan if p[0] < end]
     write_srt(plan, ydir / "captions.en.srt")
     shutil.copy(ydir / "captions.en.srt", cdir / "captions.en.srt")
-    audio = build_audio(plan, end, brand, work, full_voice=session["_voice_full"], music_file=session["_music"])
+    sfx = sfx_plan(session, segs, brand, end)
+    audio = build_audio(plan, end, brand, work, full_voice=session["_voice_full"], music_file=session["_music"], sfx=sfx)
 
     print("3/4 habillage + encodage…")
     final = cdir / f"{slug}_final.mp4"
@@ -776,7 +830,8 @@ def cmd_render(a):
                 Image.fromarray(compose(overlay_elements(mid, segs, brand, total), W, H), "RGBA").save(
                     cdir / "stills" / f'{fmt_ts(s["start"]).replace(":", "-")}_{s["type"]}.png')
     write_capcut_readme(cdir, slug, a.alpha)
-    write_youtube(session, segs, total, brand, ydir)
+    used = [f for _, f, _ in sfx] + ([session["_music"]] if session["_music"] else [])
+    write_youtube(session, segs, total, brand, ydir, used)
     shutil.copy(final, base / f"{slug}.mp4")
     print(f"\n✔ {base / (slug + '.mp4')}  ({fmt_ts(end)})\n✔ {ydir}/\n✔ {cdir}/")
 

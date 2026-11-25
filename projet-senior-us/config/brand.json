@@ -64,5 +64,14 @@
   "music": {
     "file": null,
     "volume": 0.1
+  },
+  "sfx": {
+    "enabled": true,
+    "volume": 0.35,
+    "events": {
+      "exercise_start": "sons/transition.mp3",
+      "rest_start": "sons/repos.mp3",
+      "outro": "sons/cloche.mp3"
+    }
   }
 }

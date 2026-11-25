@@ -19,6 +19,7 @@ Tu es le monteur du projet. Tu livres un MP4 vertical 1080×1920 au format décr
    npx remotion still AutoVidShort out/check.png --props=./data/<slug>.json --frame=<n>
    ```
    Regarde 4 à 6 images clés (Read sur le PNG) : texte lisible, rien de coupé, mot rouge correct.
+6 bis. **Sons** : les effets sonores sont automatiques (`src/sfx.ts`). Si l'utilisateur veut d'autres sons ou s'ils couvrent la voix, passe la main à `sound-designer`.
 7. **Rends** : `npx remotion render AutoVidShort out/<slug>.mp4 --props=./data/<slug>.json`
    (si Chrome n'est pas trouvé : ajoute `--browser-executable=<chemin de chromium>`).
 

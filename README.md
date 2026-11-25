@@ -7,8 +7,8 @@ cd projet-senior-us && claude      # ou projet-video, projet-app
 
 | | Projet | Pour quoi | Agents |
 |---|---|---|---|
-| 1 | [`projet-senior-us/`](projet-senior-us/) | **Auto Video Senior (US)** — séances de gym douce YouTube 16:9 pour seniors américains, montage automatique Python + FFmpeg, export YouTube et CapCut. Claude Code **et** Antigravity. | `redacteur-seance-us`, `preparateur-medias`, `monteur-senior`, `controleur-senior` |
-| 2 | [`projet-video/`](projet-video/) | **Shorts/Reels verticaux** au style des deux vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*` | `stratege-youtube`, `scenariste`, `monteur-video`, `decoupeur-shorts`, `motion-designer` |
+| 1 | [`projet-senior-us/`](projet-senior-us/) | **Auto Video Senior (US)** — séances de gym douce YouTube 16:9 pour seniors américains, montage automatique Python + FFmpeg, export YouTube et CapCut. Claude Code **et** Antigravity. | `redacteur-seance-us`, `preparateur-medias`, `designer-sonore`, `monteur-senior`, `controleur-senior` |
+| 2 | [`projet-video/`](projet-video/) | **Shorts/Reels verticaux** au style des deux vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*` | `stratege-youtube`, `scenariste`, `monteur-video`, `sound-designer`, `decoupeur-shorts`, `motion-designer` |
 | 3 | [`projet-app/`](projet-app/) | **Applications web et mobiles** (méthode Replica : analyser, reconstruire, tester, lancer), 11 skills `/replica-*` | `chercheur-produit`, `architecte-app`, `designer-ui`, `dev-web`, `dev-mobile`, `testeur-qa`, `lanceur` |
 
 Analyse des deux vidéos d'origine : [`ANALYSE.md`](ANALYSE.md). Anciens fichiers de démarrage : [`archive/`](archive/).

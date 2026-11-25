@@ -5,6 +5,7 @@
 |--------|-------|
 | écrire ou adapter une séance (JSON) en anglais américain | `redacteur-seance-us` |
 | ranger vos voix off, clips du coach et musique ; ajuster les durées | `preparateur-medias` |
+| effets sonores doux, sons Openverse et leurs crédits | `designer-sonore` |
 | rendre la vidéo, les images de contrôle, le dossier CapCut | `monteur-senior` |
 | relire une séance ou une vidéo : sécurité, lisibilité, style | `controleur-senior` |
 

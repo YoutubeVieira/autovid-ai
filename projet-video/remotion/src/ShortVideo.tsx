@@ -1,6 +1,7 @@
 import { AbsoluteFill, Sequence, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Captions } from './Captions';
 import { Facecam } from './Facecam';
+import { SoundEffects } from './SoundEffects';
 import { graphicHeight, sceneAt } from './layout';
 import { H, themes } from './theme';
 import type { VideoProps } from './types';
@@ -44,6 +45,7 @@ export const ShortVideo: React.FC<VideoProps> = (props) => {
       )}
 
       <Captions captions={props.captions} scenes={props.scenes} />
+      <SoundEffects props={props} />
     </AbsoluteFill>
   );
 };

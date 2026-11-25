@@ -13,6 +13,10 @@ entrees/<slug>/
 │   ├── 01.mp3          ← voix off du segment 01…
 │   ├── 02.wav
 │   └── complete.mp3    ← OU une seule piste pour toute la séance (commence à 0:00)
+├── sons/
+│   ├── exercise_start.mp3  ← remplace le souffle de transition (facultatif)
+│   ├── rest_start.mp3      ← remplace la cloche de repos
+│   └── outro.mp3           ← remplace la cloche de fin
 └── musique.mp3         ← musique de fond (facultatif, mise sous la voix)
 ```
 

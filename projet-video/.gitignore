@@ -1,3 +1,4 @@
 entrees/**/*.*
 !entrees/LISEZMOI.md
 !entrees/.gitkeep
+__pycache__/

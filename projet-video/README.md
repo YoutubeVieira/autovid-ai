@@ -6,7 +6,7 @@ Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Trois parties :
 2. **11 skills Claude Code** (`.claude/skills/`) qui font le travail d'une chaîne YouTube.
 3. **Un gabarit Remotion** (`remotion/`) qui rend des Shorts/Reels au format des vidéos analysées : visuels en haut, facecam en bas, sous-titres mot à mot avec mot-clé rouge.
 
-## Les 5 agents
+## Les 6 agents
 
 | Agent | Rôle |
 |-------|------|
@@ -15,6 +15,7 @@ Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Trois parties :
 | `monteur-video` | prise brute → coupes → sous-titres → `video.json` → MP4 |
 | `decoupeur-shorts` | vidéo longue → Shorts verticaux |
 | `motion-designer` | nouveaux visuels et animations du gabarit Remotion |
+| `sound-designer` | effets sonores placés automatiquement sur chaque apparition, sons libres Openverse |
 
 Ils s'appellent automatiquement selon la demande (« monte cette vidéo », « écris le script de… »), ou explicitement : « utilise l'agent monteur-video sur brut.mp4 ». Le rôle de chacun est résumé dans [`CLAUDE.md`](CLAUDE.md).
 
@@ -56,3 +57,4 @@ npm run render:replica    # exemple « Replica » (thème sombre) → out/replic
 - Mets ta prise facecam dans `remotion/public/facecam.mp4` et ajoute `"facecam": "facecam.mp4"` au JSON ; sans facecam, un emplacement factice est affiché.
 - Format du JSON : [`remotion/src/types.ts`](remotion/src/types.ts). Mises en page : `split`, `facecam`, `graphic`. Visuels : `headline`, `bigNumber`, `terminal`, `iconGrid`, `bars`, `ranking`, `checklist`, `score`. Les mots entre `*astérisques*` sont en rouge.
 - Les deux exemples (`remotion/data/`) sont les adaptations françaises des deux vidéos analysées.
+- **Effets sonores** automatiques : whoosh à chaque nouveau visuel, impact sur les gros chiffres, pop sur les listes, clics sur les lignes de terminal (`src/sfx.ts`, sons dans `public/sfx/`). `"sfx": "off"` les coupe, `"sfxExtra"` en ajoute. Pour de vrais enregistrements libres : `python3 outils/chercher-sons.py` (Openverse, à lancer sur votre PC).

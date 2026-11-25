@@ -27,6 +27,14 @@ export type Caption = {
   text: string;
 };
 
+export type SoundEffect = {
+  /** Instant en secondes. */
+  at: number;
+  /** Fichier dans public/ (ex: "sfx/whoosh.mp3"). */
+  sound: string;
+  volume?: number;
+};
+
 export type VideoProps = {
   title: string;
   theme: 'light' | 'dark';
@@ -34,4 +42,10 @@ export type VideoProps = {
   facecam?: string;
   scenes: Scene[];
   captions: Caption[];
+  /**
+   * Effets sonores. "auto" (défaut) : placés d'après les scènes (voir src/sfx.ts) ;
+   * "off" : aucun ; liste : uniquement ces sons. sfxExtra s'ajoute dans tous les cas.
+   */
+  sfx?: 'auto' | 'off' | SoundEffect[];
+  sfxExtra?: SoundEffect[];
 };

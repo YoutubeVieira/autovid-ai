@@ -16,6 +16,7 @@ séance (JSON) ──► autovideo.py (Python + FFmpeg) ──► MP4 1080p + Yo
 | Chronomètre | calculé depuis le début et la fin de chaque segment (jamais un minuteur indépendant), ou compteur de répétitions `08 / 12` |
 | Lisibilité | chaque texte passe en blanc avec halo sombre si le décor derrière lui est sombre (sinon olive avec halo beige) |
 | Audio | voix off par segment (fichiers ou synthèse vocale), musique sous la voix, AAC 48 kHz |
+| Effets sonores | doux et rares, placés d'après la timeline : souffle au début des exercices, cloche de repos, cloche de fin (`sons/`) ; crédits repris dans la description |
 | YouTube | `title.txt`, `description.txt` (chapitres + avertissement médical US + hashtags), `captions.en.srt` |
 | CapCut | voir plus bas |
 
@@ -54,6 +55,7 @@ entrees/exemple-50s/musique.mp3
   "tts": { "command": "edge-tts --voice en-US-AriaNeural --text {text} --write-media {out}" }
   ```
   (n'importe quel outil qui écrit un fichier audio fonctionne ; `{text}` et `{out}` sont remplacés.)
+- **Effets sonores** : `entrees/<slug>/sons/exercise_start|rest_start|outro.mp3` remplacent les sons par défaut de `sons/`. Sons libres : `python3 outils/chercher-sons.py "soft chime" --liste` (Openverse, à lancer sur votre PC ; CC0 par défaut).
 - **Musique** : `entrees/<slug>/musique.mp3`, ou par défaut `"music": { "file": "…", "volume": 0.10 }` dans `config/brand.json`.
 - **Texte à gauche** si le coach est à droite : `"text_side": "left"` sur le segment. Forcer le ton : `"text_tone": "light"` (blanc) ou `"dark"` (olive).
 
@@ -79,6 +81,7 @@ Les deux assistants partagent les mêmes règles : **`AGENTS.md`** (langue, styl
 | Règles | `CLAUDE.md` (importe `AGENTS.md`) | `AGENTS.md` + `.agent/rules/gym-douce-senior.md` |
 | Créer une séance | agent `redacteur-seance-us` | workflow `/nouvelle-seance` |
 | Ranger voix off / vidéos | agent `preparateur-medias` | workflow `/importer-medias` |
+| Effets sonores | agent `designer-sonore` | workflow `/ajouter-sons` |
 | Monter la vidéo | agent `monteur-senior` | workflow `/monter-video` |
 | Préparer CapCut | agent `monteur-senior` | workflow `/exporter-capcut` |
 | Contrôle qualité | agent `controleur-senior` | (étapes de contrôle dans `/monter-video`) |
