@@ -79,9 +79,9 @@ try {
   await page.fill("#contenu", "Tutoriel capoeira");
   await page.uncheck("input[value=instagram]");
   await page.click("#f-pub button[type=submit]");
-  await page.waitForSelector("#r-pub .card");
+  await page.waitForSelector("#r-pub section.card");
   assert.deepEqual(JSON.stringify(calls.at(-1).messages[0].content).match(/tiktok|instagram|youtube/g).filter((v, i, a) => a.indexOf(v) === i), ["tiktok", "youtube"]);
-  assert.equal(await page.locator("#r-pub .card").count(), 2);
+  assert.equal(await page.locator("#r-pub section.card").count(), 2);
   assert.equal(await page.getAttribute("#r-pub a", "href"), "https://www.tiktok.com/upload");
   await shot("4-publier");
 
