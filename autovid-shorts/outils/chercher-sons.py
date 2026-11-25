@@ -2,7 +2,7 @@
 """Cherche et télécharge des effets sonores libres sur Openverse (api.openverse.org).
 
 À lancer sur votre PC : l'API n'est pas joignable depuis une session Claude dans le cloud.
-Copie identique dans autovid-senior/outils/ et autovid-shorts/outils/.
+Même fichier dans le dépôt autovid-senior (outils/).
 
 Exemples :
   python3 outils/chercher-sons.py "soft chime" --liste
@@ -32,7 +32,7 @@ def search(query, licences, max_seconds, n):
               "category": "sound_effect"}
     for attempt in (params, {k: v for k, v in params.items() if k != "category"}):
         url = API + "?" + urllib.parse.urlencode(attempt)
-        req = urllib.request.Request(url, headers={"User-Agent": "autovid-ai/1.0 (chercher-sons)"})
+        req = urllib.request.Request(url, headers={"User-Agent": "autovid-shorts/1.0 (chercher-sons)"})
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 results = json.load(r).get("results", [])
@@ -60,7 +60,7 @@ def credit(r):
 def download(r, folder, name, max_seconds):
     folder.mkdir(parents=True, exist_ok=True)
     tmp = folder / f".{name}.download"
-    req = urllib.request.Request(r["url"], headers={"User-Agent": "autovid-ai/1.0 (chercher-sons)"})
+    req = urllib.request.Request(r["url"], headers={"User-Agent": "autovid-shorts/1.0 (chercher-sons)"})
     with urllib.request.urlopen(req, timeout=60) as resp, open(tmp, "wb") as f:
         shutil.copyfileobj(resp, f)
     out = folder / f"{name}.mp3"

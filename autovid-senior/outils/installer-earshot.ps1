@@ -1,5 +1,5 @@
 # Installe earshot (outils 2 et 3 de la vidéo « 3 outils SFX ») pour ce projet, sur Windows (PowerShell).
-# Copie identique dans autovid-shorts\outils\ et autovid-senior\outils\. Mac / Linux : installer-earshot.sh.
+# Même fichier dans le dépôt autovid-shorts (outils\). Mac / Linux : installer-earshot.sh.
 #
 #   powershell -ExecutionPolicy Bypass -File outils\installer-earshot.ps1
 #   ... -Ecoute     (+ modèles d'écoute, ≈ 1,1 Go)    ... -SansMcp    (n'enregistre pas le serveur MCP)

@@ -1,6 +1,6 @@
 # Projet vidéo — AutoVid
 
-Production de vidéos YouTube et de Shorts au format décrit dans `../ANALYSE.md`.
+Production de vidéos YouTube et de Shorts au format décrit dans `docs/ANALYSE.md`.
 
 ## Quel agent pour quoi
 | Besoin | Agent |

@@ -1,0 +1,27 @@
+AUTOVID-APPS — INSTALLER ET LANCER SUR VOTRE PC (WINDOWS)
+========================================================
+
+Dans l'invite de commandes (touche Windows, cmd, Entrée) :
+
+  cd %USERPROFILE%\Desktop
+  curl -L -o INSTALLER-autovid-apps.bat https://raw.githubusercontent.com/YoutubeVieira/autovid-apps/main/INSTALLER.bat
+  INSTALLER-autovid-apps.bat
+
+Dépôt privé : si curl télécharge une page d'erreur (404), ouvrez
+https://github.com/YoutubeVieira/autovid-apps/blob/main/INSTALLER.bat connecté à GitHub,
+bouton « Download raw file », puis double-cliquez sur le fichier.
+
+ÉTAPES
+1. Outils : vérifie Git, Node.js et Claude Code ; propose d'installer ce qui manque
+   (après une installation : fermez la fenêtre et relancez le fichier).
+2. Projet : le télécharge dans Documents\autovid-apps (ou le met à jour). Dépôt privé : connectez-vous
+   à GitHub avec le compte YoutubeVieira si une fenêtre le demande.
+3. Installation :
+   - rien de plus : les agents et skills sont déjà dans le dossier.
+4. Session Claude : lance « claude remote-control ». Laissez la fenêtre OUVERTE et ouvrez
+   l'application Claude Code : la session « autovid-apps » apparaît. Exemples de demandes :
+     - « je veux une app comme Calendly, en web et en mobile »
+
+ANTIGRAVITY : ouvrez le dossier Documents\autovid-apps ; workflows dans .agent\workflows\.
+
+EN CAS D'ERREUR : copiez le message affiché et envoyez-le à Claude.

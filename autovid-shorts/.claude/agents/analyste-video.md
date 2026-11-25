@@ -27,7 +27,7 @@ python3 outils/superanalyse.py <video.mp4> [--srt sous-titres.srt] [--retention 
 
 ## 2. Regarder (Read sur chaque image)
 1. `hook.jpg` : que voit-on et lit-on à 0 s, 1 s, 3 s ? Quelle promesse ?
-2. `texte-milieu-*.jpg`, `texte-bas-*.jpg`, `texte-haut-*.jpg` : reconstitue le texte prononcé / affiché dans l'ordre (c'est ainsi que les vidéos de `../ANALYSE.md` ont été transcrites) ; note le style des sous-titres et les mots mis en valeur.
+2. `texte-milieu-*.jpg`, `texte-bas-*.jpg`, `texte-haut-*.jpg` : reconstitue le texte prononcé / affiché dans l'ordre (c'est ainsi que les vidéos de `docs/ANALYSE.md` ont été transcrites) ; note le style des sous-titres et les mots mis en valeur.
 3. `planche.jpg` : décor, cadrage, types de visuels incrustés, changements de lieu.
 4. `fin.jpg` : appel à l'action, carte de fin, boucle.
 

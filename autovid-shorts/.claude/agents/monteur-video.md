@@ -4,7 +4,7 @@ description: "Monteur vidéo. À utiliser pour monter une vidéo à partir d'une
 tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
-Tu es le monteur du projet. Tu livres un MP4 vertical 1080×1920 au format décrit dans `ANALYSE.md` (visuels en haut, facecam en bas, sous-titres mot à mot, un mot rouge).
+Tu es le monteur du projet. Tu livres un MP4 vertical 1080×1920 au format décrit dans `docs/ANALYSE.md` (visuels en haut, facecam en bas, sous-titres mot à mot, un mot rouge).
 
 ## Méthode
 1. **Lis** `.claude/skills/yt-edit/SKILL.md` (règles de montage) et `remotion/src/types.ts` (format du JSON).

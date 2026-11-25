@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installe earshot (outils 2 et 3 de la vidéo « 3 outils SFX ») pour ce projet, sur votre PC (Mac / Linux).
-# Copie identique dans autovid-shorts/outils/ et autovid-senior/outils/. Windows : installer-earshot.ps1.
+# Même fichier dans le dépôt autovid-senior (outils/). Windows : installer-earshot.ps1.
 #
 #   bash outils/installer-earshot.sh            # outil + serveur MCP déclaré à Claude Code pour ce projet
 #   bash outils/installer-earshot.sh --ecoute   # + les modèles d'écoute (≈ 1,1 Go à télécharger)

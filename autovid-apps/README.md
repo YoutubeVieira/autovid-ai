@@ -1,6 +1,8 @@
 # Projet application — Replica
 
-Inspiré de la vidéo 2 (voir [`../ANALYSE.md`](../ANALYSE.md)) : 11 skills Claude Code qui transforment « je veux une app comme X » en ton propre produit en ligne et payant.
+> **Dépôt indépendant.** Installation sur un PC Windows : [`INSTALLER.bat`](INSTALLER.bat) (mode d'emploi : [`INSTALLER.txt`](INSTALLER.txt)). Claude Code : agents dans `.claude/agents/`, règles dans `CLAUDE.md`. Antigravity : `AGENTS.md`, `.agent/rules/`, `.agent/workflows/`. Historique antérieur : dépôt `autovid-ai`.
+
+Inspiré de la vidéo 2 (voir [`docs/ANALYSE.md`](docs/ANALYSE.md)) : 11 skills Claude Code qui transforment « je veux une app comme X » en ton propre produit en ligne et payant.
 
 > On reconstruit **ce que fait** une app (fonctionnalités, parcours), jamais **ce qu'elle possède** (code, marque, textes, images).
 
@@ -44,4 +46,4 @@ Claude enchaîne les agents ; chaque agent suit les skills ci-dessus. Enchaînem
 
 Tous les livrables intermédiaires sont écrits dans `replica/` (recon.md, reviews.md, plan.md, diff.md…), ce qui permet de reprendre le travail dans une nouvelle session.
 
-Le contenu de lancement se fait avec le [projet vidéo](../autovid-shorts/) : l'agent `lanceur` prépare le brief, les agents `scenariste` et `monteur-video` produisent le Short.
+Le contenu de lancement se fait avec le [projet vidéo `autovid-shorts`](https://github.com/YoutubeVieira/autovid-shorts) (dépôt séparé) : l'agent `lanceur` prépare le brief, les agents `scenariste` et `monteur-video` produisent le Short.

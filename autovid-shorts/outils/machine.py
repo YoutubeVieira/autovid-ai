@@ -208,7 +208,7 @@ def cmd_programmer(a):
                            "statut": "publie" if p in v["publications"] else "a_publier"})
         start = dt.datetime.fromisoformat(v["jour"]).replace(hour=h, minute=m)
         ev.append("\r\n".join([
-            "BEGIN:VEVENT", f"UID:{data['semaine']}-{v['id']}@autovid-ai",
+            "BEGIN:VEVENT", f"UID:{data['semaine']}-{v['id']}@autovid-shorts",
             f"DTSTAMP:{dt.datetime.now(dt.timezone.utc):%Y%m%dT%H%M%SZ}",
             f"DTSTART;TZID={data['fuseau']}:{start:%Y%m%dT%H%M%S}",
             f"DTEND;TZID={data['fuseau']}:{start + dt.timedelta(minutes=15):%Y%m%dT%H%M%S}",
@@ -219,7 +219,7 @@ def cmd_programmer(a):
         w = csv.DictWriter(f, fieldnames=list(lignes[0]))
         w.writeheader()
         w.writerows(lignes)
-    (d / "calendrier.ics").write_text("\r\n".join(["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//autovid-ai//machine//FR",
+    (d / "calendrier.ics").write_text("\r\n".join(["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//autovid-shorts//machine//FR",
                                                     *ev, "END:VCALENDAR"]) + "\r\n", encoding="utf-8")
     print(f"✔ {len(a_prog) - len(restantes)} vidéo(s) programmée(s) → {d / 'publications.csv'}, {d / 'calendrier.ics'}")
     if restantes:

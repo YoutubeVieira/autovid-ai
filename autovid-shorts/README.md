@@ -1,6 +1,8 @@
 # Projet vidéo — AutoVid YouTube Agent
 
-Inspiré de la vidéo 1 (voir [`../ANALYSE.md`](../ANALYSE.md)). Trois parties :
+> **Dépôt indépendant.** Installation sur un PC Windows : [`INSTALLER.bat`](INSTALLER.bat) (mode d'emploi : [`INSTALLER.txt`](INSTALLER.txt)). Claude Code : agents dans `.claude/agents/`, règles dans `CLAUDE.md`. Antigravity : `AGENTS.md`, `.agent/rules/`, `.agent/workflows/`. Historique antérieur : dépôt `autovid-ai`.
+
+Inspiré de la vidéo 1 (voir [`docs/ANALYSE.md`](docs/ANALYSE.md)). Trois parties :
 
 1. **5 agents** (`.claude/agents/`) qui se répartissent la production — voir ci-dessous.
 2. **11 skills Claude Code** (`.claude/skills/`) qui font le travail d'une chaîne YouTube.

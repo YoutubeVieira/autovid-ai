@@ -16,4 +16,4 @@ Tu maintiens le gabarit `remotion/`. Code TypeScript/React, Remotion 4.
 ## Vérification obligatoire
 1. `npx tsc --noEmit`
 2. Ajoute une scène utilisant le visuel dans `data/exemple-youtube-agent.json` (ou un JSON de test) et rends 2 images : `npx remotion still … --frame=<début+5>` et `--frame=<milieu>`, dans les deux thèmes. Regarde-les.
-3. Documente le nouveau type dans `autovid-shorts/README.md` (liste des visuels) et dans `.claude/skills/yt-edit/SKILL.md` si le monteur doit le connaître.
+3. Documente le nouveau type dans `README.md` (liste des visuels) et dans `.claude/skills/yt-edit/SKILL.md` si le monteur doit le connaître.

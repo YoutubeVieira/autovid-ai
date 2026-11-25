@@ -1,0 +1,29 @@
+CRÉER LES 3 PROJETS INDÉPENDANTS — TOUT PAR COMMANDE (WINDOWS)
+================================================================
+
+Dans l'invite de commandes (touche Windows, cmd, Entrée) :
+
+  cd %USERPROFILE%\Desktop
+  curl -L -o CREER-DEPOTS.bat https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-dc9e84d2-s625ne/CREER-DEPOTS.bat
+  CREER-DEPOTS.bat
+
+Ce que fait le fichier :
+1. Vérifie Git et l'outil officiel de GitHub « gh » ; propose de les installer (winget).
+   Après une installation : fermez la fenêtre, rouvrez cmd et relancez CREER-DEPOTS.bat.
+2. Connexion GitHub (une seule fois) : une page s'ouvre, collez le code affiché dans la
+   fenêtre noire, puis « Authorize ». Compte attendu : YoutubeVieira.
+3. Télécharge les 3 projets (depuis le dépôt autovid-ai).
+4. Crée sur GitHub les 3 dépôts PRIVÉS et envoie chaque projet :
+     autovid-shorts   → Documents\autovid-shorts
+     autovid-senior   → Documents\autovid-senior
+     autovid-apps     → Documents\autovid-apps
+   Un projet déjà présent dans Documents n'est pas touché.
+5. Propose de lancer tout de suite l'installation d'un projet (son INSTALLER.bat).
+
+Ensuite, chaque projet s'utilise seul : son INSTALLER.bat, ses agents Claude Code,
+ses workflows Antigravity (ouvrez son dossier dans Antigravity).
+
+Pour que Claude dans le cloud puisse aussi y travailler : autorisez l'application Claude
+sur les 3 nouveaux dépôts : https://github.com/apps/claude/installations/select_target
+
+EN CAS D'ERREUR : copiez le message affiché et envoyez-le à Claude.

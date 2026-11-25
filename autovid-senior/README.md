@@ -1,5 +1,7 @@
 # Auto Video Senior (US) — Gentle Senior Fitness
 
+> **Dépôt indépendant.** Installation sur un PC Windows : [`INSTALLER.bat`](INSTALLER.bat) (mode d'emploi : [`INSTALLER.txt`](INSTALLER.txt)). Claude Code : agents dans `.claude/agents/`, règles dans `CLAUDE.md`. Antigravity : `AGENTS.md`, `.agent/rules/`, `.agent/workflows/`. Historique antérieur : dépôt `autovid-ai`.
+
 Générateur automatique de séances de **gym douce pour seniors américains** (YouTube, 16:9), dans le style du kit *Gym Douce Senior* : coach en plein écran, quelques textes discrets posés sur la vidéo, aucun cadre.
 
 ```

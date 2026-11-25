@@ -11,6 +11,8 @@ cd autovid-senior && claude      # ou autovid-shorts, autovid-apps
 | 2 | [`autovid-shorts/`](autovid-shorts/) | **Shorts/Reels verticaux** au style des vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*`, effets sonores (earshot), **machine à Reels** (7 vidéos par semaine, approbation, 1 publication par jour, analyse des vraies statistiques) et **7 styles de création MP4** (motion, claymation, explainer, chanté, pub, 3D, cartoon — [`styles/STYLES.md`](autovid-shorts/styles/STYLES.md)) | `chef-machine`, `publicateur`, `analyste-performance`, `directeur-creatif`, `stratege-youtube`, `scenariste`, `monteur-video`, `sound-designer`, `decoupeur-shorts`, `motion-designer` |
 | 3 | [`autovid-apps/`](autovid-apps/) | **Applications web et mobiles** (méthode Replica : analyser, reconstruire, tester, lancer), 11 skills `/replica-*` | `chercheur-produit`, `architecte-app`, `designer-ui`, `dev-web`, `dev-mobile`, `testeur-qa`, `lanceur` |
 
+**Projets indépendants** : `CREER-DEPOTS.bat` (mode d'emploi `CREER-DEPOTS.txt`) crée sur GitHub les 3 dépôts privés `autovid-shorts`, `autovid-senior`, `autovid-apps` et les place dans `Documents` ; chacun a ensuite son propre `INSTALLER.bat`.
+
 Analyse des deux vidéos d'origine : [`ANALYSE.md`](ANALYSE.md). Anciens fichiers de démarrage : [`archive/`](archive/).
 
 ## Où déposer vos voix off et vos vidéos
