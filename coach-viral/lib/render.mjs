@@ -2,7 +2,7 @@
    Style « citation » : image au centre qui zoome lentement, fond flou de la même image,
    texte blanc en haut et en bas, voix off, fondu enchaîné entre les scènes. */
 import { spawn } from "node:child_process";
-import { writeFile, mkdtemp, rm } from "node:fs/promises";
+import { writeFile, mkdtemp, rm, copyFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,9 +13,9 @@ export const W = 1080, H = 1920, IMG = 1080, FPS = 30;
 const IMG_Y = Math.round((H - IMG) / 2);
 const XFADE = 0.4;
 
-export function run(cmd, args, { input } = {}) {
+export function run(cmd, args, { input, cwd } = {}) {
   return new Promise((resolve, reject) => {
-    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"] });
+    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"], cwd });
     let out = "", err = "";
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (err += d));
@@ -61,13 +61,15 @@ function hex(c, fallback) {
   return /^#?[0-9a-f]{6}$/i.test(c || "") ? "0x" + c.replace("#", "") : fallback;
 }
 
+/* Les filtres FFmpeg ne reçoivent que des noms de fichiers simples, relatifs au dossier de travail :
+   un chemin Windows (C:\…) ou un nom avec apostrophe casserait la syntaxe des filtres. */
 /* Filtres drawtext d'un bloc de lignes. anchor "bottom" : la dernière ligne finit à y ; "top" : la première commence à y. */
 function textFilters(lines, files, { y, anchor, size, color, fadeIn, dur }) {
   const lh = Math.round(size * 1.28);
   const top = anchor === "bottom" ? y - lines.length * lh : y;
   const alpha = `if(lt(t\\,${fadeIn})\\,0\\,if(lt(t\\,${fadeIn + 0.35})\\,(t-${fadeIn})/0.35\\,if(gt(t\\,${(dur - 0.35).toFixed(2)})\\,max(0\\,(${dur.toFixed(2)}-t)/0.35)\\,1)))`;
   return lines.map((_, i) =>
-    `drawtext=fontfile='${FONT}':textfile='${files[i]}':fontsize=${size}:fontcolor=${color}` +
+    `drawtext=fontfile=police.otf:textfile=${files[i]}:fontsize=${size}:fontcolor=${color}` +
     `:shadowcolor=black@0.65:shadowx=0:shadowy=3:x=(w-text_w)/2:y=${top + i * lh}:alpha='${alpha}'`
   );
 }
@@ -81,14 +83,14 @@ export async function renderScene(scene, out, dir, idx, style = {}) {
   const zoomOut = style.zoom === "out";
   const z = zoomOut ? `1.12-0.12*on/${n}` : `1+0.12*on/${n}`;
   const inputs = scene.image
-    ? ["-framerate", String(FPS), "-loop", "1", "-t", d.toFixed(3), "-i", scene.image]
+    ? ["-framerate", String(FPS), "-loop", "1", "-t", d.toFixed(3), "-i", path.resolve(scene.image)]
     : ["-f", "lavfi", "-t", d.toFixed(3), "-i", `gradients=s=1080x1080:c0=0x2B1F4A:c1=0xC2557A:x0=0:y0=0:x1=1080:y1=1080:r=${FPS}`];
 
   const write = async (name, lines) => {
     const files = [];
     for (let i = 0; i < lines.length; i++) {
-      const f = path.join(dir, `${name}-${idx}-${i}.txt`);
-      await writeFile(f, lines[i]);
+      const f = `${name}-${idx}-${i}.txt`;
+      await writeFile(path.join(dir, f), lines[i]);
       files.push(f);
     }
     return files;
@@ -111,8 +113,9 @@ export async function renderScene(scene, out, dir, idx, style = {}) {
        ...textFilters(basLines, basFiles, { y: IMG_Y + IMG + 34, anchor: "top", size, color, fadeIn: 0.6, dur: d })]
         .map((f) => "," + f).join("") + `[v]`
   ];
+  await copyFile(FONT, path.join(dir, "police.otf")).catch(() => {});
   await run("ffmpeg", ["-y", "-loglevel", "error", ...inputs, "-filter_complex", filters.join(";"),
-    "-map", "[v]", "-frames:v", String(n), "-r", String(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", out]);
+    "-map", "[v]", "-frames:v", String(n), "-r", String(FPS), "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", path.resolve(out)], { cwd: dir });
   return out;
 }
 

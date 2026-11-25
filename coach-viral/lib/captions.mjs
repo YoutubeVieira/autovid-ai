@@ -1,6 +1,6 @@
 /* Modèle « face caméra » : votre vidéo, avec sous-titres mot à mot et titres en boîte (format ASS rendu par FFmpeg).
    Le style est un objet de réglages, qu'on peut déduire d'une image de référence. */
-import { writeFile, mkdtemp, rm } from "node:fs/promises";
+import { writeFile, mkdtemp, rm, cp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -101,10 +101,11 @@ export async function renderFacecam(video, words, titles, style, out) {
   try {
     const ass = path.join(dir, "sous-titres.ass");
     await writeFile(ass, buildAss(words, titles, style));
-    const esc = (p) => p.replace(/\\/g, "/").replace(/:/g, "\\:").replace(/'/g, "\\'");
-    await run("ffmpeg", ["-y", "-loglevel", "error", "-i", video,
-      "-vf", `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,subtitles='${esc(ass)}':fontsdir='${esc(FONTS)}'`,
-      "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", out]);
+    /* Noms simples relatifs au dossier de travail : sûrs dans un filtre FFmpeg, même sous Windows. */
+    await cp(FONTS, path.join(dir, "polices"), { recursive: true });
+    await run("ffmpeg", ["-y", "-loglevel", "error", "-i", path.resolve(video),
+      "-vf", `scale=${W}:${H}:force_original_aspect_ratio=increase,crop=${W}:${H},setsar=1,subtitles=sous-titres.ass:fontsdir=polices`,
+      "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "160k", "-movflags", "+faststart", path.resolve(out)], { cwd: dir });
     return out;
   } finally {
     await rm(dir, { recursive: true, force: true });

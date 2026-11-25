@@ -45,3 +45,19 @@ jobs:
           name: captures
           path: coach-viral/captures
           if-no-files-found: ignore
+
+  installateur-windows:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntaxe des scripts PowerShell (Windows PowerShell 5.1)
+        shell: powershell
+        run: |
+          $erreurs = 0
+          foreach ($f in Get-ChildItem coach-viral/installer/*.ps1) {
+            $tokens = $null; $err = $null
+            [System.Management.Automation.Language.Parser]::ParseFile($f.FullName, [ref]$tokens, [ref]$err) | Out-Null
+            foreach ($e in $err) { Write-Host "$($f.Name):$($e.Extent.StartLineNumber) $($e.Message)"; $erreurs++ }
+          }
+          if ($erreurs) { exit 1 } else { Write-Host 'Scripts PowerShell : syntaxe OK' }

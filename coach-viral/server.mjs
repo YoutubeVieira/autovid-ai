@@ -488,5 +488,5 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     billing = new Billing({ db: openDb(path.join(studio.DATA, "abonnes.sqlite")), stripe, price: process.env.STRIPE_PRIX, publicUrl: process.env.URL_PUBLIQUE });
   }
   const port = Number(process.env.PORT || 8080);
-  createServer({ client: new Anthropic(), billing, stripe }).listen(port, () => console.log(`Coach viral prêt sur http://localhost:${port}`));
+  createServer({ client: new Anthropic(), billing, stripe }).listen(port, process.env.HOST || undefined, () => console.log(`Coach viral prêt sur http://localhost:${port}`));
 }

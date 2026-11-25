@@ -3,12 +3,14 @@
 import * as z from "zod/v4";
 import { mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { randomBytes } from "node:crypto";
 import { ask, CoachError } from "./coach.mjs";
 import { run, mediaDuration, renderVideo } from "./render.mjs";
 import { synthesize } from "./voice.mjs";
 
 const PY = process.env.PYTHON || "python3";
+const TRANSCRIRE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "voix", "transcrire.py");
 export const DATA = process.env.DOSSIER_DONNEES || path.join(process.cwd(), "donnees");
 const MAX_LINK_SECONDS = 180;
 
@@ -132,7 +134,7 @@ export function titlesFor(client, i) {
 export async function transcribeWords(file, dir) {
   const wav = path.join(dir, "audio-mots.wav");
   await run("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-vn", "-ac", "1", "-ar", "16000", wav]);
-  const out = await run(PY, [path.join(path.dirname(new URL(import.meta.url).pathname), "..", "voix", "transcrire.py"), wav, process.env.WHISPER_MODELE || "small", "--mots"]);
+  const out = await run(PY, [TRANSCRIRE, wav, process.env.WHISPER_MODELE || "small", "--mots"]);
   return JSON.parse(out);
 }
 
@@ -172,7 +174,7 @@ export async function extract(file, dir, { frames = 8, transcrire = process.env.
     try {
       const wav = path.join(dir, "audio.wav");
       await run("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-vn", "-ac", "1", "-ar", "16000", "-t", "300", wav]);
-      transcription = (await run(PY, [path.join(path.dirname(new URL(import.meta.url).pathname), "..", "voix", "transcrire.py"), wav, process.env.WHISPER_MODELE || "small"])).trim();
+      transcription = (await run(PY, [TRANSCRIRE, wav, process.env.WHISPER_MODELE || "small"])).trim();
     } catch {
       transcription = ""; /* pas de transcription : l'analyse se fait sur les images */
     }
