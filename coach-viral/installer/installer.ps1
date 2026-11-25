@@ -2,6 +2,7 @@
 # A coller dans PowerShell (pas besoin d'etre administrateur) :
 #   irm https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-ee8a77f1-5c7kmx/coach-viral/installer/installer.ps1 | iex
 # Relancer la meme commande met l'application a jour (vos reglages, votre voix et vos videos sont gardes).
+# Mode sans questions (robot de test) : COACH_IA=gemini|claude, COACH_CLE=..., COACH_DEMARRER=non.
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -16,9 +17,12 @@ function Etape($texte) { Write-Host ''; Write-Host "==> $texte" -ForegroundColor
 function Ok($texte) { Write-Host "    $texte" -ForegroundColor Green }
 function Info($texte) { Write-Host "    $texte" -ForegroundColor Gray }
 function Actualiser-Path {
-  $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links')
+  $env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links')
 }
 function Winget-Installer($id, $nom) {
+  if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
+    throw "$nom manque et winget est introuvable. Installez 'App Installer' depuis le Microsoft Store, puis relancez."
+  }
   Info "Installation de $nom (quelques minutes)..."
   winget install --id $id -e --silent --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
   Actualiser-Path
@@ -30,9 +34,6 @@ Write-Host '  ---------------------------'
 
 # 1. Outils
 Etape '1/6  Outils necessaires'
-if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-  throw "winget est introuvable. Installez 'App Installer' depuis le Microsoft Store, puis relancez."
-}
 Actualiser-Path
 
 $nodeOk = $false
@@ -48,11 +49,19 @@ if (-not $nodeOk) {
 
 if (-not (Get-Command ffmpeg -ErrorAction SilentlyContinue)) { Winget-Installer 'Gyan.FFmpeg' 'FFmpeg' } else { Ok 'FFmpeg present' }
 
-$py312 = $false
-if (Get-Command py -ErrorAction SilentlyContinue) {
-  try { $out = & cmd.exe /c "py -3.12 --version 2>&1"; $py312 = ($LASTEXITCODE -eq 0) } catch { $py312 = $false }
+# Trouve un python.exe 3.12 : lanceur py, dossier habituel, ou python du PATH.
+function Trouver-Python312 {
+  if (Get-Command py -ErrorAction SilentlyContinue) {
+    try { $p = & cmd.exe /c "py -3.12 -c ""import sys; print(sys.executable)"" 2>nul"; if ($LASTEXITCODE -eq 0 -and $p) { return ($p | Select-Object -First 1).Trim() } } catch { }
+  }
+  $habituel = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
+  if (Test-Path $habituel) { return $habituel }
+  foreach ($c in Get-Command python -All -ErrorAction SilentlyContinue) {
+    try { $v = & cmd.exe /c """$($c.Source)"" --version 2>&1"; if ("$v" -match 'Python 3\.12\.') { return $c.Source } } catch { }
+  }
+  return $null
 }
-if (-not $py312) { Winget-Installer 'Python.Python.3.12' 'Python 3.12' } else { Ok 'Python 3.12 present' }
+if (-not (Trouver-Python312)) { Winget-Installer 'Python.Python.3.12' 'Python 3.12' } else { Ok 'Python 3.12 present' }
 
 if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) { Winget-Installer 'Cloudflare.cloudflared' 'Cloudflare Tunnel' } else { Ok 'Cloudflare Tunnel present' }
 
@@ -86,10 +95,9 @@ Ok 'Modules installes'
 Etape '4/6  Voix et transcription (gros telechargement la premiere fois, 10 a 20 min)'
 $pyExe = Join-Path $Py 'Scripts\python.exe'
 if (-not (Test-Path $pyExe)) {
-  $py312Exe = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
-  if (Get-Command py -ErrorAction SilentlyContinue) { & py -3.12 -m venv $Py }
-  elseif (Test-Path $py312Exe) { & $py312Exe -m venv $Py }
-  else { throw 'Python 3.12 introuvable. Fermez PowerShell, rouvrez-le et relancez la commande.' }
+  $py312Exe = Trouver-Python312
+  if (-not $py312Exe) { throw 'Python 3.12 introuvable. Fermez PowerShell, rouvrez-le et relancez la commande.' }
+  & $py312Exe -m venv $Py
   if ($LASTEXITCODE -ne 0) { throw 'Creation de l environnement Python impossible.' }
 }
 & $pyExe -m pip install --upgrade pip --quiet
@@ -107,6 +115,8 @@ $ia = 'gemini'
 if (Test-Path $reglages) {
   $ancien = Get-Content $reglages -Raw | ConvertFrom-Json
   if ($ancien.ia) { $ia = $ancien.ia } elseif (Test-Path (Join-Path $Config 'cle-api.txt')) { $ia = 'claude' }
+} elseif ($env:COACH_IA) {
+  $ia = $env:COACH_IA
 } else {
   Write-Host '    Quelle IA utiliser ?' -ForegroundColor Yellow
   Write-Host '      1 = Gemini de Google : GRATUIT (cle gratuite sur aistudio.google.com) - recommande'
@@ -116,7 +126,10 @@ if (Test-Path $reglages) {
 }
 if ($ia -eq 'gemini') { $cleFichier = Join-Path $Config 'cle-gemini.txt'; $ou = 'aistudio.google.com > Get API key' }
 else { $cleFichier = Join-Path $Config 'cle-api.txt'; $ou = 'console.anthropic.com > API Keys' }
-if (-not (Test-Path $cleFichier)) {
+if (-not (Test-Path $cleFichier) -and $env:COACH_CLE) {
+  ConvertTo-SecureString $env:COACH_CLE -AsPlainText -Force | ConvertFrom-SecureString | Set-Content $cleFichier
+  Ok 'Cle enregistree (mode automatique)'
+} elseif (-not (Test-Path $cleFichier)) {
   Write-Host "    Collez votre cle API ($ou). Clic droit pour coller. Elle reste chiffree sur ce PC." -ForegroundColor Yellow
   $sec = Read-Host '    Cle API' -AsSecureString
   $sec | ConvertFrom-SecureString | Set-Content $cleFichier
@@ -149,5 +162,6 @@ Write-Host ''
 Write-Host '  Installation terminee !' -ForegroundColor Magenta
 Write-Host '  Double-cliquez sur "Coach Viral" sur le Bureau pour demarrer.'
 Write-Host ''
+if ($env:COACH_DEMARRER -eq 'non') { return }
 $rep = Read-Host '  Demarrer maintenant ? (O/n)'
 if ($rep -ne 'n' -and $rep -ne 'N') { & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Racine 'lancer.ps1') }

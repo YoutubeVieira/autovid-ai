@@ -7,7 +7,7 @@ $App = Join-Path $Racine 'app'
 $Config = Join-Path $Racine 'config'
 $Logs = Join-Path $Racine 'journaux'
 New-Item -ItemType Directory -Force -Path $Logs | Out-Null
-$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links')
+$env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links')
 
 $r = Get-Content (Join-Path $Config 'reglages.json') -Raw | ConvertFrom-Json
 function Lire-Cle($fichier) {
@@ -85,6 +85,8 @@ if ($adresse) {
 }
 Write-Host "  Code d'acces (Reglages > Code d'acces) : $($r.code_acces)" -ForegroundColor Yellow
 Write-Host ''
+# Mode test (robot) : on laisse tourner le serveur et on rend la main.
+if ($env:COACH_TEST -eq '1') { Write-Host "  Mode test : serveur laisse en marche ($local)."; return }
 Start-Process $local
 
 Write-Host '  Laissez cette fenetre ouverte. Appuyez sur Entree pour arreter Coach Viral.' -ForegroundColor Gray

@@ -14,7 +14,7 @@ function Ok($texte) { Write-Host "    $texte" -ForegroundColor Green }
 function Info($texte) { Write-Host "    $texte" -ForegroundColor Gray }
 
 if (-not (Test-Path $Reglages)) { throw "Installez d'abord Coach Viral (installer.ps1), puis relancez cette commande." }
-$env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
+$env:Path = $env:Path + ';' + [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
 
 Write-Host ''
 Write-Host '  Coach Viral - clonage de voix (Chatterbox)' -ForegroundColor Magenta
@@ -30,10 +30,10 @@ else { Info 'Pas de carte NVIDIA : version processeur (lente mais gratuite).'; $
 Etape '2/4  Environnement Python separe (Chatterbox a ses propres versions)'
 $pyExe = Join-Path $Venv 'Scripts\python.exe'
 if (-not (Test-Path $pyExe)) {
-  $py312Exe = Join-Path $env:LOCALAPPDATA 'Programs\Python\Python312\python.exe'
-  if (Get-Command py -ErrorAction SilentlyContinue) { & py -3.12 -m venv $Venv }
-  elseif (Test-Path $py312Exe) { & $py312Exe -m venv $Venv }
-  else { throw 'Python 3.12 introuvable : relancez d abord installer.ps1.' }
+  # Meme Python 3.12 que l'application (l'environnement principal connait son interpreteur de base).
+  $base = & (Join-Path $Racine 'python\Scripts\python.exe') -c "import sys; print(sys._base_executable)"
+  if ($LASTEXITCODE -ne 0 -or -not $base) { throw 'Python de Coach Viral introuvable : relancez d abord installer.ps1.' }
+  & $base.Trim() -m venv $Venv
   if ($LASTEXITCODE -ne 0) { throw 'Creation de l environnement Python impossible.' }
 }
 & $pyExe -m pip install --upgrade pip --quiet

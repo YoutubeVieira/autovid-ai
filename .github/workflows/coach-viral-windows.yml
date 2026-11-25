@@ -1,0 +1,73 @@
+name: Coach Viral – installation Windows complète
+
+# Robot qui fait, sur une vraie machine Windows, exactement ce que fait l'utilisateur :
+# la commande PowerShell d'installation, l'ajout de Chatterbox, le démarrage, puis de vraies voix,
+# une vraie vidéo et une vraie transcription. Les fichiers produits sont joints au résultat (« sorties »).
+# Pour tester aussi Gemini : ajoutez le secret GEMINI_API_KEY (Settings > Secrets and variables > Actions).
+on:
+  workflow_dispatch:
+  push:
+    paths: ["coach-viral/installer/**", ".github/workflows/coach-viral-windows.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  installation:
+    runs-on: windows-latest
+    timeout-minutes: 170
+    env:
+      COACH_SORTIES: ${{ github.workspace }}\sorties
+    steps:
+      - uses: actions/checkout@v4
+      # Les machines Windows de GitHub n'ont pas winget : on y met Node, Python, FFmpeg et cloudflared avant.
+      # Sur un vrai PC, c'est l'installateur qui les installe avec winget.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: FFmpeg et Cloudflare Tunnel
+        run: choco install ffmpeg cloudflared -y --no-progress
+
+      - name: 1. Installation (la commande à coller dans PowerShell)
+        shell: powershell
+        env:
+          COACH_IA: gemini
+          COACH_CLE: ${{ secrets.GEMINI_API_KEY != '' && secrets.GEMINI_API_KEY || 'cle-de-test' }}
+          COACH_DEMARRER: non
+        run: irm https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/coach-viral/installer/installer.ps1 | iex
+
+      - name: 2. Clonage de voix (Chatterbox)
+        shell: powershell
+        run: irm https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/coach-viral/installer/ajouter-chatterbox.ps1 | iex
+
+      - name: 3. Démarrage de l'application
+        shell: powershell
+        env:
+          COACH_TEST: "1"
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File "$env:LOCALAPPDATA\CoachViral\lancer.ps1"
+
+      - name: 4. Essais réels (voix, vidéo, transcription, clonage, Gemini)
+        shell: powershell
+        env:
+          COACH_GEMINI_REEL: ${{ secrets.GEMINI_API_KEY != '' }}
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File coach-viral\installer\tester-installation.ps1
+
+      - name: Journaux du serveur
+        if: always()
+        shell: powershell
+        run: |
+          $j = Join-Path $env:LOCALAPPDATA 'CoachViral\journaux'
+          if (Test-Path $j) { Get-ChildItem $j | ForEach-Object { Write-Host "--- $($_.Name)"; Get-Content $_.FullName -Tail 40 } }
+          New-Item -ItemType Directory -Force -Path $env:COACH_SORTIES | Out-Null
+          if (Test-Path $j) { Copy-Item "$j\*" $env:COACH_SORTIES -ErrorAction SilentlyContinue }
+
+      - name: Fichiers produits (à télécharger et écouter)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sorties
+          path: sorties
+          if-no-files-found: ignore
