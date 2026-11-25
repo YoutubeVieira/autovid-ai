@@ -420,7 +420,7 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
           await mkdir(work, { recursive: true });
           try {
             step("Transcription mot à mot");
-            const mots = await studio.transcribeWords(video, work).catch(() => { throw new CoachError("transcription", "Transcription impossible : installez faster-whisper sur le serveur (voir le guide)."); });
+            const mots = await studio.transcribeWords(video, work).catch((e) => { throw new CoachError("transcription", "Transcription impossible : " + studio.detail(e)); });
             step("Titres");
             const titres = b.titres === false ? { titres: [] } : await studio.titlesFor(client, { mots, langue });
             step("Montage");

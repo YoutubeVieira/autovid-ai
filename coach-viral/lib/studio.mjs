@@ -131,6 +131,14 @@ export function titlesFor(client, i) {
   return ask(client, { lang: i.langue, content: text, schema: TitlesSchema, effort: "low" });
 }
 
+/* Fin du message d'erreur d'un outil (la ligne utile est en général la dernière). */
+export function detail(e) {
+  const lines = String(e?.message || e).split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const last = lines.slice(-2).join(" ").slice(-300);
+  if (/No module named 'faster_whisper'|introuvable/.test(last)) return "installez faster-whisper sur le serveur (voir le guide).";
+  return last || "erreur inconnue";
+}
+
 export async function transcribeWords(file, dir) {
   const wav = path.join(dir, "audio-mots.wav");
   await run("ffmpeg", ["-y", "-loglevel", "error", "-i", file, "-vn", "-ac", "1", "-ar", "16000", wav]);
@@ -296,8 +304,8 @@ export async function produceClips(client, video, options, outDir, renderFacecam
   await mkdir(outDir, { recursive: true });
   try {
     onStep("Transcription mot à mot");
-    const mots = options.mots || await transcribeWords(video, work).catch(() => {
-      throw new CoachError("transcription", "Transcription impossible : installez faster-whisper sur le serveur (voir le guide).");
+    const mots = options.mots || await transcribeWords(video, work).catch((e) => {
+      throw new CoachError("transcription", "Transcription impossible : " + detail(e));
     });
     if (!mots.length) throw new CoachError("transcription", "Aucune parole détectée dans la vidéo.");
     const duree = await mediaDuration(video);

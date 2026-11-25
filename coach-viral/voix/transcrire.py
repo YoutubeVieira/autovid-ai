@@ -6,6 +6,9 @@ Installation : pip install faster-whisper   (le modèle « small » tient sur CP
 import json
 import sys
 
+# Sous Windows, la sortie vers un autre programme n'est pas en UTF-8 par defaut : les accents casseraient le JSON.
+sys.stdout.reconfigure(encoding="utf-8")
+
 from faster_whisper import WhisperModel
 
 args = [a for a in sys.argv[1:] if not a.startswith("--")]

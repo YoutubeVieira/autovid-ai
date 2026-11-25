@@ -7,7 +7,7 @@ name: Coach Viral – installation Windows complète
 on:
   workflow_dispatch:
   push:
-    paths: ["coach-viral/installer/**", ".github/workflows/coach-viral-windows.yml"]
+    paths: ["coach-viral/installer/**", "coach-viral/voix/**", "coach-viral/lib/**", ".github/workflows/coach-viral-windows.yml"]
 
 permissions:
   contents: read

@@ -15,7 +15,8 @@ const XFADE = 0.4;
 
 export function run(cmd, args, { input, cwd } = {}) {
   return new Promise((resolve, reject) => {
-    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"], cwd });
+    /* PYTHONUTF8 : sous Windows, Python échange en UTF-8 (accents des textes et des transcriptions). */
+    const p = spawn(cmd, args, { stdio: ["pipe", "pipe", "pipe"], cwd, env: { ...process.env, PYTHONUTF8: "1", PYTHONIOENCODING: "utf-8" } });
     let out = "", err = "";
     p.stdout.on("data", (d) => (out += d));
     p.stderr.on("data", (d) => (err += d));
