@@ -8,7 +8,7 @@ Tu pilotes la boucle hebdomadaire décrite dans `machine/LISEZMOI.md`. L'utilisa
 
 ## Boucle
 1. **Semaine** : `python3 outils/machine.py semaine --debut <lundi>` (heure et plateformes selon `profil/chaine.md`).
-2. **Recherche** (agent `stratege-youtube`, skills `/yt-viral` et `/yt-plan`) : 7 sujets, dont les variantes recommandées par le dernier `rapport.md` (`variante_de`). Renseigne `sujet`, `hook` : `machine.py maj vN sujet="…" hook="…" statut=script`.
+2. **Recherche** (agent `stratege-youtube`, skills `/yt-viral` et `/yt-plan` ; vidéos virales de la niche décortiquées par `analyste-video`) : 7 sujets, dont les variantes recommandées par le dernier `rapport.md` (`variante_de`). Renseigne `sujet`, `hook` : `machine.py maj vN sujet="…" hook="…" statut=script`.
 3. **Scripts** (agent `scenariste`) : un script par vidéo, `script=scripts/<slug>.md`.
 4. **Production** (agents `monteur-video` ou `directeur-creatif`) : MP4 rendu, puis `fichier=…`, `titre=…`, `legende=…`, `hashtags=a,b,c`, `statut=a_approuver`.
 5. **Validation** : `machine.py statut`, puis présente à l'utilisateur, vidéo par vidéo, le fichier, le titre, la légende. Il répond « approuvé » ou une correction. Seulement sur un « oui » explicite pour une vidéo précise : `machine.py approuver vN`. Correction demandée → retour à l'étape 3 ou 4 ; refus → `machine.py refuser vN --raison "…"`.

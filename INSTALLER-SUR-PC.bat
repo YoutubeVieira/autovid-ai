@@ -52,6 +52,13 @@ choice /c 123 /m "Votre choix"
 if errorlevel 3 (set "PROJET=projet-app") else if errorlevel 2 (set "PROJET=projet-senior-us") else (set "PROJET=projet-video")
 cd /d "%DOSSIER%\%PROJET%" || goto erreur
 
+if exist "remotion\package.json" (
+  echo Installation du modele de montage Remotion ^(npm install^)...
+  pushd remotion
+  call npm install --no-audit --no-fund || (popd & goto erreur)
+  popd
+)
+
 if exist "outils\installer-earshot.ps1" (
   choice /m "Installer earshot (effets sonores, environ 1 minute)"
   if not errorlevel 2 powershell -NoProfile -ExecutionPolicy Bypass -File "outils\installer-earshot.ps1"

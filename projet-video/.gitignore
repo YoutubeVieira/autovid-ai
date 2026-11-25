@@ -11,3 +11,5 @@ externes/
 .claude/skills/explainer-kit/
 .claude/skills/spatial-film/
 .env
+# Analyses de vidéos (images de vidéos tierces) : jamais versionnées
+analyses/

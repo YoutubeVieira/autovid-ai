@@ -24,6 +24,7 @@ https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-dc9e84d2-s625ne/I
    1 = projet-video      Shorts / Reels, 7 styles de création MP4, machine à Reels
    2 = projet-senior-us  séances de gym douce pour seniors américains
    3 = projet-app        applications web et mobiles
+   Pour projet-video, il installe le modèle de montage Remotion (npm install, environ 1 minute).
    Pour les projets vidéo, il propose aussi d'installer :
    - earshot (effets sonores, environ 1 minute) ;
    - les 7 styles de création MP4 (environ 200 Mo, projet-video seulement).

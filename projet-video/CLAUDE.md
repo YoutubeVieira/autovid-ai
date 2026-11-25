@@ -8,6 +8,7 @@ Production de vidéos YouTube et de Shorts au format décrit dans `../ANALYSE.md
 | semaine de contenu : 7 vidéos, approbation, 1 publication/jour, analyse | `chef-machine` |
 | programmer / publier sur Instagram, TikTok, YouTube (vidéos approuvées seulement) | `publicateur` |
 | statistiques réelles, classement, variantes à produire | `analyste-performance` |
+| décortiquer une vidéo (la sienne ou une virale) : hook, rythme, texte, son, CTA, score | `analyste-video` |
 | vidéo dans un style précis (claymation, explainer, chanté, pub, 3D, cartoon, motion) | `directeur-creatif` |
 | quoi publier, quand, audit, SEO, viral, commentaires | `stratege-youtube` |
 | script, hook, titre, miniature | `scenariste` |
@@ -33,6 +34,7 @@ Catalogue, outils, clés et coûts : `styles/STYLES.md`. Installation sur le PC 
 - Vérifier le gabarit : `cd remotion && npx tsc --noEmit`
 - Image de contrôle : `npx remotion still AutoVidShort out/check.png --props=./data/<slug>.json --frame=<n>`
 - Rendu : `npx remotion render AutoVidShort out/<slug>.mp4 --props=./data/<slug>.json`
+- Analyser une vidéo : `python3 outils/analyser-video.py video.mp4 [--transcrire]` → `analyses/<nom>/rapport.md`
 - Couper les silences : `python3 outils/couper-silences.py brut.mp4 remotion/public/facecam.mp4`
 
 ## Règles
