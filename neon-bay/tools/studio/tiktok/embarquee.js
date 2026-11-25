@@ -45,7 +45,7 @@ for (const v of V) {
   const objs = city(c, { len: 600, x: 60 }).concat([hero, driver, cop, cop2, truck, look, face, dash]);
 
   const EYE = [.38, 1.2, -.38]; // devant la tête du conducteur (sinon la caméra est dans sa tête) // œil du conducteur, relatif à la voiture
-  const pov = (d, label, extra = {}) => e.follow(d, hero, EYE, EYE, Object.assign({ tg: 'look', ty: 0, f: 30, ease: 'linear', sh: .6 }, extra), label);
+  const pov = (d, label, extra = {}) => e.follow(d, hero, EYE, EYE, Object.assign({ tg: 'look', ty: 0, f: 58, ease: 'linear', sh: .6 }, extra), label);
   // 1. accroche : vue du conducteur, la route défile, le gyrophare dans le dos
   pov(1.5, 'POV conducteur : la route, les gyrophares derrière');
   e.text(0, 1.5, v.hook, 'hook', { cut: true });

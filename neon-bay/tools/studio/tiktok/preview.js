@@ -5,7 +5,7 @@
 const { chromium } = require('playwright');
 const { execFileSync } = require('child_process');
 const fs = require('fs'), path = require('path');
-const ROOT = path.join(__dirname, '..', '..', '..'), web = path.join(ROOT, 'marketing', 'tiktok', '.web'), out = path.join(ROOT, 'marketing', 'tiktok', 'apercus');
+const ROOT = path.join(__dirname, '..', '..', '..'), web = process.env.NB_WEB ? path.resolve(process.env.NB_WEB) : path.join(ROOT, 'marketing', 'tiktok', '.web'), out = path.join(ROOT, 'marketing', 'tiktok', 'apercus');
 const ri = process.argv.indexOf('--res'), res = ri > 0 ? +process.argv[ri + 1] : 360;
 const nums = process.argv.slice(2).filter((a, i, l) => /^\d+$/.test(a) && l[i - 1] !== '--res').map(Number);
 (async () => {
@@ -13,7 +13,7 @@ const nums = process.argv.slice(2).filter((a, i, l) => /^\d+$/.test(a) && l[i - 
   const b = await chromium.launch({ args: ['--use-gl=swiftshader', '--enable-unsafe-swiftshader'] });
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   p.on('pageerror', e => console.error('page:', e.message));
-  await p.goto('file://' + path.join(web, 'studio.html')); await p.waitForFunction(() => window.STUDIO, null, { timeout: 30000 });
+  await p.goto('file://' + path.join(web, 'studio.html')); await p.waitForFunction(() => window.STUDIO, null, { timeout: 180000 });
   const dir = path.join(__dirname, 'projets');
   for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.json')).sort()) {
     const proj = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); if (nums.length && !nums.includes(proj.tiktok.n)) continue;

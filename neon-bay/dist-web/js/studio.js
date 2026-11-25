@@ -84,7 +84,17 @@
   const FINAL = { uniforms: { tDiffuse: { value: null }, time: { value: 0 }, vig: { value: .35 }, grain: { value: .045 }, grade: { value: 0 } },
     vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: 'uniform sampler2D tDiffuse; uniform float time, vig, grain; uniform int grade; varying vec2 vUv; float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time) * 43758.5453); } void main(){ vec2 d = vUv - .5; float ca = .0012; vec3 c; c.r = texture2D(tDiffuse, vUv + d * ca).r; c.g = texture2D(tDiffuse, vUv).g; c.b = texture2D(tDiffuse, vUv - d * ca).b; c = LinearTosRGB(vec4(c, 1.)).rgb; float l = dot(c, vec3(.299, .587, .114)); if (grade == 1) { c = mix(c, c * vec3(.82, 1.02, 1.12), 1. - l); c = mix(c, c * vec3(1.14, 1., .84), l); c = (c - .5) * 1.08 + .5; } else if (grade == 2) { c = mix(vec3(l), c, 1.35); c *= vec3(1.06, .94, 1.1); } else if (grade == 3) { c = vec3(smoothstep(.04, .96, l)); } else if (grade == 4) { c *= vec3(1.12, 1.0, .8); c = mix(vec3(l), c, 1.1); } c *= 1. - vig * dot(d, d) * 2.2; c += (h(vUv * 900.) - .5) * grain; gl_FragColor = vec4(c, 1.); }' };
-  let composer = null, bloomPass = null, finalPass = null;
+  let composer = null, bloomPass = null, finalPass = null, dofPass = null, depthRT = null, camFocus = 10;
+  // profondeur de champ façon cinéma : le sujet visé par la caméra est net, l'avant et l'arrière-plan se floutent
+  const DOF = { uniforms: { tDiffuse: { value: null }, tDepth: { value: null }, cameraNear: { value: .1 }, cameraFar: { value: 2000 }, focus: { value: 10 }, aperture: { value: .02 }, maxblur: { value: .012 }, aspect: { value: 1 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: '#include <packing>\nuniform sampler2D tDiffuse, tDepth; uniform float cameraNear, cameraFar, focus, aperture, maxblur, aspect; varying vec2 vUv;' +
+      'float dAt(vec2 uv){ float fz = texture2D(tDepth, uv).x; return -perspectiveDepthToViewZ(fz, cameraNear, cameraFar); }' +
+      'void main(){ float d = dAt(vUv); float coc = clamp(abs(d - focus) / max(d, .001) * aperture, 0.0, maxblur); vec4 c = texture2D(tDiffuse, vUv); if (coc < .0006) { gl_FragColor = c; return; }' +
+      'vec4 acc = c; float wsum = 1.0; vec2 r = vec2(coc / aspect, coc);' +
+      'for (int i = 0; i < 16; i++) { float a = float(i) * 2.39996; float rr = sqrt((float(i) + .5) / 16.0); vec2 o = vec2(cos(a), sin(a)) * rr * r; float dd = dAt(vUv + o); float cc = clamp(abs(dd - focus) / max(dd, .001) * aperture, 0.0, maxblur);' +
+      ' float w = dd < d ? 1.0 : smoothstep(0.0, coc, cc + .0004); acc += texture2D(tDiffuse, vUv + o) * w; wsum += w; }' +
+      'gl_FragColor = acc / wsum; }' };
   // calque titres / flashs / fondus, rendu DANS l'image (donc présent dans les vidéos exportées)
   const hudCv = document.createElement('canvas'), hudCtx = hudCv.getContext('2d'), hudTex = new THREE.CanvasTexture(hudCv);
   const hudScene = new THREE.Scene(), hudCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -144,6 +154,8 @@
   }
   function setupComposer(cam) {
     composer = new THREE.EffectComposer(R); composer.addPass(new THREE.RenderPass(scene, cam));
+    depthRT = new THREE.WebGLRenderTarget(256, 256); depthRT.depthTexture = new THREE.DepthTexture(256, 256); depthRT.depthTexture.type = THREE.UnsignedIntType;
+    dofPass = new THREE.ShaderPass(DOF); dofPass.uniforms.tDepth.value = depthRT.depthTexture; composer.addPass(dofPass);
     bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(256, 256), .8, .5, .82); composer.addPass(bloomPass);
     finalPass = new THREE.ShaderPass(FINAL); composer.addPass(finalPass);
   }
@@ -318,7 +330,7 @@
       if (o.asset === 'camera') {
         cinCam.position.copy(h.position); cinCam.fov = s.f || 40;
         const tgId = s.tg !== undefined ? s.tg : o.target, tg = tgId && P.objects.find(x => x.id === tgId);
-        if (tg && rt[tg.id]) { const tp = rt[tg.id].holder.position.clone(); tp.y += (s.ty != null ? s.ty : o.tgtY != null ? o.tgtY : 1); cinCam.lookAt(tp); h.quaternion.copy(cinCam.quaternion); }
+        if (tg && rt[tg.id]) { const tp = rt[tg.id].holder.position.clone(); tp.y += (s.ty != null ? s.ty : o.tgtY != null ? o.tgtY : 1); cinCam.lookAt(tp); h.quaternion.copy(cinCam.quaternion); camFocus = cinCam.position.distanceTo(tp); }
         else cinCam.quaternion.copy(h.quaternion);
         if (s.sh) { // mouvement « caméra à l'épaule stabilisée » : lent et doux (0,4 à 1,6 Hz), atténué sur les longues focales
           const a = Math.min(s.sh, 3) * .35 * Math.min(1, 34 / Math.max(20, s.f || 34)), T = time * 6.2832;
@@ -382,6 +394,12 @@
     gizmo.visible = !camView && !recording && !!gizmo.object; grid.visible = !camView && !recording;
     composer.passes[0].camera = cam; finalPass.uniforms.time.value = time; finalPass.uniforms.vig.value = camView || recording ? .38 : .12; finalPass.uniforms.grain.value = camView || recording ? .04 : 0;
     finalPass.uniforms.grade.value = ({ none: 0, teal: 1, neon: 2, noir: 3, warm: 4 })[P.grade || 'none'] || 0;
+    // profondeur de champ : seulement dans la vue caméra et au rendu final (désactivable : projet.dof = false)
+    const dofOn = (camView || recording) && P.dof !== false; dofPass.enabled = dofOn;
+    if (dofOn) { const sz = R.getDrawingBufferSize(new THREE.Vector2()); if (depthRT.width !== sz.x || depthRT.height !== sz.y) depthRT.setSize(sz.x, sz.y);
+      R.setRenderTarget(depthRT); R.render(scene, cam); R.setRenderTarget(null);
+      const u = dofPass.uniforms; u.cameraNear.value = cam.near; u.cameraFar.value = cam.far; u.focus.value = Math.max(.5, camFocus); u.aspect.value = sz.x / sz.y;
+      const fmm = 24 / Math.tan((cam.fov * PI / 180) / 2) / 2; u.aperture.value = (P.dofStrength || 1) * .011 * Math.pow(fmm / 35, 2); /* grand angle presque net, téléobjectif très flou (comme une vraie optique) */ u.maxblur.value = .014 * (P.dofStrength || 1); }
     composer.render();
     if (camView || recording) { const [fw, fh, fx, fy] = recording ? [R.domElement.width, R.domElement.height, 0, 0] : layoutFrame(); if (drawHud(time, fx, fy, fw, fh)) { R.autoClear = false; R.render(hudScene, hudCam); R.autoClear = true; } }
   }
