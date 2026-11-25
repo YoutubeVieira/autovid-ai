@@ -263,7 +263,10 @@
     if (b.dataset.share != null) share(state.publier.versions[+b.dataset.share]);
   });
 
-  var VIEWS = { idees: viewIdees, score: viewScore, profil: viewProfil, publier: viewPublier };
+  var VIEWS = {
+    idees: viewIdees, score: viewScore, profil: viewProfil, publier: viewPublier,
+    studio: function () { return StudioViews.studio(vue); }, voix: function () { return StudioViews.voix(vue); }
+  };
   function show(name, arg) {
     document.querySelectorAll(".tabs button").forEach(function (t) { t.setAttribute("aria-selected", String(t.dataset.vue === name)); });
     store.set("vue", name);
@@ -272,23 +275,78 @@
   }
   document.querySelectorAll(".tabs button").forEach(function (t) { t.onclick = function () { show(t.dataset.vue); }; });
 
-  /* Réglages : langue des réponses, thème, code d'accès du serveur. */
-  document.getElementById("btn-reglages").onclick = function () {
+  /* ---------- Abonnement ---------- */
+
+  async function subscribe() {
+    if (document.querySelector("dialog.abo")) return;
+    var s = await StudioViews.sante().catch(function () { return null; });
+    if (!s || !s.vente) return;
+    var q = s.quotas || {};
     var d = document.createElement("dialog");
+    d.className = "abo";
+    d.innerHTML = `<h2>Coach Viral Pro</h2><p class="prix">${esc(s.prix)}</p>
+      <ul class="clean"><li>${q.analyse} analyses et idées par mois</li><li>${q.video} vidéos fabriquées par mois</li><li>Voix off réalistes, clonage de votre voix</li><li>Sans engagement : résiliable en un clic</li></ul>
+      <div class="actions"><button class="secondary" value="non" id="abo-non">Plus tard</button><button class="primary" id="abo-go" style="margin-top:0">S'abonner</button></div>
+      <p class="note">Paiement sécurisé par Stripe. Après le paiement, cet appareil reçoit votre clé d'abonnement : gardez-la (Réglages) pour l'utiliser sur un autre appareil.</p>`;
+    document.body.appendChild(d);
+    d.querySelector("#abo-non").onclick = function () { d.close(); };
+    d.querySelector("#abo-go").onclick = async function () {
+      try { location.href = (await UI.api("abonnement/payer", {})).url; } catch (e) { UI.toast(e.message); }
+    };
+    d.addEventListener("close", function () { d.remove(); });
+    d.showModal();
+  }
+
+  async function activateFromUrl() {
+    var p = new URLSearchParams(location.search);
+    var sid = p.get("abonnement");
+    if (!sid) return;
+    history.replaceState(null, "", location.pathname);
+    if (sid === "annule") return UI.toast("Paiement annulé.");
+    try {
+      var r = await UI.api("abonnement/activer", { session: sid });
+      store.set("cle", r.cle);
+      UI.toast("Bienvenue ! Votre abonnement est actif.");
+    } catch (e) { UI.toast(e.message); }
+  }
+
+  /* Réglages : langue, thème, code d'accès ou abonnement. */
+  document.getElementById("btn-reglages").onclick = async function () {
+    var s = await StudioViews.sante().catch(function () { return {}; });
+    var d = document.createElement("dialog");
+    var cle = store.get("cle", "");
     d.innerHTML = '<form method="dialog"><h2>Réglages</h2>' +
-      '<label for="r-langue">Langue des réponses</label><select id="r-langue"><option value="fr">Français</option><option value="pt">Português (Brasil)</option><option value="en">English</option></select>' +
+      '<label for="r-langue">Langue des réponses et des voix</label><select id="r-langue"><option value="fr">Français</option><option value="pt">Português (Brasil)</option><option value="en">English</option></select>' +
       '<label for="r-theme">Thème</label><select id="r-theme"><option value="">Automatique</option><option value="light">Clair</option><option value="dark">Sombre</option></select>' +
-      '<label for="r-code">Code d\'accès <small>(donné par la personne qui gère le serveur)</small></label><input type="password" id="r-code" autocomplete="off">' +
+      (s.vente
+        ? '<label for="r-cle">Clé d\'abonnement</label><input type="text" id="r-cle" autocomplete="off" spellcheck="false"><div id="r-usage" class="note"></div>' +
+          '<div class="actions"><button class="secondary" type="button" id="r-copier">Copier la clé</button><button class="secondary" type="button" id="r-portail">Gérer l\'abonnement</button><button class="secondary" type="button" id="r-abo">S\'abonner</button></div>'
+        : '<label for="r-code">Code d\'accès <small>(donné par la personne qui gère le serveur)</small></label><input type="password" id="r-code" autocomplete="off">') +
       '<div class="actions"><button class="secondary" value="cancel">Annuler</button><button class="secondary" id="r-ok" value="ok">Enregistrer</button></div></form>';
     document.body.appendChild(d);
     d.querySelector("#r-langue").value = store.get("langue", "fr");
     d.querySelector("#r-theme").value = store.get("theme", "");
-    d.querySelector("#r-code").value = store.get("code", "");
+    if (s.vente) {
+      d.querySelector("#r-cle").value = cle;
+      d.querySelector("#r-copier").onclick = function () { UI.copy(d.querySelector("#r-cle").value); };
+      d.querySelector("#r-abo").onclick = function () { d.close(); subscribe(); };
+      d.querySelector("#r-portail").onclick = async function () {
+        try { location.href = (await UI.api("abonnement/portail", {})).url; } catch (e) { UI.toast(e.message); }
+      };
+      if (cle) UI.get("abonnement/etat").then(function (e) {
+        var u = e.usage;
+        d.querySelector("#r-usage").textContent = (e.actif ? "Abonnement actif" : "Abonnement inactif") +
+          " · ce mois : " + u.analyse.utilise + "/" + u.analyse.max + " analyses, " + u.video.utilise + "/" + u.video.max + " vidéos";
+      }).catch(function () { d.querySelector("#r-usage").textContent = "Clé inconnue."; });
+    } else {
+      d.querySelector("#r-code").value = store.get("code", "");
+    }
     d.addEventListener("close", function () {
       if (d.returnValue === "ok") {
         store.set("langue", d.querySelector("#r-langue").value);
         store.set("theme", d.querySelector("#r-theme").value);
-        store.set("code", d.querySelector("#r-code").value.trim());
+        if (s.vente) store.set("cle", d.querySelector("#r-cle").value.trim());
+        else store.set("code", d.querySelector("#r-code").value.trim());
         applyTheme();
         UI.toast("Réglages enregistrés");
       }
@@ -296,12 +354,14 @@
     });
     d.showModal();
   };
+  window.CV = { show: show, subscribe: subscribe };
   function applyTheme() {
     var t = store.get("theme", "");
     if (t) document.documentElement.setAttribute("data-theme", t); else document.documentElement.removeAttribute("data-theme");
   }
 
   applyTheme();
+  activateFromUrl();
   show(VIEWS[store.get("vue", "idees")] ? store.get("vue", "idees") : "idees");
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
 })();

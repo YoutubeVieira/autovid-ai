@@ -101,7 +101,9 @@ test("le code d'accès protège l'IA mais pas la page", async () => {
     assert.equal((await post(base, "/api/ideas", { niche: "x" })).status, 401);
     assert.equal((await post(base, "/api/ideas", { niche: "x" }, { "x-code-acces": "secret" })).status, 200);
     assert.equal((await fetch(base + "/")).status, 200);
-    assert.deepEqual(await (await fetch(base + "/api/sante")).json(), { ok: true, code_requis: true });
+    const sante = await (await fetch(base + "/api/sante")).json();
+    assert.equal(sante.code_requis, true);
+    assert.equal(sante.vente, false);
   }, { accessCode: "secret" });
 });
 

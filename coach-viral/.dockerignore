@@ -1,0 +1,4 @@
+node_modules
+donnees
+tests/fixtures
+.env

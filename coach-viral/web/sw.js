@@ -1,7 +1,7 @@
 /* Garde l'interface disponible hors connexion. Les demandes à l'IA (/api) ne sont jamais mises en cache.
    Changez VERSION à chaque mise à jour des fichiers. */
-var VERSION = "cv-v1";
-var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./css/app.css", "./js/ui.js", "./js/media.js", "./js/app.js", "./icons/icon.svg"];
+var VERSION = "cv-v2";
+var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./css/app.css", "./js/ui.js", "./js/media.js", "./js/studio.js", "./js/app.js", "./icons/icon.svg"];
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

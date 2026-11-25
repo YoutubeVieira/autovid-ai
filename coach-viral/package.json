@@ -5,13 +5,16 @@
   "description": "Coach IA pour vidéos courtes : idées, scripts, score de viralité, analyse de profil, légendes par plateforme.",
   "type": "module",
   "main": "server.mjs",
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "node server.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.14.0",
+    "stripe": "^23.2.0",
     "zod": "^4.6.7"
   }
 }

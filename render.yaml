@@ -1,13 +1,30 @@
 services:
   - type: web
     name: coach-viral
-    runtime: node
+    runtime: docker
     rootDir: coach-viral
-    buildCommand: npm ci
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /api/sante
+    disk:
+      name: donnees
+      mountPath: /data
+      sizeGB: 1
     envVars:
       - key: ANTHROPIC_API_KEY
         sync: false
+      # Usage personnel : un code d'accès suffit.
       - key: CODE_ACCES
         sync: false
+      # Vente à 1,99 €/mois : mettre VENTE=1 et remplir les clés Stripe.
+      - key: VENTE
+        value: "0"
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRIX
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: URL_PUBLIQUE
+        sync: false
+      - key: VOIX_MOTEURS
+        value: kokoro,edge
