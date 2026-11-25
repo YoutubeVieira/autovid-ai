@@ -1,6 +1,7 @@
 // Rendu cloud d'un projet Néon Studio en MP4 H.264 (image par image, sans perte de cadence).
 // node tools/studio/render.js projet.json [--out film.mp4] [--res 1080] [--fps 30]
 // node tools/studio/render.js --template chase   (scènes prêtes : trailer, chase, arrival, duel, launch)
+// --sons marketing/sons : utilise les fichiers <type>.wav du dossier (whoosh, impact, riser, siren, engine, rumble, rain, pop, sting) à la place de la synthèse
 // --sfx 0 : sans bruitages automatiques (par défaut : whooshs sur les coupes, impacts, sirènes, moteurs, pluie, fusée)
 // --blur 3 : flou de mouvement cinéma (temps de rendu multiplié d'autant)
 // --music usa|ita|col|bra|moon|mars|lofi  ajoute la musique du jeu (synthétisée hors ligne), --hot 7-14,21-36 = passages intenses
@@ -69,10 +70,18 @@ function autoSfx(proj, dur) {
   if (music) {
     const g = await b.newPage(); await g.goto('file://' + path.join(web, 'index.html')); await g.waitForFunction(() => window.NB_AUDIO, null, { timeout: 30000 });
     const hot = (arg('hot', '') || '').split(',').filter(Boolean).map(x => { const [a, z] = x.split('-').map(Number); return { hot: true, t: a, d: z - a }; });
-    if (arg('sfx', '1') !== '0') hot.push(...autoSfx(proj, dur)); // bruitages placés automatiquement sur le montage
+    const files = []; // bruitages en fichiers (--sons dossier) : remplacent la synthèse pour les types présents
+    if (arg('sfx', '1') !== '0') { const sons = arg('sons', null), KIND = { sfxWhoosh: 'whoosh', sfxImpact: 'impact', sfxRiser: 'riser', sfxSiren: 'siren', sfxEngine: 'engine', sfxRumble: 'rumble', sfxRain: 'rain', sfxPop: 'pop', sfxSting: 'sting' };
+      for (const e of autoSfx(proj, dur)) { const k = KIND[e.fn], f = sons && k && path.join(sons, k + '.wav');
+        if (f && fs.existsSync(f)) { const bed = ['siren', 'rain', 'engine', 'rumble'].includes(k), vol = e.args[e.args.length - 1] || .5, len = bed ? e.args[0] : 0; files.push({ t: k === 'riser' ? Math.max(0, e.t - (e.args[0] || 1)) : e.t, f, vol, len, bed }); }
+        else hot.push(e); } }
     const b64 = await g.evaluate(async ([st, secs, ev]) => { const buf = await window.NB_AUDIO.renderOffline(st, secs, ev); let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); }, [music, Math.ceil(dur) + 1, hot]);
     const wav = out.replace(/\.mp4$/, '.wav'), tmp = out.replace(/\.mp4$/, '.tmp.mp4'); fs.writeFileSync(wav, Buffer.from(b64, 'base64')); fs.renameSync(out, tmp);
-    const code = await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1`, '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
+    const ins = ['-i', tmp, '-i', wav], fc = []; files.forEach((x, i) => { if (x.bed) ins.push('-stream_loop', '-1'); ins.push('-i', x.f); fc.push(`[${i + 2}:a]${x.bed ? `atrim=0:${x.len.toFixed(2)},` : ''}aformat=sample_rates=44100:channel_layouts=stereo,volume=${(x.vol * 1.6).toFixed(2)},adelay=${Math.round(x.t * 1000)}:all=1[s${i}]`); });
+    const mixA = files.length ? ['-filter_complex', fc.join(';') + ';[1:a]' + files.map((x, i) => `[s${i}]`).join('') + `amix=inputs=${files.length + 1}:normalize=0:duration=first,alimiter=limit=0.95[mx]`, '-map', '0:v', '-map', '[mx]'] : ['-map', '0:v', '-map', '1:a'];
+    const AF = `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1`;
+    if (files.length) { mixA[1] = mixA[1].replace('[mx]', ',' + AF + '[mx]'); }
+    const code = await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', ...ins, ...mixA, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', ...(files.length ? [] : ['-af', AF]), '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
     if (code === 0) { fs.unlinkSync(tmp); fs.unlinkSync(wav); } else { fs.renameSync(tmp, out); console.error('Musique non ajoutée (vidéo muette gardée), son : ' + wav); }
   }
   await b.close();
