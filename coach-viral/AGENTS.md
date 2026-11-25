@@ -2,6 +2,11 @@
 
 Coach Viral : coach IA et studio vidéo pour vidéos courtes. Interface et textes en **français**, réponses de l'IA en FR / PT-BR / EN.
 
+## Travail à plusieurs (Claude Code + Antigravity)
+
+Plusieurs assistants modifient ce projet. **Avant de commencer, lisez `JOURNAL.md`** (ce qui a été fait, ce qui reste à faire, qui fait quoi),
+faites `git pull` sur la branche `ccr-ee8a77f1-5c7kmx`, et **à la fin ajoutez une entrée dans `JOURNAL.md`** puis `git commit` et `git push`.
+
 ## Lancer
 
 ```bash
@@ -16,7 +21,7 @@ Dépendances système : Node 22.5+, FFmpeg, Python 3.12 (`voix/*.py` : Kokoro, C
 ## Tester (obligatoire avant chaque commit)
 
 ```bash
-npm test                      # 37 tests, sans réseau (fausse IA)
+npm test                      # 41 tests, sans réseau (fausse IA)
 node tests/smoke.mjs          # parcours navigateur (Playwright)
 node tests/smoke-studio.mjs   # radar, studio, clips, voix
 ```
@@ -28,7 +33,7 @@ node tests/smoke-studio.mjs   # radar, studio, clips, voix
 - `lib/gemini.mjs` : client Gemini REST (responseJsonSchema).
 - `lib/studio.mjs` : analyse de vidéo, nouvelle version, style d'après image, clips.
 - `lib/render.mjs` (modèle citation) et `lib/captions.mjs` (face caméra) : rendu FFmpeg 1080x1920.
-- `lib/voice.mjs` : moteurs de voix ; `lib/radar.mjs` : tendances ; `lib/billing.mjs` : Stripe.
+- `lib/voice.mjs` : moteurs de voix ; `lib/voiceworker.mjs` + `voix/serveur_voix.py` : serveur de voix permanent ; `lib/gallery.mjs` : « Mes vidéos » ; `lib/radar.mjs` : tendances ; `lib/billing.mjs` : Stripe.
 - `web/` : PWA sans compilation (HTML/CSS/JS). Changer `VERSION` dans `web/sw.js` à chaque modification de `web/`.
 
 ## Règles

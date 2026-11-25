@@ -41,6 +41,7 @@
         ${[["lien", "🔗 Lien"], ["fichier", "🎞️ Fichier"], ["sujet", "✍️ Sujet"], ["face", "🎤 Face caméra"], ["clips", "✂️ Clips"]].map(([k, t]) =>
           `<label class="chip"><input type="radio" name="mode" value="${k}"${k === mode ? " checked" : ""}> ${t}</label>`).join("")}
       </div>
+      <details class="card" id="mes-videos"><summary><strong>🎞️ Mes vidéos</strong> <span class="note" id="mv-nb"></span></summary><div id="mv-list"></div></details>
       <form class="card" id="f-studio"></form>
       <details class="card" id="ref-style"><summary><strong>🎨 Copier un style à partir d'images de référence</strong></summary>
         <p class="note">Ajoutez 1 à 4 captures d'écran d'une vidéo dont vous aimez la mise en page. L'IA mesure les couleurs, tailles et positions, et règle le modèle pour vous.</p>
@@ -50,6 +51,8 @@
       <div id="r-studio"></div>`;
     document.querySelectorAll('input[name="mode"]').forEach((r) => (r.onchange = () => { store.set("studio.mode", r.value); renderForm(s, r.value); }));
     $("ref-img").onchange = (ev) => refStyle(ev.target.files);
+    $("mes-videos").addEventListener("toggle", () => { if ($("mes-videos").open) myVideos(); });
+    myVideos(true);
     renderForm(s, mode);
     if (st.version) renderVersion(s);
   }
@@ -207,6 +210,7 @@
 
   async function showResult(r, s, box) {
     box = box || $("r-studio");
+    myVideos(true);
     const url = await UI.fileUrl(r.video);
     const voixUrl = r.voix ? await UI.fileUrl(r.voix) : null;
     const v = st.version;
@@ -245,11 +249,44 @@
   }
 
   async function showClips(r, box) {
+    myVideos(true);
     const items = await Promise.all(r.clips.map(async (c) => ({ ...c, url: await UI.fileUrl(c.video) })));
     box.innerHTML = items.map((c, i) => `<section class="card"><h2>Clip ${i + 1} · ${esc(c.titre)}</h2>
       <p class="note">Potentiel ${c.score}/100 · de ${Math.floor(c.debut / 60)}:${String(Math.round(c.debut % 60)).padStart(2, "0")} à ${Math.floor(c.fin / 60)}:${String(Math.round(c.fin % 60)).padStart(2, "0")} — ${esc(c.pourquoi)}</p>
       <video class="result" src="${c.url}" controls playsinline></video>
       <div class="actions"><a class="secondary" href="${c.url}" download="clip-${i + 1}.mp4">⬇️ Télécharger</a></div></section>`).join("");
+  }
+
+  /* ---------------- Mes vidéos ---------------- */
+
+  const TYPES = { citation: "Citation", face_camera: "Face caméra", clips: "Clips" };
+  async function myVideos(countOnly) {
+    const list = $("mv-list"), nb = $("mv-nb");
+    if (!list) return;
+    let d;
+    try { d = await UI.get("videos"); } catch (e) { list.innerHTML = `<p class="err">${esc(e.message)}</p>`; return; }
+    nb.textContent = d.videos.length ? `(${d.videos.length})` : "";
+    if (countOnly && !$("mes-videos").open) return;
+    if (!d.videos.length) { list.innerHTML = `<p class="note">Aucune vidéo pour l'instant. Elles sont gardées ${d.conservation_jours} jours.</p>`; return; }
+    list.innerHTML = `<p class="note">Gardées ${d.conservation_jours} jours.</p>` + d.videos.map((v) => {
+      const videos = v.fichiers.filter((f) => f.endsWith(".mp4"));
+      return `<div class="theme" data-id="${v.id}"><div class="theme-top"><strong>${esc(v.titre || TYPES[v.type] || "Vidéo")}</strong>
+        <span class="note">${esc(TYPES[v.type] || "")} · ${new Date(v.date).toLocaleDateString("fr-FR")}</span></div>
+        <div class="mv-player"></div>
+        <div class="actions">${videos.map((f, i) => `<button class="secondary mv-voir" data-f="${f}">▶️ ${videos.length > 1 ? "Clip " + (i + 1) : "Voir"}</button>`).join("")}
+        <button class="secondary mv-suppr">🗑️ Supprimer</button></div></div>`;
+    }).join("");
+    list.querySelectorAll(".mv-voir").forEach((b) => (b.onclick = async () => {
+      const box = b.closest(".theme").querySelector(".mv-player");
+      try {
+        const url = await UI.fileUrl(b.dataset.f);
+        box.innerHTML = `<video class="result" src="${url}" controls playsinline autoplay></video><a class="secondary" href="${url}" download="coach-viral.mp4">⬇️ Télécharger</a>`;
+      } catch (e) { UI.toast(e.message); }
+    }));
+    list.querySelectorAll(".mv-suppr").forEach((b) => (b.onclick = async () => {
+      if (!confirm("Supprimer cette vidéo ?")) return;
+      try { await UI.del("videos/" + b.closest(".theme").dataset.id); myVideos(); } catch (e) { UI.toast(e.message); }
+    }));
   }
 
   /* ---------------- Radar de tendances ---------------- */

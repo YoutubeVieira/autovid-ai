@@ -1,6 +1,6 @@
 /* Garde l'interface disponible hors connexion. Les demandes à l'IA (/api) ne sont jamais mises en cache.
    Changez VERSION à chaque mise à jour des fichiers. */
-var VERSION = "cv-v4";
+var VERSION = "cv-v5";
 var SHELL = ["./", "./index.html", "./manifest.webmanifest", "./css/app.css", "./js/ui.js", "./js/media.js", "./js/studio.js", "./js/app.js", "./icons/icon.svg"];
 
 self.addEventListener("install", function (e) {

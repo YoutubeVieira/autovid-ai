@@ -16,6 +16,7 @@ import { run as runCmd } from "./lib/render.mjs";
 import { QUOTAS } from "./lib/billing.mjs";
 import { Radar } from "./lib/radar.mjs";
 import { GeminiClient } from "./lib/gemini.mjs";
+import { Gallery } from "./lib/gallery.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.join(here, "web");
@@ -165,13 +166,18 @@ const MAX_UPLOAD = 150 * 1024 * 1024;
 /* File d'attente : une seule fabrication de vidéo à la fois (le rendu prend tout le processeur). */
 export class Jobs {
   constructor(parallel = Number(process.env.RENDUS_SIMULTANES || 1)) { this.jobs = new Map(); this.queue = []; this.active = 0; this.parallel = parallel; }
-  add(owner, fn) {
+  /* meta : { type, titre } pour ranger la vidéo dans la galerie une fois finie. */
+  add(owner, fn, meta = null) {
     const id = studio.newId();
     const job = { id, owner, etat: "en_attente", etape: "En attente", resultat: null, erreur: null, cree: Date.now() };
     this.jobs.set(id, job);
     this.queue.push(async () => {
       job.etat = "en_cours";
-      try { job.resultat = await fn((etape) => { job.etape = etape; }); job.etat = "termine"; job.etape = "Terminé"; }
+      try {
+        job.resultat = await fn((etape) => { job.etape = etape; });
+        if (meta && this.onDone) await this.onDone(owner, { id, ...meta, resultat: job.resultat }).catch((e) => console.error(e));
+        job.etat = "termine"; job.etape = "Terminé";
+      }
       catch (e) { job.etat = "erreur"; job.erreur = e instanceof CoachError ? e.message : "La fabrication a échoué : " + String(e.message || e).slice(0, 300); if (!(e instanceof CoachError)) console.error(e); }
     });
     this.pump();
@@ -225,8 +231,12 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
 
   const dirs = { uploads: path.join(dataDir, "televersements"), out: path.join(dataDir, "sorties"), voix: path.join(dataDir, "voix") };
   const sale = Boolean(billing);
+  /* Vidéos gardées 30 jours en usage personnel, 2 jours en mode vente (réglable). */
+  const keepDays = Number(env.CONSERVATION_JOURS || (sale ? 2 : 30));
+  const gallery = new Gallery({ dir: path.join(dataDir, "galerie"), filesDir: dirs.out, keepDays });
+  jobs.onDone = (uid, entry) => gallery.add(uid, entry);
   if (!sale) radarOf("moi").schedule();
-  setInterval(() => { studio.cleanup(dirs.out); studio.cleanup(dirs.uploads, 24); }, 3600_000).unref();
+  setInterval(() => { studio.cleanup(dirs.out, keepDays * 24); studio.cleanup(dirs.uploads, 24); }, 3600_000).unref();
 
   /* Qui fait la demande : l'abonné (clé), ou « moi » en usage personnel. */
   function who(req) {
@@ -300,8 +310,17 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
     const fm = /^\/api\/fichiers\/([a-f0-9]{24}(?:-voix)?\.(?:mp4|mp3|wav))$/.exec(p);
     if (fm && req.method === "GET") {
       const job = [...jobs.jobs.values()].find((j) => j.owner === user.id && j.resultat && Object.values(j.resultat).includes(fm[1]));
-      if (!job) return send(res, 404, { erreur: "Fichier introuvable." });
+      if (!job && !(await gallery.owns(user.id, fm[1]))) return send(res, 404, { erreur: "Fichier introuvable." });
       return serveFile(res, path.join(dirs.out, fm[1]), fm[1], url.searchParams.has("telecharger"));
+    }
+
+    /* Galerie « Mes vidéos » */
+    if (p === "/api/videos" && req.method === "GET") {
+      return send(res, 200, { videos: await gallery.list(user.id), conservation_jours: keepDays });
+    }
+    const vm = /^\/api\/videos\/([a-f0-9]{24})$/.exec(p);
+    if (vm && req.method === "DELETE") {
+      return (await gallery.remove(user.id, vm[1])) ? send(res, 200, { supprime: true }) : send(res, 404, { erreur: "Vidéo introuvable." });
     }
 
     /* Suivi d'une fabrication */
@@ -409,7 +428,8 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
       const style = typeof b.style === "object" && b.style ? b.style : {};
       if (gabarit === "clips") {
         const video = await uploadPath(user, b.video);
-        const job = jobs.add(user.id, (step) => studio.produceClips(client, video, { nombre: b.nombre, langue: lang(b.langue), style }, dirs.out, renderFacecam, step));
+        const job = jobs.add(user.id, (step) => studio.produceClips(client, video, { nombre: b.nombre, langue: lang(b.langue), style }, dirs.out, renderFacecam, step),
+          { type: "clips", titre: str(b.titre, 120) || "Clips" });
         return send(res, 202, { travail: job.id });
       }
       if (gabarit === "face_camera") {
@@ -429,7 +449,7 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
             await renderFacecam(video, mots, titres.titres, style, path.join(dirs.out, id + ".mp4"));
             return { video: id + ".mp4" };
           } finally { await rm(work, { recursive: true, force: true }); }
-        });
+        }, { type: "face_camera", titre: str(b.titre, 120) || "Face caméra" });
         return send(res, 202, { travail: job.id });
       }
       const parsed = NewVersion.safeParse(b.version);
@@ -442,7 +462,7 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
         echantillon: (await hasSample(user)) ? sampleOf(user) : null,
         style: { couleur: style.couleur, taille: Number(style.taille) || undefined, zoom: style.zoom }, env
       };
-      const job = jobs.add(user.id, (step) => studio.produce(parsed.data, opts, dirs.out, step));
+      const job = jobs.add(user.id, (step) => studio.produce(parsed.data, opts, dirs.out, step), { type: "citation", titre: parsed.data.titre });
       return send(res, 202, { travail: job.id });
     }
 

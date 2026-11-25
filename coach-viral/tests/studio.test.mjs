@@ -234,3 +234,29 @@ test("mode vente : sans clé valide, rien ne passe ; avec clé, quotas appliqué
     assert.equal((await post("/api/stripe/webhook", {})).status, 400);
   });
 });
+
+test("galerie : la vidéo finie est gardée, listée, servie après « redémarrage », puis supprimée", { timeout: 240_000 }, async () => {
+  process.env.IMAGES = "aucun";
+  const dataDir = await mkdtemp(path.join(tmpdir(), "t-gal-"));
+  const client = { beta: { messages: { async parse() { return { stop_reason: "end_turn", parsed_output: VERSION }; } } } };
+  let videoName;
+  await withServer({ client, dataDir, env: { VOIX_MOTEURS: "test" } }, async (base) => {
+    const fab = await fetch(base + "/api/studio/fabriquer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ gabarit: "citation", version: VERSION, moteur: "test" }) });
+    const job = await waitJob(base, (await fab.json()).travail);
+    assert.equal(job.etat, "termine", job.erreur);
+    videoName = job.resultat.video;
+  });
+  /* Nouveau serveur sur les mêmes données : la file des travaux est vide, la galerie garde la vidéo. */
+  await withServer({ client, dataDir, env: { VOIX_MOTEURS: "test" } }, async (base) => {
+    const g = await (await fetch(base + "/api/videos")).json();
+    assert.equal(g.videos.length, 1);
+    assert.equal(g.videos[0].titre, "La main tendue");
+    assert.equal(g.videos[0].type, "citation");
+    assert.ok(g.videos[0].fichiers.includes(videoName));
+    assert.equal(g.conservation_jours, 30);
+    assert.equal((await fetch(`${base}/api/fichiers/${videoName}`)).status, 200);
+    assert.equal((await fetch(`${base}/api/videos/${g.videos[0].id}`, { method: "DELETE" })).status, 200);
+    assert.equal((await (await fetch(base + "/api/videos")).json()).videos.length, 0);
+    assert.equal((await fetch(`${base}/api/fichiers/${videoName}`)).status, 404);
+  });
+});

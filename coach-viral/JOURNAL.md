@@ -1,0 +1,38 @@
+# Journal de travail partagé
+
+Ce fichier sert de carnet de bord commun aux assistants qui travaillent sur Coach Viral
+(Claude Code dans le cloud, l'assistant d'Antigravity sur le PC, ou tout autre).
+**Chacun lit ce fichier avant de commencer et y ajoute une entrée quand il a fini.**
+Les entrées les plus récentes sont en haut.
+
+## Comment travailler à plusieurs
+
+1. Avant de commencer : `git pull` sur la branche `ccr-ee8a77f1-5c7kmx`, puis lire ce journal et `AGENTS.md`.
+2. Faire une seule chose à la fois, avec ses tests (`npm test`).
+3. À la fin : ajouter une entrée ci-dessous (fait / vérifié / pas vérifié / à faire), `git commit`, puis `git push`.
+4. Si un `git push` est refusé : `git pull` (fusion), relancer `npm test`, puis repousser. Ne jamais forcer (`--force`).
+5. Une tâche prise : l'écrire dans « À faire » avec son nom (« en cours : Antigravity ») pour éviter de travailler à deux sur la même chose.
+
+---
+
+## 2026-11-25 — Claude Code (cloud)
+
+**Fait**
+- Serveur de voix permanent (`voix/serveur_voix.py`, `lib/voiceworker.mjs`) : Kokoro et Chatterbox restent chargés en mémoire au lieu de se recharger à chaque phrase. Retour automatique à l'ancien script si le serveur ne démarre pas (`VOIX_SERVEUR=0` pour le couper).
+- Galerie « Mes vidéos » (`lib/gallery.mjs`, onglet Studio) : vidéos gardées 30 jours en usage personnel (`CONSERVATION_JOURS`), visibles après un redémarrage, supprimables.
+- Raccourci « Mettre à jour Coach Viral » sur le Bureau.
+- Transcription Whisper sous Windows : lecture du WAV par soundfile au lieu de PyAV (erreur `metadata_errors` relevée par le robot Windows).
+- Code d'accès : plus demandé sur le PC lui-même ; demandé par une fenêtre sur le téléphone ; lien avec `?code=`.
+
+**Vérifié**
+- 41 tests (`npm test`) et les deux parcours navigateur.
+- Robot Windows réel (`.github/workflows/coach-viral-windows.yml`) : installation, Chatterbox, voix Kokoro FR/PT et Edge, vidéo citation, clonage Chatterbox OK. Transcription : correctif poussé, résultat à confirmer.
+
+**Pas vérifié**
+- Appels réels à Gemini (ajouter le secret `GEMINI_API_KEY` sur GitHub pour que le robot le teste).
+- Le gain de vitesse réel du serveur de voix sur Windows (à lire dans le prochain passage du robot).
+
+**À faire (idées)**
+- Musique de fond libre de droits intégrée (bibliothèque locale gratuite).
+- Sous-titres synchronisés avec la voix dans le modèle citation.
+- Modèle « avant / après » et modèle « liste top 3 » pour la niche capoeira / sport.

@@ -156,7 +156,12 @@ $lnk.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $Raci
 $lnk.WorkingDirectory = $Racine
 $lnk.IconLocation = (Get-Command node).Source + ',0'
 $lnk.Save()
-Ok 'Raccourci "Coach Viral" cree sur le Bureau'
+$maj = $ws.CreateShortcut((Join-Path $bureau 'Mettre a jour Coach Viral.lnk'))
+$maj.TargetPath = (Get-Command powershell.exe).Source
+$maj.Arguments = '-NoProfile -ExecutionPolicy Bypass -NoExit -Command "irm https://raw.githubusercontent.com/' + $Depot + '/' + $Branche + '/coach-viral/installer/installer.ps1 | iex"'
+$maj.WorkingDirectory = $Racine
+$maj.Save()
+Ok 'Raccourcis "Coach Viral" et "Mettre a jour Coach Viral" crees sur le Bureau'
 
 Write-Host ''
 Write-Host '  Installation terminee !' -ForegroundColor Magenta

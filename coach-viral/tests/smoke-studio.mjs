@@ -80,6 +80,13 @@ try {
   assert.equal(await page.locator("a[download='voix-off.mp3']").count(), 1);
   await shot("7-studio-video");
 
+  /* Galerie « Mes vidéos » : la vidéo y est, et se lit */
+  await page.click("#mes-videos summary");
+  await page.waitForSelector("#mv-list .mv-voir");
+  assert.match(await page.textContent("#mv-nb"), /\(1\)/);
+  await page.click("#mv-list .mv-voir");
+  await page.waitForSelector("#mv-list video.result");
+
   /* Style à partir d'une image de référence */
   const ref = path.join(dataDir, "ref.png");
   await run("ffmpeg", ["-y", "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=s=540x960", "-frames:v", "1", ref]);

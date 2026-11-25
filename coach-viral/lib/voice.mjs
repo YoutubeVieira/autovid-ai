@@ -10,6 +10,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { run, mediaDuration } from "./render.mjs";
+import { workerFor } from "./voiceworker.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PY = process.env.PYTHON || "python3";
@@ -64,7 +65,8 @@ export async function synthesize(text, out, opts = {}, env = process.env) {
       await run("ffmpeg", ["-y", "-loglevel", "error", "-f", "lavfi", "-i", `sine=f=240:d=${d.toFixed(2)}`, raw]);
     } else if (engine === "kokoro") {
       const voice = pick(VOICES.kokoro[lang], opts.voix);
-      await run(PY, [path.join(SCRIPTS, "kokoro_tts.py"), txt, raw, KOKORO_LANG[lang], voice, String(opts.vitesse || 1)]);
+      await viaWorker(env, PY, { moteur: "kokoro", texte: clean, langue: lang, voix: voice, vitesse: opts.vitesse || 1, sortie: raw },
+        () => run(PY, [path.join(SCRIPTS, "kokoro_tts.py"), txt, raw, KOKORO_LANG[lang], voice, String(opts.vitesse || 1)]));
     } else if (engine === "edge") {
       const voice = pick(VOICES.edge[lang], opts.voix);
       const mp3 = path.join(dir, "brut.mp3");
@@ -72,7 +74,8 @@ export async function synthesize(text, out, opts = {}, env = process.env) {
       await run("ffmpeg", ["-y", "-loglevel", "error", "-i", mp3, raw]);
     } else if (engine === "chatterbox") {
       if (!opts.echantillon) throw new Error("Enregistrez d'abord votre voix dans l'onglet Voix.");
-      await run(PY_CHATTERBOX, [path.join(SCRIPTS, "chatterbox_tts.py"), txt, raw, lang, opts.echantillon]);
+      await viaWorker(env, PY_CHATTERBOX, { moteur: "chatterbox", texte: clean, langue: lang, echantillon: opts.echantillon, sortie: raw },
+        () => run(PY_CHATTERBOX, [path.join(SCRIPTS, "chatterbox_tts.py"), txt, raw, lang, opts.echantillon]));
     } else if (engine === "fal") {
       if (!opts.echantillon) throw new Error("Enregistrez d'abord votre voix dans l'onglet Voix.");
       await falSynthesize(clean, lang, opts.echantillon, raw, env);
@@ -83,6 +86,18 @@ export async function synthesize(text, out, opts = {}, env = process.env) {
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+}
+
+/* Serveur de voix permanent (modèles gardés en mémoire) ; s'il ne démarre pas, script ponctuel. */
+async function viaWorker(env, python, req, fallback) {
+  if (env.VOIX_SERVEUR === "0") return fallback();
+  const w = workerFor(python);
+  try {
+    await w.start();
+  } catch {
+    return fallback();
+  }
+  return w.request(req);
 }
 
 function pick(list, wanted) {
