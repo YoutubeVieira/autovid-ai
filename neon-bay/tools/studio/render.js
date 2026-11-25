@@ -79,7 +79,7 @@ function autoSfx(proj, dur) {
     const wav = out.replace(/\.mp4$/, '.wav'), tmp = out.replace(/\.mp4$/, '.tmp.mp4'); fs.writeFileSync(wav, Buffer.from(b64, 'base64')); fs.renameSync(out, tmp);
     const ins = ['-i', tmp, '-i', wav], fc = []; files.forEach((x, i) => { if (x.bed) ins.push('-stream_loop', '-1'); ins.push('-i', x.f); fc.push(`[${i + 2}:a]${x.bed ? `atrim=0:${x.len.toFixed(2)},` : ''}aformat=sample_rates=44100:channel_layouts=stereo,volume=${(x.vol * 1.6).toFixed(2)},adelay=${Math.round(x.t * 1000)}:all=1[s${i}]`); });
     const mixA = files.length ? ['-filter_complex', fc.join(';') + ';[1:a]' + files.map((x, i) => `[s${i}]`).join('') + `amix=inputs=${files.length + 1}:normalize=0:duration=first,alimiter=limit=0.95[mx]`, '-map', '0:v', '-map', '[mx]'] : ['-map', '0:v', '-map', '1:a'];
-    const AF = `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1`;
+    const AF = `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1.5,alimiter=limit=0.84:level=false`; // limiteur final : jamais de crête à 0 dB (grésillement sur téléphone)
     if (files.length) { mixA[1] = mixA[1].replace('[mx]', ',' + AF + '[mx]'); }
     const code = await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', ...ins, ...mixA, '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', ...(files.length ? [] : ['-af', AF]), '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
     if (code === 0) { fs.unlinkSync(tmp); fs.unlinkSync(wav); } else { fs.renameSync(tmp, out); console.error('Musique non ajoutée (vidéo muette gardée), son : ' + wav); }
