@@ -1,5 +1,5 @@
 ---
-description: Monter une séance en vidéo 1080p avec habillage discret, voix off et sous-titres
+description: "Monter une séance en vidéo 1080p avec habillage discret, voix off et sous-titres"
 ---
 
 1. Vérifie la séance : `python3 autovideo.py check sessions/<slug>.json`.

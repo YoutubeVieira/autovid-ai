@@ -1,5 +1,5 @@
 ---
-description: Régler les effets sonores doux d'une séance (transition, cloche de repos, cloche de fin)
+description: "Régler les effets sonores doux d'une séance (transition, cloche de repos, cloche de fin)"
 ---
 
 1. Lance `python3 autovideo.py check sessions/<slug>.json` et lis la ligne « effets sonores ».

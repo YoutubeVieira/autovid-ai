@@ -24,3 +24,13 @@ Chaque projet vidéo a un dossier d'entrée, lu automatiquement :
 Ces médias ne sont pas versionnés dans git (trop lourds). Deux façons de les transmettre :
 1. **Les joindre dans la conversation** (application Claude) : l'agent les range dans le bon dossier d'entrée.
 2. **Travailler directement dans un dossier de votre PC** : sur le PC, ouvrez un terminal dans votre copie du dépôt et lancez `claude remote-control` (ou utilisez l'application Claude Desktop) ; la session apparaît dans l'application Claude Code et lit vos fichiers sur place, sans téléversement. Une session dans le cloud comme celle-ci ne peut pas accéder à votre PC.
+
+## Antigravity
+Toutes les demandes sont aussi disponibles dans **Google Antigravity** (règles + workflows `/…`) :
+- **Dossier `autovid-ai` entier ouvert** : règle `.agent/rules/autovid.md` et 18 workflows dans `.agent/workflows/` —
+  `/video-analyser-video`, `/video-superanalyse`, `/video-creer-short`, `/video-creer-style`, `/video-machine-semaine`, `/video-publier`, `/video-statistiques`, `/video-effets-sonores`, `/video-decouper-shorts`, `/video-installer`,
+  `/senior-nouvelle-seance`, `/senior-importer-medias`, `/senior-monter-video`, `/senior-ajouter-sons`, `/senior-exporter-capcut`,
+  `/app-cloner-app`, `/app-tester-app`, `/installer-pc`.
+- **Un seul projet ouvert** : les mêmes workflows sans préfixe, dans `<projet>/.agent/workflows/`.
+
+Chaque workflow renvoie à l'agent Claude Code correspondant (`.claude/agents/<nom>.md`) : les règles (validation avant publication ou dépense, clés jamais dans la conversation) sont les mêmes dans les deux outils. Les guides publics divergent sur le nom du dossier (`.agent/` ou `.agents/`) : si les workflows n'apparaissent pas, renommez-le `.agents/`.

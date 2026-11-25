@@ -1,5 +1,5 @@
 ---
-description: Préparer le dossier à déposer dans CapCut pour retoucher la séance
+description: "Préparer le dossier à déposer dans CapCut pour retoucher la séance"
 ---
 
 1. Rends avec la couche transparente : `python3 autovideo.py render sessions/<slug>.json --alpha` (ou `--alpha prores` si la version de CapCut ne lit pas le codec QuickTime Animation).

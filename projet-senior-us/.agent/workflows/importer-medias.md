@@ -1,5 +1,5 @@
 ---
-description: Ranger les voix off, clips du coach et musique fournis par l'utilisateur et ajuster la séance
+description: "Ranger les voix off, clips du coach et musique fournis par l'utilisateur et ajuster la séance"
 ---
 
 1. Identifie la séance concernée (`sessions/<slug>.json`).
