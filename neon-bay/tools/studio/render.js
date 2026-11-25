@@ -1,6 +1,7 @@
 // Rendu cloud d'un projet Néon Studio en MP4 H.264 (image par image, sans perte de cadence).
 // node tools/studio/render.js projet.json [--out film.mp4] [--res 1080] [--fps 30]
 // node tools/studio/render.js --template chase   (scènes prêtes : trailer, chase, arrival, duel, launch)
+// --sfx 0 : sans bruitages automatiques (par défaut : whooshs sur les coupes, impacts, sirènes, moteurs, pluie, fusée)
 // --blur 3 : flou de mouvement cinéma (temps de rendu multiplié d'autant)
 // --music usa|ita|col|bra|moon|mars|lofi  ajoute la musique du jeu (synthétisée hors ligne), --hot 7-14,21-36 = passages intenses
 const { chromium } = require('playwright');
@@ -14,6 +15,30 @@ const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv
 const tpl = arg('template', file ? null : 'chase');
 const fps = +arg('fps', 30), res = +arg('res', 1080);
 const BLUR = Math.max(1, Math.min(8, +arg('blur', 1))); // --blur 3 : flou de mouvement (3 sous-images par image)
+// Sound design automatique : lit le montage (coupes de caméra, flashs, ralentis, titres, objets) et place les bruitages au bon moment.
+function autoSfx(proj, dur) {
+  const ev = [], add = (t, fn, ...args) => { if (t >= 0 && t < dur) ev.push({ t: +t.toFixed(3), fn, args }); };
+  const cam = (proj.objects || []).find(o => o.asset === 'camera'), cuts = [];
+  if (cam) for (const k of cam.keys || []) if (k.ease === 'cut' && k.t > .2) cuts.push(k.t);
+  const flashes = proj.flashes || [], titles = proj.titles || [], slow = proj.slow || [];
+  const near = (t, list, d = .25) => list.some(x => Math.abs(x - t) < d);
+  // coupes : souffle court (alterné gauche/droite), sauf si un impact tombe au même moment
+  cuts.forEach((t, i) => { if (!near(t, flashes)) add(t - .12, 'sfxWhoosh', .32, i % 2 ? .35 : -.35, .45); });
+  // flashs : impact grave
+  for (const t of flashes) add(t, 'sfxImpact', .9);
+  // ralentis : montée avant, impact au début, grondement pendant
+  for (const s of slow) { add(s.t, 'sfxRiser', .9, .5); add(s.t, 'sfxImpact', 1); add(s.t, 'sfxRumble', Math.min(3, s.d), .45); }
+  // titres : accroche = impact, titres et sous-titres = petit « pop », carte noire précédée d'une montée
+  for (const tt of titles) { if (tt.style === 'hook') add(tt.t + .02, 'sfxImpact', .8); else if (tt.style === 'card') { if (tt.t > 1) add(tt.t, 'sfxRiser', .7, .45); } else if (tt.text) add(tt.t, 'sfxPop', .28); }
+  const last = titles.filter(t => t.style === 'card').pop(); if (last) add(last.t + .05, 'sfxSting', .4);
+  // ambiances selon les objets de la scène
+  const has = a => (proj.objects || []).some(o => o.asset === a);
+  if (proj.rain) add(0, 'sfxRain', dur, .13);
+  if (has('police')) add(.3, 'sfxSiren', Math.max(2, dur - 2.5), .35, .2);
+  if (['car_sports', 'car_sedan', 'car_suv', 'car_van', 'police', 'boat'].some(has)) { const moving = (proj.objects || []).filter(o => /^car_|police|boat/.test(o.asset) && (o.keys || []).length > 1); for (const o of moving.slice(0, 3)) add(o.keys[0].t + .1, 'sfxEngine', Math.min(2.5, (o.keys[o.keys.length - 1].t - o.keys[0].t) || 2), .3); }
+  if (has('rocket')) { const r = proj.objects.find(o => o.asset === 'rocket'); const lift = (r.keys || []).find((k, i, a) => i && k.p && a[i - 1].p && k.p[1] > a[i - 1].p[1] + 1); add(lift ? lift.t - .8 : dur * .4, 'sfxRumble', 4, .9); }
+  return ev.sort((a, b) => a.t - b.t);
+}
 (async () => {
   const studio = path.join(web, 'studio.html');
   if (!fs.existsSync(studio)) { console.error('Lance d’abord : node tools/build-web.js'); process.exit(1); }
@@ -44,6 +69,7 @@ const BLUR = Math.max(1, Math.min(8, +arg('blur', 1))); // --blur 3 : flou de mo
   if (music) {
     const g = await b.newPage(); await g.goto('file://' + path.join(web, 'index.html')); await g.waitForFunction(() => window.NB_AUDIO, null, { timeout: 30000 });
     const hot = (arg('hot', '') || '').split(',').filter(Boolean).map(x => { const [a, z] = x.split('-').map(Number); return { hot: true, t: a, d: z - a }; });
+    if (arg('sfx', '1') !== '0') hot.push(...autoSfx(proj, dur)); // bruitages placés automatiquement sur le montage
     const b64 = await g.evaluate(async ([st, secs, ev]) => { const buf = await window.NB_AUDIO.renderOffline(st, secs, ev); let s = ''; const u = new Uint8Array(buf); for (let i = 0; i < u.length; i += 32768) s += String.fromCharCode.apply(null, u.subarray(i, i + 32768)); return btoa(s); }, [music, Math.ceil(dur) + 1, hot]);
     const wav = out.replace(/\.mp4$/, '.wav'), tmp = out.replace(/\.mp4$/, '.tmp.mp4'); fs.writeFileSync(wav, Buffer.from(b64, 'base64')); fs.renameSync(out, tmp);
     const code = await new Promise(r => spawn('ffmpeg', ['-y', '-loglevel', 'error', '-i', tmp, '-i', wav, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-af', `afade=t=in:st=0:duration=0.6,afade=t=out:st=${Math.max(0, dur - 2).toFixed(2)}:duration=2,loudnorm=I=-14:TP=-1`, '-shortest', '-movflags', '+faststart', out], { stdio: 'inherit' }).on('close', r));
