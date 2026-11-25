@@ -2,7 +2,7 @@
 description: "Ranger les voix off, clips du coach et musique fournis par l'utilisateur"
 ---
 
-Travaille dans le dossier `projet-senior-us/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-senior/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Identifie la séance concernée (`sessions/<slug>.json`).
 2. Lance `python3 autovideo.py check sessions/<slug>.json` pour voir le numéro de chaque segment.

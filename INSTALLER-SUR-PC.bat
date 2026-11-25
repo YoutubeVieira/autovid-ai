@@ -45,11 +45,11 @@ if exist "%DOSSIER%\.git" (
 
 echo.
 echo === 3/4 Choix du projet ===
-echo   1 = projet-video      ^(Shorts, 7 styles, machine a Reels^)
-echo   2 = projet-senior-us  ^(gym douce seniors^)
-echo   3 = projet-app        ^(applications web et mobiles^)
+echo   1 = autovid-shorts      ^(Shorts, 7 styles, machine a Reels^)
+echo   2 = autovid-senior  ^(gym douce seniors^)
+echo   3 = autovid-apps        ^(applications web et mobiles^)
 choice /c 123 /m "Votre choix"
-if errorlevel 3 (set "PROJET=projet-app") else if errorlevel 2 (set "PROJET=projet-senior-us") else (set "PROJET=projet-video")
+if errorlevel 3 (set "PROJET=autovid-apps") else if errorlevel 2 (set "PROJET=autovid-senior") else (set "PROJET=autovid-shorts")
 cd /d "%DOSSIER%\%PROJET%" || goto erreur
 
 if exist "remotion\package.json" (

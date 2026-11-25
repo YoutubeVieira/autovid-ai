@@ -2,14 +2,14 @@
 
 Chaque projet est autonome : son dossier contient ses agents, ses règles (`CLAUDE.md`), sa documentation et ses outils. Ouvrez Claude Code (ou Antigravity) **dans le dossier du projet** pour que ses agents soient chargés :
 ```bash
-cd projet-senior-us && claude      # ou projet-video, projet-app
+cd autovid-senior && claude      # ou autovid-shorts, autovid-apps
 ```
 
 | | Projet | Pour quoi | Agents |
 |---|---|---|---|
-| 1 | [`projet-senior-us/`](projet-senior-us/) | **Auto Video Senior (US)** — séances de gym douce YouTube 16:9 pour seniors américains, montage automatique Python + FFmpeg, export YouTube et CapCut. Claude Code **et** Antigravity. | `redacteur-seance-us`, `preparateur-medias`, `designer-sonore`, `monteur-senior`, `controleur-senior` |
-| 2 | [`projet-video/`](projet-video/) | **Shorts/Reels verticaux** au style des vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*`, effets sonores (earshot), **machine à Reels** (7 vidéos par semaine, approbation, 1 publication par jour, analyse des vraies statistiques) et **7 styles de création MP4** (motion, claymation, explainer, chanté, pub, 3D, cartoon — [`styles/STYLES.md`](projet-video/styles/STYLES.md)) | `chef-machine`, `publicateur`, `analyste-performance`, `directeur-creatif`, `stratege-youtube`, `scenariste`, `monteur-video`, `sound-designer`, `decoupeur-shorts`, `motion-designer` |
-| 3 | [`projet-app/`](projet-app/) | **Applications web et mobiles** (méthode Replica : analyser, reconstruire, tester, lancer), 11 skills `/replica-*` | `chercheur-produit`, `architecte-app`, `designer-ui`, `dev-web`, `dev-mobile`, `testeur-qa`, `lanceur` |
+| 1 | [`autovid-senior/`](autovid-senior/) | **Auto Video Senior (US)** — séances de gym douce YouTube 16:9 pour seniors américains, montage automatique Python + FFmpeg, export YouTube et CapCut. Claude Code **et** Antigravity. | `redacteur-seance-us`, `preparateur-medias`, `designer-sonore`, `monteur-senior`, `controleur-senior` |
+| 2 | [`autovid-shorts/`](autovid-shorts/) | **Shorts/Reels verticaux** au style des vidéos analysées (facecam + motion design + sous-titres mot à mot), gabarit Remotion, 11 skills `/yt-*`, effets sonores (earshot), **machine à Reels** (7 vidéos par semaine, approbation, 1 publication par jour, analyse des vraies statistiques) et **7 styles de création MP4** (motion, claymation, explainer, chanté, pub, 3D, cartoon — [`styles/STYLES.md`](autovid-shorts/styles/STYLES.md)) | `chef-machine`, `publicateur`, `analyste-performance`, `directeur-creatif`, `stratege-youtube`, `scenariste`, `monteur-video`, `sound-designer`, `decoupeur-shorts`, `motion-designer` |
+| 3 | [`autovid-apps/`](autovid-apps/) | **Applications web et mobiles** (méthode Replica : analyser, reconstruire, tester, lancer), 11 skills `/replica-*` | `chercheur-produit`, `architecte-app`, `designer-ui`, `dev-web`, `dev-mobile`, `testeur-qa`, `lanceur` |
 
 Analyse des deux vidéos d'origine : [`ANALYSE.md`](ANALYSE.md). Anciens fichiers de démarrage : [`archive/`](archive/).
 
@@ -18,8 +18,8 @@ Chaque projet vidéo a un dossier d'entrée, lu automatiquement :
 
 | Projet | Dossier | Mode d'emploi |
 |--------|---------|---------------|
-| Senior US | `projet-senior-us/entrees/<séance>/coach/NN.mp4`, `voix/NN.mp3` | [`entrees/LISEZMOI.md`](projet-senior-us/entrees/LISEZMOI.md) |
-| Shorts | `projet-video/entrees/<vidéo>/brut.mp4`, `voix.mp3` | [`entrees/LISEZMOI.md`](projet-video/entrees/LISEZMOI.md) |
+| Senior US | `autovid-senior/entrees/<séance>/coach/NN.mp4`, `voix/NN.mp3` | [`entrees/LISEZMOI.md`](autovid-senior/entrees/LISEZMOI.md) |
+| Shorts | `autovid-shorts/entrees/<vidéo>/brut.mp4`, `voix.mp3` | [`entrees/LISEZMOI.md`](autovid-shorts/entrees/LISEZMOI.md) |
 
 Ces médias ne sont pas versionnés dans git (trop lourds). Deux façons de les transmettre :
 1. **Les joindre dans la conversation** (application Claude) : l'agent les range dans le bon dossier d'entrée.

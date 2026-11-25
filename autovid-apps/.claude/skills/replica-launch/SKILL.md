@@ -17,4 +17,4 @@ description: "Met le clone en ligne et le prépare à vendre — déploiement, d
 Titre (30 car.), sous-titre, description, mots-clés, 5 captures annotées, catégorie — écrits autour de la promesse de `/replica-brand`.
 
 ## Contenu de lancement
-Script d'un Short de 40 s au format du `projet-video` (hook « Avant / Après » avec les problèmes résolus) → à passer à `/yt-script` puis `/yt-edit`.
+Script d'un Short de 40 s au format du `autovid-shorts` (hook « Avant / Après » avec les problèmes résolus) → à passer à `/yt-script` puis `/yt-edit`.

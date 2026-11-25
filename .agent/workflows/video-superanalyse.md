@@ -2,7 +2,7 @@
 description: "Super-analyse sans images : seconde par seconde, moments forts, mots qui accrochent, SEO, prompts, améliorations"
 ---
 
-Travaille dans le dossier `projet-video/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-shorts/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Demande la vidéo, et si possible les sous-titres `.srt` et l'export de rétention de YouTube Studio.
 2. Lance `python outils/superanalyse.py <video> [--srt <fichier.srt>] [--retention <retention.csv>]`.

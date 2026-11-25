@@ -2,7 +2,7 @@
 description: "Monter une séance en vidéo 1080p avec habillage discret, voix off et sous-titres"
 ---
 
-Travaille dans le dossier `projet-senior-us/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-senior/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Vérifie la séance : `python3 autovideo.py check sessions/<slug>.json`.
 2. Génère les images de contrôle : `python3 autovideo.py still sessions/<slug>.json --at 1`, puis `--at 3`, `--at 6`, au milieu d'un exercice et d'un repos, et 3 s avant la fin. Ouvre chaque image et vérifie lisibilité et visibilité du coach (voir `AGENTS.md`).

@@ -2,7 +2,7 @@
 """Cherche et télécharge des effets sonores libres sur Openverse (api.openverse.org).
 
 À lancer sur votre PC : l'API n'est pas joignable depuis une session Claude dans le cloud.
-Copie identique dans projet-senior-us/outils/ et projet-video/outils/.
+Copie identique dans autovid-senior/outils/ et autovid-shorts/outils/.
 
 Exemples :
   python3 outils/chercher-sons.py "soft chime" --liste

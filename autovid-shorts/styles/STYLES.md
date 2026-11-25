@@ -23,6 +23,6 @@ D'après la vidéo « Ce skill Claude crée… » (@henriexploria) : 7 skills (`
 bash outils/installer-styles.sh            # skills + OpenMontage téléchargé
 bash outils/installer-styles.sh --setup    # + dépendances d'OpenMontage (Python, Node, TTS gratuite Piper)
 ```
-Tout atterrit dans `externes/` et `.claude/skills/<style>` (ignorés par git), aux versions testées. Relancer Claude Code dans `projet-video/` ensuite, puis : « fais une pub claymation pour … » → l'agent `directeur-creatif` choisit l'outil.
+Tout atterrit dans `externes/` et `.claude/skills/<style>` (ignorés par git), aux versions testées. Relancer Claude Code dans `autovid-shorts/` ensuite, puis : « fais une pub claymation pour … » → l'agent `directeur-creatif` choisit l'outil.
 
 Les skills **animation-studio** (dessin animé, explainer, lyric video, avec musique synthétisée par code, sans clé) et **codesign** (animer un visuel, vidéo de lancement) sont aussi disponibles dans votre compte Claude : l'agent les propose quand aucun service payant n'est voulu.

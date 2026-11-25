@@ -2,7 +2,7 @@
 description: "Régler les effets sonores doux d'une séance"
 ---
 
-Travaille dans le dossier `projet-senior-us/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-senior/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Lance `python3 autovideo.py check sessions/<slug>.json` et lis la ligne « effets sonores ».
 2. Pour changer un son pour cette séance seulement, place le fichier dans `entrees/<slug>/sons/<événement>.mp3` (`exercise_start`, `rest_start` ou `outro`). Pour toutes les séances, remplace le fichier dans `sons/`.

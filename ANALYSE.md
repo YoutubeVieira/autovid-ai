@@ -32,8 +32,8 @@ Deux Reels/Shorts verticaux (1080×1920, 60 i/s, en portugais du Brésil), même
 ```
 
 ## Ce que ce dépôt en tire
-- [`projet-video/`](projet-video/) — 5 agents (stratège, scénariste, monteur, découpeur de Shorts, motion designer), le pack **AutoVid YouTube Agent** (11 skills `/yt-*` en français) + un gabarit **Remotion** qui rend des vidéos dans ce format exact à partir d'un JSON.
-- [`projet-app/`](projet-app/) — 7 agents (chercheur produit, architecte, designer, dev web, dev mobile, QA, lanceur) et le pack **Replica** (11 skills `/replica-*` en français) pour concevoir, construire, tester, monétiser et lancer une application.
+- [`autovid-shorts/`](autovid-shorts/) — 5 agents (stratège, scénariste, monteur, découpeur de Shorts, motion designer), le pack **AutoVid YouTube Agent** (11 skills `/yt-*` en français) + un gabarit **Remotion** qui rend des vidéos dans ce format exact à partir d'un JSON.
+- [`autovid-apps/`](autovid-apps/) — 7 agents (chercheur produit, architecte, designer, dev web, dev mobile, QA, lanceur) et le pack **Replica** (11 skills `/replica-*` en français) pour concevoir, construire, tester, monétiser et lancer une application.
 
 ---
 
@@ -51,10 +51,10 @@ CTA : « commente SFX sous ma vidéo sur Instagram ».
 
 ## Ce que le dépôt en tire
 - **Placement des sons sans « voir » la vidéo** : nos deux générateurs connaissent déjà l'instant exact de chaque apparition (scènes Remotion, segments de séance). Les sons sont donc placés de façon déterministe — c'est le rôle annoncé de « Real SFX », sans outil supplémentaire.
-  - `projet-video` : whoosh à chaque nouveau visuel, impact sur les gros chiffres, pop sur les listes, clics sur les lignes de terminal (`remotion/src/sfx.ts`) ; agent `sound-designer`.
-  - `projet-senior-us` : profil doux et rare — souffle au début des exercices, cloche de repos, cloche de fin (`sfx_plan` dans `autovideo.py`) ; agent `designer-sonore`.
+  - `autovid-shorts` : whoosh à chaque nouveau visuel, impact sur les gros chiffres, pop sur les listes, clics sur les lignes de terminal (`remotion/src/sfx.ts`) ; agent `sound-designer`.
+  - `autovid-senior` : profil doux et rare — souffle au début des exercices, cloche de repos, cloche de fin (`sfx_plan` dans `autovideo.py`) ; agent `designer-sonore`.
 - **Openverse** : `outils/chercher-sons.py` (dans les deux projets) cherche et télécharge un son, refuse les licences non commerciales, écrit le crédit à côté du fichier ; le projet senior le reprend dans la description YouTube. À lancer sur le PC (API non joignable depuis une session cloud).
-- **Sons par défaut** synthétisés et versionnés (`projet-video/remotion/public/sfx/`, `projet-senior-us/sons/`) pour que tout fonctionne sans téléchargement.
+- **Sons par défaut** synthétisés et versionnés (`autovid-shorts/remotion/public/sfx/`, `autovid-senior/sons/`) pour que tout fonctionne sans téléchargement.
 - **Earshot** est intégré aux deux projets vidéo : skills `earshot` et `real-sound` copiées (commit 7a7f7c5, MIT), script `outils/installer-earshot.sh` / `.ps1` qui l'installe sur le PC et déclare son serveur MCP. Testé ici : installation, génération de sons, serveur MCP (20 outils, appel `make`). Les modèles d'écoute (≈ 1,1 Go) n'ont pas pu être téléchargés depuis la session cloud. Les sons par défaut des deux projets sont désormais générés par earshot.
 
 ---
@@ -78,7 +78,7 @@ CTA : « commente Compétences sous ma vidéo sur Instagram et je te les envoie 
 **Constat** : ces sept skills ne sont pas publiés (aimant à prospects). Les exemples montrés (personnages en pâte à modeler, brocoli qui chante, prisonnier, chat cartoon) sont des vidéos générées par des modèles payants (type Seedance / Kling / ElevenLabs), que Claude orchestre sans les produire lui-même.
 
 ## Ce que le dépôt en tire
-`projet-video/styles/STYLES.md` associe à chaque style l'équivalent public le plus proche, vérifié (dépôt cloné et lu, commit épinglé) : skills `claymation-ads` et `seedance` (fal.ai, payants, sans licence publiée → téléchargés sur le PC, jamais copiés ici), `talking-explainer` (MIT, présentateur cartoon avec lip-sync), et OpenMontage (AGPL-3.0, 13 pipelines dont `animated-explainer`, `animation`, `cinematic`, `character-animation`, `documentary-montage`). Le style **Singing** n'a pas d'équivalent public : il est assemblé à partir des outils d'OpenMontage (musique avec voix + lip-sync). Installation par `outils/installer-styles.sh` / `.ps1` ; agent `directeur-creatif` pour choisir l'outil, estimer le coût et faire valider avant toute génération payante.
+`autovid-shorts/styles/STYLES.md` associe à chaque style l'équivalent public le plus proche, vérifié (dépôt cloné et lu, commit épinglé) : skills `claymation-ads` et `seedance` (fal.ai, payants, sans licence publiée → téléchargés sur le PC, jamais copiés ici), `talking-explainer` (MIT, présentateur cartoon avec lip-sync), et OpenMontage (AGPL-3.0, 13 pipelines dont `animated-explainer`, `animation`, `cinematic`, `character-animation`, `documentary-montage`). Le style **Singing** n'a pas d'équivalent public : il est assemblé à partir des outils d'OpenMontage (musique avec voix + lip-sync). Installation par `outils/installer-styles.sh` / `.ps1` ; agent `directeur-creatif` pour choisir l'outil, estimer le coût et faire valider avant toute génération payante.
 
 ---
 
@@ -87,4 +87,4 @@ CTA : « commente Compétences sous ma vidéo sur Instagram et je te les envoie 
 Post texte : une « machine » qui crée, publie et analyse des vidéos, où « votre seul travail est de relire et d'approuver ». Six étapes : (1) machine à Reels — narration, animations, sous-titres ; (2) connecteur Instagram, TikTok, YouTube pour publier et suivre les métriques ; (3) recherche automatique des tendances de la niche ; (4) Claude écrit les scripts et produit les 7 vidéos de la semaine ; (5) approbation puis une publication par jour ; (6) analyse des performances et nouvelles versions des meilleures vidéos. « Le secret » : utiliser les données réelles du profil. CTA : « commente MÁQUINA » (skill non publiée). Le résultat revendiqué (15 millions de vues, 50 000 abonnés en 30 jours) n'est pas vérifiable.
 
 ## Ce que le dépôt en tire
-`projet-video/machine/` : la boucle hebdomadaire, avec trois nouveaux agents (`chef-machine`, `publicateur`, `analyste-performance`) qui s'appuient sur ceux qui existaient déjà (recherche `stratege-youtube`, scripts `scenariste`, production `monteur-video` / `directeur-creatif`). `outils/machine.py` tient la file des 7 vidéos avec une étape d'approbation obligatoire (impossible de programmer ou publier une vidéo non approuvée), programme une vidéo par jour (`publications.csv`, `calendrier.ics`), importe les statistiques réelles (exports YouTube Studio, Instagram, TikTok — colonnes EN/FR/PT) et produit un rapport qui désigne les variantes à produire. La publication passe par les connecteurs du compte Claude (OpusClip, Picsart, Supermetrics) ou par la programmation native des plateformes : rien n'est publié sans confirmation.
+`autovid-shorts/machine/` : la boucle hebdomadaire, avec trois nouveaux agents (`chef-machine`, `publicateur`, `analyste-performance`) qui s'appuient sur ceux qui existaient déjà (recherche `stratege-youtube`, scripts `scenariste`, production `monteur-video` / `directeur-creatif`). `outils/machine.py` tient la file des 7 vidéos avec une étape d'approbation obligatoire (impossible de programmer ou publier une vidéo non approuvée), programme une vidéo par jour (`publications.csv`, `calendrier.ics`), importe les statistiques réelles (exports YouTube Studio, Instagram, TikTok — colonnes EN/FR/PT) et produit un rapport qui désigne les variantes à produire. La publication passe par les connecteurs du compte Claude (OpusClip, Picsart, Supermetrics) ou par la programmation native des plateformes : rien n'est publié sans confirmation.

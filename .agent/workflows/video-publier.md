@@ -2,7 +2,7 @@
 description: "Programmer et publier les vidéos approuvées sur Instagram, TikTok et YouTube"
 ---
 
-Travaille dans le dossier `projet-video/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-shorts/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Suis `.claude/agents/publicateur.md`.
 2. `python outils/machine.py programmer`, puis lis `machine/semaines/<semaine>/publications.csv`.

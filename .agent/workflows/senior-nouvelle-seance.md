@@ -2,7 +2,7 @@
 description: "Créer une nouvelle séance de gym douce (anglais américain) et la valider"
 ---
 
-Travaille dans le dossier `projet-senior-us/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-senior/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Demande la durée (10, 20 ou 30 min) et l'objectif (balance, strength ou mobility) si l'utilisateur ne les a pas donnés.
 2. Lance `python3 autovideo.py plan --minutes <durée> --focus <objectif>`.

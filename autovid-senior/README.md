@@ -22,7 +22,7 @@ séance (JSON) ──► autovideo.py (Python + FFmpeg) ──► MP4 1080p + Yo
 
 ## Installation
 ```bash
-cd projet-senior-us
+cd autovid-senior
 pip install -r requirements.txt     # numpy, Pillow ; FFmpeg doit être installé
 ```
 Les polices (Montserrat, Inter, Roboto Mono, licence OFL) sont dans `fonts/`.
@@ -87,7 +87,7 @@ Les deux assistants partagent les mêmes règles : **`AGENTS.md`** (langue, styl
 | Préparer CapCut | agent `monteur-senior` | workflow `/exporter-capcut` |
 | Contrôle qualité | agent `controleur-senior` | (étapes de contrôle dans `/monter-video`) |
 
-Ouvrir le dossier `projet-senior-us/` comme espace de travail (Antigravity) ou y lancer `claude`.
+Ouvrir le dossier `autovid-senior/` comme espace de travail (Antigravity) ou y lancer `claude`.
 Antigravity : les guides publics divergent sur le nom du dossier (`.agent/` ou `.agents/`) ; `.agent/` est lu par toutes les versions documentées. Si vos règles n'apparaissent pas, renommez-le `.agents/`.
 
 ## Charte

@@ -2,7 +2,7 @@
 description: "Créer un Short / Reel de A à Z : sujet, script, montage, sons, rendu"
 ---
 
-Travaille dans le dossier `projet-video/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-shorts/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Sujet et hook : suis `.claude/agents/scenariste.md` (script dans `scripts/<slug>.md`).
 2. Montage : suis `.claude/agents/monteur-video.md` (prise brute dans `entrees/<slug>/` si l'utilisateur en a une) → `remotion/data/<slug>.json`.

@@ -2,7 +2,7 @@
 description: "Ajouter, régler ou remplacer les effets sonores d'une vidéo"
 ---
 
-Travaille dans le dossier `projet-video/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-shorts/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Suis `.claude/agents/sound-designer.md`.
 2. Sons automatiques : `remotion/src/sfx.ts` ; réglages par vidéo dans `remotion/data/<slug>.json` (`sfx`, `sfxExtra`).

@@ -36,7 +36,7 @@ Web + mobile ensemble = monorepo `apps/web`, `apps/mobile`, `packages/shared` su
 
 ## Démarrer
 ```bash
-mkdir mon-app && cp -r projet-app/.claude mon-app/ && cd mon-app
+mkdir mon-app && cp -r autovid-apps/.claude mon-app/ && cd mon-app
 claude
 > Je veux une app comme Calendly, en web et en mobile.
 ```
@@ -44,4 +44,4 @@ Claude enchaîne les agents ; chaque agent suit les skills ci-dessus. Enchaînem
 
 Tous les livrables intermédiaires sont écrits dans `replica/` (recon.md, reviews.md, plan.md, diff.md…), ce qui permet de reprendre le travail dans une nouvelle session.
 
-Le contenu de lancement se fait avec le [projet vidéo](../projet-video/) : l'agent `lanceur` prépare le brief, les agents `scenariste` et `monteur-video` produisent le Short.
+Le contenu de lancement se fait avec le [projet vidéo](../autovid-shorts/) : l'agent `lanceur` prépare le brief, les agents `scenariste` et `monteur-video` produisent le Short.

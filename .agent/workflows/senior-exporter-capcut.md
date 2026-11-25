@@ -2,7 +2,7 @@
 description: "Préparer le dossier à déposer dans CapCut"
 ---
 
-Travaille dans le dossier `projet-senior-us/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-senior/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Rends avec la couche transparente : `python3 autovideo.py render sessions/<slug>.json --alpha` (ou `--alpha prores` si la version de CapCut ne lit pas le codec QuickTime Animation).
 2. Vérifie que `out/<slug>/capcut/` contient : `<slug>_final.mp4`, `<slug>_clean.mp4`, `<slug>_overlay_alpha.mov`, `captions.en.srt`, `stills/`, `timeline.csv`, `IMPORT_CAPCUT.md`.

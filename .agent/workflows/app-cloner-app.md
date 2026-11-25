@@ -2,7 +2,7 @@
 description: "Construire sa propre application à partir d'une app existante (méthode Replica), web et/ou mobile"
 ---
 
-Travaille dans le dossier `projet-app/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-apps/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. Lis `CLAUDE.md` : ordre des agents et règles (reconstruire ce que l'app fait, jamais ce qu'elle possède).
 2. Analyse : suis `.claude/agents/chercheur-produit.md` (skills `replica-recon`, `replica-reviews`).

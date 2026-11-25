@@ -2,7 +2,7 @@
 description: "Installer ou vérifier tout le projet vidéo sur ce PC"
 ---
 
-Travaille dans le dossier `projet-video/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
+Travaille dans le dossier `autovid-shorts/` : toutes les commandes et chemins ci-dessous s'entendent depuis ce dossier.
 
 1. `cd remotion && npm install` puis `npx tsc --noEmit`.
 2. Effets sonores : `powershell -ExecutionPolicy Bypass -File outils/installer-earshot.ps1` (bash : `outils/installer-earshot.sh`).

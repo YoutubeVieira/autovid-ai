@@ -70,7 +70,7 @@ Puis demandez par exemple « une pub claymation de 20 s pour mon livre » : l'ag
 
 ## Démarrer
 ```bash
-cd projet-video
+cd autovid-shorts
 claude            # les skills de .claude/skills sont chargées automatiquement
 ```
 Remplis d'abord `profil/voice.md` et `profil/chaine.md` (ou laisse `/yt-script` et `/yt-plan` te poser les questions).
