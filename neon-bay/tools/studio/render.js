@@ -1,6 +1,7 @@
 // Rendu cloud d'un projet Néon Studio en MP4 H.264 (image par image, sans perte de cadence).
 // node tools/studio/render.js projet.json [--out film.mp4] [--res 1080] [--fps 30]
 // node tools/studio/render.js --template chase   (scènes prêtes : trailer, chase, arrival, duel, launch)
+// --blur 3 : flou de mouvement cinéma (temps de rendu multiplié d'autant)
 // --music usa|ita|col|bra|moon|mars|lofi  ajoute la musique du jeu (synthétisée hors ligne), --hot 7-14,21-36 = passages intenses
 const { chromium } = require('playwright');
 const { spawn } = require('child_process');
@@ -12,6 +13,7 @@ const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ?
 const file = process.argv[2] && !process.argv[2].startsWith('--') ? process.argv[2] : null;
 const tpl = arg('template', file ? null : 'chase');
 const fps = +arg('fps', 30), res = +arg('res', 1080);
+const BLUR = Math.max(1, Math.min(8, +arg('blur', 1))); // --blur 3 : flou de mouvement (3 sous-images par image)
 (async () => {
   const studio = path.join(web, 'studio.html');
   if (!fs.existsSync(studio)) { console.error('Lance d’abord : node tools/build-web.js'); process.exit(1); }
@@ -27,7 +29,13 @@ const fps = +arg('fps', 30), res = +arg('res', 1080);
   const ff = spawn('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'image2pipe', '-framerate', String(fps), '-c:v', 'mjpeg', '-i', '-', '-c:v', 'libx264', '-preset', 'medium', '-crf', '21', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', out], { stdio: ['pipe', 'inherit', 'inherit'] });
   const N = Math.round(dur * fps), t0 = Date.now();
   for (let f = 0; f <= N; f++) {
-    const b64 = await p.evaluate(([t, w, h]) => { window.STUDIO.frame(t, w, h); return document.getElementById('cv').toDataURL('image/jpeg', .93).split(',')[1]; }, [f / fps, W, H]);
+    // flou de mouvement façon caméra de cinéma (obturateur à 180°) : moyenne de BLUR instants dans la demi-image
+    const b64 = await p.evaluate(([t, w, h, n, dtf]) => {
+      if (n <= 1) { window.STUDIO.frame(t, w, h); return document.getElementById('cv').toDataURL('image/jpeg', .93).split(',')[1]; }
+      const acc = window.__acc || (window.__acc = document.createElement('canvas')); acc.width = w; acc.height = h; const g = acc.getContext('2d');
+      for (let k = 0; k < n; k++) { window.STUDIO.frame(t + (k / (n - 1) - .5) * dtf * .5, w, h); g.globalAlpha = 1 / (k + 1); g.drawImage(document.getElementById('cv'), 0, 0, w, h); }
+      g.globalAlpha = 1; return acc.toDataURL('image/jpeg', .93).split(',')[1];
+    }, [f / fps, W, H, BLUR, 1 / fps]);
     if (!ff.stdin.write(Buffer.from(b64, 'base64'))) await new Promise(r => ff.stdin.once('drain', r));
     if (f % fps === 0) process.stdout.write(`\r${Math.round(f / N * 100)} % (${f}/${N} images, ${W}×${H})   `);
   }

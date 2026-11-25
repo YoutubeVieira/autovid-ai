@@ -29,7 +29,7 @@ for json in "$DIR"/projets/*.json; do
   dest="$OUT/$slug.mp4"
   if [ -s "$dest" ]; then skipped=$((skipped + 1)); echo "[$(date +%H:%M:%S)] déjà rendue : $slug"; continue; fi
   read -r music hot dur < <(node -e "const t=require(process.argv[1]).tiktok;console.log(t.music, t.hot||'-', t.duration)" "$json")
-  args=(--out "$OUT/.partiel/$slug.mp4" --res "$RES" --music "$music")
+  args=(--out "$OUT/.partiel/$slug.mp4" --res "$RES" --music "$music" --blur "${BLUR:-3}")
   [ "$hot" != "-" ] && args+=(--hot "$hot")
   echo "[$(date +%H:%M:%S)] rendu : $slug (${dur} s, musique $music)"
   t0=$(date +%s)
