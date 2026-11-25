@@ -406,7 +406,18 @@ def body_elements(sp):
     return B.E
 
 
+# v5 face layout (head-local metres, d = (p - hc) / hk; x lateral, -y front, z up): big stylised eyes
+EYE_X, EYE_Z = 0.0335, -0.0085          # eye centres
+EYE_FRONT = -0.0940                     # y of the front of the eyeball
+LID_UP, LID_LO = 33.0, -33.0            # rest angles of the upper / lower lid edges (deg above the eye centre)
+
+
+def eye_radius(sp):
+    return 0.0160 if sp.female else 0.0152
+
+
 def head_elements(sp):
+    """v5 head: soft, rounded animated-film volumes (full cheeks, rounded jaw, small round nose)."""
     k, f, hk = sp.k, sp.female, sp.hk
     hc = sp.hc
     H = Fam()
@@ -414,56 +425,56 @@ def head_elements(sp):
     def P(x, y, z):
         return hc + Vector((x, y, z)) * hk
 
-    # neck: lower part follows the chest, upper part the neck bone
-    nr = 0.047 if f else 0.054
-    H.caps((0, 0.022, 1.39 * k), (0, 0.022, 1.47 * k), nr, "Chest", "Skin")
-    H.caps((0, 0.022, 1.47 * k), P(0, 0.018, -0.088), nr * 0.95, "Neck", "Skin")
-    # skull + face masses
-    H.ell(P(0, 0, 0), (0.074 * hk, 0.093 * hk, 0.102 * hk), "Head", "Skin")                  # skull
-    H.ell(P(0, -0.034, -0.058), (0.054 * hk, 0.052 * hk, 0.068 * hk), "Head", "Skin")          # face mass
+    def S(*v):
+        return tuple(c * hk for c in v)
+
+    # neck: lower part follows the chest, upper part the neck bone (wider, smooth into the jaw)
+    nr = 0.049 if f else 0.057
+    H.caps((0, 0.020, 1.385 * k), (0, 0.020, 1.47 * k), nr, "Chest", "Skin", s=2.0)
+    H.caps((0, 0.020, 1.47 * k), P(0, 0.020, -0.090), nr * 0.93, "Neck", "Skin", s=2.0)
+    H.ell(P(0, 0.034, -0.080), S(0.050, 0.040, 0.050) if f else S(0.056, 0.044, 0.050), "Neck", "Skin", s=1.8)  # nape
+    # cranium + forehead + face masses
+    H.ell(P(0, 0.006, 0.004), S(0.076, 0.093, 0.099), "Head", "Skin")
+    H.ell(P(0, -0.044, 0.026), S(0.061, 0.041, 0.054), "Head", "Skin", s=2.0)                 # round forehead
+    H.ell(P(0, -0.028, -0.046), S(0.051, 0.055, 0.058) if f else S(0.053, 0.056, 0.060), "Head", "Skin")
+    # rounded U-shaped jaw (wider and squarer on the men) instead of jaw-line capsules: no ridge
+    H.ell(P(0, -0.022, -0.080), S(0.041, 0.050, 0.025) if f else S(0.047, 0.051, 0.027), "Head", "Skin", s=2.0)
     for sx in (1, -1):
-        H.ell(P(sx * 0.024, -0.072, -0.052), (0.018 * hk, 0.014 * hk, 0.024 * hk), "Head", "Skin",
-              s=2.0)                                                                           # maxilla / cheeks
-    jaw = 0.043 if f else 0.047
-    for sx in (1, -1):
-        H.caps(P(sx * jaw, 0.006, -0.074), P(sx * 0.021, -0.066, -0.121), (0.0105 if f else 0.0135) * hk,
-               "Head", "Skin", s=2.2 if f else 3)                                              # jaw line
-        H.ell(P(sx * 0.045, -0.055, -0.032), (0.020 * hk, 0.018 * hk, 0.016 * hk), "Head", "Skin",
-              s=2.0)                                                                           # cheekbone
-        bw = 0.8 if f else 1.0
-        H.ell(P(sx * 0.029, -0.083 - 0.002 * bw, 0.013), (0.025 * hk, (0.010 + 0.004 * bw) * hk,
-              (0.008 + 0.002 * bw) * hk), "Head", "Skin", axis=(sx * 0.28, 0, 1), s=3.4)   # brow ridge (marked)
-        H.ell(P(sx * 0.031, -0.088, -0.007), (0.0155 * hk, 0.012 * hk, 0.0100 * hk), "Head", "Skin",
-              s=4.4, neg=True)                                                                 # eye socket
-        H.ell(P(sx * 0.050, -0.072, 0.004), (0.010 * hk, 0.008 * hk, 0.012 * hk), "Head", "Skin",
-              s=2.5)                                                                           # orbit rim
-        # ear: shell + inner hollow + lobe
-        H.ell(P(sx * 0.077, 0.010, -0.018), (0.009 * hk, 0.019 * hk, 0.031 * hk), "Head", "Skin",
-              axis=(0, 0.25, 1), lateral=(1, 0, 0), s=5)
-        H.ell(P(sx * 0.084, 0.006, -0.020), (0.006 * hk, 0.010 * hk, 0.017 * hk), "Head", "Skin",
+        # full, soft cheeks, high under the eyes (rounder on the women)
+        H.ell(P(sx * 0.036, -0.058, -0.040 if f else -0.043), S(0.023, 0.023, 0.022), "Head", "Skin", s=2.0)
+        H.ell(P(sx * 0.046, -0.046, -0.024), S(0.017, 0.020, 0.014), "Head", "Skin", s=2.0)      # cheekbone (soft)
+        H.ell(P(sx * 0.034, -0.046, -0.070), S(0.021, 0.024, 0.024), "Head", "Skin", s=2.0)      # lower cheek (full)
+        if not f:                                       # men: a soft jaw corner
+            H.ell(P(sx * 0.040, -0.004, -0.092), S(0.012, 0.020, 0.014), "Head", "Skin", s=1.8)
+        # soft brow (stronger on the men)
+        H.ell(P(sx * 0.032, -0.081, 0.017), S(0.025, 0.009 if f else 0.011, 0.009), "Head", "Skin",
+              axis=(sx * 0.25, 0, 1), s=2.6)
+        # ear: shell + helix rim + inner hollow + lobe
+        H.ell(P(sx * 0.076, 0.010, -0.020), S(0.009, 0.018, 0.029), "Head", "Skin",
+              axis=(0, 0.25, 1), lateral=(1, 0, 0), s=4)
+        H.ell(P(sx * 0.081, 0.017, -0.012), S(0.005, 0.009, 0.024), "Head", "Skin",
+              axis=(0, 0.35, 1), lateral=(1, 0, 0), s=4)
+        H.ell(P(sx * 0.083, 0.005, -0.021), S(0.006, 0.010, 0.016), "Head", "Skin",
               axis=(0, 0.25, 1), lateral=(1, 0, 0), s=5, neg=True)
-        H.ell(P(sx * 0.073, 0.012, -0.046), (0.007 * hk, 0.010 * hk, 0.010 * hk), "Head", "Skin", s=5)
-    H.ell(P(0, -0.086, 0.012), (0.014 * hk, 0.009 * hk, 0.011 * hk), "Head", "Skin", s=3)        # glabella
-    # nose: bridge, tip, wings, nostrils
-    nz = 0.9 if f else 1.0
-    H.ell(P(0, -0.0935, -0.025), (0.0060 * hk, 0.0095 * hk, 0.027 * hk * nz), "Head", "Skin",
-          axis=(0, -0.50, 1), s=6)
-    H.ball(P(0, -0.1065 + (0.003 if f else 0), -0.049), 0.0080 * hk * nz, "Head", "Skin", s=6)
+        H.ell(P(sx * 0.073, 0.011, -0.046), S(0.0065, 0.009, 0.0095), "Head", "Skin", s=4)
+    H.ell(P(0, -0.085, 0.010), S(0.013, 0.008, 0.010), "Head", "Skin", s=2.5)                # glabella
+    # nose: small and round (narrow low bridge, round tip, wings, nostrils)
+    nz = 0.92 if f else 1.0
+    H.ell(P(0, -0.0905, -0.022), S(0.0058, 0.0080, 0.022 * nz), "Head", "Skin", axis=(0, -0.42, 1), s=5)
+    H.ball(P(0, -0.1005, -0.0455 * nz - 0.004 * (1 - nz)), (0.0084 if f else 0.0094) * hk, "Head", "Skin", s=4)
     for sx in (1, -1):
-        H.ell(P(sx * 0.0105, -0.094, -0.054), (0.0060 * hk, 0.0070 * hk, 0.0060 * hk), "Head", "Skin", s=6)
-        H.ell(P(sx * 0.0075, -0.099, -0.059), (0.003, 0.0035, 0.0022), "Head", "Skin", s=5, neg=True)
+        H.ell(P(sx * 0.0098, -0.0905, -0.0505), S(0.0058, 0.0062, 0.0055), "Head", "Skin", s=5)
+        H.ell(P(sx * 0.0066, -0.0955, -0.0565), S(0.0026, 0.0032, 0.0019), "Head", "Skin", s=5, neg=True)
     # mouth: muzzle, lips, slit
-    H.ell(P(0, -0.070, -0.088), (0.027 * hk, 0.0140 * hk, 0.024 * hk), "Head", "Skin", s=2.5)
+    H.ell(P(0, -0.068, -0.086), S(0.025, 0.020, 0.024), "Head", "Skin", s=2.5)
     lip = 1.2 if f else 1.0
-    H.ell(P(0, -0.0855, -0.0835), (0.019 * hk, 0.0065 * hk * lip, 0.0058 * hk * lip), "Head", "Skin", s=5)
-    H.ell(P(0, -0.0840, -0.0952), (0.017 * hk, 0.0072 * hk * lip, 0.0064 * hk * lip), "Head", "Skin", s=5)
-    H.caps(P(-0.020, -0.094, -0.0889), P(0.020, -0.094, -0.0889), 0.0016, "Head", "Skin", s=6, neg=True)
-    # chin, with a defined underside: a negative volume under the jaw separates the chin from
-    # the neck (the overhang casts the chin shadow seen from above / 3/4)
-    H.ell(P(0, -0.077, -0.122), ((0.018 if f else 0.022) * hk, 0.017 * hk, 0.018 * hk), "Head", "Skin", s=3)
-    H.ell(P(0, -0.034, -0.116), ((0.036 if f else 0.042) * hk, 0.042 * hk, 0.011 * hk), "Head", "Skin",
-          s=3.0)                                                                           # jaw floor
-    H.ell(P(0, -0.050, -0.152), (0.030 * hk, 0.022 * hk, 0.010 * hk), "Head", "Skin", s=1.6, neg=True)
+    H.ell(P(0, -0.0850, -0.0835), (0.019 * hk, 0.0060 * hk * lip, 0.0055 * hk * lip), "Head", "Skin", s=5)
+    H.ell(P(0, -0.0838, -0.0950), (0.017 * hk, 0.0068 * hk * lip, 0.0062 * hk * lip), "Head", "Skin", s=5)
+    H.caps(P(-0.020, -0.094, ZL), P(0.020, -0.094, ZL), 0.0016, "Head", "Skin", s=6, neg=True)
+    # chin (defined but soft), jaw floor, hollow under the chin
+    H.ell(P(0, -0.069, -0.106), S(0.015, 0.014, 0.014) if f else S(0.020, 0.016, 0.015), "Head", "Skin", s=2.6)
+    H.ell(P(0, -0.032, -0.098), S(0.034, 0.042, 0.013) if f else S(0.040, 0.044, 0.014), "Head", "Skin", s=2.2)
+    H.ell(P(0, -0.046, -0.139), S(0.030, 0.024, 0.012), "Head", "Skin", s=1.3, neg=True)
     return H.E
 
 
@@ -1116,6 +1127,7 @@ def make_ponytail(sp, bvh_avoid, mats):
             pts.append(c + (xax * math.cos(a) + side * math.sin(a)) * bundle * spread)
             rad.append(((0.0105 if L % 2 else 0.0090) * (1 - 0.82 * s ** 1.3) + 0.0012) * hk)
         out.append(tube("Lock", pts, rad, 5, mats, "Hair", cap_end=True))
+        out[-1]["uv"] = "hair"
     # tie (scrunchie, material Shirt so it matches the top)
     t0, t1 = cen[0], cen[1]
     ax = (t1 - t0).normalized()
@@ -2033,7 +2045,29 @@ def arm_uv_inverse(u, v):
     return None
 
 
-UNTEXTURED = {"Hair", "Eyes", "Lips", "EyeWhite", "Gear", "Metal", "Lens", "Trim", "Sole"}
+UNTEXTURED = {"Lips", "EyeWhite", "Gear", "Metal", "Lens", "Trim", "Sole"}
+
+
+def uv_hair(obj, sp):
+    """v5 hair: spherical mapping from the crown: v = angle from the crown (the glossy band of the hair
+    map lands on the upper curve of the head), u = azimuth x 5 (strands tile around the head)."""
+    me = obj.data
+    uv = _uv(obj)
+    crown = Vector((0, 0.015, 0.095))
+    for p in me.polygons:
+        vals = []
+        for li in p.loop_indices:
+            d = (me.vertices[me.loops[li].vertex_index].co - sp.hc) / sp.hk - crown
+            pol = math.atan2(math.hypot(d.x, d.y), d.z)
+            az = (math.atan2(d.x, -d.y) / (2 * math.pi)) % 1.0
+            vals.append([az, min(0.99, max(0.01, pol / math.pi * 1.25))])
+        a = [q[0] for q in vals]
+        if max(a) - min(a) > 0.5:
+            for q in vals:
+                if q[0] < 0.5:
+                    q[0] += 1.0
+        for li, (az, vv) in zip(p.loop_indices, vals):
+            uv.data[li].uv = (az * 5.0, vv)
 
 
 def assign_uvs(parts, sp):
@@ -2058,6 +2092,8 @@ def assign_uvs(parts, sp):
             for li, lp in enumerate(o.data.loops):
                 c = o.data.vertices[lp.vertex_index].co
                 uv.data[li].uv = (0.5 + (c.x - ex) / (2 * ri), 0.5 + (c.z - ez) / (2 * ri))
+        elif mode == "hair":
+            uv_hair(o, sp)
         elif mode == "strip0":
             uv_strip(o, 0.005, 0.055)
         elif mode == "armcyl":
@@ -2065,10 +2101,345 @@ def assign_uvs(parts, sp):
         else:
             uv = _uv(o)
             used = {o.data.materials[p.material_index].name for p in o.data.polygons if o.data.materials}
-            if used and used <= UNTEXTURED - ({"Eyes"} if sp.v4 else set()):
+            if used and used <= {"Hair"}:          # brows, lashes: a dark root texel of the hair map
+                uv.data.foreach_set("uv", [0.5, 0.03] * len(uv.data))
+            elif used and used <= UNTEXTURED:
                 # v5: untextured part -> one constant UV (a new UV map holds a 0..1 square per face,
                 # which split every vertex at export and multiplied the morph target data)
                 uv.data.foreach_set("uv", [0.5] * (2 * len(uv.data)))
+
+
+# --------------------------------------------------------------------------- v5 face helpers
+def _adjacency(me):
+    n = len(me.vertices)
+    ev = np.empty(len(me.edges) * 2, dtype=np.int64)
+    me.edges.foreach_get("vertices", ev)
+    ev = ev.reshape(-1, 2)
+    return n, ev
+
+
+def _vertex_avg(co, ev, n):
+    acc = np.zeros_like(co)
+    cnt = np.zeros(n)
+    np.add.at(acc, ev[:, 0], co[ev[:, 1]])
+    np.add.at(acc, ev[:, 1], co[ev[:, 0]])
+    np.add.at(cnt, ev[:, 0], 1)
+    np.add.at(cnt, ev[:, 1], 1)
+    return acc / np.maximum(cnt, 1)[:, None]
+
+
+def _boundary_mask(obj):
+    bm = bmesh.new()
+    bm.from_mesh(obj.data)
+    b = np.array([v.is_boundary for v in bm.verts], dtype=bool)
+    bm.free()
+    return b
+
+
+def taubin_smooth(obj, iters=6, lam=0.5, mu=-0.53, weight=None):
+    """Volume-preserving smoothing (Taubin lambda|mu) of a mesh; boundaries stay; weight(co) 0..1."""
+    me = obj.data
+    n, ev = _adjacency(me)
+    co = np.empty(n * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    fixed = _boundary_mask(obj)
+    w = np.ones(n) if weight is None else np.array([weight(Vector(c)) for c in co])
+    w[fixed] = 0.0
+    for _ in range(iters):
+        for f_ in (lam, mu):
+            co = co + (_vertex_avg(co, ev, n) - co) * (f_ * w)[:, None]
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+
+
+def relax_on_surface(obj, bvh, iters=4, lam=0.5, fixed_fn=None):
+    """Even out a decimated mesh: tangential Laplacian relaxation, re-projected on the dense surface."""
+    me = obj.data
+    n, ev = _adjacency(me)
+    co = np.empty(n * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    fixed = _boundary_mask(obj)
+    if fixed_fn is not None:
+        fixed |= np.array([fixed_fn(Vector(c)) for c in co], dtype=bool)
+    for _ in range(iters):
+        avg = _vertex_avg(co, ev, n)
+        new = co + (avg - co) * lam
+        for i in np.where(~fixed)[0]:
+            hit = bvh.find_nearest(Vector(new[i]))
+            if hit[0] is not None:
+                new[i] = hit[0]
+        new[fixed] = co[fixed]
+        co = new
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+
+
+def eye_frame(sp, sx):
+    """Centre (world) and radius of the eyeball on side sx."""
+    r = eye_radius(sp)
+    c = sp.hc + Vector((sx * EYE_X, EYE_FRONT + r, EYE_Z)) * sp.hk
+    return c, r * sp.hk
+
+
+def lid_edge(beta, upper, sx):
+    """Rest angle (deg) of a lid edge at angle beta (0 = +X corner) around the eye: almond shape, the
+    upper lid peaks a little towards the nose, the lower lid dips a little towards the temple."""
+    t = math.cos(math.radians(beta)) * sx          # +1 outer corner .. -1 inner corner
+    if upper:
+        return LID_UP - 5.0 * t
+    return LID_LO - 4.0 * t
+
+
+def carve_eye_sockets(head, sp, margin_up=14.0, margin_lo=8.0):
+    """Wrap the skin around each eyeball: skin in front of the eye opening (+ margins that the lids
+    cover at rest) is pulled radially onto the eyeball and cut away; the hole rim is snapped onto a
+    sphere just inside the lid shells, which hide it. The skin then folds into the socket on a
+    smooth crease above / below the lids."""
+    me = head.data
+    n = len(me.vertices)
+    co = np.empty(n * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    for sx in (1, -1):
+        c, r = eye_frame(sp, sx)
+        q = co - np.array(c)
+        d = np.linalg.norm(q, axis=1)
+        nn = q / np.maximum(d, 1e-9)[:, None]
+        fwd = -nn[:, 1]
+        beta = np.degrees(np.arccos(np.clip(nn[:, 0], -1, 1)))
+        th = np.degrees(np.arctan2(nn[:, 2], fwd))
+        tt = np.cos(np.radians(beta)) * sx
+        up = LID_UP - 5.0 * tt + margin_up
+        lo = LID_LO - 4.0 * tt - margin_lo
+        wth = _sst(up + 9.0, up, th) * _sst(lo - 7.0, lo, th)
+        wb = _sst(1.0, 8.0, beta) * _sst(1.0, 8.0, 180.0 - beta)
+        wd = 1.0 - _sst(r + 0.009, r + 0.020, d)
+        w = wth * wb * wd * (fwd > -0.3)
+        rt = r + 0.0008
+        dn = np.where(d > rt, d - (d - rt) * w, d)
+        co = np.array(c) + nn * dn[:, None]
+    me.vertices.foreach_set("co", co.ravel())
+    me.update()
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    eyes = [eye_frame(sp, sx) for sx in (1, -1)]
+
+    def inside(p, R):
+        return any((p - c).length < r + R for c, r in eyes)
+    dead = [f for f in bm.faces if all(inside(v.co, 0.0013) for v in f.verts)]
+    bmesh.ops.delete(bm, geom=dead, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    for v in bm.verts:
+        if v.is_boundary:
+            for c, r in eyes:
+                if (v.co - c).length < r + 0.004:
+                    v.co = c + (v.co - c).normalized() * (r + 0.0013)
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+
+
+def make_eye_v5(sp, sx, mats, iris_tex=True):
+    """Eyeball (EyeWhite) + iris dome (Eyes, textured: iris, pupil, catch light) bulging like a cornea."""
+    c, r = eye_frame(sp, sx)
+    eye = nb.uv_sphere("Eye", r, c, 16, 10)
+    # poles on the Y axis: clean rings around the iris
+    eye.data.transform(Matrix.Translation(c) @ Matrix.Rotation(math.pi / 2, 4, "X") @ Matrix.Translation(-c))
+    set_material(eye, mats, "EyeWhite")
+    ri = r * 0.56                                     # iris radius (big readable iris)
+    amax = math.asin(ri / r)
+    nr, ns = 5, 18
+    verts = [c + Vector((0, -(r + 0.0011 * sp.hk), 0))]
+    for i in range(1, nr + 1):
+        a = amax * i / nr
+        bulge = 0.0011 * sp.hk * (1 - (i / nr) ** 2) + 0.00025 * sp.hk
+        rad = r + bulge
+        for j in range(ns):
+            ph = 2 * math.pi * j / ns
+            verts.append(c + Vector((math.sin(a) * math.cos(ph), -math.cos(a), math.sin(a) * math.sin(ph))) * rad)
+    faces = [(0, 1 + (j + 1) % ns, 1 + j) for j in range(ns)]
+    for i in range(nr - 1):
+        a0, a1 = 1 + i * ns, 1 + (i + 1) * ns
+        faces += [(a0 + j, a0 + (j + 1) % ns, a1 + (j + 1) % ns, a1 + j) for j in range(ns)]
+    iris = nb.mesh_object("Iris", verts, faces)
+    fix_normals_out(iris, lambda q: c)
+    iris["uv"] = "iris:%f,%f,%f" % (c.x, c.z, ri)
+    set_material(iris, mats, "Eyes")
+    return eye, iris
+
+
+def make_lid_v5(name, c, r, sx, upper, rho, mats, nb_=14, nt=5, bmin=5.0):
+    """Visible eyelid at rest: a shell patch around the eyeball whose edge follows lid_edge() (almond
+    opening), buried end 96 / 76 deg further, + a lid-margin strip down to the eyeball. Rotating it
+    about X through the eye centre opens / closes it."""
+    X, F, Z = Vector((1, 0, 0)), Vector((0, -1, 0)), Vector((0, 0, 1))
+    span = 96.0 if upper else -76.0
+
+    def P(beta, th, rad):
+        b, t = math.radians(beta), math.radians(th)
+        return c + (X * math.cos(b) + (F * math.cos(t) + Z * math.sin(t)) * math.sin(b)) * rad
+    betas = [bmin + (180 - 2 * bmin) * j / nb_ for j in range(nb_ + 1)]
+    W = nb_ + 1
+    verts = []
+    for i in range(nt + 1):
+        s = (i / nt) ** 1.4                                # denser rows near the visible edge
+        for b in betas:
+            e = lid_edge(b, upper, sx)
+            verts.append(P(b, e + span * s, rho))
+    for b in betas:                                        # margin (lid thickness) down to the eyeball
+        verts.append(P(b, lid_edge(b, upper, sx) - (1.0 if upper else -1.0), r + 0.0002))
+    faces = [(i * W + j, i * W + j + 1, (i + 1) * W + j + 1, (i + 1) * W + j) for i in range(nt) for j in range(nb_)]
+    R = (nt + 1) * W
+    faces += [(R + j, R + j + 1, j + 1, j) for j in range(nb_)]
+    o = nb.mesh_object(name, verts, faces)
+    fix_normals_out(o, lambda q: c)
+    return set_material(o, mats, "Skin")
+
+
+def lash_v5(name, c, r, sx, rho, mats, female, lower=False):
+    """Lash card along the upper (or lower) lid edge: a thin dark wedge sweeping out and up (Hair)."""
+    n = 11
+    bmin = 13.0
+    L = ((0.0036 if female else 0.0019) if not lower else (0.0012 if female else 0.0)) * (r / 0.016)
+    if L <= 0:
+        return None
+    X, F, Z = Vector((1, 0, 0)), Vector((0, -1, 0)), Vector((0, 0, 1))
+    verts = []
+    for i in range(n):
+        b = bmin + (180 - 2 * bmin) * i / (n - 1)
+        e = math.radians(lid_edge(b, not lower, sx))
+        bb = math.radians(b)
+        radial = X * math.cos(bb) + (F * math.cos(e) + Z * math.sin(e)) * math.sin(bb)
+        p = c + radial * (rho + 0.0001)
+        t = math.cos(bb) * sx                              # +1 outer corner
+        f = (0.45 + 0.55 * math.sin(bb) ** 0.7) * (1.0 + 0.30 * max(0.0, t))   # longer towards the outer corner
+        up = Z if not lower else -Z
+        out = (radial * 0.85 + up * 0.55 + X * (0.25 * math.cos(bb))).normalized()
+        tip = p + out * L * f
+        th = 0.00030 if female else 0.00024
+        verts += [p - up * th, tip, p + radial * 0.0004 + up * th * 0.5]
+    faces = []
+    for i in range(n - 1):
+        a, b = 3 * i, 3 * (i + 1)
+        faces += [(a, b, b + 1, a + 1), (a + 1, b + 1, b + 2, a + 2), (a + 2, b + 2, b, a)]
+    faces += [(0, 1, 2), (3 * (n - 1) + 2, 3 * (n - 1) + 1, 3 * (n - 1))]
+    o = nb.mesh_object(name, verts, faces)
+    close_normals(o)
+    return set_material(o, mats, "Hair")
+
+
+def lash_line_v5(c, r, sx, rho, mats, female):
+    """Thin dark line on the upper lid margin (reads at distance, like eyeliner)."""
+    pts, rad = [], []
+    n = 11
+    X, F, Z = Vector((1, 0, 0)), Vector((0, -1, 0)), Vector((0, 0, 1))
+    for i in range(n):
+        b = 12.0 + 156.0 * i / (n - 1)
+        e = math.radians(lid_edge(b, True, sx) + 1.5)
+        bb = math.radians(b)
+        radial = X * math.cos(bb) + (F * math.cos(e) + Z * math.sin(e)) * math.sin(bb)
+        pts.append(c + radial * (rho + 0.00015))
+        rad.append((0.00062 if female else 0.0005) * (0.5 + 0.5 * math.sin(bb) ** 0.5))
+    return tube("Lash", pts, rad, 4, mats, "Hair", cap_end=True, cap_start=True)
+
+
+def make_brow_v5(sp, sx, bvh, mats):
+    """Eyebrow: a thin patch conforming to the skin (normals = skin normals: no stray highlights),
+    tapering from a soft head to a fine tail; thicker and straighter on the men."""
+    hc, hk, f = sp.hc, sp.hk, sp.female
+    n, m = 11, 3
+    rows = []
+    for i in range(n):
+        u = i / (n - 1)
+        x = (0.0105 + 0.044 * u)
+        arch = (0.0060 if f else 0.0040) * math.sin(math.pi * min(1.0, u / 0.82) * 0.5) ** 1.5 \
+            - (0.0080 if f else 0.0055) * max(0.0, u - 0.62) ** 1.6 / 0.38 ** 1.6
+        zc = EYE_Z + eye_radius(sp) + (0.0060 if f else 0.0052) + arch - 0.001 * u
+        head_w = 0.0050 if f else 0.0078
+        w = head_w * (1 - 0.80 * u ** 1.5) * (0.70 + 0.30 * math.sin(math.pi * min(1.0, u * 4 + 0.2) * 0.5)) + 0.0004
+        row = []
+        for j in range(m + 1):
+            s = -1 + 2 * j / m
+            z = zc + s * w * 0.5
+            p0 = hc + Vector((sx * x, -0.5 / hk, z)) * hk
+            hit = bvh.ray_cast(Vector((p0.x, -0.5, p0.z)), Vector((0, 1, 0)))
+            if hit[0] is None:
+                row = None
+                break
+            lift = (0.00055 if 0 < j < m else 0.00018) * (1.0 - 0.4 * u)
+            row.append(hit[0] + hit[1].normalized() * lift)
+        if row:
+            rows.append(row)
+    W = m + 1
+    verts = [p for r_ in rows for p in r_]
+    faces = [(i * W + j, i * W + j + 1, (i + 1) * W + j + 1, (i + 1) * W + j)
+             for i in range(len(rows) - 1) for j in range(m)]
+    o = nb.mesh_object("Brow", verts, faces)
+    fix_normals_out(o, lambda q: hc + (q - hc) * 0.5)
+    return set_material(o, mats, "Hair")
+
+
+def make_lips_v5(bvh_head, sp, mats):
+    """Upper lip with a Cupid's bow, fuller lower lip: tapered tubes of lens-shaped section laid on the
+    mouth (fuller on the women)."""
+    hc, hk, f = sp.hc, sp.hk, sp.female
+    out = []
+    lipf = 1.18 if f else 1.0
+    for name in ("LipUp", "LipLow"):
+        upper = name == "LipUp"
+        half = 0.0208 if upper else 0.0190
+        n = 13
+        rings = []
+        for i in range(n):
+            u = -1 + 2 * i / (n - 1)
+            x = u * half * hk
+            taper = math.sqrt(max(0.0, 1 - u * u)) ** 0.8
+            if upper:
+                bow = 1.0 + 0.30 * math.exp(-((abs(u) - 0.30) / 0.16) ** 2) - 0.22 * math.exp(-(u / 0.10) ** 2)
+                rv = (0.0026 * lipf * taper * bow + 0.0004) * hk          # half height
+                zc = ZL + rv / hk * 0.95 - 0.0010 * u * u
+                rd = (0.0026 * lipf * taper + 0.0005) * hk
+            else:
+                rv = (0.0036 * lipf * taper + 0.0004) * hk
+                zc = ZL - rv / hk * 0.92 + 0.0006 * u * u
+                rd = (0.0031 * lipf * taper + 0.0005) * hk
+            z = hc.z + zc * hk
+            # cast above / below the mouth opening (cut_mouth), then slide to the lip centre line
+            zcast = hc.z + (max(zc, ZL + MOUTH_B * (1.0 - u * u) ** 0.5 + 0.0012) if upper else
+                            min(zc, ZL - MOUTH_B * (1.0 - u * u) ** 0.5 - 0.0012)) * hk
+            hit = bvh_head.ray_cast(Vector((x, -0.5, zcast)), Vector((0, 1, 0)))
+            if hit[0] is None:
+                continue
+            p, nrm = hit[0], hit[1].normalized()
+            p = Vector((p.x, p.y, z))
+            nrm = (nrm + Vector((0, -0.6, 0))).normalized()
+            upv = Vector((0, 0, 1))
+            upv = (upv - nrm * upv.dot(nrm)).normalized()
+            c = p - nrm * rd * 0.25
+            ring = []
+            for j in range(8):
+                a = 2 * math.pi * j / 8
+                ca, sa = math.cos(a), math.sin(a)
+                # lens section: fuller towards the front, the upper lip turns up, the lower one down
+                fz = sa * rv + (0.35 * rv * max(0.0, ca) * (1 if upper else -1) * 0.4)
+                ring.append(c + nrm * ca * rd * (1.0 if ca > 0 else 0.6) + upv * fz)
+            rings.append(ring)
+        verts = [v for r_ in rings for v in r_]
+        faces = []
+        for i in range(len(rings) - 1):
+            for j in range(8):
+                j2 = (j + 1) % 8
+                faces.append((i * 8 + j, (i + 1) * 8 + j, (i + 1) * 8 + j2, i * 8 + j2))
+        o = nb.mesh_object(name, verts, faces)
+        cen = [sum(r_, Vector()) / 8 for r_ in rings]
+
+        def ctr(q, cen=cen):
+            return min(cen, key=lambda cc: (cc - q).length)
+        fix_normals_out(o, ctr)
+        out.append(set_material(o, mats, "Lips"))
+    return out
 
 
 # --------------------------------------------------------------------------- facial expressions (v5)
@@ -2106,6 +2477,7 @@ EXPR = {
 
 # v5: the eyelids / mouth inside cost ~380 triangles; the fullest variants give them back on the
 # clothes (budget factor) and the hair cap (triangles) to stay under 9000
+HEAD_TRIS = 3300                    # v5 head budget (face + skull cap, before the cap moves to Body)
 TRI_TRIM = {"human_f2": (0.93, 100), "human_f3": (0.92, 120), "human_f4": (0.92, 120), "human_m4": (0.95, 60)}
 
 
@@ -2364,8 +2736,7 @@ def face_keys(body, sp, spans, eyes):
         ll = e.get("ll", (0, 0))
         d[:, 2] += ll[0] * LL
         d[:, 1] -= ll[1] * LL
-        wide = e.get("lid", (0, 0))[0] < 0
-        d[~(skin | ((tag == "lash") if wide else False))] = 0    # wide eyes: the lashes ride on the skin
+        d[~skin] = 0                                               # lids / lashes rotate with the lids
         new += d * hk * pin[:, None]
         pr = e.get("press", 0)
         if pr:
@@ -2380,12 +2751,10 @@ def face_keys(body, sp, spans, eyes):
             else:
                 du, dl = e.get("lid", (0, 0))
             if du:
-                lash_k = 0.0 if du < 0 else (LASH_TH - E["meet"]) / max(1.0, E["up"] - E["meet"])
-                for tg, k_ in (("lidup", 1.0), ("lash", lash_k)):
-                    m = ms & (tag == tg)
-                    new[m] = _rot_x(new[m], c, math.radians(du * k_))
+                m = ms & np.isin(tag, ["lidup", "lash"])          # v5: the lashes sit on the lid edge
+                new[m] = _rot_x(new[m], c, math.radians(du))
             if dl:
-                m = ms & (tag == "lidlow")
+                m = ms & np.isin(tag, ["lidlow", "lashlow"])
                 new[m] = _rot_x(new[m], c, -math.radians(dl))
         kb = body.shape_key_add(name=name, from_mix=False)
         kb.data.foreach_set("co", new.ravel())
@@ -2430,6 +2799,10 @@ COLORS = {   # default glTF colours (the game overrides Skin Shirt Pants Shoes H
                      Shoes=(0.90, 0.90, 0.88), Hair=(0.07, 0.05, 0.04), Lips=(0.60, 0.33, 0.28),
                      Gear=(0.12, 0.12, 0.13), Eyes=(0.25, 0.30, 0.34)),
 }
+# v5: 3-day stubble in the skin map, iris colours of the v3 humans (v4: COLORS[...]["Eyes"])
+STUBBLE = {"human_m", "human_m3", "human_m5"}
+IRIS = {"human_m": (0.24, 0.14, 0.07), "human_f": (0.20, 0.36, 0.22), "human_m2": (0.20, 0.11, 0.05),
+        "human_f2": (0.38, 0.24, 0.10)}
 # v4 fabric maps per slot: (texture, normal map, tile in metres)
 FABRIC = {
     "swim": ("jersey", 0.022), "tank": ("mesh", 0.030), "crop": ("jersey", 0.045), "jersey": ("mesh", 0.034),
@@ -2455,20 +2828,20 @@ def build_human(female, variant=""):
         top, bot = ("jersey", 0.05), ("denim", 0.06)
         TILE["Shirt"], TILE["Pants"] = 0.05, 0.06
     hat_tex = "denim" if not sp.v4 else {"bucket": bot[0], "cap": top[0]}.get(sp.hat, "denim")
-    skin_png = tex["skin_f" if female else "skin_m"]
+    t5 = nbt.textures_v5(female, sp.name in STUBBLE, C.get("Eyes", IRIS.get(sp.name, (0.3, 0.18, 0.08))))
+    skin_png = t5["skin"]
     if "tattoo" in sp.extras:
         skin_png = nbt.tattoo_skin(skin_png, "skin_" + sp.name[6:], arm_uv_inverse)
     mats = {
-        "Skin": tex_material("Skin", C["Skin"], 0.55, skin_png),
+        "Skin": tex_material("Skin", C["Skin"], 0.55, skin_png, t5["skin_n"], 0.35),
         "Shirt": tex_material("Shirt", C["Shirt"], 0.45 if sp.top == "swim" else 0.8, tex[top[0]],
                               tex[top[0] + "_n"], 0.55),
         "Pants": tex_material("Pants", C["Pants"], 0.85, tex[bot[0]], tex[bot[0] + "_n"], 0.55),
         "Shoes": tex_material("Shoes", C["Shoes"], 0.5, tex["shoes"]),
-        "Hair": nb.material("Hair", C["Hair"], roughness=0.6),
-        "Eyes": (tex_material("Eyes", C["Eyes"], 0.12, tex["iris"]) if sp.v4
-                 else nb.material("Eyes", (0.05, 0.035, 0.025), roughness=0.12)),
+        "Hair": tex_material("Hair", C["Hair"], 0.42, t5["hair"]),        # v5: strands + glossy band
+        "Eyes": tex_material("Eyes", (1.0, 1.0, 1.0), 0.06, t5["iris"]),   # v5: colour + catch lights in the map
         "Lips": nb.material("Lips", C["Lips"], roughness=0.4),
-        "EyeWhite": nb.material("EyeWhite", (0.86, 0.83, 0.79), roughness=0.2),
+        "EyeWhite": nb.material("EyeWhite", (0.93, 0.91, 0.88), roughness=0.12),
         "Hat": (tex_material("Hat", C["Hat"], 0.75, tex[hat_tex], tex[hat_tex + "_n"], 0.5) if sp.hat
                 else nb.material("Hat", (0.5, 0.5, 0.5))),
         "Gear": nb.material("Gear", C.get("Gear", (0.03, 0.03, 0.035)), roughness=0.45),
@@ -2593,7 +2966,8 @@ def build_human(female, variant=""):
         o["uv"] = {"Skin": "armcyl" if "tattoo" in sp.extras else "strip", "Shoes": "shoe"}.get(name, "box:" + name)
 
     # ------------------------------------------------ head family
-    head = metaball_mesh("HeadMB", head_E, 0.0038)
+    head = metaball_mesh("HeadMB", head_E, 0.0030)
+    taubin_smooth(head, 14)             # v5: no polygonisation ripples (smooth, soft volumes)
     set_material(head, mats, "Skin")
 
     def head_rule(c, reg, bone):
@@ -2680,6 +3054,7 @@ def build_human(female, variant=""):
         r = ring.get(v, 9)
         v.co = v.co + nrm[v] * off * (0.10 + 0.90 * smooth(r / 7.0))
     hair_parts = [nb.bm_to_object("HairCap", capbm)]
+    hair_parts[0]["uv"] = "hair"
     set_material(hair_parts[0], mats, "Hair")
 
     # hair volumes (bob): separate metaball family, faces buried in the head removed, locks carved
@@ -2696,14 +3071,25 @@ def build_human(female, variant=""):
                 continue
             fall = max(0.0, min(1.0, (0.06 - d.z) / 0.10))         # locks deepen towards the tips
             v.co = v.co + v.normal * (0.0032 * strand_ridge(sp, d) * (0.4 + 0.6 * fall))
+        vol["uv"] = "hair"
         hair_parts.append(vol)
 
     cut_mouth(head, sp)                 # v5: mouth opening for the expressions (under the lips at rest)
+    carve_eye_sockets(head, sp)         # v5: skin wrapped around the big eyes, hidden rim under the lids
+    eye_fr = [eye_frame(sp, sx_) for sx_ in (1, -1)]
+    dense = head.copy()
+    dense.data = head.data.copy()
+    nb.link(dense)
+    bvh_dense_face = BVHTree.FromObject(dense, bpy.context.evaluated_depsgraph_get())
 
     def head_keep(c):
         d = (c - hc) / hk
         if d.y < -0.06 and abs(mouth_rho(d) - 1.0) < 0.45:
             return 1.0                                   # rim of the mouth opening
+        if any((c - ec_).length < er_ + 0.0045 for ec_, er_ in eye_fr):
+            return 1.0                                   # eye sockets
+        if d.y < -0.07 and abs(d.x) < 0.016 and -0.065 < d.z < -0.015:
+            return 0.8                                   # nose
         if d.y < -0.035 and -0.15 < d.z < 0.03 and abs(d.x) < 0.07:
             return 0.55                                  # face
         if abs(d.x) > 0.062 and -0.08 < d.z < 0.02:
@@ -2711,7 +3097,9 @@ def build_human(female, variant=""):
         if scalp(c):
             return 0.0
         return 0.1
-    decimate(head, (1740 if female else 1800) if sp.v4 else (1800 if female else 1850), head_keep)
+    decimate(head, HEAD_TRIS - (80 if sp.v4 else 0), head_keep)
+    relax_on_surface(head, bvh_dense_face, 3, 0.45)  # even triangles (no facets), back on the dense surface
+    bpy.data.objects.remove(dense)
     decimate(hair_parts[0], -TRI_TRIM.get(sp.name, (1.0, 0))[1] + (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
         520 if sp.hat else (640 if sp.hair == "buzz" else 980))))
     if vol is not None:
@@ -2826,74 +3214,31 @@ def build_human(female, variant=""):
             sole["uv"] = "sole"
             parts.append(sole)
 
-    # ------------------------------------------------ eyes, lash lines, eyelids and eyebrows
+    # ------------------------------------------------ eyes, eyelids, lashes and eyebrows (v5)
     eyes = {}
+    iris_c = []
     for sx in (1, -1):
-        ex, ez = sx * 0.031 * hk, hc.z - 0.007 * hk
-        hit = bvh_head.ray_cast(Vector((ex, -0.5, ez)), Vector((0, 1, 0)))
-        r = 0.0118 * hk
-        cy = (hit[0].y if hit[0] is not None else hc.y - 0.08) - 0.0015 + r
-        eye = nb.uv_sphere("Eye", r, (ex, cy, ez), 10, 6)
-        parts.append(set_material(eye, mats, "EyeWhite"))
-        # v5 eyelids: hidden just outside the visible part of the eyeball, rotate to close
-        ec = Vector((ex, cy, ez))
-        up, lo = eye_open_range(bvh_head, ec, r)
-        meet = lo + 0.32 * (up - lo)
-        eyes[sx] = dict(c=ec, up=up + 1.0, lo=lo - 1.0, meet=meet)
-        print("[face] eye %+d: open from %d to %d deg, lids meet at %.0f" % (sx, lo, up, meet))
-        for nm, e0, e1, nt in (("LidUp", up + 1.0, up + 96.0, 4), ("LidLow", lo - 1.0, lo - 76.0, 3)):
-            # radius: in front of the iris (which bulges ~1.4 mm out of the eyeball)
-            lid = make_lid(nm, ec, r + 0.0019 * hk, e0, e1, r + 0.0001, mats, nb_=8, nt=nt)
+        ec, r = eye_frame(sp, sx)
+        eye, iris = make_eye_v5(sp, sx, mats)
+        parts += [eye, iris]
+        meet = LID_LO + 0.36 * (LID_UP - LID_LO)
+        eyes[sx] = dict(c=ec, up=LID_UP, lo=LID_LO, meet=meet)
+        for nm, upper, rho in (("LidUp", True, r + 0.0020 * hk), ("LidLow", False, r + 0.0017 * hk)):
+            lid = make_lid_v5(nm, ec, r, sx, upper, rho, mats)
             lid["uv"] = "face"
-            lid["fx"] = "lidup" if nm == "LidUp" else "lidlow"
+            lid["fx"] = "lidup" if upper else "lidlow"
             special[lid.name] = "head"
             parts.append(lid)
-        if sp.v4:   # textured iris (planar UV), lash line + lash card in the Hair colour
-            ri = 0.0060 * hk
-            iris = nb.uv_sphere("Iris", ri, (ex, cy - r + 0.0013, ez), 10, 5, scale=(1, 0.42, 1))
-            iris["uv"] = "iris:%f,%f,%f" % (ex, ez, ri)
-            parts.append(set_material(iris, mats, "Eyes"))
-            ll = lash_line(Vector((ex, cy, ez)), r, sx, hk, mats)
-            parts.append(set_material(ll, mats, "Hair"))
-            parts.append(lash_cards(Vector((ex, cy, ez)), r, sx, hk, mats, female))
-            ll["fx"] = parts[-1]["fx"] = "lash"
-        else:
-            iris = nb.uv_sphere("Iris", 0.0058 * hk, (ex, cy - r + 0.0012, ez), 8, 4, scale=(1, 0.45, 1))
-            parts.append(set_material(iris, mats, "Eyes"))
-            parts.append(lash_line(Vector((ex, cy, ez)), r, sx, hk, mats))
-            parts[-1]["fx"] = "lash"
-        # eyebrow: tapered slab following the brow surface (thicker than v2: reads from 10 m)
-        n = 7
-        top, bot = [], []
-        for i in range(n):
-            u = i / (n - 1)
-            x = sx * (0.010 + 0.044 * u) * hk
-            z = hc.z + (0.0165 + 0.0065 * math.sin(math.pi * u * 0.9) - 0.0065 * u) * hk
-            w = (0.0050 - 0.0024 * u) * hk * (0.78 if female else 1.0)
-            hu = bvh_head.ray_cast(Vector((x, -0.5, z + w)), Vector((0, 1, 0)))
-            hd = bvh_head.ray_cast(Vector((x, -0.5, z - w)), Vector((0, 1, 0)))
-            if hu[0] is None or hd[0] is None:
-                continue
-            top.append((hu[0], hu[1]))
-            bot.append((hd[0], hd[1]))
-        verts, faces = [], []
-        th_b = 0.0024 if female else 0.0031
-        for i, ((pt, nt), (pb, nbm)) in enumerate(zip(top, bot)):
-            tb = th_b * (0.55 + 0.45 * math.sin(math.pi * (0.15 + 0.85 * i / max(1, len(top) - 1))))
-            verts += [pt + nt * 0.0006, pb + nbm * 0.0006, pb + nbm * tb * 0.8, pt + nt * tb]
-        for i in range(len(top) - 1):
-            a, b = 4 * i, 4 * (i + 1)
-            faces += [(a + 3, a + 2, b + 2, b + 3), (a, a + 3, b + 3, b), (a + 2, a + 1, b + 1, b + 2)]
-        m = len(top) - 1
-        faces += [(0, 1, 2, 3), (4 * m + 3, 4 * m + 2, 4 * m + 1, 4 * m)]
-        brow = nb.mesh_object("Brow", verts, faces)
+        for o in (lash_line_v5(ec, r, sx, r + 0.0020 * hk, mats, female),
+                  lash_v5("LashCard", ec, r, sx, r + 0.0020 * hk, mats, female),
+                  lash_v5("LashLow", ec, r, sx, r + 0.0017 * hk, mats, female, lower=True)):
+            if o is not None:
+                o["fx"] = "lash" if o.name.split(".")[0] != "LashLow" else "lashlow"
+                special[o.name] = "head"
+                parts.append(o)
+        brow = make_brow_v5(sp, sx, bvh_head, mats)
         brow["fx"] = "brow"                                # follows the skin in the expressions
-        bmb = bmesh.new()
-        bmb.from_mesh(brow.data)
-        bmesh.ops.recalc_face_normals(bmb, faces=bmb.faces)
-        bmb.to_mesh(brow.data)
-        bmb.free()
-        parts.append(set_material(brow, mats, "Hair"))
+        parts.append(brow)
 
     # ------------------------------------------------ hats / ponytail / bun tie / head accessories
     if sp.hat:
@@ -2928,7 +3273,7 @@ def build_human(female, variant=""):
             parts.append(o)
 
     print("[human] parts:", ", ".join("%s=%d" % (o.name, nb.tri_count(o)) for o in parts))
-    for o in make_lips(bvh_head, hc, hk, female, mats):
+    for o in make_lips_v5(bvh_head, sp, mats):
         o["fx"] = "lipup" if o.name.startswith("LipUp") else "liplow"
         parts.append(o)
     for o in make_mouth_inside(sp, mats):

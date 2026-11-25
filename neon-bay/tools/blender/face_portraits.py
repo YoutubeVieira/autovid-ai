@@ -41,7 +41,7 @@ def render(path, tmp, tag):
             for kb in o.data.shape_keys.key_blocks[1:]:
                 kb.value = 0.0
     head = arm.matrix_world @ arm.pose.bones["Head"].head
-    center = head + Vector((0, -0.02, 0.075))
+    center = head + Vector((0, -0.02, float(os.environ.get("NB_FACE_DZ", "0.075"))))
     cam_data = bpy.data.cameras.new("Cam")
     cam_data.lens = 85
     cam = nb.link(bpy.data.objects.new("Cam", cam_data))
@@ -62,7 +62,7 @@ def render(path, tmp, tag):
     out = []
     for view, d in (("front", Vector((0.0, -1.0, 0.03))), ("34", Vector((0.62, -1.0, 0.06)))):
         d.normalize()
-        cam.location = center + d * 0.74
+        cam.location = center + d * float(os.environ.get("NB_FACE_DIST", "0.74"))
         look_at(cam, center)
         scene.render.filepath = os.path.join(tmp, "%s_%s.png" % (tag, view))
         bpy.ops.render.render(write_still=True)

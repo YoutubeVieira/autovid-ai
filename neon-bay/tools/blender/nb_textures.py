@@ -465,6 +465,154 @@ def tattoo_skin(skin_png, out_name, arm_uv):
     return _save(out_name, img, levels=64, mode="RGB")
 
 
+# --------------------------------------------------------------------------- humans v5 (numpy, no bake)
+#   skin5_<f|m>[s]   : 512 RGB, light and neutral (x material.color): soft rosy blush on the cheeks,
+#                      nose, ears, chin; very faint pores; optional 3-day stubble ("s")
+#   skin5_n          : 512 tangent normal map of the skin (fine relief, very light), tiles
+#   iris5_<rrggbb>   : 128 RGB iris in its colour: fibres, collarette, limbal ring, pupil and two
+#                      catch lights (the Eyes material factor stays white)
+#   hair5            : 256 grey strands (along v) + a glossy highlight band (v ~ .30-.42), tiles in u
+def _periodic_noise(n, cells, seed, octaves=3):
+    """Smooth tileable value noise in [-0.5, 0.5] (sum of bilinear-upsampled random grids)."""
+    rng = np.random.RandomState(seed)
+    out = np.zeros((n, n), np.float32)
+    amp, tot = 1.0, 0.0
+    for o in range(octaves):
+        c = cells * (2 ** o)
+        g = rng.rand(c, c).astype(np.float32)
+        x = np.arange(n) * c / n
+        i0 = np.floor(x).astype(int) % c
+        i1 = (i0 + 1) % c
+        t = x - np.floor(x)
+        t = t * t * (3 - 2 * t)
+        rows = g[i0][:, None, :] * 0 + 0
+        a = g[i0][:, i0] * (1 - t)[None, :] + g[i0][:, i1] * t[None, :]
+        b = g[i1][:, i0] * (1 - t)[None, :] + g[i1][:, i1] * t[None, :]
+        out += amp * (a * (1 - t)[:, None] + b * t[:, None])
+        tot += amp
+        amp *= 0.5
+        del rows
+    return out / tot - 0.5
+
+
+def _skin5(female, stubble):
+    n = SIZE
+    jj, ii = np.mgrid[0:n, 0:n].astype(np.float32)
+    u = (ii + 0.5) / n
+    v = 1.0 - (jj + 0.5) / n
+    x0, x1, z0, z1 = FACE_RECT
+    dx = (u - 0.25) * ((x1 - x0) / 0.75) + x0
+    dz = v * (z1 - z0) + z0
+    face = np.clip((u - 0.245) / 0.02, 0, 1)
+    soft = _periodic_noise(n, 4, 11, 3)                      # very low contrast tone variation
+    pores = _periodic_noise(n, 64, 12, 2)
+    base = 0.955 + soft * 0.022 + pores * 0.018
+
+    def blob(cx, cz, rx, rz):
+        return np.exp(-(((dx - cx) / rx) ** 2 + ((dz - cz) / rz) ** 2))
+    k = 1.0 if female else 0.75
+    blush = (blob(0.038, -0.050, 0.022, 0.017) + blob(-0.038, -0.050, 0.022, 0.017)) * k
+    blush += blob(0.0, -0.047, 0.010, 0.010) * 0.75                        # nose tip
+    blush += (blob(0.080, -0.022, 0.012, 0.028) + blob(-0.080, -0.022, 0.012, 0.028)) * 0.7   # ears
+    blush += blob(0.0, -0.118, 0.016, 0.010) * 0.35                        # chin
+    blush += (blob(0.034, -0.002, 0.014, 0.005) + blob(-0.034, -0.002, 0.014, 0.005)) * 0.35  # upper lids
+    blush = np.minimum(blush, 1.0) * face
+    r = base - blush * 0.010
+    g = base - blush * 0.085
+    b = base - blush * 0.070
+    if stubble:
+        t = np.abs(dx) / 0.068
+        ztop = -0.064 + 0.050 * t * t
+        zbot = -0.175 + 0.075 * t * t
+        m = np.clip((ztop - dz) / 0.008, 0, 1) * np.clip((dz - zbot) / 0.03, 0, 1) * np.clip((1.06 - t) / 0.12, 0, 1)
+        m *= 1.0 - blob(0.0, -0.0889, 0.020, 0.0055)                      # not on the lips
+        m *= 0.70 + 0.30 * np.clip(1 - (t - 0.3) / 0.6, 0, 1)
+        rng = np.random.RandomState(21)
+        speck = rng.rand(n, n).astype(np.float32)
+        speck = (speck + np.roll(speck, 1, 0) + np.roll(speck, 1, 1)) / 3.0
+        m = m * face * (0.55 + 0.9 * (speck - 0.5) + 0.45)
+        m = np.clip(m, 0, 1.2)
+        r, g, b = r - m * 0.115, g - m * 0.105, b - m * 0.085
+    return np.stack([r, g, b], -1)
+
+
+def _skin5_normal():
+    n = 512
+    h = _periodic_noise(n, 64, 31, 2) * 0.75 + _periodic_noise(n, 16, 32, 2) * 0.25
+    return _normal_from_height(h, 1.0)
+
+
+def _iris5(col):
+    n = 128
+    yy, xx = np.mgrid[0:n, 0:n].astype(np.float32)
+    x, y = (xx + 0.5) / n * 2 - 1, 1 - (yy + 0.5) / n * 2
+    r = np.sqrt(x * x + y * y)
+    a = np.arctan2(y, x)
+    rng = np.random.RandomState(5)
+    k = np.arange(1, 48)
+    ph = rng.uniform(0, 2 * np.pi, (len(k),))
+    amp = rng.uniform(0.3, 1.0, (len(k),)) / np.sqrt(k)
+    fib = sum(amp[i] * np.cos(k[i] * 3 * a + ph[i] + 5 * r) for i in range(len(k)))
+    fib = (fib - fib.min()) / (fib.max() - fib.min())
+    c = np.array(col, np.float32)
+    light = np.clip(c * 1.6 + 0.08, 0, 1)
+    t = np.clip((r - 0.36) / 0.55, 0, 1)                     # light near the pupil, darker outside
+    rgb = light[None, None] * (1 - t[..., None]) + c[None, None] * t[..., None]
+    rgb = rgb * (0.72 + 0.42 * fib[..., None])
+    collar = np.exp(-((r - 0.50) / 0.06) ** 2) * 0.12
+    rgb = rgb + collar[..., None] * light
+    limbal = np.clip((r - 0.80) / 0.16, 0, 1) ** 1.3
+    rgb = rgb * (1 - 0.78 * limbal[..., None])
+    pupil = np.clip((r - 0.36) / 0.035, 0, 1)
+    rgb = rgb * pupil[..., None] + 0.015 * (1 - pupil[..., None])
+    # catch lights (key light up-left, small fill down-right)
+    for (hx, hy, hr, hv) in ((-0.30, 0.34, 0.17, 1.0), (0.30, -0.30, 0.07, 0.75)):
+        d = np.sqrt((x - hx) ** 2 + (y - hy) ** 2)
+        s_ = np.clip((hr - d) / 0.035, 0, 1) * hv
+        rgb = rgb * (1 - s_[..., None]) + s_[..., None]
+    return np.clip(rgb, 0, 1)
+
+
+def _hair5():
+    n = 256
+    jj, ii = np.mgrid[0:n, 0:n].astype(np.float32)
+    u = (ii + 0.5) / n
+    v = 1.0 - (jj + 0.5) / n
+    rng = np.random.RandomState(9)
+    s = np.zeros(n, np.float32)
+    for kk in (8, 16, 32, 64):
+        cc = rng.rand(kk).astype(np.float32)
+        x = np.arange(n) * kk / n
+        i0 = np.floor(x).astype(int) % kk
+        t = x - np.floor(x)
+        s += (cc[i0] * (1 - t) + cc[(i0 + 1) % kk] * t) / (kk ** 0.35)
+    s = (s - s.min()) / (s.max() - s.min())                   # strand brightness across u (tiles)
+    strands = s[None, :] * np.ones((n, 1), np.float32)
+    wav = 0.012 * np.sin(u * 2 * np.pi * 2) + 0.006 * np.sin(u * 2 * np.pi * 5 + 1.0)
+    band = np.exp(-(((v - 0.36 - wav) / 0.07) ** 2)) * (0.55 + 0.45 * strands)
+    root = np.clip(v / 0.08, 0, 1)                           # slightly darker at the roots / tips
+    tip = 1.0 - 0.12 * np.clip((v - 0.80) / 0.2, 0, 1)
+    val = (0.70 + 0.16 * strands) * (0.86 + 0.14 * root) * tip + band * 0.30
+    return np.clip(val, 0, 1)
+
+
+def textures_v5(female, stubble, iris_col):
+    """v5 face / hair maps; returns {name: png path} (cached per process)."""
+    global _DIR, SIZE
+    if _DIR is None:
+        _DIR = tempfile.mkdtemp(prefix="nb_tex_")
+    key = "skin5_%s%s" % ("f" if female else "m", "s" if stubble else "")
+    if key not in _CACHE:
+        _CACHE[key] = _save(key, _skin5(female, stubble), levels=64, mode="RGB")
+    if "skin5_n" not in _CACHE:
+        _CACHE["skin5_n"] = _save("skin5_n", _skin5_normal(), levels=16, mode="RGB")
+        _CACHE["hair5"] = _save("hair5", _hair5(), levels=48)
+    ik = "iris5_%02x%02x%02x" % tuple(int(c * 255) for c in iris_col)
+    if ik not in _CACHE:
+        _CACHE[ik] = _save(ik, _iris5(iris_col), levels=48, mode="RGB")
+    return {"skin": _CACHE[key], "skin_n": _CACHE["skin5_n"], "hair": _CACHE["hair5"], "iris": _CACHE[ik]}
+
+
 # --------------------------------------------------------------------------- animals
 # 256 px tiling maps, box-projected at world scale by gen_animals.py (light grey: the Fur / Fur2
 # colours come from material.color, so pelts can be recoloured):
