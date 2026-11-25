@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Coach Viral</title>
+  <meta name="description" content="Coach IA pour vos vidéos courtes : idées, scripts, score de viralité, analyse de profil et légendes par plateforme.">
+  <meta name="theme-color" content="#14121F">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon.svg">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="logo" aria-hidden="true">▲</span> Coach Viral</div>
+    <button class="ghost" id="btn-reglages" aria-label="Réglages">⚙︎</button>
+  </header>
+
+  <main id="vue"></main>
+
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-vue="idees" aria-selected="true"><span>💡</span>Idées</button>
+    <button role="tab" data-vue="score"><span>🎯</span>Score</button>
+    <button role="tab" data-vue="profil"><span>📈</span>Profil</button>
+    <button role="tab" data-vue="publier"><span>🚀</span>Publier</button>
+  </nav>
+
+  <script src="js/ui.js"></script>
+  <script src="js/media.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "Coach Viral",
+  "short_name": "Coach Viral",
+  "description": "Coach IA pour vos vidéos courtes : idées, scripts, score de viralité, analyse de profil.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#100E18",
+  "theme_color": "#14121F",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

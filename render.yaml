@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: coach-viral
+    runtime: node
+    rootDir: coach-viral
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/sante
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CODE_ACCES
+        sync: false
