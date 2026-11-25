@@ -79,3 +79,12 @@ CTA : « commente Compétences sous ma vidéo sur Instagram et je te les envoie 
 
 ## Ce que le dépôt en tire
 `projet-video/styles/STYLES.md` associe à chaque style l'équivalent public le plus proche, vérifié (dépôt cloné et lu, commit épinglé) : skills `claymation-ads` et `seedance` (fal.ai, payants, sans licence publiée → téléchargés sur le PC, jamais copiés ici), `talking-explainer` (MIT, présentateur cartoon avec lip-sync), et OpenMontage (AGPL-3.0, 13 pipelines dont `animated-explainer`, `animation`, `cinematic`, `character-animation`, `documentary-montage`). Le style **Singing** n'a pas d'équivalent public : il est assemblé à partir des outils d'OpenMontage (musique avec voix + lip-sync). Installation par `outils/installer-styles.sh` / `.ps1` ; agent `directeur-creatif` pour choisir l'outil, estimer le coût et faire valider avant toute génération payante.
+
+---
+
+# Post 5 — « Máquina de Reels » (Instagram, en portugais)
+
+Post texte : une « machine » qui crée, publie et analyse des vidéos, où « votre seul travail est de relire et d'approuver ». Six étapes : (1) machine à Reels — narration, animations, sous-titres ; (2) connecteur Instagram, TikTok, YouTube pour publier et suivre les métriques ; (3) recherche automatique des tendances de la niche ; (4) Claude écrit les scripts et produit les 7 vidéos de la semaine ; (5) approbation puis une publication par jour ; (6) analyse des performances et nouvelles versions des meilleures vidéos. « Le secret » : utiliser les données réelles du profil. CTA : « commente MÁQUINA » (skill non publiée). Le résultat revendiqué (15 millions de vues, 50 000 abonnés en 30 jours) n'est pas vérifiable.
+
+## Ce que le dépôt en tire
+`projet-video/machine/` : la boucle hebdomadaire, avec trois nouveaux agents (`chef-machine`, `publicateur`, `analyste-performance`) qui s'appuient sur ceux qui existaient déjà (recherche `stratege-youtube`, scripts `scenariste`, production `monteur-video` / `directeur-creatif`). `outils/machine.py` tient la file des 7 vidéos avec une étape d'approbation obligatoire (impossible de programmer ou publier une vidéo non approuvée), programme une vidéo par jour (`publications.csv`, `calendrier.ics`), importe les statistiques réelles (exports YouTube Studio, Instagram, TikTok — colonnes EN/FR/PT) et produit un rapport qui désigne les variantes à produire. La publication passe par les connecteurs du compte Claude (OpusClip, Picsart, Supermetrics) ou par la programmation native des plateformes : rien n'est publié sans confirmation.

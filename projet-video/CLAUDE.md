@@ -5,6 +5,9 @@ Production de vidéos YouTube et de Shorts au format décrit dans `../ANALYSE.md
 ## Quel agent pour quoi
 | Besoin | Agent |
 |--------|-------|
+| semaine de contenu : 7 vidéos, approbation, 1 publication/jour, analyse | `chef-machine` |
+| programmer / publier sur Instagram, TikTok, YouTube (vidéos approuvées seulement) | `publicateur` |
+| statistiques réelles, classement, variantes à produire | `analyste-performance` |
 | vidéo dans un style précis (claymation, explainer, chanté, pub, 3D, cartoon, motion) | `directeur-creatif` |
 | quoi publier, quand, audit, SEO, viral, commentaires | `stratege-youtube` |
 | script, hook, titre, miniature | `scenariste` |
@@ -19,6 +22,9 @@ Prises brutes et voix off : `entrees/<slug>/` (voir `entrees/LISEZMOI.md`). Ne j
 ## Chaîne de production
 `stratege-youtube` (sujet) → `scenariste` (`scripts/<slug>.md`) → tournage → `monteur-video` (`remotion/data/<slug>.json`) → `sound-designer` (si les sons automatiques ne suffisent pas) → rendu `remotion/out/<slug>.mp4` → `decoupeur-shorts`.
 Les agents se passent le travail par fichiers : chacun lit ce que le précédent a écrit.
+
+## Machine à Reels
+Boucle hebdomadaire créer → approuver → programmer → publier → analyser : `machine/LISEZMOI.md`, outil `outils/machine.py`. L'utilisateur seul approuve ; rien n'est programmé ni publié sans son approbation.
 
 ## Styles de création (7)
 Catalogue, outils, clés et coûts : `styles/STYLES.md`. Installation sur le PC : `bash outils/installer-styles.sh` (ou `.ps1`). Les outils tiers vont dans `externes/` et `.claude/skills/<style>`, jamais dans git ; les clés dans `.env`, jamais dans le chat.
