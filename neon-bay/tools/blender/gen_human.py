@@ -2596,6 +2596,7 @@ def build_human(female, variant=""):
     hair_i, eyes_i, shirt_i = ORDER.index("Hair"), ORDER.index("Eyes"), ORDER.index("Shirt")
     white_i, hat_i = ORDER.index("EyeWhite"), ORDER.index("Hat")
     pants_i, shoes_i = ORDER.index("Pants"), ORDER.index("Shoes")
+    trim_i, sole_i = ORDER.index("Trim"), ORDER.index("Sole")
     arm_bones = [b for b in bone_names if b.startswith(("UpperArm", "LowerArm", "Hand", "Thumb", "Fingers"))]
     neck_axis = np.array([0, 0.022])
     rule = np.array([""] * len(co), dtype=object)
@@ -2648,7 +2649,10 @@ def build_human(female, variant=""):
                 W[i, bidx[b]] = 0
         if W[i].sum() < 1e-6:                            # outside every element: nearest bone
             best, bd = "Hips", 9.0
+            no_arms = vmat[i] in (pants_i, shoes_i, trim_i, sole_i) or rule[i] == "legs"
             for name, h, t, _ in BONES:
+                if no_arms and name in arm_bones:        # waistbands / soles never follow the hands
+                    continue
                 a, b = np.array(J[h]), np.array(J[t])
                 ab = b - a
                 hh = np.clip((c - a) @ ab / (ab @ ab), 0, 1)
@@ -2656,6 +2660,31 @@ def build_human(female, variant=""):
                 if d < bd:
                     best, bd = name, d
             W[i, bidx[best]] = 1.0
+    # v4: the torso is skinned by height (Hips -> Spine -> Chest) instead of by the dominant
+    # field: shirt and trousers share the same weights at the waist, so hip sways / body waves
+    # (Dance, Dance2, Sit) no longer open a gap between the top and the waistband.
+    tb = [bidx["Hips"], bidx["Spine"], bidx["Chest"]]
+    zA, zB, zC = sp.waist - 0.05 * k, 1.13 * k, 1.31 * k
+    for i in range(len(co)):
+        c = co[i]
+        tot = W[i].sum()
+        tor = W[i, tb].sum()
+        if tot < 1e-9 or tor < 0.55 * tot or abs(c[0]) > 0.24 or not (zA - 0.08 < c[2] < zC + 0.02):
+            continue
+        if rule[i] in ("skirt", "head", "chest") or vmat[i] in (hair_i, eyes_i, white_i, hat_i):
+            continue
+        z = c[2]
+        if z <= zA:
+            wh, ws, wc = 1.0, 0.0, 0.0
+        elif z <= zB:
+            t = smooth((z - zA) / (zB - zA))
+            wh, ws, wc = 1 - t, t, 0.0
+        else:
+            t = smooth((z - zB) / (zC - zB))
+            wh, ws, wc = 0.0, 1 - t, t
+        if z < zA:                                       # below the waist: legs keep their share
+            continue
+        W[i, tb] = np.array([wh, ws, wc]) * tor
     for i in range(len(co)):
         order = np.argsort(-W[i])[:4]
         tot = W[i, order].sum()

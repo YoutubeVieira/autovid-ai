@@ -8,7 +8,7 @@
 Writes models/previews/<name>.png (640x400, 3/4 view, studio light);
 "<name>@<Clip>[:frame]" writes previews/<name>_<Clip>[_<frame>].png (default frame 1);
 "<name>@face" writes previews/<name>_face.png (3/4 close-up of the head);
-debug close-ups: @front, @side (head), @feet, @hands (left hand), @chest (head + torso, from the front);
+debug close-ups: @front, @side (head), @feet, @hands (left hand), @chest (head + torso, from the front), @waist;
 "<name>@far" / "@top": whole body from 10 m (3/4 from above / almost top-down, game distance);
 "<name>@<Clip>:<frame>/handR" (or /handL, /face, /far, /top): a view of a posed clip, e.g.
 "human_m@Aim:0/handR+w_pistol" = close-up of the right hand holding the pistol;
@@ -91,7 +91,7 @@ def render_model(spec):
     name, _, variant = spec.partition("@")
     variant, _, cview = variant.partition("/")          # "<Clip>:<frame>/<view>"
     clip, _, frame = variant.partition(":")
-    face = clip in ("face", "front", "side", "feet", "hands", "far", "top", "chest")
+    face = clip in ("face", "front", "side", "feet", "hands", "far", "top", "chest", "waist")
     view = clip
     if face or not clip:
         clip = "Idle"
@@ -145,6 +145,8 @@ def render_model(spec):
             hp = [p for p in pts if p.z < 0.25]
         elif view == "hands":
             hp = [p for p in pts if 0.6 < p.z < 0.95 and p.x > 0.15]
+        elif view == "waist":
+            hp = [p for p in pts if 0.75 < p.z < 1.2 and abs(p.x) < 0.25]
         else:
             hp = [p for p in pts if p.z > top - (0.62 if view == "chest" else 0.30) and abs(p.x) < (0.24 if view == "chest" else 0.15)]
         lo = Vector([min(p[i] for p in hp) for i in range(3)])
