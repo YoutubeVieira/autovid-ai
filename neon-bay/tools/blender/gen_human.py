@@ -1253,14 +1253,41 @@ def resample_loop(pts, step):
     return out
 
 
+def snap_boundary(obj, curves, reach=0.03):
+    """Move the boundary vertices of a piece onto the nearest smooth seam curve (closed polylines).
+    Both pieces of a seam share the same boundary positions, so they stay watertight."""
+    if not curves:
+        return
+    me = obj.data
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    A = np.concatenate(curves)
+    B = np.concatenate([np.roll(c, -1, 0) for c in curves])
+    AB = B - A
+    L2 = np.maximum((AB ** 2).sum(1), 1e-12)
+    for v in bm.verts:
+        if not v.is_boundary:
+            continue
+        p = np.array(v.co)
+        t = np.clip(((p - A) * AB).sum(1) / L2, 0, 1)
+        Q = A + AB * t[:, None]
+        d = ((Q - p) ** 2).sum(1)
+        i = int(d.argmin())
+        if d[i] < reach * reach:
+            v.co = Vector(Q[i])
+    bm.to_mesh(me)
+    bm.free()
+    me.update()
+
+
 def seam_piping(name, piece, bvh, mats, mat, zmin, width=0.013, thick=0.0032):
     """Hide the stair-stepped material seams of a garment piece (swimsuit / tank top cut-outs):
     each boundary loop is resampled, smoothed, projected back on the body and turned into a
     piping ribbon that straddles the seam."""
     out = []
     for li, loop in enumerate(boundary_loops(piece, zmin)):
-        pts = resample_loop(loop, 0.030)
-        for _ in range(6):
+        pts = resample_loop(loop, 0.026)
+        for _ in range(1):          # the seam is already snapped onto a smooth curve: barely smooth
             pts = [pts[i] * 0.5 + (pts[i - 1] + pts[(i + 1) % len(pts)]) * 0.25 for i in range(len(pts))]
         P, N = [], []
         for p in pts:
@@ -1289,7 +1316,8 @@ def torso_bare(sp, c):
     if x > xo_z:
         return True
     if x < xi:
-        nz = nf if c.y < 0.01 else nbk
+        tb = min(1.0, max(0.0, (c.y + 0.02) / 0.09))
+        nz = nf + (nbk - nf) * tb * tb * (3 - 2 * tb)       # front scoop rising smoothly to the back
         return z > nz + 0.045 * (x / xi) ** 2.5                # scooped neckline rising to the straps
     return False
 
@@ -1299,8 +1327,8 @@ def hat_frame(sp):
     if sp.hat != "bucket":
         return cap_frame(sp)
     hc, hk = sp.hc, sp.hk
-    front = hc + Vector((0, -0.084, 0.026)) * hk
-    back = hc + Vector((0, 0.100, -0.006)) * hk
+    front = hc + Vector((0, -0.084, 0.034)) * hk
+    back = hc + Vector((0, 0.100, -0.008)) * hk
     n = (back - front).cross(Vector((1, 0, 0))).normalized()
     if n.z < 0:
         n = -n
@@ -1328,13 +1356,13 @@ def make_bucket(sp, bvh, mats):
     hit = bvh.ray_cast(C + n * 0.3, -n, 0.3)
     if hit[0] is not None:
         H = (hit[0] - C).dot(n)
-    H = max(H + 0.010, 0.088 * hk)
+    H = max(H + 0.008, 0.080 * hk)
     rings = []
     for e in range(NE):
         h = H * e / (NE - 1) * 0.94
         ring = []
         for d, r in rim:
-            taper = 1.0 - 0.10 * (e / (NE - 1)) ** 1.5
+            taper = 1.0 - 0.22 * (e / (NE - 1)) ** 1.4
             p = C + n * h + d * r * taper
             hit = bvh.ray_cast(C + n * h + d * 0.3, -d, 0.3)
             if hit[0] is not None:
@@ -1368,11 +1396,11 @@ def make_bucket(sp, bvh, mats):
         p0 = rings[0][i]
         for j in range(NB):
             s = j / (NB - 1)
-            out = d * (0.058 * hk * s) - n * (0.030 * s ** 1.3)
+            out = d * (0.050 * hk * s) - n * (0.024 * s ** 1.2)
             verts.append(p0 + out + n * 0.0022)
         for j in range(NB):
             s = j / (NB - 1)
-            out = d * (0.058 * hk * s) - n * (0.030 * s ** 1.3)
+            out = d * (0.050 * hk * s) - n * (0.024 * s ** 1.2)
             verts.append(p0 + out - n * 0.0022)
     W = 2 * NB
     for i in range(NA):
@@ -1734,7 +1762,7 @@ def clothes_v4(sp, pieces, parts, bvh, bvh_head, body_E, mats, special, seam_src
     # ---- tops
     if sp.sleeveless and seam_src is not None:
         for o in seam_piping("Piping", seam_src, bvh, mats, "Shirt", sp.waist + 0.05,
-                             width=0.012 if sp.top == "swim" else 0.015):
+                             width=0.011 if sp.top == "swim" else 0.014):
             add(o, "box:Shirt")
         bpy.data.objects.remove(seam_src)
     if sp.top in ("crop", "jersey", "jumpsuit"):
@@ -2178,6 +2206,15 @@ def build_human(female, variant=""):
             v.co.z = 0.0
     pieces = split_by_material(body, mats)
     seam_src = None
+    if sp.sleeveless:              # snap the stair-stepped cut-out seams onto smooth curves
+        curves = []
+        for lp in boundary_loops(pieces["Shirt"], sp.waist + 0.05):
+            c = resample_loop(lp, 0.006)
+            for _ in range(16):
+                c = [c[i] * 0.5 + (c[i - 1] + c[(i + 1) % len(c)]) * 0.25 for i in range(len(c))]
+            curves.append(np.array(c))
+        for nm in ("Shirt", "Skin"):
+            snap_boundary(pieces[nm], curves)
     if sp.sleeveless:              # garment cut-outs: keep the dense boundary for the piping
         seam_src = pieces["Shirt"].copy()
         seam_src.data = pieces["Shirt"].data.copy()
@@ -2195,7 +2232,18 @@ def build_human(female, variant=""):
     else:
         budget = {"Shirt": 1150, "Pants": 960, "Shoes": 460, "Skin": 380}
     for name, o in pieces.items():
-        decimate(o, budget.get(name, 300))
+        keep = None
+        if sp.sleeveless and name in ("Shirt", "Skin"):
+            # protect the garment cut-out edges (otherwise the decimated seam shows red teeth)
+            from mathutils.kdtree import KDTree
+            bl = [p_ for lp_ in boundary_loops(o, sp.waist + 0.05) for p_ in lp_]
+            if bl:
+                kd = KDTree(len(bl))
+                for i_, p_ in enumerate(bl):
+                    kd.insert(p_, i_)
+                kd.balance()
+                keep = lambda c, kd=kd: 1.0 if kd.find(c)[2] < 0.010 else 0.0
+        decimate(o, budget.get(name, 300), keep)
         o["uv"] = {"Skin": "armcyl" if "tattoo" in sp.extras else "strip", "Shoes": "shoe"}.get(name, "box:" + name)
 
     # ------------------------------------------------ head family
@@ -2275,7 +2323,7 @@ def build_human(female, variant=""):
             off = 0.0042 + 0.0030 * top
             off *= 1.0 + 0.32 * rid
         elif sp.hair == "buzz":            # shaved / buzz cut: a thin even shell
-            off = 0.0019 + 0.0006 * top
+            off = 0.0036 + 0.0008 * top
         elif female:
             off = 0.008 + 0.006 * top
             off *= 1.0 + 0.22 * rid

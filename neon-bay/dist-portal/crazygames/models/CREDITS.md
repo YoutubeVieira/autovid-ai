@@ -10,7 +10,18 @@ Tout fichier `.glb` animé (exporté de Blender, ou packs CC0 Quaternius / Kenne
 aucune géométrie, texture ou animation reprise d'un autre jeu ou d'un pack. Régénérables à l'identique
 (`python3 tools/blender/gen_*.py`), mêmes droits que le reste du jeu.
 
-- `car_sedan.glb`, `car_sports.glb`, `car_suv.glb`, `car_van.glb` : voitures (`gen_cars.py`).
+- `car_sedan.glb`, `car_sports.glb`, `car_suv.glb`, `car_van.glb`, `car_police.glb` : voitures version 3
+  (`gen_cars.py`, kit `nb_vehicle.py`) : carrosserie lissée à lignes de caisse et passages de roue évasés,
+  optiques en verre émissif, calandre ajourée, habitacle visible, jantes détaillées (disques, étriers,
+  écrous), pneus à sculptures en normal map, plaques sans texte lisible ; voiture de police fictive
+  (livrée bicolore, rampe de gyrophares, pare-buffle, emblème générique). Designs inventés : aucune
+  marque, aucun logo, aucune calandre de constructeur réel.
+- `army_jeep.glb`, `army_truck.glb`, `army_apc.glb` : véhicules militaires génériques (`gen_army.py`) :
+  4x4 ouvert à arceaux, camion bâché 6 roues, blindé 8 roues à tourelle. Numéros au pochoir inventés,
+  aucun insigne réel. Textures (pneus, plastique, toile, optiques, plaques) générées par numpy dans
+  `nb_vehicle.py`, aucune source externe.
+- Planches d'aperçu des véhicules : `tools/blender/previews/<nom>_sheet.png` et `vehicles_sheet.png`
+  (`vehicle_sheet.py`).
 - `human_m.glb`, `human_f.glb`, `human_m2.glb` (trapu, sweat à capuche, casquette), `human_f2.glb` (jupe,
   queue de cheval) : humains skinnés (version 3 : doigts animés, textures procédurales cuites dans Blender —
   peau, maille, sergé, semelles — et normal maps tissu, mèches de cheveux en géométrie) avec animations Idle,
@@ -24,6 +35,14 @@ aucune géométrie, texture ou animation reprise d'un autre jeu ou d'un pack. R�
   Blender (`nb_textures.weapon_textures`, 256 px, normal maps). Designs génériques inventés : aucune
   reproduction d'une arme réelle, aucune marque ni marquage, aucune texture externe.
 - `palm.glb`, `lamp.glb`, `hydrant.glb`, `bench.glb`, `traffic_light.glb` : mobilier urbain (`gen_props.py`).
+- `lm_statue.glb` (« Statue de la Lumière » : femme drapée à la torche, couronne à 5 rayons, tablette « NB »,
+  piédestal sur fort en étoile à 7 branches, îlot) et `lm_palace.glb` (« Palais présidentiel » néoclassique,
+  portique ionique, drapeau fictif) : monuments inventés de Néon Bay, **inspirés** des grands symboles
+  américains sans en copier aucun ni porter de nom réel (`gen_landmarks.py`).
+- `prop_basket_hoop`, `prop_basket_court`, `prop_soccer_goal`, `prop_soccer_field`, `prop_boxing_ring`,
+  `prop_ball_basket`, `prop_ball_soccer`, `prop_stadium_stand` (`.glb`) : équipements sportifs génériques,
+  sans marque ni logo (`gen_landmarks.py`). Textures procédurales cuites dans Blender (marbre, pierre,
+  patine, gazon, béton, toile, parquet + lignes du terrain dessinées par le script).
 - Chaque `<nom>.glb.js` est la copie base64 du `.glb` correspondant (secours hors serveur).
 - `previews/*.png` : rendus d'aperçu (`render_previews.py`) ; planche des armes dans
   `tools/blender/previews/weapons_sheet.png` (`weapon_sheet.py`).

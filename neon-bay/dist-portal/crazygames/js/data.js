@@ -51,7 +51,7 @@ window.NB_DATA = (() => {
         // ville balnéaire néon : tours de verre au centre, petits immeubles pastel, palmiers, plage au sud, océan à l'est
         roof: 'flat', glass: '#2b3d63', facades: ['#f2b5d4', '#9fe0e6', '#f6e3c3', '#c9b8ff', '#ffd1a1', '#b8f2c9'],
         trees: 'palm', edges: { s: 'beach', e: 'sea' }, lamp: '#e9f6ff', sidewalk: 'concrete', sky: '#7cc4f2', ground: '#c9b79a',
-        landmarks: ['tower', 'wheel', 'stadium'],
+        landmarks: ['tower', 'wheel', 'stadium', 'palace', 'statue'],
         peds: { shirts: ['#ff2e93', '#21e6ff', '#ffd23f', '#ffffff', '#111111', '#7a5cff', '#ff8a3d', '#3ee0c5'], pants: ['#2f4f86', '#1d1a2e', '#c2a878', '#e8e8ee'], shorts: .45, hat: .3, hatTypes: ['cap', 'cap', 'beanie'], jacket: .15, skirt: .2, skins: ['#f2d3b3', '#e0b48c', '#c68b59', '#8d5a3b', '#5c3a24'] },
         cars: { palette: ['#ff5d8f', '#ffd23f', '#3ee0c5', '#e7e3f5', '#4da3ff', '#c13cff', '#111111', '#ff8a3d'], taxi: '#ffd23f', types: { sedan: 3, muscle: 2, convertible: 1.4, van: .8, pickup: 1, taxi: 1 } },
       },
@@ -212,7 +212,7 @@ window.NB_DATA = (() => {
   };
 
   // modèles 3D animés (.glb) : chemin -> utilisés si le fichier se charge
-  const MODELS = { robot: 'models/robot.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', human_m2: 'models/human_m2.glb', human_f2: 'models/human_f2.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb', w_pistol: 'models/w_pistol.glb', w_uzi: 'models/w_uzi.glb', w_shotgun: 'models/w_shotgun.glb', w_rifle: 'models/w_rifle.glb', w_sniper: 'models/w_sniper.glb', w_rocket: 'models/w_rocket.glb', w_minigun: 'models/w_minigun.glb', w_lmg: 'models/w_lmg.glb', w_gl: 'models/w_gl.glb', w_rail: 'models/w_rail.glb' };
+  const MODELS = { robot: 'models/robot.glb', lm_palace: 'models/lm_palace.glb', car_police: 'models/car_police.glb', army_jeep: 'models/army_jeep.glb', army_truck: 'models/army_truck.glb', army_apc: 'models/army_apc.glb', lm_statue: 'models/lm_statue.glb', car_sedan: 'models/car_sedan.glb', car_sports: 'models/car_sports.glb', car_suv: 'models/car_suv.glb', car_van: 'models/car_van.glb', human_m: 'models/human_m.glb', human_f: 'models/human_f.glb', human_m2: 'models/human_m2.glb', human_f2: 'models/human_f2.glb', palm: 'models/palm.glb', lamp: 'models/lamp.glb', hydrant: 'models/hydrant.glb', bench: 'models/bench.glb', traffic_light: 'models/traffic_light.glb', w_pistol: 'models/w_pistol.glb', w_uzi: 'models/w_uzi.glb', w_shotgun: 'models/w_shotgun.glb', w_rifle: 'models/w_rifle.glb', w_sniper: 'models/w_sniper.glb', w_rocket: 'models/w_rocket.glb', w_minigun: 'models/w_minigun.glb', w_lmg: 'models/w_lmg.glb', w_gl: 'models/w_gl.glb', w_rail: 'models/w_rail.glb' };
 
   return { MODELS, SHOP_CONFIG, SPACE, REGIONS, LEVELS, STEP_LABEL, WEAPONS, GEAR, AUDIO_FILES, OUTFITS };
 })();

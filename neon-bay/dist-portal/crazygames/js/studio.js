@@ -320,7 +320,9 @@
         const tgId = s.tg !== undefined ? s.tg : o.target, tg = tgId && P.objects.find(x => x.id === tgId);
         if (tg && rt[tg.id]) { const tp = rt[tg.id].holder.position.clone(); tp.y += (s.ty != null ? s.ty : o.tgtY != null ? o.tgtY : 1); cinCam.lookAt(tp); h.quaternion.copy(cinCam.quaternion); }
         else cinCam.quaternion.copy(h.quaternion);
-        if (s.sh) { const a = s.sh, n = time * 37; cinCam.position.x += Math.sin(n * 1.3) * .06 * a; cinCam.position.y += Math.sin(n * 1.7 + 1) * .05 * a; cinCam.rotateZ(Math.sin(n * .9) * .006 * a); }
+        if (s.sh) { // mouvement « caméra à l'épaule stabilisée » : lent et doux (0,4 à 1,6 Hz), atténué sur les longues focales
+          const a = Math.min(s.sh, 3) * .35 * Math.min(1, 34 / Math.max(20, s.f || 34)), T = time * 6.2832;
+          cinCam.position.x += (Math.sin(T * .43) * .6 + Math.sin(T * 1.07 + 2) * .3 + Math.sin(T * 1.61 + 4) * .1) * .05 * a; cinCam.position.y += (Math.sin(T * .51 + 1) * .6 + Math.sin(T * 1.23 + 3) * .4) * .035 * a; cinCam.rotateZ((Math.sin(T * .37 + .5) * .7 + Math.sin(T * .91) * .3) * .004 * a); }
         cinCam.updateProjectionMatrix(); h.visible = !camView && !recording;
       }
       if (u.action) { u.action.time = ((ts * (o.speed || 1)) % (u.clipDur || 1)); u.mixer.update(0); }

@@ -754,7 +754,7 @@ def make_statue():
             kind = "g" if not (rings[i][2] == "g" and rings[i + 1][2] == "p") else "g"
         for s in range(segs):
             s2 = (s + 1) % segs
-            f.append((i * segs + s, i * segs + s2, (i + 1) * segs + s2, (i + 1) * segs + s))
+            f.append(((i + 1) * segs + s, (i + 1) * segs + s2, i * segs + s2, i * segs + s))   # faces up
             fm.append({"g": 0, "p": 1, "r": 2}[kind])
     isl = nb.mesh_object("Islet", v, f, [grass, stone, rock], fm)
     parts.append(smooth(isl, 30))
@@ -830,7 +830,7 @@ def make_statue():
     fig.append(statue_robe(patina))
     for x, y, sz in ((0.085, -0.235, (0.045, 0.072, 0.034)), (-0.075, -0.200, (0.042, 0.060, 0.030))):
         fig.append(sphere(1.0, (x, y, 0.028), patina, 10, 6, sz, 60))         # toes under the hem
-    fig.append(rev([(0.27, -0.02), (0.27, 0.0)], 32, patina, cap1=True))    # bronze base slab
+    fig.append(rev([(0.31, -0.02), (0.31, 0.004)], 32, patina, cap1=True))    # bronze base slab
     # crown: band + 5 rays fanned over the front half
     fig.append(rev([(0.090, 1.684), (0.100, 1.692), (0.101, 1.712), (0.094, 1.728)], 20, patina,
                    loc=(0, 0.004, 0), angle=50, scale=(1.0, 1.08)))
@@ -927,7 +927,7 @@ def balustrade(p0, p1, z, m, spacing=0.7, sides=4, h=1.05):
     parts = [box((L, 0.42, 0.14), (mid.x, mid.y, z + 0.07), m, ang),
              box((L, 0.46, 0.14), (mid.x, mid.y, z + h - 0.07), m, ang)]
     n = max(1, int(L / spacing))
-    prof = [(0.07, z + 0.14), (0.13, z + 0.42), (0.065, z + 0.78), (0.09, z + h - 0.14)]
+    prof = [(0.075, z + 0.14), (0.14, z + 0.40), (0.07, z + h - 0.14)]      # spindle: 2 bands
     for i in range(n):
         p = p0 + d * ((i + 0.5) / n)
         parts.append(rev(prof, sides, m, loc=(p.x, p.y, 0), phase=math.pi / 4 + ang, angle=89))
@@ -939,7 +939,7 @@ def ionic_column(x, y, z0, z1, D, m):
     H = z1 - z0
     parts.append(bbox(x - D * 0.68, x + D * 0.68, y - D * 0.68, y + D * 0.68, z0, z0 + 0.18, m))
     parts.append(rev([(D * 0.64, z0 + 0.18), (D * 0.62, z0 + 0.30), (D * 0.54, z0 + 0.36), (D * 0.58, z0 + 0.46),
-                      (D * 0.52, z0 + 0.52)], 12, m, loc=(x, y, 0), angle=60))
+                      (D * 0.52, z0 + 0.52)], 12, m, loc=(x, y, 0), angle=60, cap1=True))
     sh0, sh1 = z0 + 0.52, z1 - 0.62
 
     def flute(r, z, a):
@@ -986,7 +986,7 @@ def make_palace():
     # ---------------- grounds: lawn slab, paths, hedges
     P.append(bbox(-55, 55, -40, 40, -0.3, 0.0, grass))
     P.append(bbox(-3.0, 3.0, -40, -13.0, 0.0, 0.04, path))                  # main drive
-    P.append(rev([(9.0, 0.0), (9.0, 0.04), (12.5, 0.04), (12.5, 0.0)], 32, path, loc=(0, -26.5, 0), angle=30))
+    P.append(rev([(12.5, 0.0), (12.5, 0.035), (9.0, 0.035), (9.0, 0.0)], 32, path, loc=(0, -26.5, 0), angle=30))
     P.append(bbox(-46, 46, -2.0, -1.0, 0.0, 0.04, path))                    # walk along the facade
     for sx in (-1, 1):
         P.append(bbox(sx * 53.0 - 0.6, sx * 53.0 + 0.6, -37, 38.0, 0.0, 1.4, hedge))
@@ -1047,14 +1047,14 @@ def make_palace():
 
     # ---------------- balustrades on the roofs
     zb = 15.2
-    P += balustrade((-20.4, -1.4), (20.4, -1.4), zb, marble, 0.72)
-    P += balustrade((-20.4, 21.4), (20.4, 21.4), zb, marble, 0.72)
+    P += balustrade((-20.4, -1.4), (20.4, -1.4), zb, marble, 0.85)
+    P += balustrade((-20.4, 21.4), (20.4, 21.4), zb, marble, 0.85)
     for sx in (-1, 1):
-        P += balustrade((sx * 20.4, -1.4), (sx * 20.4, 21.4), zb, marble, 0.72)
+        P += balustrade((sx * 20.4, -1.4), (sx * 20.4, 21.4), zb, marble, 0.85)
         xa, xb = (20.4, 44.4) if sx > 0 else (-44.4, -20.4)
-        P += balustrade((xa, 0.6), (xb, 0.6), 11.0, marble, 0.95, sides=3)
-        P += balustrade((xa, 17.4), (xb, 17.4), 11.0, marble, 0.95, sides=3)
-        P += balustrade((sx * 44.4, 0.6), (sx * 44.4, 17.4), 11.0, marble, 0.95, sides=3)
+        P += balustrade((xa, 0.6), (xb, 0.6), 11.0, marble, 1.1, sides=3)
+        P += balustrade((xa, 17.4), (xb, 17.4), 11.0, marble, 1.1, sides=3)
+        P += balustrade((sx * 44.4, 0.6), (sx * 44.4, 17.4), 11.0, marble, 1.1, sides=3)
         for y in (0.6, 17.4):              # dies (pedestals) with urns at the corners
             P.append(bbox(sx * 44.4 - 0.4, sx * 44.4 + 0.4, y - 0.4, y + 0.4, 11.0, 12.3, marble))
             P.append(sphere(0.35, (sx * 44.4, y, 12.65), marble, 8, 5, angle=60))
@@ -1067,10 +1067,8 @@ def make_palace():
     P.append(bbox(-11.5, 11.5, -9.0, -1.0, 0.0, 2.0, stone))
     for k in range(8):
         P.append(bbox(-7.5, 7.5, -13.5 + k * 0.56, -9.0, 0.0, (k + 1) * 0.25, stone))
-    for sx in (-1, 1):
-        P.append(bbox(sx * 7.5 - (0.8 if sx > 0 else 0) + (0 if sx > 0 else -0.0), sx * 7.5 + (0 if sx > 0 else 0.8)
-                      if False else sx * 8.3, -13.6, -9.0, 0.0, 2.3, stone) if False else
-                 bbox(min(sx * 7.5, sx * 8.4), max(sx * 7.5, sx * 8.4), -13.6, -9.0, 0.0, 2.3, stone))
+    for sx in (-1, 1):                      # stair cheek walls
+        P.append(bbox(min(sx * 7.5, sx * 8.4), max(sx * 7.5, sx * 8.4), -13.6, -9.0, 0.0, 2.3, stone))
     for x in (-8.75, -5.25, -1.75, 1.75, 5.25, 8.75):
         P += ionic_column(x, -7.6, 2.0, 14.0, 1.25, marble)
         P.append(bbox(x - 0.55, x + 0.55, -1.25, -1.0, 2.0, 14.0, marble))          # responding pilaster
@@ -1155,7 +1153,7 @@ def make_palace():
         x = -3.8 + (i + 0.5) * 7.6 / 16
         top = 2.7 + 0.8 * math.cos(x / 4.0 * math.pi / 2)
         P.append(strand((x, yf, 0.1), (x, yf, top), 0.03, iron, sides=3))
-        P.append(sphere(0.06, (x, yf, top + 0.03), gold, 6, 4))
+        P.append(strand((x, yf, top - 0.02), (x, yf, top + 0.16), 0.055, gold, sides=4, r1=0.0, angle=30))
     for z in (0.3, 1.2, 2.4):
         P.append(box((7.6, 0.08, 0.1), (0, yf, z), iron))
 
@@ -1163,8 +1161,7 @@ def make_palace():
     fy = -26.5
     P.append(rev([(6.0, 0.0), (6.2, 0.0), (6.2, 0.55), (5.85, 0.65), (5.6, 0.62), (5.6, 0.3)], 32, marble,
                  loc=(0, fy, 0), angle=50))
-    P.append(rev([(5.62, 0.42)], 32, water, loc=(0, fy, 0), cap1=True) if False else
-             surf("Pool", [(5.62 * math.cos(2 * math.pi * s / 32), fy + 5.62 * math.sin(2 * math.pi * s / 32), 0.42)
+    P.append(surf("Pool", [(5.62 * math.cos(2 * math.pi * s / 32), fy + 5.62 * math.sin(2 * math.pi * s / 32), 0.42)
                            for s in range(32)], [tuple(range(32))], water))
     P.append(rev([(0.9, 0.4), (0.6, 0.8), (0.45, 2.0), (0.6, 2.2), (2.2, 2.45), (2.3, 2.65), (2.0, 2.7)], 16,
                  marble, loc=(0, fy, 0), angle=50))
@@ -1232,7 +1229,10 @@ def make_basket_hoop():
             P.append(strand(a, pts[k + 1][(i - 1) % N], 0.0045, rope))
     for i in range(N):
         P.append(path_tube([pts[rows][i], pts[rows][(i + 1) % N]], 0.0045, rope, sides=3))
-    return finish("BasketHoop", P)
+    objs = finish("BasketHoop", P)
+    for o in objs:          # centre the footprint (base + overhang): rim centre ends at glTF z = +1.24 m
+        xform(o, Matrix.Translation((0, -0.7875, 0)))
+    return objs
 
 
 def make_basket_court():
@@ -1248,7 +1248,7 @@ def make_basket_court():
     me.materials.append(edge)
     for p in me.polygons:
         p.material_index = 0 if p.normal.z > 0.5 else 1
-    plinth = bbox(-L / 2 - 0.15, L / 2 + 0.15, -W / 2 - 0.15, W / 2 + 0.15, -0.02, 0.03, edge)
+    plinth = bbox(-L / 2 - 0.15, L / 2 + 0.15, -W / 2 - 0.15, W / 2 + 0.15, 0.0, 0.03, edge)
     return finish("BasketCourt", [top, plinth], planar=("CourtFloor", L, W))
 
 
@@ -1440,7 +1440,10 @@ def make_ball_basket():
     for axis, alpha in (((1, 0, 0), math.pi / 2), ((0, 1, 0), math.pi / 2), ((0, 0, 1), math.radians(52)),
                         ((0, 0, -1), math.radians(52))):
         P.append(path_tube(circle(axis, alpha), rs, seam, sides=4, closed=True))
-    return finish("BallBasket", P)
+    objs = finish("BallBasket", P)
+    for o in objs:          # seams stand 3 mm proud: keep them above the ground
+        xform(o, Matrix.Translation((0, 0, 0.0031)))
+    return objs
 
 
 def truncated_icosahedron():
@@ -1674,12 +1677,23 @@ def render_view(name, view="34"):
     scene.camera = cam
     scene.render.resolution_x, scene.render.resolution_y = SHEET_W, SHEET_H
     from bpy_extras.object_utils import world_to_camera_view
-    if view == "low":
-        cam_d.lens = 18
-        cam.location = Vector((14.0, -34.0, 4.5))
-        _look_at(cam, Vector((0, 0, 56.0)))
+    tag = view
+    ZOOM = {"lm_statue": ((-13, -12, 37), (13, 10, 89)), "lm_palace": ((-26, -14, 0), (26, 22, 30)),
+            "prop_ball_basket": (lo, hi)}
+    if view == "head" and name == "lm_statue":
+        ZOOM[name] = ((-7.5, -5.5, 67.0), (3.5, 4.0, 89.0))
+        view = "zoom"
+    if view == "zoom" and name in ZOOM:       # close-up box: the figure, the portico
+        lo, hi = Vector(ZOOM[name][0]), Vector(ZOOM[name][1])
+        c, view = (lo + hi) / 2, "34"
+    if view == "low":                          # worm's-eye view from the islet's lawn
+        cam_d.lens = 24
+        cam.location = Vector((26.0, -62.0, 3.0))
+        _look_at(cam, Vector((0, 0, 50.0)))
     else:
         d = Vector((0.75, -1.0, 0.55 if view == "34" else 1.6)).normalized()
+        if name == "lm_statue" and (hi - lo).z > 45 and (hi - lo).x < 30:
+            d = Vector((0.55, -1.0, 0.18)).normalized()
         cam_d.lens = 50
         corners = [Vector((x, y, z)) for x in (lo.x, hi.x) for y in (lo.y, hi.y) for z in (lo.z, hi.z)]
         dist = L * 4
@@ -1702,7 +1716,7 @@ def render_view(name, view="34"):
     scene.render.resolution_percentage = 100
     scene.view_settings.view_transform = "AgX"
     os.makedirs(PREVIEWS, exist_ok=True)
-    scene.render.filepath = os.path.join(PREVIEWS, "%s_%s%s.png" % (name, view, "_bf" if os.environ.get("NB_BACKFACE") else ""))
+    scene.render.filepath = os.path.join(PREVIEWS, "%s_%s%s.png" % (name, tag, "_bf" if os.environ.get("NB_BACKFACE") else ""))
     bpy.ops.render.render(write_still=True)
     return scene.render.filepath
 
@@ -1739,7 +1753,7 @@ def sheet(entries, fname):
 def make_sheets(names):
     lm, sp = [], []
     for n in names:
-        views = ["34", "low"] if n == "lm_statue" else ["34"]
+        views = ["34", "zoom", "head", "low"] if n == "lm_statue" else ["34", "zoom"] if n == "lm_palace" else ["34"]
         for vw in views:
             (lm if n.startswith("lm_") else sp).append((n, vw, render_view(n, vw)))
     suffix = "_bf" if os.environ.get("NB_BACKFACE") else ""

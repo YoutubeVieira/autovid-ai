@@ -738,7 +738,7 @@ def wheel(name, R, width, rim_r, loc, side, style="alloy5", segs=18, disc=True, 
             a = 2 * math.pi * (k + 0.5) / holes
             rr = rim_r * 0.6
             c = (rr * math.cos(a), face_y + 0.024, rr * math.sin(a))
-            parts.append(cyl(0.03, 0.012, c, "Y", "Trim", sides=8, caps=(False, True), name=name + "_hole"))
+            parts.append(cyl(0.03, 0.012, c, "Y", tyre_mat, sides=8, caps=(False, True), name=name + "_hole"))
         if style == "army":   # bead-lock ring bolts + hub nuts
             for k in range(beadlock):
                 a = 2 * math.pi * k / beadlock

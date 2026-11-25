@@ -465,6 +465,82 @@ def tattoo_skin(skin_png, out_name, arm_uv):
     return _save(out_name, img, levels=64, mode="RGB")
 
 
+# --------------------------------------------------------------------------- animals
+# 256 px tiling maps, box-projected at world scale by gen_animals.py (light grey: the Fur / Fur2
+# colours come from material.color, so pelts can be recoloured):
+#   fur / fur_n         : clumped strands (streaks along u, clumps), dogs and cats
+#   feather / feather_n : overlapping scalloped feathers with a central shaft, birds
+#   shell / shell_n     : crab chitin: bumps, pits and dark speckles
+ASIZE = 256
+
+
+def _fur_height(u, v):
+    vec, w = torus(u, v, 1.6, 7.0, 21.0)          # strands: slow along u, fast along v
+    strands = noise(vec, w, scale=1.3, detail=3, rough=0.6)
+    vec2, w2 = torus(u, v, 2.0, 2.0, 5.0)
+    clumps = voronoi(vec2, w2, scale=3.0, randomness=0.9)
+    return strands * 0.65 + smoothstep(0.0, 0.6, clumps) * 0.35
+
+
+def _fur(u, v):
+    h = _fur_height(u, v)
+    vec, w = torus(u, v, 0.8, 0.8, 9.0)
+    patch = noise(vec, w, scale=1.4, detail=2, rough=0.5) - 0.5
+    return [0.68 + h * 0.32 + patch * 0.08]
+
+
+def _feather_height(u, v):
+    rows = 8
+    y = v * rows
+    r = 1.0 - frac(y)                              # feather tips point down the body
+    x = frac(u * 8.0 + smoothstep(0.0, 0.02, frac(y * 0.5) - 0.5) * 0.5)
+    # scallop: top of the next feather hides the base of this one
+    edge = smoothstep(0.0, 0.25, r - (fabs(x - 0.5) * 2.0) ** 2 * 0.45)
+    shaft = 1.0 - smoothstep(0.015, 0.05, fabs(x - 0.5))
+    barbs = 0.5 + 0.5 * sin((r * 6.0 + fabs(x - 0.5) * 9.0) * (2 * math.pi))
+    return edge * (0.75 + barbs * 0.15) + shaft * 0.12 * edge
+
+
+def _feather(u, v):
+    h = _feather_height(u, v)
+    vec, w = torus(u, v, 1.0, 1.0, 31.0)
+    mott = noise(vec, w, scale=1.5, detail=2, rough=0.5) - 0.5
+    return [0.78 + h * 0.20 + mott * 0.05]
+
+
+def _shell_height(u, v):
+    vec, w = torus(u, v, 1.8, 1.8, 41.0)
+    bumps = 1.0 - voronoi(vec, w, scale=4.0, randomness=0.8)
+    vec2, w2 = torus(u, v, 4.0, 4.0, 43.0)
+    pits = smoothstep(0.0, 0.18, voronoi(vec2, w2, scale=5.0, randomness=1.0))
+    return bumps * 0.7 + pits * 0.3
+
+
+def _shell(u, v):
+    h = _shell_height(u, v)
+    vec, w = torus(u, v, 3.0, 3.0, 47.0)
+    speck = smoothstep(0.62, 0.70, noise(vec, w, scale=2.5, detail=2, rough=0.5))
+    return [0.84 + h * 0.14 - speck * 0.30]
+
+
+def animal_textures():
+    """Bake (once per process) the animal maps; returns {name: png path}."""
+    global _DIR, SIZE
+    if _DIR is None:
+        _DIR = tempfile.mkdtemp(prefix="nb_tex_")
+    if "fur" not in _CACHE:
+        keep, SIZE = SIZE, ASIZE
+        try:
+            for nm, col, hf, st in (("fur", _fur, _fur_height, 3.0), ("feather", _feather, _feather_height, 2.5),
+                                    ("shell", _shell, _shell_height, 3.0)):
+                _CACHE[nm] = _save(nm, _bake(nm, col, 1), levels=40)
+                h = _blur(_bake(nm + "_h", lambda u, v, hf=hf: [hf(u, v)], 1)[:, :, 0])
+                _CACHE[nm + "_n"] = _save(nm + "_n", _normal_from_height(h, st), levels=20, mode="RGB")
+        finally:
+            SIZE = keep
+    return {k: _CACHE[k] for k in ("fur", "fur_n", "feather", "feather_n", "shell", "shell_n")}
+
+
 # --------------------------------------------------------------------------- weapons (v3)
 # Tiling maps for gen_weapons.py, box-projected at world scale (see WEAPON_TILE there).
 #   poly / poly_n    : moulded polymer: soft mottling + fine stipple (also the Body finish grain)

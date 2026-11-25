@@ -106,7 +106,7 @@ function buildWorld(region) {
   const lm = new Uint8Array(N * N), landmarks = [];
   const looks = region.look || {};
   for (const id of (looks.landmarks || [])) {
-    if (['wheel', 'rock', 'cablecar', 'tower'].includes(id)) { landmarks.push({ id }); continue; }
+    if (['wheel', 'rock', 'cablecar', 'tower', 'statue'].includes(id)) { landmarks.push({ id }); continue; }
     const blk = take(); if (!blk) break; const [bx, by] = blk;
     const walk = ['stadium', 'pitch', 'plantation'].includes(id);
     for (let ly = 3; ly < 7; ly++) for (let lx = 3; lx < 7; lx++) {
@@ -2097,6 +2097,15 @@ function buildSigns(g) {
 function buildLandmark(g, L2, LK) {
   const add = (geo, m, x, y, z, parent = g) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); parent.add(me); return me; };
   const id = L2.id, x = L2.x, z = L2.y;
+  // monuments Blender : palais présidentiel (bloc réservé) et Statue de la Lumière (îlot au large, côté mer)
+  if (id === 'palace' || id === 'statue') {
+    const md = R3.models && R3.models[id === 'palace' ? 'lm_palace' : 'lm_statue'];
+    if (!md) { if (id === 'palace') { add(bx(220, 40, 150), mat('#f2f2ee'), x, 20, z); } return; }
+    const sc = md.scene.clone(true); sc.traverse(o => { if (o.isMesh) { const gm = glbMat(o.material, false), q = gm === o.material ? gm.clone() : gm; if (!/glow/i.test(o.material.name || '') && q.color) { q.color.multiplyScalar(id === 'palace' ? .52 : .8); if (q.envMapIntensity !== undefined) { q.envMapIntensity = .25; q.userData.envBase = .25; } } o.material = q; o.castShadow = id === 'palace' && !!R3.shadow; o.receiveShadow = true; } });
+    if (id === 'palace') { sc.scale.setScalar(215 / Math.max(md.size.x, md.size.z)); sc.position.set(x, 0, z); }
+    else { const sx2 = W + 950, sz2 = W * .32; sc.scale.setScalar(700 / md.size.y); sc.position.set(sx2, -2, sz2); sc.rotation.y = -PI / 2; const torch = new THREE.PointLight(0xffd9a0, 1.4, 900, 2); torch.position.set(sx2, 690, sz2); g.add(torch); }
+    g.add(sc); return;
+  }
   if (id === 'tower') { // flèche lumineuse sur la plus haute tour
     let best = null, bh = 0; for (let ty = 2; ty < N - 2; ty++) for (let tx = 2; tx < N - 2; tx++) { const k = ty * N + tx; if (world.map[k] === BLD && !world.lm[k] && !world.wh[k]) { const h = bHeight(tx, ty); if (h > bh) { bh = h; best = [tx, ty]; } } }
     if (!best) return; const bxp = best[0] * T + T / 2, bzp = best[1] * T + T / 2;
@@ -2396,12 +2405,12 @@ function makeCar3(c) {
   const add = (geo, m, x, y, z) => { const me = new THREE.Mesh(geo, m); me.position.set(x, y, z); g.add(me); return me; };
   const P2 = (geo, x, y, z) => { const me = add(geo, mat(c.color), x, y, z); paint.push(me); return me; };
   const glass = mat('#121022'), tyre = mat('#08080c'), chrome = mat('#cfd3dc');
-  const type = c.kind === 'police' || c.kind === 'gang' ? 'sedan' : (c.type || 'sedan');
+  const type = c.kind === 'police' ? (R3.models && R3.models.car_police && qLevel !== 'low' ? 'police' : 'sedan') : c.kind === 'gang' ? 'sedan' : (c.type || 'sedan');
   add(bx(46, .5, 24), bmat('#000000', .35), 1, .3, 0);
   const wheels = (fx, rx, w = 22) => { add(bx(9, 9, w), tyre, fx, 5, 0); add(bx(9, 9, w), tyre, rx, 5, 0); };
   const lights = (fx, rx, y = 10, wd = 15) => { add(bx(1, 3, wd), mat('#fff6cc', '#fff2b0'), fx, y, 0); add(bx(1, 3, wd), mat('#ff2e4d', '#ff2e4d'), rx, y, 0); };
   let front = 21, roofY = 25.5;
-  const AM = R3.models || {}, mk = { sedan: 'car_sedan', taxi: 'car_sedan', small: 'car_sedan', muscle: 'car_sports', convertible: 'car_sports', sports: 'car_sports', jeep: 'car_suv', pickup: 'car_suv', suv: 'car_suv', van: 'car_van', army_jeep: AM.army_jeep ? 'army_jeep' : 'car_suv', army_truck: AM.army_truck ? 'army_truck' : 'car_van', army_apc: AM.army_apc ? 'army_apc' : 'car_van' }[type], md = mk && qLevel !== 'low' && R3.models[mk];
+  const AM = R3.models || {}, mk = { sedan: 'car_sedan', taxi: 'car_sedan', small: 'car_sedan', muscle: 'car_sports', convertible: 'car_sports', sports: 'car_sports', jeep: 'car_suv', pickup: 'car_suv', suv: 'car_suv', van: 'car_van', police: 'car_police', army_jeep: AM.army_jeep ? 'army_jeep' : 'car_suv', army_truck: AM.army_truck ? 'army_truck' : 'car_van', army_apc: AM.army_apc ? 'army_apc' : 'car_van' }[type], md = mk && qLevel !== 'low' && R3.models[mk];
   const wheelsL = [];
   if (c.boat) { // bateau : coque, proue, cabine, pare-brise, liseré
     P2(bx(40, 6, 18), -2, 4, 0); const bow = add(new THREE.CylinderGeometry(0, 9, 14, 4, 1), mat(c.color), 23, 4, 0); bow.rotation.z = -PI / 2; bow.rotation.x = PI / 4; bow.scale.set(1, 1, .7); paint.push(bow);
@@ -2409,7 +2418,7 @@ function makeCar3(c) {
     add(bx(10, 1, 15), mat('#6b4a2a'), -19, 7.4, 0); front = 26; roofY = 16;
   } else if (md) {
     const sc = md.scene.clone(true), k = (type === 'army_truck' ? 62 : type === 'army_apc' ? 58 : type === 'army_jeep' ? 46 : type === 'van' ? 44 : type === 'small' ? 36 : 42) / md.size.x; sc.scale.setScalar(k); g.add(sc);
-    sc.traverse(o => { if (o.isMesh && o.material && /paint/i.test(o.material.name)) paint.push(o); if (/^Wheel/i.test(o.name)) wheelsL.push(o); });
+    const sirens = []; sc.traverse(o => { if (o.isMesh && o.material && /paint/i.test(o.material.name)) { paint.push(o); if (/^army/.test(type)) { o.material = o.material.clone(); o.material.metalness = .05; o.material.roughness = .85; } } if (o.isMesh && o.material && /^Siren/.test(o.material.name)) { o.material = o.material.clone(); sirens.push(o); } if (/^Wheel/i.test(o.name)) wheelsL.push(o); }); g.userData.sirens = sirens;
     for (const pm of paint) pm.material = pmat(c.color);
     front = md.size.x * k / 2; roofY = md.size.y * k + 1.5;
     if (type === 'taxi') add(bx(8, 4, 12), mat('#ffd23f', '#806000'), -4, roofY + .5, 0);
@@ -2449,10 +2458,11 @@ function makeCar3(c) {
     wheels(13, -13); lights(21.2, -21.2);
     if (type === 'taxi') { add(bx(8, 4, 12), mat('#ffd23f', '#806000'), -4, 26, 0); add(bx(42.2, 2, 20.2), mat('#111111'), 0, 11, 0); }
   }
-  const u = { paint, color: c.color, wreck: false, wheels: wheelsL, wr: md ? .34 * (type === 'van' ? 44 : 42) / md.size.x : 4.5 };
+  const WR = { army_jeep: .38, army_truck: .55, army_apc: .55 }, kk = md ? (type === 'army_truck' ? 62 : type === 'army_apc' ? 58 : type === 'army_jeep' ? 46 : type === 'van' ? 44 : 42) / md.size.x : 1;
+  const u = { paint, color: c.color, wreck: false, wheels: wheelsL, wr: md ? (WR[type] || .34) * kk : 4.5, sirens: g.userData.sirens || [] };
   if (c.kind === 'police') {
     if (!md) add(bx(12, 9.2, 20.4), mat('#1b1f4a'), -2, 9, 0);
-    u.r = add(bx(4, 3, 7), mat('#ff2e4d'), -4, roofY, -4); u.b = add(bx(4, 3, 7), mat('#2e6bff'), -4, roofY, 4);
+    if (u.sirens.length) { u.r = { position: {} }; u.b = null; } else { u.r = add(bx(4, 3, 7), mat('#ff2e4d'), -4, roofY, -4); u.b = add(bx(4, 3, 7), mat('#2e6bff'), -4, roofY, 4); }
     u.glow = add(new THREE.CircleGeometry(48, 20), bmat('#ff2e4d', .18, true), 0, .8, 0); u.glow.rotation.x = -PI / 2;
   }
   const cone = new THREE.Mesh(new THREE.CircleGeometry(150, 14, -.33, .66), R3.coneMat || (R3.coneMat = bmat('#fff0c0', .1, true).clone()));
@@ -2467,7 +2477,7 @@ function poseCar(m, c) {
   m.position.set(c.x, c.boat ? -1 + Math.sin(S.time * 2 + (c.bob || 0)) * 1.2 : 0, c.y); m.rotation.y = -c.a; if (c.boat) m.rotation.z = Math.sin(S.time * 1.6 + (c.bob || 0)) * .04 + clamp(c.v / 3000, -.08, .12);
   if (c.wreck && !u.wreck) { u.wreck = true; for (const pm of u.paint) pm.material = mat('#26222e'); u.cone.visible = false; if (u.glow) u.glow.visible = false; if (u.mk) u.mk.visible = false; }
   if (!c.wreck && u.color !== c.color) { u.color = c.color; for (const pm of u.paint) pm.material = pmat(c.color); }
-  if (u.r && !c.wreck) { const f = Math.sin((S.time + c.flash) * 14) > 0; u.r.material = f ? mat('#ff2e4d', '#ff2e4d') : mat('#401018'); u.b.material = f ? mat('#10183a') : mat('#2e6bff', '#2e6bff'); u.glow.material = bmat(f ? '#ff2e4d' : '#2e6bff', .2, true); }
+  if (u.r && !c.wreck) { const f = Math.sin((S.time + c.flash) * 14) > 0; if (u.sirens && u.sirens.length) { for (const o of u.sirens) { const red = /Red/.test(o.material.name), on = red ? f : !f; if (o.material.emissive) o.material.emissive.set(on ? (red ? 0xff2e4d : 0x2e6bff) : 0x000000); } } else { u.r.material = f ? mat('#ff2e4d', '#ff2e4d') : mat('#401018'); u.b.material = f ? mat('#10183a') : mat('#2e6bff', '#2e6bff'); } u.glow.material = bmat(f ? '#ff2e4d' : '#2e6bff', .2, true); }
   if (u.mk) { u.mk.visible = c.mark && !c.wreck; u.mk.position.set(0, 40 + Math.sin(S.time * 5) * 4, 0); }
   if (u.wheels.length && !c.wreck) { const da = (c.v || 0) * (R3.dt || .016) / u.wr; for (const w of u.wheels) w.rotation.z -= da; }
 }
@@ -3396,7 +3406,7 @@ function loadModel(k, url, fin) {
     if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
     let hand = null; scene.traverse(o => { if (!hand && o.isBone && /hand/i.test(o.name) && /(r$|right|\.r|_r)/i.test(o.name)) hand = o; });
     const box = new THREE.Box3().setFromObject(scene), h = box.getSize(new THREE.Vector3()).y || 1;
-    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k.startsWith('w_') && S.screen === 'shop') setTimeout(fillThumbs, 50); if (k === 'robot') P._m = null; if (['palm', 'lamp', 'hydrant', 'bench', 'traffic_light'].includes(k)) R3.world = null; };
+    R3.models[k] = { scene, mixer, acts, hand, scale: 55 / h, size: box.getSize(new THREE.Vector3()), anims: gl.animations }; if (k.startsWith('w_') && S.screen === 'shop') setTimeout(fillThumbs, 50); if (k === 'robot') P._m = null; if (['palm', 'lamp', 'hydrant', 'bench', 'traffic_light', 'lm_palace', 'lm_statue'].includes(k)) R3.world = null; };
   // secours : si le .glb ne peut pas être servi, on charge sa copie en JavaScript (base64)
   const fallback = () => { const sc3 = document.createElement('script'); sc3.src = url + '.js'; sc3.onload = () => { try { const b64 = (window.NB_MODEL_DATA || {})[k]; if (!b64) return; const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new THREE.GLTFLoader().parse(buf.buffer, '', onGl, () => {}); } catch (e) {} }; document.head.appendChild(sc3); };
   try { new THREE.GLTFLoader().load(url, onGl, undefined, fallback); } catch (e) { fallback(); }

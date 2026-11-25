@@ -22,8 +22,38 @@ const WEAPON_LENS = ['rifle', 'sniper', 'rocket', 'gl', 'rail'];
 const WEAPON_TRIS = { pistol: 4000, uzi: 9000, shotgun: 9000, rifle: 9000, sniper: 9000, rail: 9000,
   rocket: 12000, minigun: 12000, lmg: 12000, gl: 12000 };
 const CONTRACT = {
+  // v3 cars: <= 9000 tris, <= 700 KB, 7 materials (= draw calls); every node matching /^Wheel/ (the game
+  // spins them all) must be one of the listed wheels, at the hub, unrotated
   car: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim'],
-         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'], maxTris: 4200 },
+         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'], maxTris: 9000, maxBytes: 700 * 1024, maxMats: 7,
+         len: [4.3, 4.95] },
+  // new vehicles: <= 12000 tris, <= 900 KB
+  car_police: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim', 'Livery', 'SirenRed', 'SirenBlue'],
+         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR', 'Lightbar'], maxTris: 12000, maxBytes: 900 * 1024,
+         maxMats: 10, len: [4.3, 4.9] },
+  army_jeep: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim'],
+         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'], maxTris: 12000, maxBytes: 900 * 1024, maxMats: 8,
+         len: [3.5, 4.2] },
+  army_truck: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim', 'Canvas'],
+         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_ML', 'Wheel_MR', 'Wheel_RL', 'Wheel_RR'], maxTris: 12000,
+         maxBytes: 900 * 1024, maxMats: 8, len: [6.8, 7.8] },
+  army_apc: { mats: ['Paint', 'Glass', 'Tyre', 'Rim', 'LightFront', 'LightRear', 'Trim'],
+         nodes: ['Wheel_FL', 'Wheel_FR', 'Wheel_F2L', 'Wheel_F2R', 'Wheel_R2L', 'Wheel_R2R', 'Wheel_RL', 'Wheel_RR',
+                 'Turret', 'Gun'], maxTris: 12000, maxBytes: 900 * 1024, maxMats: 8, len: [6.6, 8.0] },
+  // landmarks + sports (gen_landmarks.py): real scale, metres; <= 15000 tris / 900 KB for monuments,
+  // <= 4000 tris per sports prop (ring and stand <= 8000)
+  lm_statue: { mats: ['Patina', 'Glow', 'Stone'], maxTris: 15000, maxBytes: 900 * 1024 },
+  lm_palace: { mats: ['Marble', 'Stone', 'Grass', 'Glass', 'Flag', 'FlagStar', 'Metal', 'Water'], maxTris: 15000,
+               maxBytes: 900 * 1024 },
+  prop_basket_hoop: { mats: ['Metal', 'Board', 'HoopRed', 'Rope'], maxTris: 4000, maxBytes: 300 * 1024 },
+  prop_basket_court: { mats: ['CourtFloor'], maxTris: 4000, maxBytes: 300 * 1024, textured: ['CourtFloor'] },
+  prop_soccer_goal: { mats: ['GoalPost', 'Rope'], maxTris: 4000, maxBytes: 300 * 1024 },
+  prop_soccer_field: { mats: ['Pitch'], maxTris: 4000, maxBytes: 300 * 1024, textured: ['Pitch'] },
+  prop_boxing_ring: { mats: ['Canvas', 'Rope', 'Metal', 'Glow', 'CornerRed', 'CornerBlue'], maxTris: 8000,
+                      maxBytes: 500 * 1024 },
+  prop_ball_basket: { mats: ['Rubber', 'Seam'], maxTris: 4000, maxBytes: 300 * 1024 },
+  prop_ball_soccer: { mats: ['BallWhite', 'BallBlack'], maxTris: 4000, maxBytes: 300 * 1024 },
+  prop_stadium_stand: { mats: ['Concrete', 'SeatA', 'SeatB'], maxTris: 8000, maxBytes: 500 * 1024 },
   human: { mats: ['Skin', 'Shirt', 'Pants', 'Shoes', 'Hair', 'Eyes'], clips: HUMAN_CLIPS,
            // three.js strips '.' from node names: UpperArm.L -> UpperArmL
            nodes: ['Hips', 'Spine', 'Chest', 'Neck', 'Head', 'UpperArmL', 'UpperArmR', 'LowerArmL', 'LowerArmR',
@@ -40,6 +70,7 @@ const CONTRACT = {
 };
 
 function contractFor(name) {
+  if (CONTRACT[name]) return CONTRACT[name];
   if (name.startsWith('car_')) return CONTRACT.car;
   if (name.startsWith('human_')) return CONTRACT.human;
   if (name.startsWith('w_')) return CONTRACT.weapon;
@@ -133,8 +164,15 @@ function contractFor(name) {
         human = { handLx: +pL.x.toFixed(3), handRx: +pH.x.toFixed(3), headY: +head.getWorldPosition(V()).y.toFixed(3),
           boneYalongHand: +along.dot(localY).toFixed(3), attach };
       }
+      // vehicles: every node the game would spin (/^Wheel/) with its hub position and rotation
+      const wheels = [];
+      gltf.scene.updateMatrixWorld(true);
+      gltf.scene.traverse(o => { if (/^Wheel/i.test(o.name)) {
+        const wb = new THREE.Box3().setFromObject(o), p = o.getWorldPosition(new THREE.Vector3());
+        wheels.push({ name: o.name, pos: p.toArray().map(v => +v.toFixed(3)), rot: +(Math.abs(o.rotation.x) + Math.abs(o.rotation.y) + Math.abs(o.rotation.z)).toFixed(4),
+          r: +((wb.max.y - wb.min.y) / 2).toFixed(3), minY: +wb.min.y.toFixed(3), parent: o.parent ? o.parent.name : '' }); } });
       return {
-        meshes, mats: [...mats], texd, tris, skinned, nodes, loopErr, human,
+        meshes, mats: [...mats], texd, tris, skinned, nodes, loopErr, human, wheels,
         clips: gltf.animations.map(a => a.name + ':' + a.duration.toFixed(2) + 's/' + a.tracks.length + 'tr'),
         clipNames: gltf.animations.map(a => a.name),
         size: box.getSize(new THREE.Vector3()).toArray().map(v => +v.toFixed(3)),
@@ -159,6 +197,26 @@ function contractFor(name) {
       if (!(info.max[0] > -info.min[0])) errs.push('barrel not towards +X');
       if (!(info.min[0] < 0 && info.min[1] < 0 && info.max[1] > 0)) errs.push('origin not inside the grip area');
     }
+    if (c.maxMats && info.mats.length > c.maxMats) errs.push('too many materials ' + info.mats.length);
+    if (c.textured && c !== CONTRACT.human)    // printed maps (court / pitch): 512 px colour texture
+      c.textured.forEach(m => { if (!/map512x512/.test(info.texd[m] || '')) errs.push('no 512x512 texture on ' + m); });
+    if (/^prop_/.test(name) && Math.abs(info.min[1]) > 0.01)
+      errs.push('not on the ground (min y ' + info.min[1] + ')');
+    if (c.len) {
+      if (info.size[0] < c.len[0] || info.size[0] > c.len[1]) errs.push('length ' + info.size[0] + ' outside ' + c.len);
+      if (Math.abs(info.min[1]) > 0.01) errs.push('not on the ground (min y ' + info.min[1] + ')');
+      if (!(info.max[0] > 0 && info.min[0] < 0)) errs.push('origin not inside the vehicle');
+      const wn = (c.nodes || []).filter(n => /^Wheel/.test(n));
+      info.wheels.forEach(w => {
+        if (!wn.includes(w.name)) errs.push('unexpected node matching /^Wheel/: ' + w.name);
+        if (w.rot > 1e-4) errs.push(w.name + ' is rotated');
+        if (Math.abs(w.minY) > 0.01) errs.push(w.name + ' does not touch the ground (' + w.minY + ')');
+        if (Math.abs(w.pos[1] - w.r) > 0.02) errs.push(w.name + ' origin not at the hub');
+      });
+      // front axle towards +X, left wheels at -Z (glTF)
+      const fl = info.wheels.find(w => w.name === 'Wheel_FL'), rl = info.wheels.find(w => w.name === 'Wheel_RL');
+      if (fl && rl && !(fl.pos[0] > rl.pos[0] && fl.pos[2] < 0)) errs.push('front not towards +X / left not at -Z');
+    }
     if (c === CONTRACT.human) {
       // human_f / human_f2: 1.71 m (+ hair); human_m: 1.80 m; human_m2: 1.765 m + cap
       const h = name.startsWith('human_f') ? [1.66, 1.76] : [1.75, 1.85];
@@ -174,6 +232,8 @@ function contractFor(name) {
     console.log('  materials:', info.mats.join(', '));
     if (info.skinned) console.log('  skinned meshes:', info.skinned);
     if (info.clips.length) console.log('  clips    :', info.clips.join(', '));
+    if (c.len) console.log('  wheels   :', info.wheels.map(w => w.name + '@' + w.pos + ' R=' + w.r + ' (' + w.parent + ')').join(', '));
+    if (c.len) { const ex = info.nodes.filter(n => /^(Lightbar|Turret|Gun)$/.test(n)); if (ex.length) console.log('  nodes    :', ex.join(', ')); }
     if (Object.keys(info.texd).length) console.log('  textures :', Object.entries(info.texd).map(([k, v]) => k + ':' + v).join(', '));
     if (info.human) {
       console.log('  bones    : HandL.x=' + info.human.handLx + ' HandR.x=' + info.human.handRx +

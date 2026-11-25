@@ -1,6 +1,6 @@
 ---
 name: blender-assets
-description: Pipeline Blender procédural (bpy 5.x, sans interface) qui génère les modèles 3D originaux de Néon Bay (voitures, humains animés, armes, mobilier urbain) en .glb pour three.js r128, avec copie base64 .glb.js, rendus d'aperçu et vérification Playwright. À utiliser dès qu'il faut régénérer, modifier, ajouter ou vérifier un modèle 3D du jeu (neon-bay/models), changer une couleur, une proportion, une animation ou un budget de polygones, ou diagnostiquer un .glb qui ne se charge pas ou dont les noms de matériaux/os/animations ne correspondent plus à ce que le jeu attend.
+description: Pipeline Blender procédural (bpy 5.x, sans interface) qui génère les modèles 3D originaux de Néon Bay (voitures, humains animés, armes, mobilier urbain, monuments, équipements sportifs) en .glb pour three.js r128, avec copie base64 .glb.js, rendus d'aperçu et vérification Playwright. À utiliser dès qu'il faut régénérer, modifier, ajouter ou vérifier un modèle 3D du jeu (neon-bay/models), changer une couleur, une proportion, une animation ou un budget de polygones, ou diagnostiquer un .glb qui ne se charge pas ou dont les noms de matériaux/os/animations ne correspondent plus à ce que le jeu attend.
 ---
 
 # Assets Blender de Néon Bay
@@ -15,9 +15,18 @@ on modifie le script puis on régénère.
 Depuis `neon-bay/` (Blender n'est pas nécessaire : le module `bpy` 5.3 est installé pour `python3`) :
 
 ```bash
-python3 tools/blender/gen_cars.py            # car_sedan, car_sports, car_suv, car_van
+python3 tools/blender/gen_cars.py            # v3 : car_sedan, car_sports, car_suv, car_van, car_police
 python3 tools/blender/gen_cars.py sedan van  # seulement certaines
+python3 tools/blender/gen_army.py            # army_jeep army_truck army_apc (args : jeep truck apc)
+python3 tools/blender/vehicle_sheet.py       # planches véhicules (3/4 avant, 3/4 arrière, profil) :
+                                             # tools/blender/previews/<nom>_sheet.png + vehicles_sheet.png
+NB_VIEWS=front34,rear34,side,wheel,cabin,top python3 tools/blender/vehicle_sheet.py car_sedan  # vues de contrôle
 python3 tools/blender/gen_props.py           # palm, lamp, hydrant, bench, traffic_light
+python3 tools/blender/gen_landmarks.py       # lm_statue lm_palace prop_basket_hoop prop_basket_court prop_soccer_goal
+                                             # prop_soccer_field prop_boxing_ring prop_ball_basket prop_ball_soccer
+                                             # prop_stadium_stand + planches (args : ids ou noms courts, ex. "statue hoop")
+python3 tools/blender/gen_landmarks.py --sheet [ids]   # planches seules : previews/landmarks_sheet.png, sport_sheet.png
+NB_BACKFACE=1 python3 tools/blender/gen_landmarks.py --sheet   # faces arrière en rouge (contrôle des normales)
 python3 tools/blender/gen_human.py           # human_m human_f human_m2 human_f2 (args "m" "f" "m2" "f2") ~10 s chacun
 python3 tools/blender/gen_weapons.py         # w_pistol w_uzi w_shotgun w_rifle w_sniper w_rocket
                                              # w_minigun w_lmg w_gl w_rail  (args : ids, ex. "pistol rail")
@@ -47,7 +56,8 @@ au centre de l'objet.
 
 | Famille | Avant | Taille | Noms obligatoires |
 |---|---|---|---|
-| Voitures `car_*.glb` | **+X** | ~4,4 m de long (SUV 4,6, van 4,8) | matériaux `Paint` (carrosserie, recolorée par le jeu), `Glass`, `Tyre`, `Rim`, `LightFront` (émissif), `LightRear` (émissif), `Trim` ; roues = objets séparés `Wheel_FL`, `Wheel_FR`, `Wheel_RL`, `Wheel_RR`, origine au moyeu, sans rotation : l'essieu est l'axe local Z (latéral), donc faire rouler = `wheel.rotation.z -= v*dt/R` ; enfants de `Body` |
+| Voitures `car_*.glb` (v3) | **+X** | ~4,5 m hors tout (SUV 4,7, van 4,9) ; R roue 0,33 (sports 0,335, SUV 0,38, van 0,34) | matériaux `Paint` (carrosserie, recolorée par le jeu : tout nom contenant « paint »), `Glass` (transparent, alpha 0,55 : habitacle visible), `Tyre`, `Rim`, `LightFront` (émissif), `LightRear` (émissif), `Trim` : **7 matériaux max** ; roues = objets séparés `Wheel_FL`, `Wheel_FR`, `Wheel_RL`, `Wheel_RR`, origine au moyeu, sans rotation : l'essieu est l'axe local Z (latéral), donc faire rouler = `wheel.rotation.z -= v*dt/R` ; enfants de `Body` ; maillages nommés `mesh_Wheel_*` (sinon les sous-maillages créés par three.js matchent aussi `/^Wheel/` et tournent deux fois) ; étriers dans `Body` (ne tournent pas). `car_police` : + `Livery` (2e couleur, non recolorée), nœud `Lightbar` (enfant de Body) avec `SirenRed` (côté gauche, −Z glTF) et `SirenBlue` (droit, +Z) émissifs ; ≤ 12 000 tris |
+| Armée `army_*.glb` | **+X** | jeep 4,1 m, truck 7,4 m, apc 7,0 m ; R roue 0,38 / 0,55 / 0,55 | même contrat que les voitures (`Paint` olive mat — recolorée si le jeu passe une couleur —, `Glass`, `Tyre`, `Rim`, `LightFront`, `LightRear`, `Trim`, + `Canvas` pour la bâche du camion) ; roues : jeep `Wheel_FL/FR/RL/RR` ; truck + `Wheel_ML/MR` (essieu central) ; apc `Wheel_FL/FR`, `Wheel_F2L/F2R` (2e essieu), `Wheel_R2L/R2R` (3e), `Wheel_RL/RR` (4e, arrière) ; roues de secours = `SpareTyre` dans Body (pas animées) ; apc : nœud `Turret` (axe de tourelle, tourner = `rotation.y`) et son enfant `Gun` (axe des tourillons, pointer = `rotation.z`, + = vers le haut) ; ≤ 12 000 tris et ≤ 900 Ko |
 | Humains `human_m/f/m2/f2.glb` | **+Z** (glTF) | m 1,80 m / f et f2 1,71 m au crâne (1,82 / 1,72 avec les cheveux) ; m2 1,765 m (1,79 avec la casquette), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` + doigts (v3) `Thumb.L/R Thumb2.L/R` (pouce, enfants de Hand) et `Fingers.L/R Fingers2.L/R` (4 doigts : phalange proximale puis moyenne+distale) ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips`, `EyeWhite`, jamais recolorés par le jeu ; + `Hat` casquette, **human_m2 seulement**, non recoloré par le jeu actuel) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` ; textures 512×512 sur `Skin Shirt Pants Shoes` (+`Hat`), normal maps sur `Shirt Pants` (+`Hat`) ; < 9 000 triangles et < 900 Ko |
 | Armes `w_<id>.glb` | canon **+X**, haut **+Y**, côté droit +Z | réelle : pistol 0,23 m, uzi 0,47, shotgun 1,04, rifle 0,94, sniper 1,25, rocket 1,13, minigun 1,01, lmg 1,06, gl 0,77, rail 1,02 | origine = centre de la poignée (main droite ; poignée arrière pour rocket/minigun) ; matériaux `Body` (couleur principale, recolorée pour les peintures : le jeu recolore tout matériau dont le nom contient « body », n'en créer aucun autre), `Metal`, `Grip`, `Glow` (émissif : points de visée, LED, bobines du rail) sur toutes, `Lens` (optiques) sur rifle, sniper, rocket, gl, rail ; v3 ajoute `MetalEdge` (usure claire des arêtes) et `Polymer` ; UV + textures 256 px ; un seul maillage, pas d'animation |
 | Lampadaire `lamp.glb` | bras vers +Z | 6 m | matériau émissif `Bulb` (+ `Metal`) |
@@ -119,18 +129,53 @@ le haut vers +Y, à t=0 : `Aim` quaternion (x,y,z,w) `(-0.3496, -0.348, 0.6307, 
 recalculées à chaque check). Dans le jeu, diviser la position par l'échelle appliquée au modèle
 si l'arme est mise à l'échelle séparément.
 
+## Monuments et sport (`gen_landmarks.py`)
+
+Lieux **inventés** (parodie) : rien de copié, aucun nom réel de monument dans les fichiers.
+Échelle réelle, 1 unité = 1 m, Z-haut dans Blender, origine au sol au centre de l'emprise, « façade »
+vers glTF +Z. Dans le jeu (1 m ≈ 30 unités) mettre l'échelle **30** à la main : le chargeur générique
+(`loadModel`) calcule `scale = 55 / hauteur`, faux pour ces modèles.
+
+| id | Contenu | Taille | Matériaux | tris / Ko |
+|---|---|---|---|---|
+| `lm_statue` | îlot (y=0 = niveau de l'eau, plateau à 2,5 m), ponton, fort en étoile à 7 branches, piédestal en granit, statue drapée : torche (`Glow`), couronne 5 rayons, tablette « NB », patine | flamme à 88,1 m ; îlot ~90 m (ponton vers +Z) ; statue `S_FIG` = 20 (silhouette de 1,8 → ~49 m), pieds à `Z_FEET` 39,3 m | Patina, PatinaDark, Glow, Gold, Stone, Grass, Rock, Wood, Shadow | ~10 850 / 440 |
+| `lm_palace` | corps central + 2 ailes, portique 6 colonnes ioniques, fronton (médaillon + étoile dorée), 66 fenêtres à frontons, balustrades, toit en croupe, mât + drapeau (bleu néon, étoile rose), pelouse, allées, haies, grille + portail, fontaine | bâtiment 88 m, pelouse 110 × 80 m (dalle de 0,3 m sous y=0), drapeau ~30 m | Marble, Stone, Glass, Roof, Grass, Path, Hedge, Metal, Gold, Water, Wood, Flag, FlagStar, Glow | ~14 900 / 840 (budget 15 000 / 900) |
+| `prop_basket_hoop` | panier sur pied mobile, panneau 1,8 × 1,05, cercle à 3,05 m, filet losanges (prismes fins) | emprise centrée ; centre du cercle à z = +1,24 m (glTF) | Metal, Padding, Board, Lines, HoopRed, Rope | 1 280 / 60 |
+| `prop_basket_court` | dalle 32 × 19 m (terrain 28 × 15 + 2 m), lignes **dans la texture** 512 px | | CourtFloor (texture couleur, facteur blanc), Concrete | 24 / 85 |
+| `prop_soccer_goal` | but 7,32 × 2,44 m, filet en brins | profondeur 2 m, centré | GoalPost, Metal, Rope | 1 136 / 58 |
+| `prop_soccer_field` | dalle 96 × 62 m (terrain 90 × 56 + 3 m), bandes de tonte + lignes dans la texture | | Pitch, Concrete | 12 / 98 |
+| `prop_boxing_ring` | ring 6,1 m entre poteaux, 4 cordes, coins rouge/bleu/blanc, marches, bandeau néon, 4 tours + portique à 7 m, 8 projecteurs | 12 × 12 × 7,3 m | Canvas, Skirt, Glow, Metal, CornerRed, CornerBlue, CornerWhite, Rope, Lens | 3 750 / 173 |
+| `prop_ball_basket` / `prop_ball_soccer` | r 0,12 (normal map granuleuse, coutures en géométrie) / r 0,11 (32 panneaux bombés) | posés sur y=0 | Rubber, Seam / BallWhite, BallBlack | 1 800 / 106 ; 1 080 / 26 |
+| `prop_stadium_stand` | module de 12 rangs, 192 sièges, allée centrale, rambardes | **x −5..5 exactement** : à répéter tous les 10 m le long de X | Concrete, SeatA/B/C, Metal | 6 670 / 305 |
+
+Construction : `bake_textures()` cuit les textures **avant** `reset_scene()` (chaque cuisson remet la
+scène à zéro) ; `finish()` joint les pièces en deux maillages, `<Nom>_Tex` (matériaux texturés, UV en
+projection cubique à l'échelle `TILE`, ou planaires pour le terrain) et `<Nom>` sans UV (fichier plus
+léger). Les pièces sont des solides fermés (`solid`, normales recalculées) ou des surfaces orientées à
+la main (`surf`, `rev`, `strand`, `path_tube`) ; le lissage est posé par pièce et survit à la jointure.
+Matériaux exportés en simple face. Statue : métaballes (`mb_elements`, rayons *visibles*) décimées à
+6 200 tris + robe en révolution à plis (`robe_radius`). Leviers de budget du palais : espacement des
+balustres (`balustrade(..., spacing)`, profil à 3 points), barreaux de la grille, nombre de fenêtres.
+Pièges : un profil de `rev` doit aller de l'intérieur vers l'extérieur par le dessus (sinon normales
+inversées ; vérifier avec `NB_BACKFACE=1`) ; en qualité Phong (moyenne/basse) le jeu ignore les
+textures, donc les lignes des terrains disparaissent et `CourtFloor`/`Pitch` sont blancs (garder
+`map: m.map` dans `glbMat` pour les voir) ; éviter dans les noms « paint », « glass », « rim », « trim »,
+« metal » sauf voulu (le jeu change alors métal/rugosité).
+
 ## Budgets de polygones (triangles)
 
 | Asset | Budget | Actuel (env.) |
 |---|---|---|
-| Voiture (carrosserie + 4 roues) | ≤ ~4 000 | 3 600–3 800 |
+| Voiture v3 (carrosserie + habitacle + 4 roues) | ≤ 9 000 tris, ≤ 700 Ko, ≤ 7 matériaux | 8 780–8 850 tris, 405–425 Ko |
+| Police / armée | ≤ 12 000 tris, ≤ 900 Ko | police 10 330, jeep 7 700, truck 10 520, apc 9 350 ; 400–535 Ko |
 | Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 876 Ko (dont ~210 Ko de textures) |
 | Arme (v3) | pistol ≤ 4 000, fusils ≤ 9 000, lourdes (rocket, minigun, lmg, gl) ≤ 12 000 ; ≤ 600 Ko | 3 660–9 010 tris, 250–450 Ko (≈ 60 Ko de textures + ~50 o/tri) |
 | Prop | ≤ ~1 500 | 450–1 100 |
 | Total de tous les .glb | ~8,4 Mo depuis les armes v3 (armes : 3,75 Mo) | à surveiller (chargement mobile) |
 
-Leviers : voitures → nombre de sections du loft (`build_body`), segments des roues (`lathe(...,
-14)`), biseaux des petites pièces ; humains → budgets par morceau (`budget = {"Shirt": ...}`
+Leviers : voitures → pas des sections du loft (`Car.section_xs`, `L / 0.22`), segments des roues
+(`V.wheel(..., segs=18)` ; armée 16, apc 14), boulons (`beadlock`, `hub_nuts`), biseaux des petites
+pièces (`bv=`) ; le script affiche `[vehicle] <nom>: N tris (budget), matériaux` ; humains → budgets par morceau (`budget = {"Shirt": ...}`
 du corps, `decimate(head, 1900, head_keep)`, cheveux, mains `decimate(h, 430)`), nombre de
 segments des bandes (`band(..., 14, ...)`) ; le script affiche `[human] parts: ...` avec le
 compte de chaque morceau ; armes → côtés des tubes/lathes (`sides=`), biseaux (`bevel`, `seg`) ;
@@ -139,14 +184,30 @@ taille d'arme) est dépassé.
 
 ## Comment c'est construit (pour modifier)
 
-- **Voitures** (`gen_cars.py`) : la carrosserie est un *loft* de sections à 12 points le long de
-  X ; chaque type est un dictionnaire de profils (`belt` = ligne de caisse, `roof`, `clear` =
-  garde au sol, `width`) indexés par x en mètres, plus les x des montants (`ws` pare-brise,
-  `rf`/`rr` pavillon, `rw` lunette, `bpil` montant B). Les passages de roue sont creusés dans le
-  profil bas. Vitres, montants et soubassement sont des bandes de matériaux du même maillage ;
-  plis (crease) sur la ligne de caisse et les contours de vitres, subdivision 1 appliquée, lissage
-  auto. Phares, feux, calandre, pare-chocs, rétros et poignées sont posés par lancer de rayon
-  sur la carrosserie. Nouvelle voiture = nouvelle entrée dans `CARS`.
+- **Voitures v3** (`gen_cars.py` + kit commun `nb_vehicle.py`) : carrosserie = *loft* de
+  sections à 14 points par demi-section (soubassement, bas de caisse, bas de caisse évasé,
+  ligne de caractère, épaule, joint de vitre, vitre latérale, gouttière, pavillon), sans
+  subdivision : profils `belt` / `roof` / `clear` / `width` en splines monotones (`pchip`) ; x des
+  montants (`ws`, `rf`, `rr`, `rw`, `bpil`, `cpil`, `side_glass`), portes (`doors`), capot/coffre
+  (`hood`, `trunk`, `tailgate`), arrondi des bouts (`nose`), évasement des passages de roue
+  (`flare`), `cladding` (bas de caisse en Trim). Arêtes vives marquées sur la ligne de caractère,
+  l'épaule et le bas de caisse. Matériau par bande : `band_material` (police : livrée bicolore).
+  Détails posés sur la peau par lancer de rayons (`V.Surface`) : optiques = patchs conformes
+  (`V.patch`, verre émissif + atlas réflecteurs / clignotant / recul), jours de portes, capot,
+  coffre et pare-chocs = rubans (`V.seam`), calandre ajourée (cadre + lamelles + fond), prise
+  d'air, plaques (`plate` : atlas `Rim`, sans texte lisible), rétros, poignées, essuie-glaces,
+  antenne, échappements, diffuseur, doublures de passages de roue, étriers ; habitacle (`cabin` :
+  bac inversé, planche de bord, volant, sièges) derrière `Glass` transparent. Jantes :
+  `V.wheel(style=alloy5|sport|suv6|steel|army)`. Textures numpy (`V.vehicle_textures`, aucune
+  cuisson) : sculptures + flancs du pneu (normal map, u autour de la roue), grain plastique
+  `Trim`, tissage `Canvas`, atlas `LightFront` (u<0,5 phare, haut droit orange, bas droit blanc),
+  LED `LightRear`, atlas `Rim` (v 0,76–0,99 = plaque). Nouvelle voiture = entrée dans `CARS`.
+- **Armée** (`gen_army.py`) : pièces dures (`V.box`, `V.prism`, `V.loft` facetté + biseau),
+  tubes (`V.tube` : arceaux, pare-buffle), numéros au pochoir à 7 segments (`V.stencil`, quads
+  Trim, numéros inventés, lisibles des deux côtés via `stencil_side`), roue de secours
+  (`spare`), jerrican, pelle, bâche en loft avec affaissement entre arceaux + doublure
+  intérieure, coque d'APC (`apc_hull_section` + sections `glacis` / `nose` explicites : une
+  section qui se recoupe donne une face noire), tourelle et canon en nœuds séparés.
 - **Humains** (`gen_human.py`, version 2) : quatre familles de métaballes séparées (noms
   différents → pas de fusion entre elles), chacune polygonisée à sa résolution puis décimée à
   son budget : corps (`body_elements`, ~8 mm : torse, bras, jambes de pantalon, chaussures),
