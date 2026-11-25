@@ -95,6 +95,22 @@ Les captures d'écran sont jointes au résultat. Sur un dépôt privé, GitHub o
 
 En usage personnel (≈ 50 actions par mois et un radar quotidien sur 3 niches), comptez environ 10 à 20 $ par mois d'API Claude. Pour dépenser moins, `COACH_MODEL=claude-sonnet-5-5` divise environ par deux le prix des jetons, et `claude-haiku-5-5` le divise par environ 40, avec une qualité moindre. Fixez une limite de dépense dans la console Anthropic.
 
+## Installer sur un PC Windows (gratuit)
+
+Dans PowerShell :
+
+```powershell
+irm https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-ee8a77f1-5c7kmx/coach-viral/installer/installer.ps1 | iex
+```
+
+**Clonage de votre voix (Chatterbox, gratuit), en option :**
+
+```powershell
+irm https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-ee8a77f1-5c7kmx/coach-viral/installer/ajouter-chatterbox.ps1 | iex
+```
+
+Chatterbox s'installe dans un environnement Python séparé, car il impose torch 2.6.0. Avec une carte NVIDIA, il prend quelques secondes par phrase ; sans, il est lent mais il fonctionne.
+
 ## Lancer en local
 
 ```bash

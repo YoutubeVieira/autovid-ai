@@ -21,6 +21,8 @@ $env:PORT = [string]$r.port
 $env:PYTHON = Join-Path $Racine 'python\Scripts\python.exe'
 $env:DOSSIER_DONNEES = Join-Path $Racine 'donnees'
 $env:HOST = '127.0.0.1'
+$pyChatterbox = Join-Path $Racine 'python-chatterbox\Scripts\python.exe'
+if (Test-Path $pyChatterbox) { $env:PYTHON_CHATTERBOX = $pyChatterbox }
 
 # Arrete une ancienne session restee ouverte (fenetre fermee avec la croix).
 $pids = Join-Path $Racine 'processus.txt'

@@ -13,6 +13,8 @@ import { run, mediaDuration } from "./render.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PY = process.env.PYTHON || "python3";
+/* Chatterbox a ses propres versions de torch : il peut vivre dans un environnement Python séparé. */
+const PY_CHATTERBOX = process.env.PYTHON_CHATTERBOX || PY;
 const SCRIPTS = path.join(here, "..", "voix");
 
 export const VOICES = {
@@ -70,7 +72,7 @@ export async function synthesize(text, out, opts = {}, env = process.env) {
       await run("ffmpeg", ["-y", "-loglevel", "error", "-i", mp3, raw]);
     } else if (engine === "chatterbox") {
       if (!opts.echantillon) throw new Error("Enregistrez d'abord votre voix dans l'onglet Voix.");
-      await run(PY, [path.join(SCRIPTS, "chatterbox_tts.py"), txt, raw, lang, opts.echantillon]);
+      await run(PY_CHATTERBOX, [path.join(SCRIPTS, "chatterbox_tts.py"), txt, raw, lang, opts.echantillon]);
     } else if (engine === "fal") {
       if (!opts.echantillon) throw new Error("Enregistrez d'abord votre voix dans l'onglet Voix.");
       await falSynthesize(clean, lang, opts.echantillon, raw, env);
