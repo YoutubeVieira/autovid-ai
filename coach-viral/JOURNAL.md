@@ -26,11 +26,14 @@ Les entrées les plus récentes sont en haut.
 
 **Vérifié**
 - 41 tests (`npm test`) et les deux parcours navigateur.
-- Robot Windows réel (`.github/workflows/coach-viral-windows.yml`) : installation, Chatterbox, voix Kokoro FR/PT et Edge, vidéo citation, clonage Chatterbox OK. Transcription : correctif poussé, résultat à confirmer.
+- Robot Windows réel (`.github/workflows/coach-viral-windows.yml`), passages n°4 et n°5 **entièrement verts** :
+  installation, Chatterbox, voix Kokoro FR/PT et Edge, vidéo citation, transcription Whisper + sous-titres, clonage Chatterbox.
+- Serveur de voix permanent mesuré sur Windows (n°4 sans → n°5 avec, machines différentes donc à prendre comme ordre de grandeur) :
+  Kokoro 1re phrase 120 s → 36 s ; Kokoro phrase suivante 12 s → 6 s ; vidéo citation 30 s → 24 s ; clonage Chatterbox 91 s → 82 s ;
+  étape d'essais complète 4 min 34 → 2 min 49.
 
 **Pas vérifié**
 - Appels réels à Gemini (ajouter le secret `GEMINI_API_KEY` sur GitHub pour que le robot le teste).
-- Le gain de vitesse réel du serveur de voix sur Windows (à lire dans le prochain passage du robot).
 
 **À faire (idées)**
 - Musique de fond libre de droits intégrée (bibliothèque locale gratuite).
