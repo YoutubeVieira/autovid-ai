@@ -538,7 +538,9 @@ def build_audio(plan, total, brand, work, full_voice=None, music_file=None, sfx=
         filt.append(f"[{n}:a]aresample=48000,aformat=channel_layouts=stereo,volume={music['volume']},"
                     f"afade=t=in:d=2,afade=t=out:st={max(0, total - 3):.3f}:d=3[m]")
         labels.append("[m]")
-    filt.append("".join(labels) + f"amix=inputs={len(labels)}:normalize=0:duration=first,alimiter=limit=0.95[out]")
+    # Fondu final : la cloche de fin (≈ 4 s) dépasse souvent la dernière image ; pas de coupure sèche.
+    fade_end = f"afade=t=out:st={max(0.0, total - 0.8):.3f}:d=0.8"
+    filt.append("".join(labels) + f"amix=inputs={len(labels)}:normalize=0:duration=first,{fade_end},alimiter=limit=0.95[out]")
     out = work / "audio.m4a"
     run(["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *args, "-filter_complex", ";".join(filt),
          "-map", "[out]", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", str(out)])

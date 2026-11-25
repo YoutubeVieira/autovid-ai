@@ -19,7 +19,7 @@ Les effets sonores sont placés **automatiquement** d'après les scènes du JSON
 - `"sfxExtra": [...]` : sons ajoutés aux sons automatiques (ex. un « ding » sur le mot rouge du CTA).
 
 ## Remplacer les sons par de vrais enregistrements (sur le PC de l'utilisateur)
-Les sons fournis sont synthétisés (corrects mais simples). Pour un rendu plus naturel :
+Les sons fournis viennent d'earshot (voir `remotion/public/sfx/SOURCES.md`). Pour de vrais enregistrements libres :
 ```
 python3 outils/chercher-sons.py "whoosh" --liste
 python3 outils/chercher-sons.py "whoosh" --choix 2 --nom whoosh --dossier remotion/public/sfx
@@ -27,6 +27,13 @@ python3 outils/chercher-sons.py "whoosh" --choix 2 --nom whoosh --dossier remoti
 - CC0 par défaut ; `--licence cc0,by` élargit, mais le crédit (`<nom>.txt` écrit à côté du son) doit alors figurer dans la description. Les licences « nc » sont refusées (chaîne monétisée = usage commercial).
 - L'API Openverse n'est pas joignable depuis une session cloud : ce script tourne sur le PC.
 - Garder le même nom de fichier (`whoosh`, `pop`, `impact`, `click`) remplace le son partout.
+
+## Earshot : fabriquer et « écouter » des sons (outils 2 et 3 de la vidéo SFX)
+Installé sur le PC par `bash outils/installer-earshot.sh` (Windows : `outils\installer-earshot.ps1`) : il crée `.venv-earshot/` et déclare le serveur MCP `earshot` (20 outils) à Claude Code pour ce projet.
+- **Un son** : outil MCP `make`, ou `.venv-earshot/bin/earshot make "a soft UI pop" -o remotion/public/sfx/pop.mp3`. `--sound <id>` choisit un son précis du catalogue (922 sons) ; les ids proposés sont dans la réponse (« also: … »).
+- **Une bande-son complète** à partir de vrais enregistrements (cue list depuis le JSON, sourcing avec licences, mixage, contrôles, crédits) : skill `real-sound` (`.claude/skills/real-sound/`). Son `{{PY}}` = `.venv-earshot/bin/python`.
+- **Écouter / juger** un son ou le mix (`describe`, `realness`, `timeline`, `critique`) : installer avec `--ecoute` (modèles ≈ 1,1 Go). Sans ça, vérifier par mesure (ci-dessous).
+- Earshot ne tourne pas dans une session cloud sans installation ; sur le PC il marche hors ligne (sauf les modèles d'écoute, téléchargés une fois).
 
 ## Vérifier
 1. `cd remotion && npx tsc --noEmit`

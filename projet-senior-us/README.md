@@ -56,6 +56,7 @@ entrees/exemple-50s/musique.mp3
   ```
   (n'importe quel outil qui écrit un fichier audio fonctionne ; `{text}` et `{out}` sont remplacés.)
 - **Effets sonores** : `entrees/<slug>/sons/exercise_start|rest_start|outro.mp3` remplacent les sons par défaut de `sons/`. Sons libres : `python3 outils/chercher-sons.py "soft chime" --liste` (Openverse, à lancer sur votre PC ; CC0 par défaut).
+- **Earshot** : `bash outils/installer-earshot.sh` sur votre PC (Windows : `outils\installer-earshot.ps1`) installe l'outil qui fabrique les sons et déclare son serveur MCP à Claude Code ; skills `earshot` et `real-sound` dans `.claude/skills/`. Les sons par défaut en viennent (`sons/SOURCES.md`).
 - **Musique** : `entrees/<slug>/musique.mp3`, ou par défaut `"music": { "file": "…", "volume": 0.10 }` dans `config/brand.json`.
 - **Texte à gauche** si le coach est à droite : `"text_side": "left"` sur le segment. Forcer le ton : `"text_tone": "light"` (blanc) ou `"dark"` (olive).
 

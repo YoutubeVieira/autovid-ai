@@ -3,3 +3,4 @@ __pycache__/
 entrees/**/*.*
 !entrees/LISEZMOI.md
 !entrees/**/.gitkeep
+.venv-earshot/

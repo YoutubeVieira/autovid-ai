@@ -29,6 +29,12 @@ python3 outils/chercher-sons.py "soft chime" --choix 3 --nom rest_start --dossie
 ```
 CC0 par défaut. Avec `--licence cc0,by`, le crédit écrit dans `<nom>.txt` est **obligatoire** : le générateur l'ajoute tout seul dans `youtube/description.txt` (section « Sounds: »). Licences « nc » refusées. L'API Openverse n'est pas joignable depuis une session cloud.
 
+## Earshot : fabriquer et « écouter » des sons
+Installé sur le PC par `bash outils/installer-earshot.sh` (Windows : `outils\installer-earshot.ps1`) : serveur MCP `earshot` + `.venv-earshot/`.
+- **Un son doux** : outil MCP `make`, ou `.venv-earshot/bin/earshot make --sound logo/bloom -o entrees/<slug>/sons/outro.mp3`. Préférer les familles douces : `whoosh/soft`, `notify/pair`, `heal/chime`, `logo/bloom`. Refuser tout ce qui est sec ou métallique (`boom/*`, `slam/*`, `hit/*`).
+- **Vérifier un son** (`describe`, `realness`) : installer avec `--ecoute` ; sinon mesurer (ci-dessous).
+- Origine des sons par défaut : `sons/SOURCES.md`. La skill `real-sound` est pensée pour des films de lancement énergiques : ne l'utiliser ici que pour sourcer de vrais enregistrements, jamais pour le style de mixage.
+
 ## Règles
 - Jamais de bip ou de tic-tac à chaque seconde, jamais de son pendant que le coach parle d'une consigne de sécurité.
 - Sons courts (≤ 4 s), doux, sans attaque sèche ; volume sous la voix : la voix doit rester parfaitement compréhensible pour une audition faible.

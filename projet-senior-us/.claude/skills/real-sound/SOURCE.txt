@@ -1,0 +1,2 @@
+Source : https://github.com/Leonxlnx/earshot (skills/real-sound), commit 7a7f7c5c70d4a763a1eca4b3666af7c77e313f97, licence MIT (voir LICENSE).
+Copié tel quel ; pour mettre à jour : outils/installer-earshot.sh --skills.

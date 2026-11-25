@@ -43,6 +43,7 @@ python3 autovideo.py render sessions/<slug>.json [--preview] [--until S] [--alph
 ## Sons
 - Effets sonores doux placés automatiquement par `autovideo.py` : souffle léger au début de chaque exercice (sauf le premier), petite cloche au début d'un repos, cloche de fin. Volume `config/brand.json` → `sfx.volume`.
 - Jamais de bip à chaque seconde ni de son par-dessus une consigne de sécurité ; toujours sous la voix.
+- Sons par défaut générés avec earshot (`sons/SOURCES.md`). Earshot s'installe sur le PC avec `outils/installer-earshot.sh` (ou `.ps1`) ; son serveur MCP et ses deux skills (`earshot`, `real-sound`) sont alors disponibles. Dans Antigravity, utiliser la commande `.venv-earshot/bin/earshot make …` depuis le terminal.
 - Remplacement par séance : `entrees/<slug>/sons/<exercise_start|rest_start|outro>.*`. Sons libres : `outils/chercher-sons.py` (Openverse, sur le PC ; CC0 par défaut ; crédit obligatoire pour CC BY, repris automatiquement dans la description).
 
 ## Avant de dire qu'une vidéo est prête

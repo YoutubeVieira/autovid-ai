@@ -47,7 +47,7 @@ TikTok vertical de 52 s (576×1024, en français, @henriexploria). Facecam plein
 3. **Real SFX** : regarde le montage, repère chaque moment qui demande un son (« un whoosh quand un élément apparaît ») et le place au bon endroit.
 CTA : « commente SFX sous ma vidéo sur Instagram ».
 
-**Vérification des outils** : Openverse existe (API publique `api.openverse.org/v1/audio/`, sons sous licences Creative Commons). Earshot existe (boîte à outils open source tierce qui donne des fonctions d'écoute aux agents de code). Aucune trace publique d'un outil nommé « Real SFX ».
+**Vérification des outils** : Openverse existe (API publique `api.openverse.org/v1/audio/`, sons sous licences Creative Commons). Earshot existe : [Leonxlnx/earshot](https://github.com/Leonxlnx/earshot), licence MIT — catalogue de 922 sons rendus par code, écoute par modèles, serveur MCP (20 outils), et deux skills dont **`real-sound`** (bande-son à partir de vrais enregistrements placés sur les instants calculés depuis le code de l'animation). Aucun outil public ne s'appelle « Real SFX » : `real-sound` correspond à ce que la vidéo décrit, sans certitude que ce soit le même.
 
 ## Ce que le dépôt en tire
 - **Placement des sons sans « voir » la vidéo** : nos deux générateurs connaissent déjà l'instant exact de chaque apparition (scènes Remotion, segments de séance). Les sons sont donc placés de façon déterministe — c'est le rôle annoncé de « Real SFX », sans outil supplémentaire.
@@ -55,4 +55,4 @@ CTA : « commente SFX sous ma vidéo sur Instagram ».
   - `projet-senior-us` : profil doux et rare — souffle au début des exercices, cloche de repos, cloche de fin (`sfx_plan` dans `autovideo.py`) ; agent `designer-sonore`.
 - **Openverse** : `outils/chercher-sons.py` (dans les deux projets) cherche et télécharge un son, refuse les licences non commerciales, écrit le crédit à côté du fichier ; le projet senior le reprend dans la description YouTube. À lancer sur le PC (API non joignable depuis une session cloud).
 - **Sons par défaut** synthétisés et versionnés (`projet-video/remotion/public/sfx/`, `projet-senior-us/sons/`) pour que tout fonctionne sans téléchargement.
-- **Earshot** n'est pas intégré : outil tiers non testé ici ; on vérifie plutôt les sons par mesure (`silencedetect`, `volumedetect`).
+- **Earshot** est intégré aux deux projets vidéo : skills `earshot` et `real-sound` copiées (commit 7a7f7c5, MIT), script `outils/installer-earshot.sh` / `.ps1` qui l'installe sur le PC et déclare son serveur MCP. Testé ici : installation, génération de sons, serveur MCP (20 outils, appel `make`). Les modèles d'écoute (≈ 1,1 Go) n'ont pas pu être téléchargés depuis la session cloud. Les sons par défaut des deux projets sont désormais générés par earshot.
