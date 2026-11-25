@@ -245,3 +245,76 @@ export async function cleanup(dir, hours = 48) {
     }
   } catch { /* dossier absent */ }
 }
+
+/* ---------- Clips : les meilleurs moments d'une vidéo longue (comme OpusClip) ---------- */
+
+export const ClipsSchema = z.object({
+  clips: z.array(z.object({
+    titre: z.string().describe("Title box shown during the first seconds, max 45 characters"),
+    debut: z.number().describe("Start time in seconds, at the start of a sentence"),
+    fin: z.number().describe("End time in seconds, at the end of a sentence"),
+    score: z.number().describe("0-100 estimated short-video potential"),
+    pourquoi: z.string()
+  }))
+});
+
+export function pickClips(client, i) {
+  const n = Math.min(Math.max(parseInt(i.nombre, 10) || 3, 1), 6);
+  const text = [
+    `From this word-timed transcript of a long video, pick the ${n} best self-contained moments for vertical short videos.`,
+    `Each clip lasts ${i.min || 20} to ${i.max || 60} seconds, starts with a strong hook sentence and ends on a complete thought. Clips must not overlap.`,
+    "Return times in seconds that match word timings. Sort by score, best first.",
+    JSON.stringify(i.mots.map((w) => [w.mot, Math.round(w.debut * 10) / 10]))
+  ].join("\n");
+  return ask(client, { lang: i.langue, content: text, schema: ClipsSchema, effort: "medium" });
+}
+
+/* Garde les mots d'un clip et recale leurs temps sur le début du clip. */
+export function wordsInRange(mots, debut, fin) {
+  return mots.filter((w) => w.debut >= debut - 0.05 && w.fin <= fin + 0.3)
+    .map((w) => ({ mot: w.mot, debut: Math.max(0, w.debut - debut), fin: Math.max(0.05, w.fin - debut) }));
+}
+
+/* Corrige des bornes impossibles (fin avant début, hors de la vidéo, trop court) et les chevauchements. */
+export function sanitizeClips(clips, duree, min = 8) {
+  const out = [];
+  for (const c of [...clips].sort((a, b) => b.score - a.score)) {
+    const debut = Math.max(0, Math.min(c.debut, duree));
+    const fin = Math.min(duree, Math.max(c.fin, debut));
+    if (fin - debut < min) continue;
+    if (out.some((o) => debut < o.fin && fin > o.debut)) continue;
+    out.push({ ...c, debut, fin });
+  }
+  return out;
+}
+
+export async function produceClips(client, video, options, outDir, renderFacecam, onStep = () => {}) {
+  const work = path.join(DATA, "travail", newId());
+  await mkdir(work, { recursive: true });
+  await mkdir(outDir, { recursive: true });
+  try {
+    onStep("Transcription mot à mot");
+    const mots = options.mots || await transcribeWords(video, work).catch(() => {
+      throw new CoachError("transcription", "Transcription impossible : installez faster-whisper sur le serveur (voir le guide).");
+    });
+    if (!mots.length) throw new CoachError("transcription", "Aucune parole détectée dans la vidéo.");
+    const duree = await mediaDuration(video);
+    onStep("Choix des meilleurs moments");
+    const { clips } = await pickClips(client, { mots, nombre: options.nombre, langue: options.langue });
+    const ok = sanitizeClips(clips, duree);
+    if (!ok.length) throw new CoachError("clips", "Aucun moment assez long n'a été trouvé.");
+    const results = [];
+    for (let k = 0; k < ok.length; k++) {
+      const c = ok[k];
+      onStep(`Clip ${k + 1}/${ok.length}`);
+      const cut = path.join(work, `cut${k}.mp4`);
+      await run("ffmpeg", ["-y", "-loglevel", "error", "-ss", c.debut.toFixed(2), "-to", c.fin.toFixed(2), "-i", video, "-c:v", "libx264", "-preset", "veryfast", "-crf", "18", "-c:a", "aac", cut]);
+      const id = newId();
+      await renderFacecam(cut, wordsInRange(mots, c.debut, c.fin), [{ texte: c.titre, debut: 0, fin: Math.min(3.5, c.fin - c.debut) }], options.style || {}, path.join(outDir, id + ".mp4"));
+      results.push({ video: id + ".mp4", titre: c.titre, score: Math.round(c.score), debut: c.debut, fin: c.fin, pourquoi: c.pourquoi });
+    }
+    return { clips: results, ...Object.fromEntries(results.map((r, i) => ["clip" + i, r.video])) };
+  } finally {
+    await rm(work, { recursive: true, force: true });
+  }
+}

@@ -30,10 +30,13 @@ const STYLE = {
   face_camera: { taille: 100, couleur_texte: "#FFFFFF", couleur_mot_actif: "#FFD400", couleur_contour: "#000000", epaisseur_contour: 8, position_sous_titres: 0.62, mots_par_groupe: 2, majuscules: false, titre_couleur_texte: "#FFFFFF", titre_couleur_boite: "#000000", titre_couleur_bordure: "#F28C28", titre_position: 0.14 }
 };
 const calls = [];
-const client = { beta: { messages: { async parse(p) {
+const THEMES = { themes: [{ theme: "Défi ginga 7 jours", pourquoi_maintenant: "Vidéos du défi en hausse cette semaine", accroches: ["J'ai fait la ginga 7 jours de suite", "b", "c"], format: "défi", potentiel: 81, concurrence: "faible", sources: ["https://exemple.fr/a"] }] };
+const client = { beta: { messages: {
+ async create() { return { stop_reason: "end_turn", content: [{ type: "text", text: "Signal : défi ginga" }] }; },
+ async parse(p) {
   calls.push(p);
   const t = JSON.stringify(p.messages[0].content);
-  const out = /reference screenshots/.test(t) ? STYLE : VERSION;
+  const out = /reference screenshots/.test(t) ? STYLE : /short-video themes/.test(t) ? THEMES : VERSION;
   return { stop_reason: "end_turn", parsed_output: out };
 } } } };
 
@@ -50,8 +53,18 @@ try {
   const shot = async (n) => SCREENS && page.screenshot({ path: path.join(SCREENS, n + ".png"), fullPage: true });
   await page.goto(base);
 
+  /* Radar de tendances (onglet Idées) */
+  await page.waitForSelector("#rd-add");
+  await page.fill(".rd-nom", "capoeira débutants");
+  await page.click("#rd-go");
+  await page.waitForSelector(".theme", { timeout: 30_000 });
+  assert.match(await page.textContent(".theme"), /Défi ginga 7 jours/);
+  await shot("9-radar");
+  await page.click(".rd-film");
+  await page.waitForSelector("#sujet");
+  assert.match(await page.inputValue("#sujet"), /Défi ginga 7 jours/);
+
   /* Studio, à partir d'un sujet */
-  await page.click(".tabs [data-vue=studio]");
   await page.check('input[name=mode][value=sujet]');
   await page.fill("#sujet", "ce que la capoeira m'a appris");
   await page.click("#f-studio button[type=submit]");
@@ -81,6 +94,12 @@ try {
   await page.click("#f-studio button[type=submit]");
   await page.waitForSelector("#r-studio .err", { timeout: 60_000 });
   assert.match(await page.textContent("#r-studio .err"), /faster-whisper|Transcription/);
+
+  /* Clips : sans faster-whisper, message clair */
+  await page.check('input[name=mode][value=clips]');
+  await page.setInputFiles("#clips-file", path.join(here, "fixtures/court.webm"));
+  await page.click("#f-studio button[type=submit]");
+  await page.waitForSelector("#r-studio .err", { timeout: 60_000 });
 
   /* Voix : essai, et formulaire de clonage absent quand le serveur n'a pas de moteur de clonage */
   await page.click(".tabs [data-vue=voix]");

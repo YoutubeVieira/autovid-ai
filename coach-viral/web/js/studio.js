@@ -38,7 +38,7 @@
       <h1>Studio vidéo</h1>
       <p class="lead">Collez le lien d'une vidéo qui marche : le coach analyse son style et écrit une nouvelle version, originale et améliorée. Ensuite, le studio fabrique la vidéo avec images et voix off.</p>
       <div class="chips" role="radiogroup" aria-label="Point de départ">
-        ${[["lien", "🔗 Lien"], ["fichier", "🎞️ Fichier"], ["sujet", "✍️ Sujet"], ["face", "🎤 Face caméra"]].map(([k, t]) =>
+        ${[["lien", "🔗 Lien"], ["fichier", "🎞️ Fichier"], ["sujet", "✍️ Sujet"], ["face", "🎤 Face caméra"], ["clips", "✂️ Clips"]].map(([k, t]) =>
           `<label class="chip"><input type="radio" name="mode" value="${k}"${k === mode ? " checked" : ""}> ${t}</label>`).join("")}
       </div>
       <form class="card" id="f-studio"></form>
@@ -70,8 +70,14 @@
       $("src-file").onchange = (e) => ($("src-name").textContent = e.target.files[0] ? e.target.files[0].name : "");
     } else if (mode === "sujet") {
       f.innerHTML = `<label for="sujet">Sujet de la vidéo</label>
-        <input type="text" id="sujet" placeholder="ex. ce que la capoeira m'a appris sur la patience">
+        <input type="text" id="sujet" placeholder="ex. ce que la capoeira m'a appris sur la patience" value="${esc(st.sujetPrefill || "")}">
         ${consigne}<button class="primary" type="submit">Écrire la vidéo</button>`;
+    } else if (mode === "clips") {
+      f.innerHTML = `<p class="note">Envoyez une vidéo longue (live, podcast, cours, interview) : le coach repère les meilleurs moments et en fait des clips verticaux avec sous-titres et titre.</p>
+        <label class="drop" for="clips-file"><strong>✂️ Votre vidéo longue</strong><span id="clips-name">150 Mo au maximum</span><input type="file" id="clips-file" accept="video/*"></label>
+        <label for="clips-n">Nombre de clips</label><select id="clips-n"><option>2</option><option selected>3</option><option>5</option></select>
+        <button class="primary" type="submit">Trouver les meilleurs moments</button>`;
+      $("clips-file").onchange = (e) => ($("clips-name").textContent = e.target.files[0] ? e.target.files[0].name : "");
     } else {
       f.innerHTML = `<p class="note">Votre vidéo face caméra reçoit des sous-titres mot à mot et des titres en boîte aux moments clés, comme les créateurs tech et éducatifs.</p>
         <label class="drop" for="face-file"><strong>🎤 Votre vidéo face caméra</strong><span id="face-name">Choisir un fichier</span><input type="file" id="face-file" accept="video/*"></label>
@@ -95,6 +101,14 @@
         const up = await UI.upload(file);
         const job = await UI.api("studio/fabriquer", { gabarit: "face_camera", video: up.id, style: st.faceStyle || {}, titres: $("face-titres").checked });
         return showResult(await follow(job.travail, box), s);
+      }
+      if (mode === "clips") {
+        const file = $("clips-file").files[0];
+        if (!file) throw new Error("Choisissez votre vidéo.");
+        box.innerHTML = UI.loading("Envoi de la vidéo…");
+        const up = await UI.upload(file);
+        const job = await UI.api("studio/fabriquer", { gabarit: "clips", video: up.id, nombre: $("clips-n").value, style: st.faceStyle || {} });
+        return showClips(await follow(job.travail, box), box);
       }
       if (mode === "sujet") {
         const sujet = $("sujet").value.trim();
@@ -230,6 +244,78 @@
     }
   }
 
+  async function showClips(r, box) {
+    const items = await Promise.all(r.clips.map(async (c) => ({ ...c, url: await UI.fileUrl(c.video) })));
+    box.innerHTML = items.map((c, i) => `<section class="card"><h2>Clip ${i + 1} · ${esc(c.titre)}</h2>
+      <p class="note">Potentiel ${c.score}/100 · de ${Math.floor(c.debut / 60)}:${String(Math.round(c.debut % 60)).padStart(2, "0")} à ${Math.floor(c.fin / 60)}:${String(Math.round(c.fin % 60)).padStart(2, "0")} — ${esc(c.pourquoi)}</p>
+      <video class="result" src="${c.url}" controls playsinline></video>
+      <div class="actions"><a class="secondary" href="${c.url}" download="clip-${i + 1}.mp4">⬇️ Télécharger</a></div></section>`).join("");
+  }
+
+  /* ---------------- Radar de tendances ---------------- */
+
+  async function radar(el) {
+    let d;
+    try { d = await UI.get("radar"); } catch (e) { el.innerHTML = ""; return; }
+    const niches = d.niches;
+    const potColor = (p) => "n-" + UI.level(p, 100);
+    el.innerHTML = `<section class="card radar"><h2>📡 Radar de tendances</h2>
+      <p class="note">Un bot cherche ce qui monte cette semaine dans vos niches (web, YouTube Shorts, Reddit) et propose des thèmes à filmer.${d.planifie ? " Il tourne aussi tout seul chaque jour." : ""}</p>
+      <details${niches.length ? "" : " open"}><summary><strong>Mes niches (${niches.length}/5)</strong></summary>
+        <div id="rd-list">${(niches.length ? niches : [{ nom: "", subreddits: [] }]).map((n, i) => nicheRow(n, i)).join("")}</div>
+        <div class="actions"><button class="secondary" id="rd-add" type="button">＋ Ajouter une niche</button><button class="secondary" id="rd-save" type="button">Enregistrer</button></div>
+      </details>
+      <button class="primary" id="rd-go">${d.en_cours ? "Recherche en cours…" : "🔎 Chercher les tendances maintenant"}</button>
+      <div id="rd-res">${niches.map((n) => results(n.nom, d.resultats[n.nom])).join("")}</div></section>`;
+    function nicheRow(n, i) {
+      return `<div class="niche" data-i="${i}"><div class="row"><div><label>Niche</label><input type="text" class="rd-nom" value="${esc(n.nom)}" placeholder="ex. capoeira débutants"></div>
+        <div><label>Langue</label><select class="rd-langue">${["fr", "pt", "en"].map((l) => `<option${l === (n.langue || "fr") ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>
+        <label>Public <small>(facultatif)</small></label><input type="text" class="rd-public" value="${esc(n.public || "")}">
+        <label>Subreddits <small>(facultatif, ex. capoeira fitness)</small></label><input type="text" class="rd-subs" value="${esc((n.subreddits || []).join(" "))}"></div>`;
+    }
+    function results(nom, r) {
+      if (!r) return `<h3>${esc(nom)}</h3><p class="note">Pas encore de résultat.</p>`;
+      return `<h3>${esc(nom)} <span class="note">· ${new Date(r.date).toLocaleDateString("fr-FR")} · ${r.signaux.youtube} vidéos YouTube, ${r.signaux.reddit} posts Reddit${r.signaux.web ? ", recherche web" : ""}</span></h3>` +
+        r.themes.map((t) => `<div class="theme"><div class="theme-top"><strong>${esc(t.theme)}</strong><strong class="${potColor(t.potentiel)}">${Math.round(t.potentiel)}</strong></div>
+          <p class="note">${esc(t.pourquoi_maintenant)} · concurrence ${esc(t.concurrence)} · ${esc(t.format)}</p>
+          <ul class="clean">${t.accroches.map((a) => `<li>« ${esc(a)} »</li>`).join("")}</ul>
+          ${t.sources.length ? `<p class="note">${t.sources.slice(0, 3).map((u, k) => /^https:\/\//.test(u) ? `<a href="${esc(u)}" target="_blank" rel="noopener">source ${k + 1}</a>` : "").join(" · ")}</p>` : ""}
+          <button class="secondary rd-film" data-sujet="${esc(t.theme + " — " + t.accroches[0])}">🎬 Créer la vidéo</button></div>`).join("");
+    }
+    const collect = () => [...el.querySelectorAll(".niche")].map((row) => ({
+      nom: row.querySelector(".rd-nom").value.trim(), langue: row.querySelector(".rd-langue").value,
+      public: row.querySelector(".rd-public").value.trim(), subreddits: row.querySelector(".rd-subs").value.trim()
+    })).filter((n) => n.nom);
+    $("rd-add").onclick = () => {
+      const list = $("rd-list");
+      if (list.children.length >= 5) return UI.toast("5 niches au maximum.");
+      list.insertAdjacentHTML("beforeend", nicheRow({ nom: "", subreddits: [] }, list.children.length));
+    };
+    $("rd-save").onclick = async () => {
+      try { await UI.api("radar/niches", { niches: collect() }); UI.toast("Niches enregistrées"); radar(el); } catch (e) { UI.toast(e.message); }
+    };
+    $("rd-go").onclick = async () => {
+      const b = $("rd-go");
+      b.disabled = true;
+      try {
+        await UI.api("radar/niches", { niches: collect() });
+        await UI.api("radar/lancer", {});
+        b.textContent = "Recherche en cours… (1 à 2 min par niche)";
+        for (;;) {
+          await new Promise((r) => setTimeout(r, 4000));
+          const s = await UI.get("radar");
+          if (!s.en_cours) break;
+        }
+        radar(el);
+      } catch (e) { UI.toast(e.message); b.disabled = false; }
+    };
+    el.querySelectorAll(".rd-film").forEach((b) => (b.onclick = () => {
+      st.sujetPrefill = b.dataset.sujet;
+      store.set("studio.mode", "sujet");
+      g.CV.show("studio");
+    }));
+  }
+
   /* ---------------- Voix ---------------- */
 
   async function viewVoix(vue) {
@@ -313,5 +399,5 @@
     if ($("vx-del")) $("vx-del").onclick = async () => { await UI.del("voix/echantillon"); $("vx-etat").textContent = "aucune voix enregistrée"; UI.toast("Voix supprimée"); };
   }
 
-  g.StudioViews = { studio: viewStudio, voix: viewVoix, sante };
+  g.StudioViews = { studio: viewStudio, voix: viewVoix, radar, sante };
 })(window);

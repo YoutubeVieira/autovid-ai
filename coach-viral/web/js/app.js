@@ -32,7 +32,8 @@
       '<div class="row"><div><label for="nombre">Nombre d\'idées</label><select id="nombre">' + [3, 5, 8].map(function (n) {
         return "<option" + (n == p.nombre ? " selected" : "") + ">" + n + "</option>"; }).join("") + "</select></div>" +
       '<div><label for="contraintes">Contraintes <small>(facultatif)</small></label><input type="text" id="contraintes" placeholder="ex. seul, téléphone" value="' + esc(p.contraintes) + '"></div></div>' +
-      '<button class="primary" type="submit">Générer les idées</button></form><div id="r-idees"></div>';
+      '<button class="primary" type="submit">Générer les idées</button></form><div id="r-idees"></div><div id="radar"></div>';
+    StudioViews.radar(document.getElementById("radar"));
     document.getElementById("f-idees").onsubmit = async function (ev) {
       ev.preventDefault();
       var form = { niche: val("niche"), audience: val("audience"), objectif: val("objectif"), plateforme: val("plat-i"), ton: val("ton"), nombre: val("nombre"), contraintes: val("contraintes") };

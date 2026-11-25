@@ -1,0 +1,47 @@
+name: Coach Viral – tests
+
+# Robot de test : à chaque modification de coach-viral, et chaque nuit (pour repérer une dépendance qui casse).
+on:
+  push:
+    paths: ["coach-viral/**", ".github/workflows/coach-viral-tests.yml"]
+  pull_request:
+    paths: ["coach-viral/**"]
+  schedule:
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: coach-viral
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: coach-viral/package-lock.json
+      - name: FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - run: npm ci
+      - name: Tests (fausse IA, sans réseau)
+        run: npm test
+      - name: Navigateur de test
+        run: npm install --no-save playwright && npx playwright install --with-deps chromium
+      - name: Parcours navigateur (idées, score, profil, publier)
+        run: node --no-warnings tests/smoke.mjs
+      - name: Parcours navigateur (radar, studio, clips, voix)
+        run: mkdir -p captures && SCREENS=captures node --no-warnings tests/smoke-studio.mjs
+      - name: Captures d'écran
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: captures
+          path: coach-viral/captures
+          if-no-files-found: ignore

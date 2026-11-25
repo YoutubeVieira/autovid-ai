@@ -1,0 +1,28 @@
+name: Coach Viral – radar de tendances
+
+# Robot qui réveille le serveur en ligne chaque matin et lance le radar sur vos niches.
+# À régler une fois dans GitHub > Settings > Secrets and variables > Actions :
+#   COACH_URL    : adresse du serveur (ex. https://coach-viral.onrender.com)
+#   RADAR_JETON  : le même jeton secret que la variable RADAR_JETON du serveur
+on:
+  schedule:
+    - cron: "43 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Lancer le radar
+        env:
+          COACH_URL: ${{ secrets.COACH_URL }}
+          RADAR_JETON: ${{ secrets.RADAR_JETON }}
+        run: |
+          if [ -z "$COACH_URL" ] || [ -z "$RADAR_JETON" ]; then
+            echo "Secrets COACH_URL et RADAR_JETON non réglés : rien à faire."; exit 0
+          fi
+          curl -sS --fail-with-body --max-time 900 --retry 3 --retry-delay 30 \
+            -X POST "$COACH_URL/api/radar/declencher?attendre" -H "x-jeton-radar: $RADAR_JETON"

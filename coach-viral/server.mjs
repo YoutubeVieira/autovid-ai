@@ -14,6 +14,7 @@ import { synthesize, prepareSample, consentSentence, enginesAvailable, cloneEngi
 import { renderFacecam } from "./lib/captions.mjs";
 import { run as runCmd } from "./lib/render.mjs";
 import { QUOTAS } from "./lib/billing.mjs";
+import { Radar } from "./lib/radar.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.join(here, "web");
@@ -203,8 +204,16 @@ async function serveFile(res, file, name, download) {
 
 export function createServer({ client, accessCode = process.env.CODE_ACCES || "", billing = null, stripe = null, env = process.env, dataDir = studio.DATA } = {}) {
   const jobs = new Jobs();
+  /* Radar de tendances : un par utilisateur ; celui du propriétaire (« moi ») tourne chaque jour tout seul. */
+  const radars = new Map();
+  const radarOf = (uid) => {
+    if (!radars.has(uid)) radars.set(uid, new Radar({ client, dir: path.join(dataDir, "radar", uid), env }));
+    return radars.get(uid);
+  };
+
   const dirs = { uploads: path.join(dataDir, "televersements"), out: path.join(dataDir, "sorties"), voix: path.join(dataDir, "voix") };
   const sale = Boolean(billing);
+  if (!sale) radarOf("moi").schedule();
   setInterval(() => { studio.cleanup(dirs.out); studio.cleanup(dirs.uploads, 24); }, 3600_000).unref();
 
   /* Qui fait la demande : l'abonné (clé), ou « moi » en usage personnel. */
@@ -235,6 +244,15 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
         ok: true, code_requis: Boolean(accessCode) && !sale, vente: sale, prix: env.PRIX_AFFICHE || "1,99 € / mois",
         moteurs_voix: enginesAvailable(env), clonage: cloneEngines(env), voix: VOICES, quotas: sale ? QUOTAS : null
       });
+    }
+
+    /* Déclenchement du radar par un robot externe (GitHub Actions, cron) avec un jeton secret. */
+    if (p === "/api/radar/declencher" && req.method === "POST") {
+      if (!env.RADAR_JETON || req.headers["x-jeton-radar"] !== env.RADAR_JETON) return send(res, 401, { erreur: "Jeton invalide." });
+      const r = radarOf("moi");
+      if (url.searchParams.has("attendre")) return send(res, 200, await r.run());
+      r.run().catch(() => {});
+      return send(res, 202, { lance: true });
     }
 
     /* Abonnement */
@@ -304,6 +322,14 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
       if (req.method === "DELETE") { await rm(sampleOf(user), { force: true }); return send(res, 200, { supprime: true }); }
     }
 
+    if (p === "/api/radar" && req.method === "GET") {
+      const r = radarOf(user.id);
+      const niches = await r.niches();
+      const resultats = {};
+      for (const n of niches) resultats[n.nom] = (await r.results(n.nom))[0] || null;
+      return send(res, 200, { niches, resultats, en_cours: r.running, planifie: !sale && Boolean(env.RADAR_HEURE) });
+    }
+
     if (req.method !== "POST") return send(res, 405, { erreur: "Méthode non permise." });
     const ip = req.socket.remoteAddress || "?";
     if (!allowed(ip, Date.now(), Number(env.LIMITE_PAR_HEURE || 60))) return send(res, 429, { erreur: "Limite de demandes atteinte pour cette heure." });
@@ -367,8 +393,13 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
 
     if (p === "/api/studio/fabriquer") {
       quota(user, "video");
-      const gabarit = b.gabarit === "face_camera" ? "face_camera" : "citation";
+      const gabarit = ["face_camera", "clips"].includes(b.gabarit) ? b.gabarit : "citation";
       const style = typeof b.style === "object" && b.style ? b.style : {};
+      if (gabarit === "clips") {
+        const video = await uploadPath(user, b.video);
+        const job = jobs.add(user.id, (step) => studio.produceClips(client, video, { nombre: b.nombre, langue: lang(b.langue), style }, dirs.out, renderFacecam, step));
+        return send(res, 202, { travail: job.id });
+      }
       if (gabarit === "face_camera") {
         const video = await uploadPath(user, b.video);
         const langue = lang(b.langue);
@@ -401,6 +432,26 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
       };
       const job = jobs.add(user.id, (step) => studio.produce(parsed.data, opts, dirs.out, step));
       return send(res, 202, { travail: job.id });
+    }
+
+    if (p === "/api/radar/niches") {
+      const list = (Array.isArray(b.niches) ? b.niches : []).slice(0, 5).map((n) => ({
+        nom: str(n?.nom, 80), public: str(n?.public, 200), langue: lang(n?.langue),
+        subreddits: (Array.isArray(n?.subreddits) ? n.subreddits : String(n?.subreddits || "").split(/[ ,]+/))
+          .map((x) => String(x).replace(/^r\//, "").trim()).filter((x) => /^[A-Za-z0-9_]{2,30}$/.test(x)).slice(0, 5)
+      })).filter((n) => n.nom);
+      await radarOf(user.id).saveNiches(list);
+      return send(res, 200, { niches: list });
+    }
+    if (p === "/api/radar/lancer") {
+      const r = radarOf(user.id);
+      const only = str(b.niche, 80) || null;
+      const count = only ? 1 : (await r.niches()).length;
+      if (!count) return send(res, 400, { erreur: "Ajoutez d'abord une niche." });
+      for (let i = 0; i < count; i++) quota(user, "analyse");
+      if (r.running) return send(res, 409, { erreur: "Le radar est déjà en train de chercher." });
+      r.run(only).catch(() => {});
+      return send(res, 202, { lance: true });
     }
 
     /* Coach */

@@ -133,3 +133,7 @@ audio { width: 100%; margin-top: 10px; }
 details.card summary { cursor: pointer; }
 a.secondary { text-decoration: none; display: inline-flex; align-items: center; }
 .prix { font-size: 1.6rem; font-weight: 800; margin: 4px 0 8px; background: linear-gradient(135deg, var(--accent), var(--accent-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.niche { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 4px; }
+.theme { border-top: 1px solid var(--line); padding: 10px 0; }
+.theme-top { display: flex; justify-content: space-between; gap: 10px; }
+.radar h3 .note { font-weight: 400; }
