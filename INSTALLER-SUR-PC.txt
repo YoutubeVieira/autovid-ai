@@ -29,6 +29,12 @@ https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-dc9e84d2-s625ne/I
    - earshot (effets sonores, environ 1 minute) ;
    - les 7 styles de création MP4 (environ 200 Mo, projet-video seulement).
 
+   Pour projet-video, il propose ensuite la SUPER-ANALYSE d'une vidéo :
+   glissez la vidéo dans la fenêtre, Entrée (et un .srt si vous en avez).
+   Résultats dans projet-video\analyses\<nom>\ : super.md (moments forts, mots qui
+   accrochent, SEO, améliorations), secondes.md (seconde par seconde), prompts.md.
+   Sans image : tout est en texte. Vous pouvez en analyser plusieurs à la suite.
+
 4. LANCER LA SESSION CLAUDE
    Il lance « claude remote-control ». Laissez la fenêtre OUVERTE.
    Ouvrez l'application Claude Code : une session au nom du projet apparaît.

@@ -15,6 +15,16 @@ python3 outils/analyser-video.py <video.mp4> [autres.mp4 …] --transcrire --lan
 - Résultat : `analyses/<nom>/rapport.md` (étapes 1 à 8 mesurées, score /100), `analyse.json`, `hook.jpg`, `planche.jpg`, `texte-*.jpg`, `fin.jpg`. Plusieurs vidéos : `analyses/comparatif.md`.
 - Facecam avec incrustations : si la frise semble vide alors que la vidéo bouge, relance avec `--seuil-visuel 0.04`.
 
+## 1 bis. Super-analyse (sans images) : seconde par seconde, moments forts, mots, SEO, prompts
+```
+python3 outils/superanalyse.py <video.mp4> [--srt sous-titres.srt] [--retention retention.csv]
+```
+- Texte : transcription automatique (faster-whisper), ou `--srt` si l'utilisateur a des sous-titres (CapCut, YouTube).
+- `--retention` : export « Rétention de l'audience » de YouTube Studio → les moments forts et faibles viennent des vrais chiffres ; sinon ils sont **estimés** (énergie de la voix, changement d'image, mots forts, débit) et doivent être présentés comme tels.
+- Résultat : `super.md` (moments les plus puissants, mots et formulations qui accrochent et pourquoi, pourquoi la vidéo peut faire des vues, SEO : mot-clé principal, hashtags, tags, améliorations classées), `secondes.md` (tableau seconde par seconde), `prompts.md` (un prompt FR + EN par plan pour recréer la vidéo), `super.json`.
+- **Prompts** : la description visuelle de chaque plan est à écrire dans `super.json` → `descriptions` (`{"0": {"image": "…", "camera": "…", "texte_ecran": "…"}}`) puis `python3 outils/superanalyse.py prompts analyses/<nom>/super.json`. Pour décrire, regarde les images de l'étape 2 (analyser-video) ou une image extraite dans un dossier temporaire, jamais livrée.
+- S'inspirer de la mécanique (durée, cadrage, rythme, formulation), jamais copier le texte, la voix ou les personnes d'autrui.
+
 ## 2. Regarder (Read sur chaque image)
 1. `hook.jpg` : que voit-on et lit-on à 0 s, 1 s, 3 s ? Quelle promesse ?
 2. `texte-milieu-*.jpg`, `texte-bas-*.jpg`, `texte-haut-*.jpg` : reconstitue le texte prononcé / affiché dans l'ordre (c'est ainsi que les vidéos de `../ANALYSE.md` ont été transcrites) ; note le style des sous-titres et les mots mis en valeur.

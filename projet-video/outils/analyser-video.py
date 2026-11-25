@@ -171,6 +171,7 @@ def transcrire(path, langue):
     mots = [w for s in segs for w in (s.words or [])]
     return {"fait": True, "langue": info.language,
             "segments": [{"debut": round(s.start, 2), "fin": round(s.end, 2), "texte": s.text.strip()} for s in segs],
+            "mots": [{"debut": round(w.start, 2), "fin": round(w.end, 2), "mot": w.word.strip()} for w in mots],
             "nb_mots": len(mots),
             "premiers_mots": " ".join(w.word.strip() for w in mots if w.start < 3.0),
             "mots_par_seconde": round(len(mots) / (mots[-1].end - mots[0].start), 2) if len(mots) > 1 else 0}

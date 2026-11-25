@@ -68,6 +68,14 @@ if exist "outils\installer-styles.ps1" (
   if not errorlevel 2 powershell -NoProfile -ExecutionPolicy Bypass -File "outils\installer-styles.ps1"
 )
 
+if exist "outils\superanalyse.py" (
+  python -c "import faster_whisper" >nul 2>nul || (
+    choice /m "Installer la transcription pour la super-analyse (faster-whisper, environ 200 Mo)"
+    if not errorlevel 2 python -m pip install faster-whisper
+  )
+  call :analyse
+)
+
 echo.
 echo === 4/4 Lancement de la session Claude sur ce PC ===
 echo Ouvrez ensuite l'application Claude Code : la session « %PROJET% » apparait dans la liste.
@@ -75,6 +83,22 @@ echo Laissez cette fenetre OUVERTE pendant que vous travaillez ^(Ctrl+C pour arr
 echo.
 claude remote-control
 goto fin
+
+:analyse
+echo.
+choice /m "Analyser une video maintenant (super-analyse : seconde par seconde, moments forts, mots, SEO, prompts)"
+if errorlevel 2 exit /b 0
+set "VIDEO="
+set /p "VIDEO=Glissez la video dans cette fenetre (ou collez son chemin) puis Entree : "
+if not defined VIDEO exit /b 0
+set "VIDEO=%VIDEO:"=%"
+set "SRT="
+set /p "SRT=Fichier de sous-titres .srt (Entree si aucun) : "
+if defined SRT set "SRT=%SRT:"=%"
+if defined SRT (python outils\superanalyse.py "%VIDEO%" --srt "%SRT%") else (python outils\superanalyse.py "%VIDEO%")
+echo Rapports dans : %CD%\analyses
+start "" "%CD%\analyses"
+goto analyse
 
 :erreur
 echo.

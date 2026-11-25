@@ -48,6 +48,16 @@ python3 outils/analyser-video.py ma_video.mp4 virale.mp4 --transcrire
 ```
 9 étapes : fiche technique, découpage (coupes franches et changements visuels), hook des 3 premières secondes, son (volume, silences), planche d'images, texte à l'écran, transcription, fin et appel à l'action, puis score mesurable /100. Résultat dans `analyses/<nom>/rapport.md` (+ images ; `comparatif.md` pour plusieurs vidéos). L'agent `analyste-video` lit les images et complète le jugement (formule du hook, structure, pourquoi ça marche, recette à reprendre).
 
+### Super-analyse (sans images)
+```bash
+python3 outils/superanalyse.py video.mp4 [--srt sous-titres.srt] [--retention retention.csv]
+```
+- **Seconde par seconde** (`secondes.md`) : ce qui est dit, énergie de la voix, changement d'image, mots forts, potentiel d'engagement.
+- **Moments les plus puissants** : estimés à partir de ces signaux, ou **réels** avec l'export de rétention de YouTube Studio.
+- **Mots et formulations** qui accrochent (curiosité, chiffre, gratuit, urgence, adresse directe, choc, contraste, question, appel à l'action) et **pourquoi** ils marchent.
+- **SEO** : mot-clé principal, mots-clés, hashtags, tags YouTube.
+- **Prompts plan par plan** (`prompts.md`, FR + EN) pour recréer la vidéo avec un générateur (Seedance, Kling…), et **améliorations** classées.
+
 ## Machine à Reels (créer, publier, analyser)
 Vous ne faites que relire et approuver : voir [`machine/LISEZMOI.md`](machine/LISEZMOI.md). Demandez « lance la machine pour la semaine prochaine » (agent `chef-machine`).
 

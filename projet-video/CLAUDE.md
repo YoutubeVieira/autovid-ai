@@ -35,6 +35,7 @@ Catalogue, outils, clés et coûts : `styles/STYLES.md`. Installation sur le PC 
 - Image de contrôle : `npx remotion still AutoVidShort out/check.png --props=./data/<slug>.json --frame=<n>`
 - Rendu : `npx remotion render AutoVidShort out/<slug>.mp4 --props=./data/<slug>.json`
 - Analyser une vidéo : `python3 outils/analyser-video.py video.mp4 [--transcrire]` → `analyses/<nom>/rapport.md`
+- Super-analyse sans images (seconde par seconde, moments forts, mots qui accrochent, SEO, prompts, améliorations) : `python3 outils/superanalyse.py video.mp4 [--srt s.srt] [--retention r.csv]` → `analyses/<nom>/super.md`
 - Couper les silences : `python3 outils/couper-silences.py brut.mp4 remotion/public/facecam.mp4`
 
 ## Règles
