@@ -7111,7 +7111,7 @@ const I18 = window.NB_I18N || null;
 const TR = v => I18 ? I18.t(v) : v;
 const fmt = n => { const l = I18 ? I18.lang : 'fr'; return l === 'en' ? '$' + Math.round(n).toLocaleString('en-US') : Math.round(n).toLocaleString(l === 'fr' ? 'fr-FR' : l) + ' $'; };
 const AU = window.NB_AUDIO || null;
-const au = (fn, ...a) => { try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
+const au = (fn, ...a) => { if (fn === 'cash' && typeof S !== 'undefined') S.lastCash = S.time; try { if (AU && AU.ready) AU[fn](...a); } catch (e) {} };
 const spatial = (x, y) => { const d = Math.hypot(x - P.x, y - P.y); return [Math.max(-1, Math.min(1, (x - P.x) / 600)), Math.max(0, 1 - d / 1000)]; };
 const ST = window.NB_STORE || null;
 const isPlay = () => !!(ST && ST.isPlay);
@@ -9413,7 +9413,7 @@ function glbMat(m, skin) {
     if (/paint/i.test(n)) { q.metalness = .55; q.roughness = .28; } else if (/glass/i.test(n)) { q.metalness = .3; q.roughness = .05; } else if (/tyre|tire/i.test(n)) { q.roughness = .92; q.metalness = 0; } else if (/rim|chrome|metal/i.test(n)) { q.metalness = .9; q.roughness = .22; }
     return q; }
   const shiny = /paint|glass|chrome|rim|metal|trim/i.test(n);
-  const p = new THREE.MeshPhongMaterial({ color: m.color ? m.color.clone() : 0xffffff, emissive: em ? m.emissive.clone() : 0x000000, shininess: /glass/i.test(n) ? 90 : shiny ? 50 : 8, specular: shiny ? 0x666666 : 0x111111, skinning: !!skin, transparent: m.transparent, opacity: m.opacity });
+  const p = new THREE.MeshPhongMaterial({ color: m.color ? m.color.clone() : 0xffffff, emissive: em ? m.emissive.clone() : 0x000000, shininess: /glass/i.test(n) ? 90 : shiny ? 50 : 8, specular: shiny ? 0x666666 : 0x111111, skinning: !!skin, transparent: m.transparent, opacity: m.opacity, morphTargets: !!m.morphTargets, morphNormals: !!m.morphNormals });
   p.name = n; return p;
 }
 const PMATS = {}, ENVMATS = [];
@@ -9430,7 +9430,8 @@ function makeHuman(md, col) {
   const mixer = new THREE.AnimationMixer(sc), find = re => { const c = md.anims.find(a => re.test(a.name)); return c ? mixer.clipAction(c) : null; };
   const acts = { idle: find(/idle/i), walk: find(/walk/i), run: find(/run/i), punch: find(/punch/i), death: find(/death/i), aim: find(/^aim$/i), aimrifle: find(/aimrifle/i), crouch: find(/crouch/i), dance: find(/^dance$/i), dance2: find(/^dance2$/i), sit: find(/^sit$/i), workout: find(/workout/i) };
   if (acts.death) { acts.death.setLoop(THREE.LoopOnce); acts.death.clampWhenFinished = true; }
-  const m = makeGlbChar({ scene: sc, mixer, acts, hand: null, scale: md.scale }); m.userData.human = true; return m;
+  const m = makeGlbChar({ scene: sc, mixer, acts, hand: null, scale: md.scale }); m.userData.human = true;
+  m.userData.faces = []; sc.traverse(o => { if (o.isMesh && o.morphTargetDictionary && o.morphTargetDictionary.Blink !== undefined) m.userData.faces.push(o); }); m.userData.blinkPh = Math.random() * 4; return m;
 }
 // personnages Blender (héros, ennemis) : arme dans la main droite, bras qui visent la direction de tir
 const HERO_GLB = () => HUMAN_GLB() && save.outfit.body !== 'robot' && save.realChar !== false;
@@ -9486,6 +9487,11 @@ function poseGlb(m, x, y, a, step, ko, punching) {
   if (act && u.cur !== act) { const loco = (want === 'walk' || want === 'run') && (u.curName === 'walk' || u.curName === 'run'); if (u.cur) u.cur.fadeOut(loco ? .35 : .22); act.reset().fadeIn(loco ? .35 : .22).play(); if (loco && u.cur) act.time = (u.cur.time / u.cur.getClip().duration) * act.getClip().duration; u.cur = act; u.curName = want; }
   if (act) act.timeScale = want === 'walk' ? clamp(ms / 1.0, .6, 2.4) : want === 'run' ? clamp(ms / 2.4, .7, 2.4) : 1;
   md.mixer.update(Math.min(.05, R3.dt || .016));
+  // visage : clignement, et émotion selon la situation (combat, blessure, fuite, fête)
+  if (u.faces && u.faces.length) { const w = u.faceW || (u.faceW = {}); for (const k in w) w[k] *= .9;
+    const ph = (S.time + u.blinkPh) % 3.9; w.Blink = ph < .13 ? Math.sin(ph / .13 * PI) : 0;
+    if (u.force === 'dance' || u.force === 'dance2') w.Smile = .8; else if (ko) w.Sad = 1; else if (u.mood) w[u.mood] = Math.max(w[u.mood] || 0, u.moodW || .8);
+    for (const fm of u.faces) { const d = fm.morphTargetDictionary; for (const n in d) fm.morphTargetInfluences[d[n]] = Math.min(1, w[n] || 0); } }
 }
 function poseChar(m, x, y, a, step, ko, aim, fx) {
   const u = m.userData; fx = fx || {};
@@ -9951,6 +9957,7 @@ function render3D(dt) {
   R3.seen.clear();
   for (const c of cars) if (near(c.x, c.y)) { sync(c, makeCar3, poseCar); c._m.visible = !(hideOwn && c === P.car); }
   for (const p of peds) if (near(p.x, p.y)) sync(p, e => { if (e.look) return makeChar(e.look); const f = Math.random() < .5; if (HUMAN_GLB()) return makeHuman(humanModel(f, Math.random() < .45), { Skin: e.skin, Shirt: e.shirt, Pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a', '#c2a878']), Shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']), Hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a']) }); return makeChar({ female: f, shirt: e.shirt, skin: e.skin, hair: pick(['#1a120c', '#3b2414', '#0c0c0c', '#6b4a2a', '#d8b46a', '#8a3b1c']), hairStyle: f ? pick(['long', 'ponytail', 'afro', 'short']) : pick(['short', 'short', 'afro', 'none']), pants: pick(['#1d1a2e', '#2a3a5a', '#3a2a22', '#26262e', '#4a4f5a']), skirt: f && Math.random() < .35 ? pick(['#2a3a5a', '#7a2a4a', '#1d1a2e']) : null, jacket: Math.random() < .3 ? pick(['#2b2b33', '#5a3a22', '#1f3a5a']) : null, longSleeve: Math.random() < .5, height: rnd(.92, 1.06), shoes: pick(['#0c0b12', '#ffffff', '#5a3a22']) }); }, (m, e) => poseChar(m, e.x, e.y, e.a, e.step, e.state === 'ko'));
+  for (const p of peds) if (p._m && p._m.userData.faces) { p._m.userData.mood = p.state === 'flee' ? 'Fear' : null; }
   for (const e of enemies) if (near(e.x, e.y)) sync(e, e2 => { const lk = e2.look || {}; if (HUMAN_GLB()) { const gid = e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle'; const hm = makeHumanHero({ alt: !e2.boss && hash(Math.round(e2.y), Math.round(e2.x)) % 2 === 0, skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b']), shirt: lk.shirt || e2.color, jacket: lk.jacket || (e2.boss ? e2.color : null), pants: lk.pants || '#1a1a20', hair: '#1a120c' }, gid, e2.boss ? 'gold' : 'black', !e2.boss && hash(Math.round(e2.x), Math.round(e2.y)) % 3 === 0); if (e2.boss) hm.scale.setScalar(1.3); hm.userData.bar = hpBar(hm, 30, 16); return hm; } const m = makeChar(Object.assign({ shirt: '#17131f', sleeve: '#17131f', skin: pick(((world.region.look || {}).peds || {}).skins || ['#c68b59', '#8d5a3b', '#e0b48c']), bandana: e2.boss ? null : e2.color, hat: e2.boss ? e2.color : null, chain: !!e2.boss, hair: '#1a120c' }, lk, { sleeve: lk.jacket || lk.shirt || '#17131f', longSleeve: !!lk.jacket, gun: true, gunId: e2.boss ? (lvl() > 12 ? 'minigun' : 'shotgun') : lvl() < 4 ? 'pistol' : lvl() < 10 ? 'uzi' : 'rifle', gunSkin: e2.boss ? 'gold' : 'black', glow: e2.color, scale: e2.boss ? 1.45 : 1 }, e2.boss ? { chain: true, hat: lk.hat || e2.color } : {})); m.userData.bar = hpBar(m, 30, 16); return m; },
     (m, e2) => { m.userData.aimNow = e2.alert && e2.hp > 0; poseChar(m, e2.x, e2.y, e2.a, e2.step, e2.hp <= 0, e2.alert, { recoil: S.time - (e2.firedT || -9) < .08 ? .8 : 0, hurt: S.time - (e2.hitT || -9) < .08 ? 1 : 0 }); if (m.userData.bones && e2.hp > 0) heroAim(m, e2.a, S.time - (e2.firedT || -9) < .08 ? 1 : 0, !!e2.alert); setBar(m.userData.bar, e2.hp / e2.max, e2.color, e2.hp > 0 && (e2.alert || e2.boss), e2.a); });
   if (agent && !agent.paid && near(agent.x, agent.y)) sync(agent, () => makeChar({ shirt: '#2e6bff', pants: '#14183a', skin: '#f2d3b3', hat: '#14183a', glow: '#ffb627' }), (m, a) => poseChar(m, a.x, a.y, S.time * .6, 0, false));
@@ -9964,6 +9971,7 @@ function render3D(dt) {
   if (playing && !P.car && P._m && (P._m.userData.gunId !== (save.weapon === 'fists' ? 'pistol' : save.weapon) || P._m.userData.gunSkin !== (wup(save.weapon).skin || 'black'))) P._m = null;
   if (playing && !P.car && P._m && !!P._m.userData.glb !== ((save.outfit.body === 'robot' && !!R3.models.robot) || !!HERO_GLB())) P._m = null;
   if (playing && !P.car) sync(P, () => { if (save.outfit.body === 'robot' && R3.models.robot) return makeGlbChar(R3.models.robot); if (HERO_GLB()) return makeHumanHero(playerLook(), save.weapon === 'fists' ? 'pistol' : save.weapon, wup(save.weapon).skin || 'black', false); const m = makeChar(Object.assign(playerLook(), { gunId: save.weapon === 'fists' ? 'pistol' : save.weapon, gunSkin: wup(save.weapon).skin || 'black' })); m.traverse(o => { if (o.isMesh && o.material) o.material = o.material.clone(); }); return m; }, m => { xray(m); const u = m.userData; if (u.gunMesh) u.gunMesh.visible = save.weapon !== 'fists'; u.aimNow = save.weapon !== 'fists' && (!!P.lock || S.time - (P.lastShot || -9) < 1.2 || touch.aiming); poseChar(m, P.x, P.y, P.a, P.step, false, !!P.lock || S.time - (P.lastShot || -9) < (save.weapon === 'fists' ? .25 : 1.2), { recoil: S.time - (P.lastShot || -9) < .06 ? (WBASE(save.weapon).explosive ? 1.4 : .7) : 0, hurt: S.time - (P.hitT || -9) < .08 ? 1 : 0 }); if (u.bones && save.weapon !== 'fists') heroAim(m, P.a, S.time - (P.lastShot || -9) < .06 ? 1 : 0, !!u.aimNow); });
+  if (playing && P._m) { const uu = P._m.userData; uu.mood = S.hp < 30 ? 'Fear' : (stars() > 0 || S.time - (P.lastShot || -9) < 1.2) ? 'Angry' : S.time - (S.lastCash || -9) < 1.5 ? 'Smile' : null; uu.moodW = uu.mood === 'Angry' ? .7 : .85; }
   for (const p of picks) if (near(p.x, p.y)) sync(p, () => makeProp(p.ammo ? 'ammo' : 'cash'), (m, e) => { m.position.set(e.x, Math.sin(S.time * 4 + e.x) * 2, e.y); m.rotation.y = S.time * 2; });
   if (heli && near(heli.x, heli.y)) sync(heli, makeHeli, poseHeli);
   if (playing) { const got = (save.tagsFound || {})[world.region.id] || []; world.tags.forEach((tg, i) => { if (got.includes(i) || !near(tg.x, tg.y)) return; sync(tg, () => { const g2 = new THREE.Group(); const col = world.region.pal.neon[i % world.region.pal.neon.length]; const d = new THREE.Mesh(new THREE.OctahedronGeometry(9, 0), new THREE.MeshBasicMaterial({ color: col })); d.position.y = 22; g2.add(d); const h2 = new THREE.Mesh(new THREE.CircleGeometry(18, 18), bmat(col, .35, true)); h2.rotation.x = -PI / 2; h2.position.y = .8; g2.add(h2); g2.userData.d = d; return g2; }, (m, e) => { m.position.set(e.x, 0, e.y); m.userData.d.rotation.y = S.time * 2.5; m.userData.d.position.y = 22 + Math.sin(S.time * 3 + e.x) * 3; }); }); }

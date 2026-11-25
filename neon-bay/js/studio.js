@@ -290,7 +290,7 @@
       const cols = Object.assign({}, ...((a.slots || []).map(s => ({ [s]: DEFCOL[s] }))), a.police ? { Paint: '#eef0ff' } : {}, o.color || {});
       tint(inner, cols);
       if (a.h) inner.scale.setScalar(a.h / (md.size.y || 1));
-      if (a.kind === 'human') { inner.traverse(x => { if (x.isMesh) x.frustumCulled = false; if (x.isMesh && x.material && x.material.name === 'Lips' && cols.Skin) { x.material.color.set(cols.Skin).multiplyScalar(.72); } }); u.mixer = new THREE.AnimationMixer(inner); u.anims = md.anims;
+      if (a.kind === 'human') { u.faces = []; u.blinkPh = Math.random() * 3; inner.traverse(x => { if (x.isMesh && x.morphTargetDictionary && x.morphTargetDictionary.Blink !== undefined) u.faces.push(x); }); inner.traverse(x => { if (x.isMesh) x.frustumCulled = false; if (x.isMesh && x.material && x.material.name === 'Lips' && cols.Skin) { x.material.color.set(cols.Skin).multiplyScalar(.72); } }); u.mixer = new THREE.AnimationMixer(inner); u.anims = md.anims;
         if (o.weapon) { let hand = null; inner.traverse(x => { if (x.isBone && /^Hand\.?R$/.test(x.name)) hand = x; }); const wf = 'w_' + o.weapon;
           const attach = wm => { if (!wm || !hand) return; const g2 = wm.scene.clone(true); const q = GRIP[o.clip === 'AimRifle' || (!['pistol', 'uzi'].includes(o.weapon) && o.clip !== 'Aim') ? 'AimRifle' : 'Aim']; g2.position.set(.016, .078, -.007); g2.quaternion.set(q[0], q[1], q[2], q[3]); hand.add(g2); u.weap = g2; };
           if (models[wf]) attach(models[wf]); else loadModel(wf).then(wm => { if (rt[o.id] === u) attach(wm); }); } }
@@ -338,6 +338,12 @@
         cinCam.updateProjectionMatrix(); h.visible = !camView && !recording;
       }
       if (u.action) { u.action.time = ((ts * (o.speed || 1)) % (u.clipDur || 1)); u.mixer.update(0); }
+      // expressions du visage : o.face = { Fear: .8 } (fixe) ou o.faceKeys = [{ t, w: { Angry: .6 } }, …] (interpolées) + clignement automatique
+      if (u.faces) { const w = {}; if (o.face) Object.assign(w, o.face);
+        if (o.faceKeys && o.faceKeys.length) { const k = o.faceKeys; let i = 0; while (i < k.length - 1 && k[i + 1].t <= time) i++; const a = k[i], b = k[Math.min(i + 1, k.length - 1)], e = b.t > a.t ? Math.min(1, Math.max(0, (time - a.t) / (b.t - a.t))) : 0;
+          for (const n of new Set(Object.keys(a.w || {}).concat(Object.keys(b.w || {})))) w[n] = ((a.w || {})[n] || 0) * (1 - e) + ((b.w || {})[n] || 0) * e; if (time < a.t) for (const n in w) w[n] = (a.w || {})[n] || 0; }
+        if (o.blink !== false) { const ph = (time + (u.blinkPh || 0)) % 3.7; w.Blink = Math.max(w.Blink || 0, ph < .12 ? Math.sin(ph / .12 * Math.PI) : 0); }
+        for (const fm of u.faces) { const d = fm.morphTargetDictionary; for (const n in d) fm.morphTargetInfluences[d[n]] = w[n] || 0; } }
       if (u.wheels.length) { const ang = pathLen(o, ts) / .34; for (const w of u.wheels) w.rotation.z = -ang; }
       if (u.flash) { const f = Math.sin(time * 18) > 0; u.flash[0].material.color.set(f ? 0xff2e4d : 0x300810); u.flash[1].material.color.set(f ? 0x0a1030 : 0x2e6bff); u.flashL.color.set(f ? 0xff2e4d : 0x2e6bff); u.flashL.intensity = AMB.night ? 6 : 2; }
       if (u.flame) { const y0 = sample(o, Math.max(0, ts - .1)).p[1], vy = (s.p[1] - y0) * 10, on = vy > .2 || (o.ignite != null && ts >= o.ignite); u.flame.visible = on; u.flame.scale.set(1, on ? .8 + Math.random() * .5 : 0, 1); u.flameL.intensity = on ? 6 + Math.random() * 3 : 0;

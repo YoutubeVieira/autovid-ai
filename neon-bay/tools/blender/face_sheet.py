@@ -43,7 +43,7 @@ def render_row(name, tmp):
     if missing:
         print("[faces] %s: missing shape keys %s" % (name, missing))
     head = arm.matrix_world @ arm.pose.bones["Head"].head
-    center = head + Vector((0, -0.02, 0.075))
+    center = head + Vector((0, -0.03, 0.06))
     view = os.environ.get("NB_FACE_VIEW", "34")
     d = Vector((0.0, -1.0, 0.04)) if view == "front" else Vector((0.42, -1.0, 0.06))
     d.normalize()
@@ -51,7 +51,7 @@ def render_row(name, tmp):
     cam_data.lens = 85
     cam = nb.link(bpy.data.objects.new("Cam", cam_data))
     scene.camera = cam
-    cam.location = center + d * 0.95
+    cam.location = center + d * 0.62
     look_at(cam, center)
     world = bpy.data.worlds.new("World")
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.16, 0.18, 0.22, 1)

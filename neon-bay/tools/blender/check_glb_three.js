@@ -15,6 +15,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const MODELS = path.join(ROOT, 'models');
 // v4: every human also has Dance, Dance2 (baile funk), Sit and Workout (prison yard)
 const HUMAN_CLIPS = ['Idle', 'Walk', 'Run', 'Punch', 'Death', 'Aim', 'AimRifle', 'Crouch', 'Dance', 'Dance2', 'Sit', 'Workout'];
+// v5: facial expressions = morph targets (shape keys) on the face, values 0..1
+const FACE_MORPHS = ['Blink', 'Smile', 'Angry', 'Fear', 'Surprise', 'Sad', 'MouthOpen', 'JawClench'];
 const LOOPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch', 'Dance', 'Dance2', 'Sit', 'Workout', 'Fly'];
 // animals (gen_animals.py): face +X, materials Fur / Fur2 / Eye, clips per species, <= 4000 tris
 const ANIMAL_CLIPS = { dog: ['Idle', 'Walk', 'Run', 'Sit'], cat: ['Idle', 'Walk', 'Sit'], bird: ['Idle', 'Fly'],
@@ -66,7 +68,7 @@ const CONTRACT = {
                    'ThumbL', 'ThumbR', 'Thumb2L', 'Thumb2R', 'FingersL', 'FingersR', 'Fingers2L', 'Fingers2R'],
            // baked textures: colour map on these slots (x material.color), fabric normal maps
            textured: ['Skin', 'Shirt', 'Pants', 'Shoes'], normals: ['Shirt', 'Pants'],
-           maxTris: 9000, maxBytes: 1024 * 1024 },   // v4: 1 MB (12 clips + new accessories)
+           maxTris: 9000, maxBytes: 1.15 * 1024 * 1024 },   // v5: 1.15 MB (12 clips + 8 face morph targets)
   // v3 weapons: pistol <= 4000 tris, rifles <= 9000, heavy weapons <= 12000 (WEAPON_TRIS), <= 600 KB each
   weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 12000, maxBytes: 600 * 1024 },
   lamp: { mats: ['Bulb'], maxTris: 1500 },
@@ -97,11 +99,12 @@ function contractFor(name) {
   await page.setContent('<html><body></body></html>');
   await page.addScriptTag({ path: path.join(ROOT, 'vendor', 'three.min.js') });
   await page.addScriptTag({ path: path.join(ROOT, 'vendor', 'GLTFLoader.js') });
+  await page.addScriptTag({ path: path.join(ROOT, 'vendor', 'SkeletonUtils.js') });
   let failed = 0, totalBytes = 0;
   for (const name of files) {
     const buf = fs.readFileSync(path.join(MODELS, name + '.glb'));
     totalBytes += buf.length;
-    const info = await page.evaluate(async ({ b64, loops }) => {
+    const info = await page.evaluate(async ({ b64, loops, faceMorphs }) => {
       const bin = atob(b64), u8 = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
       const gltf = await new Promise((res, rej) => new THREE.GLTFLoader().parse(u8.buffer, '', res, rej));
@@ -173,6 +176,61 @@ function contractFor(name) {
         human = { handLx: +pL.x.toFixed(3), handRx: +pH.x.toFixed(3), headY: +head.getWorldPosition(V()).y.toFixed(3),
           boneYalongHand: +along.dot(localY).toFixed(3), attach };
       }
+      // v5 face morph targets: names on the skinned meshes, deltas that really move, and a clone made with
+      // SkeletonUtils.clone (as the game / studio do) whose morphTargetInfluences drive the rendered face
+      let morph = null;
+      if (hand && gltf.animations.length) {
+        const V = (x, y, z) => new THREE.Vector3(x, y, z);
+        const withMorph = [];
+        gltf.scene.traverse(o => { if (o.isMesh && o.morphTargetDictionary) withMorph.push(o); });
+        const skin = withMorph.find(o => o.material.name === 'Skin');
+        morph = { meshes: withMorph.length, names: skin ? Object.keys(skin.morphTargetDictionary) : [], moves: {},
+                  skinned: !!(skin && skin.isSkinnedMesh), errs: [] };
+        if (skin) {
+          // largest displacement (mm) of each target over every primitive
+          for (const n of faceMorphs) {
+            let mx = 0;
+            for (const o of withMorph) {
+              const i = o.morphTargetDictionary[n], a = i === undefined ? null : o.geometry.morphAttributes.position[i];
+              if (!a) continue;
+              for (let k = 0; k < a.count; k++) mx = Math.max(mx, Math.hypot(a.getX(k), a.getY(k), a.getZ(k)));
+            }
+            morph.moves[n] = +(mx * 1000).toFixed(1);
+          }
+          const clone = THREE.SkeletonUtils.clone(gltf.scene);
+          let cs = null;
+          clone.traverse(o => { if (o.isMesh && o.material.name === 'Skin' && o.morphTargetDictionary) cs = o; });
+          if (!cs || !cs.isSkinnedMesh || !cs.morphTargetInfluences || cs.morphTargetInfluences.length !== faceMorphs.length)
+            morph.errs.push('clone has no morphTargetInfluences');
+          else {
+            if (cs.morphTargetInfluences === skin.morphTargetInfluences) morph.errs.push('clone shares its influences');
+            if (!cs.material.morphTargets || !cs.material.morphNormals) morph.errs.push('material without morphTargets/morphNormals');
+            // render the clone's head (WebGL, if the headless browser has it): each expression must change pixels
+            try {
+              const cv = document.createElement('canvas'); cv.width = cv.height = 128;
+              const r = new THREE.WebGLRenderer({ canvas: cv, preserveDrawingBuffer: true });
+              const sc = new THREE.Scene(); sc.add(clone, new THREE.AmbientLight(0xffffff, 0.6));
+              const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(0.5, 2, 2); sc.add(dl);
+              clone.updateMatrixWorld(true);
+              const hp = clone.getObjectByName('Head').getWorldPosition(V());
+              const cam = new THREE.PerspectiveCamera(20, 1, 0.05, 10);
+              cam.position.set(hp.x, hp.y + 0.07, hp.z + 0.75); cam.lookAt(hp.x, hp.y + 0.07, hp.z);
+              const px = () => { r.render(sc, cam); const g = r.getContext(), b = new Uint8Array(128 * 128 * 4);
+                g.readPixels(0, 0, 128, 128, g.RGBA, g.UNSIGNED_BYTE, b); return b; };
+              const base = px();
+              morph.pixels = {};
+              faceMorphs.forEach((n, i) => {
+                cs.morphTargetInfluences.fill(0); cs.morphTargetInfluences[i] = 1;
+                const b = px(); let c = 0;
+                for (let k = 0; k < b.length; k += 4) if (Math.abs(b[k] - base[k]) + Math.abs(b[k + 1] - base[k + 1]) + Math.abs(b[k + 2] - base[k + 2]) > 24) c++;
+                morph.pixels[n] = c;
+              });
+              cs.morphTargetInfluences.fill(0);
+              r.dispose();
+            } catch (e) { morph.pixels = null; morph.webgl = String(e); }
+          }
+        }
+      }
       // vehicles: every node the game would spin (/^Wheel/) with its hub position and rotation
       const wheels = [];
       gltf.scene.updateMatrixWorld(true);
@@ -181,14 +239,14 @@ function contractFor(name) {
         wheels.push({ name: o.name, pos: p.toArray().map(v => +v.toFixed(3)), rot: +(Math.abs(o.rotation.x) + Math.abs(o.rotation.y) + Math.abs(o.rotation.z)).toFixed(4),
           r: +((wb.max.y - wb.min.y) / 2).toFixed(3), minY: +wb.min.y.toFixed(3), parent: o.parent ? o.parent.name : '' }); } });
       return {
-        meshes, mats: [...mats], texd, tris, skinned, nodes, loopErr, human, wheels,
+        meshes, mats: [...mats], texd, tris, skinned, nodes, loopErr, human, wheels, morph,
         clips: gltf.animations.map(a => a.name + ':' + a.duration.toFixed(2) + 's/' + a.tracks.length + 'tr'),
         clipNames: gltf.animations.map(a => a.name),
         size: box.getSize(new THREE.Vector3()).toArray().map(v => +v.toFixed(3)),
         min: box.min.toArray().map(v => +v.toFixed(3)),
         max: box.max.toArray().map(v => +v.toFixed(3)),
       };
-    }, { b64: buf.toString('base64'), loops: LOOPS });
+    }, { b64: buf.toString('base64'), loops: LOOPS, faceMorphs: FACE_MORPHS });
     const c = contractFor(name);
     const errs = [];
     c.mats.forEach(m => { if (!info.mats.includes(m)) errs.push('missing material ' + m); });
@@ -244,6 +302,15 @@ function contractFor(name) {
       if (info.size[1] < h[0] || info.size[1] > h[1]) errs.push('height ' + info.size[1] + ' outside ' + h);
       if (Math.abs(info.min[1]) > 0.005) errs.push('feet not on y=0 (min y ' + info.min[1] + ')');
       if (!info.human || !(info.human.handLx > 0 && info.human.handRx < 0)) errs.push('not facing +Z (HandL must be at +X)');
+      const mo = info.morph;
+      if (!mo || !mo.names.length) errs.push('no face morph targets');
+      else {
+        FACE_MORPHS.forEach(n => { if (!mo.names.includes(n)) errs.push('missing morph target ' + n);
+          else if (!(mo.moves[n] >= 2)) errs.push('morph target ' + n + ' barely moves (' + mo.moves[n] + ' mm)');
+          if (mo.pixels && !(mo.pixels[n] > 8)) errs.push('morph target ' + n + ' does not change the render'); });
+        if (!mo.skinned) errs.push('morph targets not on a SkinnedMesh');
+        mo.errs.forEach(e => errs.push(e));
+      }
     }
     console.log(`\n== ${name}.glb  ${(buf.length / 1024).toFixed(1)} KB  ${info.tris} tris  size(x,y,z)=${info.size} min=${info.min} max=${info.max}`);
     console.log('  meshes   :', info.meshes.join(', '));
@@ -259,6 +326,13 @@ function contractFor(name) {
       for (const [clip, a] of Object.entries(info.human.attach))
         console.log(`  weapon on HandR in ${clip}: position ${a.pos}  quaternion ${a.quat}  euler XYZ(deg) ${a.eulerXYZdeg}` +
           `  | grip at ${a.gripWorld}, left palm at ${a.leftPalmWorld} (gap ${a.handsGap} m)`);
+    }
+    if (info.morph && info.morph.names.length) {
+      console.log('  morphs   : ' + info.morph.names.join(', ') + ' on ' + info.morph.meshes + ' skinned meshes; max move (mm) ' +
+        FACE_MORPHS.map(n => n + '=' + info.morph.moves[n]).join(' '));
+      console.log('  clone    : SkeletonUtils.clone + morphTargetInfluences, ' + (info.morph.pixels
+        ? 'pixels changed (128 px render) ' + FACE_MORPHS.map(n => n + '=' + info.morph.pixels[n]).join(' ')
+        : 'no WebGL in this browser (' + info.morph.webgl + '), render test skipped'));
     }
     console.log(errs.length ? '  FAIL: ' + errs.join('; ') : '  OK');
     if (errs.length) failed++;

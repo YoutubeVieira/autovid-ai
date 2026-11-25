@@ -2089,19 +2089,24 @@ LASH_TH = 52.0                      # lash line angle above the eye centre (lash
 # ll = lower lip (up, forward) ; press = lips pressed thin (0..1) ; roll = lips rolled in ; jaw = degrees
 EXPR = {
     "Blink": dict(blink=1.0, brow=(-0.0008, 0, 0, 0, 0)),
-    "Smile": dict(corner=(0.0045, 0.0030, 0.0080), cheek=(0.0040, 0.0016), el=0.0018, lid=(3, 9), ulup=0.0012,
-                  jaw=2.5, brow=(0.0008, 0, 0, 0, 0)),
-    "Angry": dict(brow=(0, 0, 0.0016, 0.0070, 0.0038), eu=-0.0012, lid=(10, 6), nose=(0.0016, 0.0010),
+    "Smile": dict(corner=(0.0055, 0.0032, 0.0105), cheek=(0.0045, 0.0018), el=0.0020, lid=(3, 9),
+                  press=0.25, brow=(0.0008, 0, 0, 0, 0)),
+    "Angry": dict(brow=(0, 0, 0.0020, 0.0095, 0.0050), eu=-0.0015, lid=(10, 6), nose=(0.0016, 0.0010),
                   corner=(-0.0010, 0.0005, -0.0028), press=0.45, chin=0.0022, jawout=0.0016),
-    "Fear": dict(brow=(0.0030, 0.0070, -0.0010, 0, 0.0022), eu=0.0038, el=-0.0016, lid=(-15, -6), jaw=6.0,
+    "Fear": dict(brow=(0.0030, 0.0080, -0.0012, 0, 0.0024), eu=0.0055, el=-0.0026, lid=(-15, -6), jaw=6.0,
                  corner=(0.0042, 0.0020, -0.0042), ll=(-0.0016, 0), ulup=0.0010),
-    "Surprise": dict(brow=(0.0090, 0, 0.0010, 0, 0), eu=0.0042, el=-0.0010, lid=(-17, -5), jaw=10.0,
+    "Surprise": dict(brow=(0.0105, 0, 0.0010, 0, 0), eu=0.0060, el=-0.0022, lid=(-17, -5), jaw=10.0,
                      corner=(-0.0058, -0.0016, 0.0), pout=0.0016, ulup=0.0016),
-    "Sad": dict(brow=(0, 0.0068, -0.0026, 0, 0.0016), lid=(10, 0), corner=(0.0008, 0.0010, -0.0058), chin=0.0022,
+    "Sad": dict(brow=(0, 0.0068, -0.0026, 0, 0.0016), lid=(10, 0), corner=(0.0010, 0.0010, -0.0070), chin=0.0024,
                 ll=(0.0010, 0.0012)),
     "MouthOpen": dict(jaw=13.0, ulup=0.0022),
     "JawClench": dict(press=0.55, roll=0.0012, corner=(0.0026, 0.0020, -0.0006), jawout=0.0022, chin=0.0032),
 }
+
+
+# v5: the eyelids / mouth inside cost ~380 triangles; the fullest variants give them back on the
+# clothes (budget factor) and the hair cap (triangles) to stay under 9000
+TRI_TRIM = {"human_f2": (0.93, 100), "human_f3": (0.92, 120), "human_f4": (0.92, 120), "human_m4": (0.95, 60)}
 
 
 def _sst(e0, e1, x):
@@ -2112,6 +2117,21 @@ def _sst(e0, e1, x):
 
 def mouth_rho(d):
     return math.hypot(d.x / MOUTH_A, (d.z - ZL) / MOUTH_B)
+
+
+def split_head_top(head, sp, z_cut=0.050):
+    """Move the skull cap (head-local z > z_cut, always under the hair / hat) out of the head mesh."""
+    bm = bmesh.new()
+    bm.from_mesh(head.data)
+    top = bm.copy()
+    hz = sp.hc.z + z_cut * sp.hk
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if f.calc_center_median().z > hz], context="FACES")
+    bmesh.ops.delete(top, geom=[f for f in top.faces if f.calc_center_median().z <= hz], context="FACES")
+    bm.to_mesh(head.data)
+    bm.free()
+    o = nb.bm_to_object("HeadTop", top, list(head.data.materials))
+    o["uv"] = "face"
+    return o
 
 
 def cut_mouth(head, sp):
@@ -2256,12 +2276,12 @@ def face_keys(body, sp, spans, eyes):
     sx = np.where(x >= 0, 1.0, -1.0)
     ax = np.abs(x)
     is_lu, is_ll = tag == "lipup", tag == "liplow"
-    skin = (tag == "skin") | is_lu | is_ll
+    skin = (tag == "skin") | (tag == "brow") | is_lu | is_ll
     # brows (+ forehead, upper orbit): t 0 = inner end .. 1 = outer end
     t = np.clip((ax - 0.008) / 0.046, 0, 1)
     zb = 0.017 + 0.005 * np.sin(np.pi * t * 0.9) - 0.004 * t
     dzb = z - zb
-    WB = (np.where(dzb >= 0, 1 - _sst(0, 0.024, dzb), _sst(-0.019, -0.002, dzb))
+    WB = (np.where(dzb >= 0, 1 - _sst(0, 0.017, dzb), _sst(-0.019, -0.002, dzb))
           * (1 - _sst(0.058, 0.075, ax)) * _sst(-0.035, -0.065, y))
     inner, outer = (1 - t) ** 1.3, t ** 2
     # around the eye opening
@@ -2282,20 +2302,36 @@ def face_keys(body, sp, spans, eyes):
     NW = np.exp(-(((ax - 0.011) / 0.007) ** 2 + ((z + 0.054) / 0.007) ** 2)) * _sst(-0.06, -0.08, y)
     MS = np.exp(-(((ax - 0.047) / 0.013) ** 2 + ((z + 0.085) / 0.018) ** 2 + ((y + 0.02) / 0.025) ** 2))
     # jaw: hard split on the mouth line in front, wider blend on the cheeks, nothing on the neck / nape
-    bw = 0.0012 + 0.012 * _sst(0.013, 0.032, ax)
-    WJ = _sst(ZL + bw, ZL - bw, z) * _sst(0.02, -0.015, y) * _sst(-0.19, -0.14, z)
+    bw = 0.0012 + 0.016 * _sst(0.012, 0.030, ax)
+    WJ = (_sst(ZL + bw, ZL - bw, z) * _sst(0.03, -0.025, y) * _sst(-0.165, -0.135, z)
+          * (1 - _sst(-0.106, -0.128, z) * (1 - _sst(-0.03, -0.062, y))))   # under the chin: front only
     cf = _sst(0.010, 0.0215, ax) * 0.5
     WJ = np.where(is_ll, 1 - cf, np.where(is_lu, cf, WJ))
     WJ = np.where(tag == "bag", _sst(ZL + 0.004, ZL - 0.004, z), WJ)
     WJ = np.where(tag == "teethup", 0.0, np.where(tag == "teethlow", 1.0, WJ))
     WJ = np.where(skin | np.isin(tag, ["bag", "teethup", "teethlow"]), WJ, 0.0)
     piv = hc + np.array(JAW_PIVOT) * hk
+    zl_w = hc[2] + ZL * hk
     # lip tube centre lines (rings of 8 vertices) for the pressed lips
     lipc = co.copy()
     for t_, a_, b_ in spans:
         if t_ in ("lipup", "liplow"):
             lipc[a_:b_] = np.repeat(co[a_:b_].reshape(-1, 8, 3).mean(1), 8, axis=0)
     lips = is_lu | is_ll
+    # pin the seam with the skull cap (split_head_top): the skin fades to no motion within 1 cm of it
+    from mathutils.kdtree import KDTree
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    seam = [v.index for v in bm.verts if v.is_boundary and tag[v.index] == "skin" and z[v.index] > 0.0]
+    bm.free()
+    pin = np.ones(n)
+    if seam:
+        kd = KDTree(len(seam))
+        for i_, vi in enumerate(seam):
+            kd.insert(co[vi], i_)
+        kd.balance()
+        for vi in np.where(skin)[0]:
+            pin[vi] = _sst(0.0, 0.010 * hk, kd.find(co[vi])[2])
     for name in EXPRESSIONS:
         e = EXPR[name]
         new = co.copy()
@@ -2305,9 +2341,9 @@ def face_keys(body, sp, spans, eyes):
             new[m] = _rot_x(co[m], piv, WJ[m] * a)
         d = np.zeros_like(co)
         r_, i_, o_, f_, s_ = e.get("brow", (0, 0, 0, 0, 0))
-        d[:, 2] += WB * (r_ + i_ * inner + o_ * outer - f_ * inner)
-        d[:, 1] -= WB * inner * f_ * 0.5
-        d[:, 0] -= sx * WB * inner * s_
+        d[:, 2] += WB * (r_ + i_ * inner + o_ * outer - f_ * inner * (1 - _sst(0.004, 0.016, dzb)))
+        d[:, 1] -= WB * inner * f_ * 0.5 * np.exp(-(dzb / 0.008) ** 2)   # bulge on the brow only
+        d[:, 0] -= sx * WB * inner * s_ * _sst(0.0, 0.014, ax)      # no fold on the centre line
         d[:, 2] += e.get("eu", 0) * EU + e.get("el", 0) * EL
         cx_, cy_, cz_ = e.get("corner", (0, 0, 0))
         d[:, 0] += sx * cx_ * CW
@@ -2328,11 +2364,13 @@ def face_keys(body, sp, spans, eyes):
         ll = e.get("ll", (0, 0))
         d[:, 2] += ll[0] * LL
         d[:, 1] -= ll[1] * LL
-        d[~skin] = 0
-        new += d * hk
+        wide = e.get("lid", (0, 0))[0] < 0
+        d[~(skin | ((tag == "lash") if wide else False))] = 0    # wide eyes: the lashes ride on the skin
+        new += d * hk * pin[:, None]
         pr = e.get("press", 0)
         if pr:
-            new[lips, 2] -= (co[lips, 2] - lipc[lips, 2]) * pr
+            # thinner lips pressed onto the mouth line (they still overlap: the opening stays hidden)
+            new[lips, 2] -= (co[lips, 2] - lipc[lips, 2]) * pr * 0.6 + (lipc[lips, 2] - zl_w) * pr * 0.75
             new[lips, 1] += e.get("roll", 0) * hk
         for side, E in eyes.items():
             c = np.array(E["c"])
@@ -2342,7 +2380,8 @@ def face_keys(body, sp, spans, eyes):
             else:
                 du, dl = e.get("lid", (0, 0))
             if du:
-                for tg, k_ in (("lidup", 1.0), ("lash", (LASH_TH - E["meet"]) / max(1.0, E["up"] - E["meet"]))):
+                lash_k = 0.0 if du < 0 else (LASH_TH - E["meet"]) / max(1.0, E["up"] - E["meet"])
+                for tg, k_ in (("lidup", 1.0), ("lash", lash_k)):
                     m = ms & (tag == tg)
                     new[m] = _rot_x(new[m], c, math.radians(du * k_))
             if dl:
@@ -2352,6 +2391,9 @@ def face_keys(body, sp, spans, eyes):
         kb.data.foreach_set("co", new.ravel())
         kb.value = 0.0
         mv = np.linalg.norm(new - co, axis=1)
+        top = (tag == "skin") & (z > 0.042)       # near the seam with the skull cap: must not move
+        if top.any() and mv[top].max() > 1e-5:
+            print("[face] WARNING %s moves the skull seam by %.2f mm" % (name, mv[top].max() * 1000))
         print("[face] %-9s moves %4d vertices, max %.1f mm" % (name, int((mv > 1e-6).sum()), mv.max() * 1000))
 
 
@@ -2547,7 +2589,7 @@ def build_human(female, variant=""):
                     kd.insert(p_, i_)
                 kd.balance()
                 keep = lambda c, kd=kd: 1.0 if kd.find(c)[2] < 0.010 else 0.0
-        decimate(o, budget.get(name, 300), keep)
+        decimate(o, int(budget.get(name, 300) * TRI_TRIM.get(sp.name, (1.0, 0))[0]), keep)
         o["uv"] = {"Skin": "armcyl" if "tattoo" in sp.extras else "strip", "Shoes": "shoe"}.get(name, "box:" + name)
 
     # ------------------------------------------------ head family
@@ -2670,7 +2712,7 @@ def build_human(female, variant=""):
             return 0.0
         return 0.1
     decimate(head, (1740 if female else 1800) if sp.v4 else (1800 if female else 1850), head_keep)
-    decimate(hair_parts[0], (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
+    decimate(hair_parts[0], -TRI_TRIM.get(sp.name, (1.0, 0))[1] + (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
         520 if sp.hat else (640 if sp.hair == "buzz" else 980))))
     if vol is not None:
         decimate(vol, 440 if sp.hair == "bun" else 900)
@@ -2800,7 +2842,8 @@ def build_human(female, variant=""):
         eyes[sx] = dict(c=ec, up=up + 1.0, lo=lo - 1.0, meet=meet)
         print("[face] eye %+d: open from %d to %d deg, lids meet at %.0f" % (sx, lo, up, meet))
         for nm, e0, e1, nt in (("LidUp", up + 1.0, up + 96.0, 4), ("LidLow", lo - 1.0, lo - 76.0, 3)):
-            lid = make_lid(nm, ec, r + 0.0007 * hk, e0, e1, r + 0.0001, mats, nb_=8, nt=nt)
+            # radius: in front of the iris (which bulges ~1.4 mm out of the eyeball)
+            lid = make_lid(nm, ec, r + 0.0019 * hk, e0, e1, r + 0.0001, mats, nb_=8, nt=nt)
             lid["uv"] = "face"
             lid["fx"] = "lidup" if nm == "LidUp" else "lidlow"
             special[lid.name] = "head"
@@ -2844,7 +2887,7 @@ def build_human(female, variant=""):
         m = len(top) - 1
         faces += [(0, 1, 2, 3), (4 * m + 3, 4 * m + 2, 4 * m + 1, 4 * m)]
         brow = nb.mesh_object("Brow", verts, faces)
-        brow["fx"] = "skin"                                # follows the skin in the expressions
+        brow["fx"] = "brow"                                # follows the skin in the expressions
         bmb = bmesh.new()
         bmb.from_mesh(brow.data)
         bmesh.ops.recalc_face_normals(bmb, faces=bmb.faces)
@@ -2891,152 +2934,165 @@ def build_human(female, variant=""):
     for o in make_mouth_inside(sp, mats):
         special[o.name] = "head"
         parts.append(o)
+    # v5: the face (head skin below the skull cap, brows, eyelids, lashes, lips, mouth inside, eyes)
+    # is its own skinned mesh "Face", the only one with morph targets: three.js r128 grows a mesh's
+    # bounding box by the morph deltas, so keeping them off the body leaves the model size (the game
+    # scales humans by their height) unchanged. The skull cap stays in "Body" (seam under the hair).
+    parts.append(split_head_top(head, sp))
     assign_uvs(parts, sp)
-    # vertex ranges of the parts that need special skin weights / expression rules (join keeps the order)
-    ranges, spans, off = [], [], 0
-    for o in parts:
-        nv = len(o.data.vertices)
-        if o.name in special:
-            ranges.append((special[o.name], off, off + nv))
-        if o.get("fx"):
-            spans.append((o["fx"], off, off + nv))
-        off += nv
-    body = nb.join(parts, "Body")
-    bm = bmesh.new()
-    bm.from_mesh(body.data)
-    bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3])
-    bm.to_mesh(body.data)
-    bm.free()
-    nb.auto_smooth(body, 75)
-    body.shape_key_add(name="Basis", from_mix=False)
-    face_keys(body, sp, spans, eyes)
-
-    # ------------------------------------------------ skin weights
+    face_parts = [o for o in parts if o is head or o.get("fx") or o.name.split(".")[0] in ("Eye", "Iris")]
+    groups_ = [("Body", [o for o in parts if not any(o is f_ for f_ in face_parts)]), ("Face", face_parts)]
     armobj = build_armature(sp)
     bone_names = [b[0] for b in BONES]
-    groups = {n: body.vertex_groups.new(name=n) for n in bone_names}
-    me = body.data
-    co = np.array([v.co for v in me.vertices])
-    vmat = np.zeros(len(co), dtype=int)
-    for p in me.polygons:
-        for vi in p.vertices:
-            vmat[vi] = p.material_index
-    F = np.clip(fields(weight_E, co), 0, None)
-    wb = [e["bone"] for e in weight_E]
-    bidx = {n: i for i, n in enumerate(bone_names)}
-    W = np.zeros((len(co), len(bone_names)))
-    for j, b in enumerate(wb):
-        W[:, bidx[b]] += F[:, j]
-    hair_i, eyes_i, shirt_i = ORDER.index("Hair"), ORDER.index("Eyes"), ORDER.index("Shirt")
-    white_i, hat_i = ORDER.index("EyeWhite"), ORDER.index("Hat")
-    pants_i, shoes_i = ORDER.index("Pants"), ORDER.index("Shoes")
-    trim_i, sole_i = ORDER.index("Trim"), ORDER.index("Sole")
-    arm_bones = [b for b in bone_names if b.startswith(("UpperArm", "LowerArm", "Hand", "Thumb", "Fingers"))]
-    neck_axis = np.array([0, 0.022])
-    rule = np.array([""] * len(co), dtype=object)
-    for name, a, b in ranges:
-        rule[a:b] = name
-    for i in range(len(co)):
-        c = co[i]
-        if rule[i] == "chest":                           # chain / lanyard / whistle
-            keep = [bidx[b] for b in ("Chest", "Neck", "Spine")]
-            sub = W[i, keep].copy()
-            W[i] = 0
-            W[i, keep] = sub
-            if W[i].sum() < 1e-6:
-                W[i, bidx["Chest"]] = 1.0
-            continue
-        if rule[i] == "legs":                            # jogger stripes, cords: never the arms
-            for b in arm_bones:
-                W[i, bidx[b]] = 0
-        if rule[i] == "skirt":
-            # hips near the waist, more and more the leg of its side towards the hem
-            s = min(1.0, max(0.0, (sp.waist - c[2]) / (sp.waist - sp.skirt_hem)))
-            legs = 0.78 * s ** 1.2
-            wl = min(1.0, max(0.0, 0.5 + c[0] / 0.12))
-            W[i] = 0
-            W[i, bidx["Hips"]] = 1 - legs
-            W[i, bidx["UpperLeg.L"]] = legs * wl
-            W[i, bidx["UpperLeg.R"]] = legs * (1 - wl)
-        elif vmat[i] in (hair_i, eyes_i, white_i, hat_i) or rule[i] == "head":
-            W[i] = 0
-            z = c[2]
-            zh = J["head"].z
-            if z > zh - 0.005 or not female or rule[i] == "head":
-                W[i, bidx["Head"]] = 1.0
-            elif z > zh - 0.085 * k:
-                t = (zh - 0.005 - z) / (0.08 * k)
-                W[i, bidx["Head"]] = 1 - t
-                W[i, bidx["Neck"]] = t
-            else:
-                t = min(1.0, (zh - 0.085 * k - z) / (0.07 * k))
-                W[i, bidx["Neck"]] = 1 - t
-                W[i, bidx["Chest"]] = t
-        elif vmat[i] == shirt_i and c[2] > 1.40 * k and np.hypot(*(c[:2] - neck_axis)) < (0.10 if st else 0.085):
-            for b in bone_names:                         # collar / hood: chest / neck only
-                if b not in ("Neck", "Chest", "Spine"):
+    tris = 0
+
+    def finish_mesh(mesh_name, plist):
+        # vertex ranges of the parts that need special skin weights / expression rules (join keeps the order)
+        ranges, spans, off = [], [], 0
+        for o in plist:
+            nv = len(o.data.vertices)
+            if o.name in special:
+                ranges.append((special[o.name], off, off + nv))
+            if o.get("fx"):
+                spans.append((o["fx"], off, off + nv))
+            off += nv
+        body = nb.join(plist, mesh_name)
+        bm = bmesh.new()
+        bm.from_mesh(body.data)
+        bmesh.ops.triangulate(bm, faces=[f for f in bm.faces if len(f.verts) > 3])
+        bm.to_mesh(body.data)
+        bm.free()
+        nb.auto_smooth(body, 75)
+        if spans:
+            body.shape_key_add(name="Basis", from_mix=False)
+            face_keys(body, sp, spans, eyes)
+
+        bone_names = [b[0] for b in BONES]
+        groups = {n: body.vertex_groups.new(name=n) for n in bone_names}
+        me = body.data
+        co = np.array([v.co for v in me.vertices])
+        vmat = np.zeros(len(co), dtype=int)
+        for p in me.polygons:
+            for vi in p.vertices:
+                vmat[vi] = p.material_index
+        F = np.clip(fields(weight_E, co), 0, None)
+        wb = [e["bone"] for e in weight_E]
+        bidx = {n: i for i, n in enumerate(bone_names)}
+        W = np.zeros((len(co), len(bone_names)))
+        for j, b in enumerate(wb):
+            W[:, bidx[b]] += F[:, j]
+        hair_i, eyes_i, shirt_i = ORDER.index("Hair"), ORDER.index("Eyes"), ORDER.index("Shirt")
+        white_i, hat_i = ORDER.index("EyeWhite"), ORDER.index("Hat")
+        pants_i, shoes_i = ORDER.index("Pants"), ORDER.index("Shoes")
+        trim_i, sole_i = ORDER.index("Trim"), ORDER.index("Sole")
+        arm_bones = [b for b in bone_names if b.startswith(("UpperArm", "LowerArm", "Hand", "Thumb", "Fingers"))]
+        neck_axis = np.array([0, 0.022])
+        rule = np.array([""] * len(co), dtype=object)
+        for name, a, b in ranges:
+            rule[a:b] = name
+        for i in range(len(co)):
+            c = co[i]
+            if rule[i] == "chest":                           # chain / lanyard / whistle
+                keep = [bidx[b] for b in ("Chest", "Neck", "Spine")]
+                sub = W[i, keep].copy()
+                W[i] = 0
+                W[i, keep] = sub
+                if W[i].sum() < 1e-6:
+                    W[i, bidx["Chest"]] = 1.0
+                continue
+            if rule[i] == "legs":                            # jogger stripes, cords: never the arms
+                for b in arm_bones:
                     W[i, bidx[b]] = 0
-            if W[i].sum() < 1e-6:
-                W[i, bidx["Chest"]] = 1.0
-        elif vmat[i] in (pants_i, shoes_i):              # trousers / skirt / belt never follow the arms
-            for b in arm_bones:
-                W[i, bidx[b]] = 0
-        if W[i].sum() < 1e-6:                            # outside every element: nearest bone
-            best, bd = "Hips", 9.0
-            no_arms = vmat[i] in (pants_i, shoes_i, trim_i, sole_i) or rule[i] == "legs"
-            for name, h, t, _ in BONES:
-                if no_arms and name in arm_bones:        # waistbands / soles never follow the hands
-                    continue
-                a, b = np.array(J[h]), np.array(J[t])
-                ab = b - a
-                hh = np.clip((c - a) @ ab / (ab @ ab), 0, 1)
-                d = np.linalg.norm(c - (a + hh * ab))
-                if d < bd:
-                    best, bd = name, d
-            W[i, bidx[best]] = 1.0
-    # v4: the torso is skinned by height (Hips -> Spine -> Chest) instead of by the dominant
-    # field: shirt and trousers share the same weights at the waist, so hip sways / body waves
-    # (Dance, Dance2, Sit) no longer open a gap between the top and the waistband.
-    tb = [bidx["Hips"], bidx["Spine"], bidx["Chest"]]
-    zA, zB, zC = sp.waist - 0.05 * k, 1.13 * k, 1.31 * k
-    for i in range(len(co)):
-        c = co[i]
-        tot = W[i].sum()
-        tor = W[i, tb].sum()
-        if tot < 1e-9 or tor < 0.55 * tot or abs(c[0]) > 0.24 or not (zA - 0.08 < c[2] < zC + 0.02):
-            continue
-        if rule[i] in ("skirt", "head", "chest") or vmat[i] in (hair_i, eyes_i, white_i, hat_i):
-            continue
-        z = c[2]
-        if z <= zA:
-            wh, ws, wc = 1.0, 0.0, 0.0
-        elif z <= zB:
-            t = smooth((z - zA) / (zB - zA))
-            wh, ws, wc = 1 - t, t, 0.0
-        else:
-            t = smooth((z - zB) / (zC - zB))
-            wh, ws, wc = 0.0, 1 - t, t
-        if z < zA:                                       # below the waist: legs keep their share
-            continue
-        W[i, tb] = np.array([wh, ws, wc]) * tor
-    forearm = [bidx[b] for b in bone_names if b.startswith(("LowerArm", "Hand", "Thumb", "Fingers"))]
-    for i in range(len(co)):                             # torso cloth never follows the forearms
-        if vmat[i] == shirt_i and abs(co[i][0]) < 0.21 and co[i][2] < 1.25 * k and W[i].sum() > 0:
-            rest = W[i].sum()
-            W[i, forearm] = 0
-            if W[i].sum() < 1e-6:
-                W[i, bidx["Spine"]] = rest
-    for i in range(len(co)):
-        order = np.argsort(-W[i])[:4]
-        tot = W[i, order].sum()
-        for j in order:
-            w = W[i, j] / tot
-            if w > 0.02:
-                groups[bone_names[j]].add([i], float(w), "REPLACE")
-    body.parent = armobj
-    mod = body.modifiers.new("Armature", "ARMATURE")
-    mod.object = armobj
-    tris = nb.tri_count(body)
+            if rule[i] == "skirt":
+                # hips near the waist, more and more the leg of its side towards the hem
+                s = min(1.0, max(0.0, (sp.waist - c[2]) / (sp.waist - sp.skirt_hem)))
+                legs = 0.78 * s ** 1.2
+                wl = min(1.0, max(0.0, 0.5 + c[0] / 0.12))
+                W[i] = 0
+                W[i, bidx["Hips"]] = 1 - legs
+                W[i, bidx["UpperLeg.L"]] = legs * wl
+                W[i, bidx["UpperLeg.R"]] = legs * (1 - wl)
+            elif vmat[i] in (hair_i, eyes_i, white_i, hat_i) or rule[i] == "head":
+                W[i] = 0
+                z = c[2]
+                zh = J["head"].z
+                if z > zh - 0.005 or not female or rule[i] == "head":
+                    W[i, bidx["Head"]] = 1.0
+                elif z > zh - 0.085 * k:
+                    t = (zh - 0.005 - z) / (0.08 * k)
+                    W[i, bidx["Head"]] = 1 - t
+                    W[i, bidx["Neck"]] = t
+                else:
+                    t = min(1.0, (zh - 0.085 * k - z) / (0.07 * k))
+                    W[i, bidx["Neck"]] = 1 - t
+                    W[i, bidx["Chest"]] = t
+            elif vmat[i] == shirt_i and c[2] > 1.40 * k and np.hypot(*(c[:2] - neck_axis)) < (0.10 if st else 0.085):
+                for b in bone_names:                         # collar / hood: chest / neck only
+                    if b not in ("Neck", "Chest", "Spine"):
+                        W[i, bidx[b]] = 0
+                if W[i].sum() < 1e-6:
+                    W[i, bidx["Chest"]] = 1.0
+            elif vmat[i] in (pants_i, shoes_i):              # trousers / skirt / belt never follow the arms
+                for b in arm_bones:
+                    W[i, bidx[b]] = 0
+            if W[i].sum() < 1e-6:                            # outside every element: nearest bone
+                best, bd = "Hips", 9.0
+                no_arms = vmat[i] in (pants_i, shoes_i, trim_i, sole_i) or rule[i] == "legs"
+                for name, h, t, _ in BONES:
+                    if no_arms and name in arm_bones:        # waistbands / soles never follow the hands
+                        continue
+                    a, b = np.array(J[h]), np.array(J[t])
+                    ab = b - a
+                    hh = np.clip((c - a) @ ab / (ab @ ab), 0, 1)
+                    d = np.linalg.norm(c - (a + hh * ab))
+                    if d < bd:
+                        best, bd = name, d
+                W[i, bidx[best]] = 1.0
+        # v4: the torso is skinned by height (Hips -> Spine -> Chest) instead of by the dominant
+        # field: shirt and trousers share the same weights at the waist, so hip sways / body waves
+        # (Dance, Dance2, Sit) no longer open a gap between the top and the waistband.
+        tb = [bidx["Hips"], bidx["Spine"], bidx["Chest"]]
+        zA, zB, zC = sp.waist - 0.05 * k, 1.13 * k, 1.31 * k
+        for i in range(len(co)):
+            c = co[i]
+            tot = W[i].sum()
+            tor = W[i, tb].sum()
+            if tot < 1e-9 or tor < 0.55 * tot or abs(c[0]) > 0.24 or not (zA - 0.08 < c[2] < zC + 0.02):
+                continue
+            if rule[i] in ("skirt", "head", "chest") or vmat[i] in (hair_i, eyes_i, white_i, hat_i):
+                continue
+            z = c[2]
+            if z <= zA:
+                wh, ws, wc = 1.0, 0.0, 0.0
+            elif z <= zB:
+                t = smooth((z - zA) / (zB - zA))
+                wh, ws, wc = 1 - t, t, 0.0
+            else:
+                t = smooth((z - zB) / (zC - zB))
+                wh, ws, wc = 0.0, 1 - t, t
+            if z < zA:                                       # below the waist: legs keep their share
+                continue
+            W[i, tb] = np.array([wh, ws, wc]) * tor
+        forearm = [bidx[b] for b in bone_names if b.startswith(("LowerArm", "Hand", "Thumb", "Fingers"))]
+        for i in range(len(co)):                             # torso cloth never follows the forearms
+            if vmat[i] == shirt_i and abs(co[i][0]) < 0.21 and co[i][2] < 1.25 * k and W[i].sum() > 0:
+                rest = W[i].sum()
+                W[i, forearm] = 0
+                if W[i].sum() < 1e-6:
+                    W[i, bidx["Spine"]] = rest
+        for i in range(len(co)):
+            order = np.argsort(-W[i])[:4]
+            tot = W[i, order].sum()
+            for j in order:
+                w = W[i, j] / tot
+                if w > 0.02:
+                    groups[bone_names[j]].add([i], float(w), "REPLACE")
+        body.parent = armobj
+        mod = body.modifiers.new("Armature", "ARMATURE")
+        mod.object = armobj
+        return nb.tri_count(body)
+    for mesh_name, plist in groups_:
+        tris += finish_mesh(mesh_name, plist)
     make_actions(armobj, sp)
     path = nb.export_glb(sp.name, animations=True, texcoords=True, morph=True)
     return path, tris

@@ -34,7 +34,7 @@ for (const v of V) {
   const DRV = [-.15, -.62, -.38]; // position du siège conducteur (côté gauche = -Z), tête vers 1,15 m
   const dk = hk.filter(k => k.t <= CRASH).map(k => ({ t: k.t, p: add(k.p, DRV), r: [0, k.r[1] + PI / 2, 0], s: [1, 1, 1], ease: 'linear' }));
   dk.push({ t: +(CRASH + .05).toFixed(2), p: [x0, -9, z0], r: [0, PI / 2, 0], s: [1, 1, 1], ease: 'cut' });
-  const driver = obj('human_m', { id: 'driver', name: 'Conducteur', color: { Shirt: '#16141c', Skin: '#8d5a3b', Hair: '#0c0c0c' }, clip: 'Idle', keys: dk });
+  const driver = obj('human_m', { id: 'driver', name: 'Conducteur', color: { Shirt: '#16141c', Skin: '#8d5a3b', Hair: '#0c0c0c' }, clip: 'Idle', keys: dk, faceKeys: [{ t: 0, w: { JawClench: .5, Angry: .25 } }, { t: 2.6, w: { Angry: .7, JawClench: .6 } }, { t: 5.6, w: { Angry: .4, Fear: .4 } }, { t: 6.4, w: { Fear: .85, MouthOpen: .25 } }, { t: 8.6, w: { Fear: 1, MouthOpen: .6, Surprise: .3 } }] });
   const cop = obj('police', { id: 'cop', name: 'Police', keys: track(t => [X(t) - 22 + Math.min(10, t * .9), 0, t < 5.6 ? -2.4 : -2.4 + 4.6 * smooth(Math.min(1, (t - 5.6) / 1))], 0, CRASH + 4) });
   const cop2 = obj('police', { id: 'cop2', name: 'Police 2', keys: track(t => [X(t) - 40 + Math.min(14, t * 1.2), 0, 2.2], 0, CRASH + 4) });
   const truck = obj('car_van', { id: 'truck', name: 'Fourgon au carrefour', color: { Paint: '#e8e4dc' }, base: at([X(4.4) + 30, 0, -2.4], PI) });

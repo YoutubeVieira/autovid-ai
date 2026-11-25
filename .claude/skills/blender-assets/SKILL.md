@@ -27,7 +27,7 @@ python3 tools/blender/gen_landmarks.py       # lm_statue lm_palace prop_basket_h
                                              # prop_stadium_stand + planches (args : ids ou noms courts, ex. "statue hoop")
 python3 tools/blender/gen_landmarks.py --sheet [ids]   # planches seules : previews/landmarks_sheet.png, sport_sheet.png
 NB_BACKFACE=1 python3 tools/blender/gen_landmarks.py --sheet   # faces arrière en rouge (contrôle des normales)
-python3 tools/blender/gen_human.py           # human_m human_f human_m2 human_f2 (args "m" "f" "m2" "f2") ~10 s chacun
+python3 tools/blender/gen_human.py           # les 9 humains (args "m" "f" "m2" "f2" "f3"...) ~6 s chacun, + expressions
 python3 tools/blender/gen_weapons.py         # w_pistol w_uzi w_shotgun w_rifle w_sniper w_rocket
                                              # w_minigun w_lmg w_gl w_rail  (args : ids, ex. "pistol rail")
 python3 tools/blender/render_previews.py     # models/previews/<nom>.png pour chaque .glb
@@ -164,11 +164,54 @@ python3 tools/blender/scene_sheets.py [humans_v4 humans_clips animals props]   #
 - **Décors** (`gen_scene_props.py`) : statiques, ≤ 3 000 tris, façade +Z ; `prop_dumbbell` (origine à la
   poignée) et `prop_rescue_tube` (origine au bout de la dragonne, tube le long de +X) sont tenus en main
   et dispensés du contrôle « posé au sol ». L'écran du DJ est une texture émissive dessinée en numpy.
-- Contrôle (`check_glb_three.js`) : humains ≤ 1 Mo et 12 clips obligatoires ; contrat `animal`
+- Contrôle (`check_glb_three.js`) : humains ≤ 1,15 Mo (v5) et 12 clips obligatoires ; contrat `animal`
   (Fur/Fur2/Eye, skinné, clips par espèce, ≤ 4 000 tris) ; contrat `sceneprop` pour les autres `prop_*`.
 - Aperçus : vues `@chest` et `@waist` ajoutées à `render_previews.py` (coutures, ceintures).
 - Limites connues : jupe de human_f2 étirée en `Sit` ; jonction cou/torse visible de près sur les hauts sans
   manches ; `Phong` (qualités basses) ignore la texture d'iris et l'écran LED (couleurs unies).
+
+## Expressions du visage (v5 : shape keys → morph targets glTF)
+
+```bash
+python3 tools/blender/gen_human.py                 # les 9 humains, avec leurs 8 expressions
+python3 tools/blender/face_sheet.py                # planche human_m + human_f : previews/faces_expressions_sheet.png
+python3 tools/blender/face_sheet.py human_m4 human_f3      # autres personnages ; NB_FACE_VIEW=front, NB_FACE_OUT=...
+```
+
+- **Noms exacts** (valeurs 0..1) : `Blink Smile Angry Fear Surprise Sad MouthOpen JawClench` (`EXPRESSIONS`,
+  réglages dans `EXPR` en tête du bloc « facial expressions » de `gen_human.py`, en mètres tête-locaux).
+- **Maillage** : le visage est un 2e maillage skinné **`Face`** (même armature, os `Head`) : peau de la tête sous
+  la calotte crânienne, sourcils, paupières, cils, lèvres, intérieur de bouche, yeux. Seul `Face` porte les morph
+  targets ; `Body` n'en a aucun. Dans three.js, chaque primitive de `Face` est un `SkinnedMesh` (`Face_1` = Skin,
+  `Face_2` Hair, `Face_3` Eyes, `Face_4` Lips, `Face_5` EyeWhite) avec le même `morphTargetDictionary` : régler
+  l'influence sur **tous** les maillages qui ont ce dictionnaire. Raison : r128 agrandit la boîte englobante d'un
+  maillage de la **somme** des deltas de ses morphs ; sur `Body` la taille du modèle (le jeu met à l'échelle par la
+  hauteur) et le contrôle « pieds à y=0 » changeaient. La calotte (`split_head_top`, z tête > 0,05) reste dans
+  `Body` (couture cachée sous les cheveux, épinglée : la peau ne bouge pas à moins de 1 cm de la couture).
+- **Construction** (`face_keys`) : champs de déplacement lissés (sourcils + front, contour de l'œil, coins de la
+  bouche, joues, menton, ailes du nez, masséters) appliqués à la peau **et** aux sourcils (ils suivent la peau) ;
+  mâchoire = rotation autour d'une charnière (`JAW_PIVOT`) avec un poids nul sur le cou et la nuque ; la fente de la
+  bouche est découpée dans la tête (`cut_mouth`, ellipse sous les lèvres) et donne sur une poche `Lips` + dents
+  `EyeWhite` (`make_mouth_inside`) ; paupières = calottes `Skin` autour du globe (`make_lid`, entre deux grands
+  cercles par les coins de l'œil) cachées au repos juste hors de la partie visible (`eye_open_range`) et qui
+  tournent autour du centre de l'œil ; les cils suivent la paupière supérieure ; iris et globes ne bougent jamais.
+- **Export** : `nb.export_glb(..., morph=True)` (`export_morph`, `export_morph_normal`, `export_apply=False`) puis
+  `nb.compact_morph_targets` réécrit le .glb : deltas < 0,05 mm / normales < 0,015 mis à zéro (l'exportateur laisse
+  du bruit sur toutes les normales), accesseurs **sparse** (sommets qui bougent seulement), positions en float32,
+  normales en int8 normalisé (**`KHR_mesh_quantization` requis**, géré par GLTFLoader r128 ; ne pas quantifier les
+  positions : Box3 r128 lirait les entiers bruts). ~110 Ko de morphs par humain. Les pièces non texturées ont des UV
+  constants (avant : un carré 0..1 par face, qui dédoublait tous les sommets).
+- **Dans le jeu** : r128 exige `material.morphTargets = true` et `morphNormals = true` ; GLTFLoader les pose et
+  `material.clone()` les garde, mais un matériau recréé (Phong de `glbMat` en qualité basse) les perd : le visage
+  reste neutre. Avec les normales, r128 n'applique que **4** influences non nulles à la fois.
+- **Contrôle** : `check_glb_three.js` exige les 8 noms sur un `SkinnedMesh`, un déplacement ≥ 2 mm par cible,
+  puis clone la scène avec `SkeletonUtils.clone`, vérifie que le clone a ses propres `morphTargetInfluences` et
+  rend la tête du clone en WebGL (128 px) pour chaque expression : pixels changés affichés (ex. Blink ~60,
+  Surprise ~1 700). Plafond humains : 1,15 Mo. Triangles : les paupières + bouche coûtent ~380 tris, rendus sur
+  les vêtements / la calotte de cheveux des variantes les plus lourdes (`TRI_TRIM`).
+- Limites : yeux très petits et blanc d'œil proche de la peau → « yeux écarquillés » (Fear, Surprise) peu
+  lisibles, surtout portés par les sourcils et la bouche ; léger pli sur la joue quand la mâchoire s'ouvre ; les
+  expressions se combinent par addition (Smile + MouthOpen marche, Angry + Surprise se contredit).
 
 ## Monuments et sport (`gen_landmarks.py`)
 
@@ -209,7 +252,7 @@ textures, donc les lignes des terrains disparaissent et `CourtFloor`/`Pitch` son
 |---|---|---|
 | Voiture v3 (carrosserie + habitacle + 4 roues) | ≤ 9 000 tris, ≤ 700 Ko, ≤ 7 matériaux | 8 780–8 850 tris, 405–425 Ko |
 | Police / armée | ≤ 12 000 tris, ≤ 900 Ko | police 10 330, jeep 7 700, truck 10 520, apc 9 350 ; 400–535 Ko |
-| Humain (tout compris) | < 9 000 tris et ≤ 1 Mo (v4 : 12 clips) | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 / f3 8 900 / m3 8 370 / f4 8 910 / m4 8 610 / m5 8 250 tris ; 900–1 000 Ko |
+| Humain (tout compris) | < 9 000 tris et ≤ 1,15 Mo (v5 : 12 clips + 8 expressions) | m 8 565 / f 8 995 / m2 8 405 / f2 8 841 / f3 8 961 / m3 8 741 / f4 8 958 / m4 8 842 / m5 8 632 tris ; 954–1 016 Ko |
 | Animal | ≤ 4 000 | dog/cat 3 940, bird 3 250, parrot 3 430, crab 1 310 ; 200–340 Ko |
 | Décor de scène `prop_*` (gen_scene_props) | ≤ 3 000 | 600–2 770 ; 20–100 Ko |
 | Arme (v3) | pistol ≤ 4 000, fusils ≤ 9 000, lourdes (rocket, minigun, lmg, gl) ≤ 12 000 ; ≤ 600 Ko | 3 660–9 010 tris, 250–450 Ko (≈ 60 Ko de textures + ~50 o/tri) |
