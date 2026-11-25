@@ -1,0 +1,49 @@
+AUTOVID AI — INSTALLER ET LANCER SUR VOTRE PC (WINDOWS)
+========================================================
+
+Le plus simple : double-cliquez sur INSTALLER-SUR-PC.bat
+(ou, dans l'invite de commandes : tapez son chemin puis Entrée).
+Il fait les 4 étapes ci-dessous et vous pose les questions au fur et à mesure.
+
+Si vous n'avez pas encore le projet sur le PC, téléchargez d'abord ce fichier :
+https://raw.githubusercontent.com/YoutubeVieira/autovid-ai/ccr-dc9e84d2-s625ne/INSTALLER-SUR-PC.bat
+(clic droit sur la page → Enregistrer sous… → INSTALLER-SUR-PC.bat), puis double-cliquez dessus.
+
+
+1. VÉRIFIER LES OUTILS
+   Le fichier vérifie Git, Python, Node.js, FFmpeg et Claude Code.
+   S'il en manque, il propose de les installer (winget). Après une installation :
+   fermez la fenêtre et relancez le fichier.
+   Claude Code s'installe à part : https://code.claude.com/docs
+   puis tapez « claude » une fois pour vous connecter.
+
+2. RÉCUPÉRER LE PROJET
+   Il le télécharge dans  Documents\autovid-ai  (ou le met à jour s'il y est déjà).
+
+3. CHOISIR LE PROJET
+   1 = projet-video      Shorts / Reels, 7 styles de création MP4, machine à Reels
+   2 = projet-senior-us  séances de gym douce pour seniors américains
+   3 = projet-app        applications web et mobiles
+   Pour les projets vidéo, il propose aussi d'installer :
+   - earshot (effets sonores, environ 1 minute) ;
+   - les 7 styles de création MP4 (environ 200 Mo, projet-video seulement).
+
+4. LANCER LA SESSION CLAUDE
+   Il lance « claude remote-control ». Laissez la fenêtre OUVERTE.
+   Ouvrez l'application Claude Code : une session au nom du projet apparaît.
+   Écrivez-y ce que vous voulez faire, par exemple :
+     - « lance la machine pour la semaine prochaine »          (projet-video)
+     - « monte l'exemple de 50 secondes avec mes fichiers »     (projet-senior-us)
+   Claude vous demandera d'approuver chaque commande.
+
+
+VOS FICHIERS (voix off, vidéos, musique)
+   projet-senior-us\entrees\<séance>\coach\  voix\  sons\   (voir entrees\LISEZMOI.md)
+   projet-video\entrees\<vidéo>\                            (voir entrees\LISEZMOI.md)
+   Ils restent sur votre PC : ils ne partent jamais sur GitHub.
+
+VOS CLÉS (fal.ai, ElevenLabs, Kling…)
+   Dans projet-video\.env  — jamais dans le chat.
+
+EN CAS D'ERREUR
+   Copiez le message affiché dans la fenêtre et envoyez-le à Claude.
