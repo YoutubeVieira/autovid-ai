@@ -58,7 +58,7 @@ au centre de l'objet.
 |---|---|---|---|
 | Voitures `car_*.glb` (v3) | **+X** | ~4,5 m hors tout (SUV 4,7, van 4,9) ; R roue 0,33 (sports 0,335, SUV 0,38, van 0,34) | matériaux `Paint` (carrosserie, recolorée par le jeu : tout nom contenant « paint »), `Glass` (transparent, alpha 0,55 : habitacle visible), `Tyre`, `Rim`, `LightFront` (émissif), `LightRear` (émissif), `Trim` : **7 matériaux max** ; roues = objets séparés `Wheel_FL`, `Wheel_FR`, `Wheel_RL`, `Wheel_RR`, origine au moyeu, sans rotation : l'essieu est l'axe local Z (latéral), donc faire rouler = `wheel.rotation.z -= v*dt/R` ; enfants de `Body` ; maillages nommés `mesh_Wheel_*` (sinon les sous-maillages créés par three.js matchent aussi `/^Wheel/` et tournent deux fois) ; étriers dans `Body` (ne tournent pas). `car_police` : + `Livery` (2e couleur, non recolorée), nœud `Lightbar` (enfant de Body) avec `SirenRed` (côté gauche, −Z glTF) et `SirenBlue` (droit, +Z) émissifs ; ≤ 12 000 tris |
 | Armée `army_*.glb` | **+X** | jeep 4,1 m, truck 7,4 m, apc 7,0 m ; R roue 0,38 / 0,55 / 0,55 | même contrat que les voitures (`Paint` olive mat — recolorée si le jeu passe une couleur —, `Glass`, `Tyre`, `Rim`, `LightFront`, `LightRear`, `Trim`, + `Canvas` pour la bâche du camion) ; roues : jeep `Wheel_FL/FR/RL/RR` ; truck + `Wheel_ML/MR` (essieu central) ; apc `Wheel_FL/FR`, `Wheel_F2L/F2R` (2e essieu), `Wheel_R2L/R2R` (3e), `Wheel_RL/RR` (4e, arrière) ; roues de secours = `SpareTyre` dans Body (pas animées) ; apc : nœud `Turret` (axe de tourelle, tourner = `rotation.y`) et son enfant `Gun` (axe des tourillons, pointer = `rotation.z`, + = vers le haut) ; ≤ 12 000 tris et ≤ 900 Ko |
-| Humains `human_m/f/m2/f2.glb` | **+Z** (glTF) | m 1,80 m / f et f2 1,71 m au crâne (1,82 / 1,72 avec les cheveux) ; m2 1,765 m (1,79 avec la casquette), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` + doigts (v3) `Thumb.L/R Thumb2.L/R` (pouce, enfants de Hand) et `Fingers.L/R Fingers2.L/R` (4 doigts : phalange proximale puis moyenne+distale) ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips`, `EyeWhite`, jamais recolorés par le jeu ; + `Hat` casquette, **human_m2 seulement**, non recoloré par le jeu actuel) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` ; textures 512×512 sur `Skin Shirt Pants Shoes` (+`Hat`), normal maps sur `Shirt Pants` (+`Hat`) ; < 9 000 triangles et < 900 Ko |
+| Humains `human_m/f/m2/f2.glb` (+ v4 f3 m3 f4 m4 m5) | **+Z** (glTF) | m 1,80 m / f et f2 1,71 m au crâne (1,82 / 1,72 avec les cheveux) ; m2 1,765 m (1,79 avec la casquette), pose A, semelles à y=0 | os `Hips Spine Chest Neck Head UpperArm.L/R LowerArm.L/R Hand.L/R UpperLeg.L/R LowerLeg.L/R Foot.L/R` + doigts (v3) `Thumb.L/R Thumb2.L/R` (pouce, enfants de Hand) et `Fingers.L/R Fingers2.L/R` (4 doigts : phalange proximale puis moyenne+distale) ; matériaux `Skin Shirt Pants Shoes Hair Eyes` (+ optionnels `Lips`, `EyeWhite`, jamais recolorés par le jeu ; + `Hat` casquette, **human_m2 seulement**, non recoloré par le jeu actuel) ; clips `Idle Walk Run Punch Death Aim AimRifle Crouch` + v4 `Dance Dance2 Sit Workout` ; textures 512×512 sur `Skin Shirt Pants Shoes` (+`Hat`), normal maps sur `Shirt Pants` (+`Hat`) ; < 9 000 triangles et < 900 Ko |
 | Armes `w_<id>.glb` | canon **+X**, haut **+Y**, côté droit +Z | réelle : pistol 0,23 m, uzi 0,47, shotgun 1,04, rifle 0,94, sniper 1,25, rocket 1,13, minigun 1,01, lmg 1,06, gl 0,77, rail 1,02 | origine = centre de la poignée (main droite ; poignée arrière pour rocket/minigun) ; matériaux `Body` (couleur principale, recolorée pour les peintures : le jeu recolore tout matériau dont le nom contient « body », n'en créer aucun autre), `Metal`, `Grip`, `Glow` (émissif : points de visée, LED, bobines du rail) sur toutes, `Lens` (optiques) sur rifle, sniper, rocket, gl, rail ; v3 ajoute `MetalEdge` (usure claire des arêtes) et `Polymer` ; UV + textures 256 px ; un seul maillage, pas d'animation |
 | Lampadaire `lamp.glb` | bras vers +Z | 6 m | matériau émissif `Bulb` (+ `Metal`) |
 | Autres props | façade vers +Z | réelle | `palm` (Trunk/Leaves/Coconut), `hydrant` (HydrantPaint/Metal), `bench` (Wood/Metal), `traffic_light` (Metal/Housing/LightRed/LightYellow/LightGreen) |
@@ -129,6 +129,47 @@ le haut vers +Y, à t=0 : `Aim` quaternion (x,y,z,w) `(-0.3496, -0.348, 0.6307, 
 recalculées à chaque check). Dans le jeu, diviser la position par l'échelle appliquée au modèle
 si l'arme est mise à l'échelle séparément.
 
+## Humains v4, animaux et décors de scène (plage, baile funk, prison)
+
+```bash
+python3 tools/blender/gen_human.py f3 m3 f4 m4 m5      # nouveaux humains (~10 s chacun) ; sans argument : les 9
+python3 tools/blender/gen_animals.py [dog cat bird parrot crab]
+python3 tools/blender/gen_scene_props.py [lifeguard_tower parasol towel dj_booth speaker_stack weights dumbbell rescue_tube]
+python3 tools/blender/scene_sheets.py [humans_v4 humans_clips animals props]   # planches dans tools/blender/previews/
+```
+
+- **Humains v4** (`OUTFITS` en tête de `gen_human.py`, `Spec.top/bottom/feet/hair/hat/extras`) : mêmes os,
+  mêmes noms, même prise d'arme que la v3. `human_f3` sauveteuse 1,70 m (Shirt = maillot une pièce rouge,
+  Pants = short de bain, pieds nus + tongs `Shoes`, queue de cheval, lunettes `Gear`/`Lens` sur la tête,
+  sifflet `Metal` sur cordon `Gear`) ; `human_m3` sauveteur 1,80 m (débardeur, short, tongs, bob = `Hat`) ;
+  `human_f4` 1,68 m (crop top, jogging à bandes `Trim`, baskets montantes `Shoes` + semelles/lacets `Sole`,
+  chignon, créoles et chaîne `Metal`) ; `human_m4` 1,78 m (maillot de foot à numéro « 10 » `Trim`, jogging,
+  montantes, casquette `Hat`, chaîne) ; `human_m5` 1,81 m (combinaison orange = `Shirt` + `Pants` même
+  couleur, tatouages dans la texture `Skin` via UV cylindriques des bras `armcyl`, crâne rasé). Nouveaux
+  matériaux jamais recolorés : `Gear Metal Lens Trim Sole`. Visages v4 : iris texturé (`Eyes`, 64 px), ligne
+  et carte de cils en `Hair`. Découpes de maillot/débardeur : couture « aimantée » sur une courbe lisse
+  (`snap_boundary`) + passepoil (`seam_piping`) ; les bords de couture sont protégés à la décimation.
+  Torse skinné par la hauteur (Hips → Spine → Chest) pour que haut et pantalon restent soudés en dansant.
+- **Clips v4, sur les 9 humains** : `Dance` (2 s, 120 bpm, rebond des genoux, bassin, poings qui
+  pompent), `Dance2` (2 s, ondulation du buste, bras au-dessus de la tête, appuis alternés), `Sit` (2 s,
+  assis sur une marche de 0,46 m, avant-bras sur les cuisses), `Workout` (2 s, curls marteau alternés ;
+  `prop_dumbbell` va dans la main). Tous bouclent.
+- **Animaux** (`gen_animals.py`) : avant **+X** (comme `makeAnimal`), gauche vers −Z, métres, origine au sol.
+  Matériaux `Fur` (recolorable), `Fur2` (poitrail, ventre, museau, chaussettes ; ailes ; dessous du crabe),
+  `Eye` (+ fixes `Nose Beak Feet Tip Claw`). Clips : dog `Idle Walk Run Sit`, cat `Idle Walk Sit`,
+  bird/parrot `Idle Fly` (ailes repliées en Idle par rotation + échelle 0,62 de `Wing2.*`), crab `Idle Walk`
+  (marche de côté le long de ±Z glTF). Os : quadrupèdes `Hips Spine Chest Neck Head Ear.L/R Tail1-3
+  UpperArm/LowerArm/Paw.L/R Thigh/Shin/Hock/HPaw.L/R` ; oiseaux `Body Neck Head Tail Wing1/Wing2.L/R
+  Leg/Foot.L/R` ; crabe `Body Eye.L/R Claw1/Claw2/Pincer.L/R LegA0-3/LegB0-3.L/R`. ≤ 4 000 tris.
+- **Décors** (`gen_scene_props.py`) : statiques, ≤ 3 000 tris, façade +Z ; `prop_dumbbell` (origine à la
+  poignée) et `prop_rescue_tube` (origine au bout de la dragonne, tube le long de +X) sont tenus en main
+  et dispensés du contrôle « posé au sol ». L'écran du DJ est une texture émissive dessinée en numpy.
+- Contrôle (`check_glb_three.js`) : humains ≤ 1 Mo et 12 clips obligatoires ; contrat `animal`
+  (Fur/Fur2/Eye, skinné, clips par espèce, ≤ 4 000 tris) ; contrat `sceneprop` pour les autres `prop_*`.
+- Aperçus : vues `@chest` et `@waist` ajoutées à `render_previews.py` (coutures, ceintures).
+- Limites connues : jupe de human_f2 étirée en `Sit` ; jonction cou/torse visible de près sur les hauts sans
+  manches ; `Phong` (qualités basses) ignore la texture d'iris et l'écran LED (couleurs unies).
+
 ## Monuments et sport (`gen_landmarks.py`)
 
 Lieux **inventés** (parodie) : rien de copié, aucun nom réel de monument dans les fichiers.
@@ -168,7 +209,9 @@ textures, donc les lignes des terrains disparaissent et `CourtFloor`/`Pitch` son
 |---|---|---|
 | Voiture v3 (carrosserie + habitacle + 4 roues) | ≤ 9 000 tris, ≤ 700 Ko, ≤ 7 matériaux | 8 780–8 850 tris, 405–425 Ko |
 | Police / armée | ≤ 12 000 tris, ≤ 900 Ko | police 10 330, jeep 7 700, truck 10 520, apc 9 350 ; 400–535 Ko |
-| Humain (tout compris) | < 9 000 tris et < 900 Ko | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 tris ; 838 / 854 / 799 / 876 Ko (dont ~210 Ko de textures) |
+| Humain (tout compris) | < 9 000 tris et ≤ 1 Mo (v4 : 12 clips) | m 8 190 / f 8 620 / m2 8 030 / f2 8 740 / f3 8 900 / m3 8 370 / f4 8 910 / m4 8 610 / m5 8 250 tris ; 900–1 000 Ko |
+| Animal | ≤ 4 000 | dog/cat 3 940, bird 3 250, parrot 3 430, crab 1 310 ; 200–340 Ko |
+| Décor de scène `prop_*` (gen_scene_props) | ≤ 3 000 | 600–2 770 ; 20–100 Ko |
 | Arme (v3) | pistol ≤ 4 000, fusils ≤ 9 000, lourdes (rocket, minigun, lmg, gl) ≤ 12 000 ; ≤ 600 Ko | 3 660–9 010 tris, 250–450 Ko (≈ 60 Ko de textures + ~50 o/tri) |
 | Prop | ≤ ~1 500 | 450–1 100 |
 | Total de tous les .glb | ~8,4 Mo depuis les armes v3 (armes : 3,75 Mo) | à surveiller (chargement mobile) |

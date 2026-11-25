@@ -43,6 +43,20 @@ aucune géométrie, texture ou animation reprise d'un autre jeu ou d'un pack. R�
   `prop_ball_basket`, `prop_ball_soccer`, `prop_stadium_stand` (`.glb`) : équipements sportifs génériques,
   sans marque ni logo (`gen_landmarks.py`). Textures procédurales cuites dans Blender (marbre, pierre,
   patine, gazon, béton, toile, parquet + lignes du terrain dessinées par le script).
+- `human_f3.glb` (sauveteuse : maillot une pièce sportif, short de bain, queue de cheval, lunettes de soleil
+  sur la tête, sifflet), `human_m3.glb` (sauveteur : débardeur, short de bain, bob, tongs), `human_f4.glb` et
+  `human_m4.glb` (danseurs de baile funk : crop top / maillot de foot à numéro, jogging à bandes, baskets
+  montantes, chaînes, chignon / casquette), `human_m5.glb` (prisonnier : combinaison orange, tatouages
+  dessinés dans la texture de peau, crâne rasé) : humains v4 (`gen_human.py`, mêmes os et clips que la v3
+  + clips `Dance`, `Dance2`, `Sit`, `Workout` ajoutés aussi à human_m/f/m2/f2 ; iris texturés, cils en carte).
+  Tenues de plage et de soirée ordinaires, aucun contenu sexualisé, personnes inventées.
+- `animal_dog`, `animal_cat`, `animal_bird` (mouette), `animal_parrot` (ara), `animal_crab` : animaux skinnés
+  et animés (`gen_animals.py`), pelage / plumes / carapace en textures procédurales cuites avec normal maps
+  (`nb_textures.animal_textures`).
+- `prop_lifeguard_tower`, `prop_parasol`, `prop_towel`, `prop_dj_booth` (écran LED dessiné par le script),
+  `prop_speaker_stack`, `prop_weights`, `prop_dumbbell`, `prop_rescue_tube` : décors plage / fête / cour de
+  prison (`gen_scene_props.py`), sans marque ni logo.
 - Chaque `<nom>.glb.js` est la copie base64 du `.glb` correspondant (secours hors serveur).
 - `previews/*.png` : rendus d'aperçu (`render_previews.py`) ; planche des armes dans
-  `tools/blender/previews/weapons_sheet.png` (`weapon_sheet.py`).
+  `tools/blender/previews/weapons_sheet.png` (`weapon_sheet.py`) ; planches humains v4, clips, animaux et
+  décors dans `tools/blender/previews/{humans_v4,humans_clips,animals,props}_sheet.png` (`scene_sheets.py`).

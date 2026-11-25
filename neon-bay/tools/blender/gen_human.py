@@ -1782,13 +1782,13 @@ def clothes_v4(sp, pieces, parts, bvh, bvh_head, body_E, mats, special, seam_src
                                "Trim" if sp.top == "jersey" else "Shirt", mats, flare=0.002)
             add(o, "box:Shirt" if sp.top != "jersey" else "")
     if sp.top == "crop":
-        o, _, _ = band("CropHem", bvh, Vector((0, 0.008, sp.crop)), Z, Vector((0, -1, 0)), 26, 0.30, 0.022, 0.005,
-                       "Shirt", mats, embed=0.003)
-        add(o, "box:Shirt")
+        o, _, _ = band("CropHem", bvh, Vector((0, 0.008, sp.crop)), Z, Vector((0, -1, 0)), 26, 0.20, 0.022, 0.005,
+                       "Shirt", mats, embed=0.012)
+        add(o, "box:Shirt", rule="legs")
     if sp.top == "jersey":
-        o, _, _ = band("JerseyHem", bvh, Vector((0, 0.008, sp.waist)), Z, Vector((0, -1, 0)), 26, 0.32, 0.026,
-                       0.0055, "Shirt", mats, embed=0.003, flare=0.003)
-        add(o, "box:Shirt")
+        o, _, _ = band("JerseyHem", bvh, Vector((0, 0.008, sp.waist)), Z, Vector((0, -1, 0)), 26, 0.25, 0.026,
+                       0.0055, "Shirt", mats, embed=0.012, flare=0.003)
+        add(o, "box:Shirt", rule="legs")
         if "number" in sp.extras:
             for o in make_number(sp, bvh, mats):
                 add(o)
@@ -1809,8 +1809,8 @@ def clothes_v4(sp, pieces, parts, bvh, bvh_head, body_E, mats, special, seam_src
     if sp.bottom == "shorts" or (sp.bottom == "joggers" and sp.top != "jersey") or sp.top == "jumpsuit":
         hgt = 0.026 if sp.top == "jumpsuit" else 0.036
         o, bpts, bdirs = band("Waistband", bvh, Vector((0, 0.008, sp.waist)), Z, Vector((0, -1, 0)), 26, 0.28,
-                              hgt, 0.0062, "Pants", mats, embed=0.003)
-        add(o, "box:Pants")
+                              hgt, 0.0062, "Pants", mats, embed=0.014)
+        add(o, "box:Pants", rule="legs")
         if sp.top != "jumpsuit":      # drawstrings hanging from the front of the waistband
             f0 = bpts[0] + bdirs[0] * 0.0075
             for sx in (1, -1):
@@ -2233,10 +2233,22 @@ def build_human(female, variant=""):
         budget = {"Shirt": 1150, "Pants": 960, "Shoes": 460, "Skin": 380}
     for name, o in pieces.items():
         keep = None
-        if sp.sleeveless and name in ("Shirt", "Skin"):
+        if sp.v4 and not sp.sleeveless and name in ("Shirt", "Pants", "Skin"):
+            # protect every seam of the v4 pieces (a decimated open edge shrinks: holes at the waist)
+            from mathutils.kdtree import KDTree
+            bl = [p_ for lp_ in boundary_loops(o) for p_ in lp_ if name != "Skin" or abs(p_.x) < 0.2]
+            if bl:
+                kd = KDTree(len(bl))
+                for i_, p_ in enumerate(bl):
+                    kd.insert(p_, i_)
+                kd.balance()
+                keep = lambda c, kd=kd: 1.0 if kd.find(c)[2] < 0.006 else 0.0
+        if sp.sleeveless and name in ("Shirt", "Skin", "Pants"):
             # protect the garment cut-out edges (otherwise the decimated seam shows red teeth)
             from mathutils.kdtree import KDTree
-            bl = [p_ for lp_ in boundary_loops(o, sp.waist + 0.05) for p_ in lp_]
+            # Skin: only the torso cut-outs (a fully protected skin piece would starve the legs)
+            bl = [p_ for lp_ in boundary_loops(o, sp.waist + 0.05 if name == "Skin" else -9.0) for p_ in lp_
+                  if name != "Skin" or p_.z > sp.waist + 0.05]
             if bl:
                 kd = KDTree(len(bl))
                 for i_, p_ in enumerate(bl):
@@ -2685,6 +2697,13 @@ def build_human(female, variant=""):
         if z < zA:                                       # below the waist: legs keep their share
             continue
         W[i, tb] = np.array([wh, ws, wc]) * tor
+    forearm = [bidx[b] for b in bone_names if b.startswith(("LowerArm", "Hand", "Thumb", "Fingers"))]
+    for i in range(len(co)):                             # torso cloth never follows the forearms
+        if vmat[i] == shirt_i and abs(co[i][0]) < 0.21 and co[i][2] < 1.25 * k and W[i].sum() > 0:
+            rest = W[i].sum()
+            W[i, forearm] = 0
+            if W[i].sum() < 1e-6:
+                W[i, bidx["Spine"]] = rest
     for i in range(len(co)):
         order = np.argsort(-W[i])[:4]
         tot = W[i, order].sum()
