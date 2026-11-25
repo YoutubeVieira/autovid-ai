@@ -10,10 +10,16 @@ New-Item -ItemType Directory -Force -Path $Logs | Out-Null
 $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User') + ';' + (Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Links')
 
 $r = Get-Content (Join-Path $Config 'reglages.json') -Raw | ConvertFrom-Json
-$sec = Get-Content (Join-Path $Config 'cle-api.txt') | ConvertTo-SecureString
-$bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
-try { $env:ANTHROPIC_API_KEY = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
-finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
+function Lire-Cle($fichier) {
+  $sec = Get-Content $fichier | ConvertTo-SecureString
+  $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($sec)
+  try { return [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr) }
+  finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) }
+}
+$ia = if ($r.ia) { $r.ia } else { 'claude' }
+$env:IA = $ia
+if ($ia -eq 'gemini') { $env:GEMINI_API_KEY = Lire-Cle (Join-Path $Config 'cle-gemini.txt') }
+else { $env:ANTHROPIC_API_KEY = Lire-Cle (Join-Path $Config 'cle-api.txt') }
 
 $env:CODE_ACCES = $r.code_acces
 $env:VOIX_MOTEURS = $r.voix
@@ -37,7 +43,7 @@ if ($r.radar_heure -ne '') { $env:RADAR_HEURE = [string]$r.radar_heure }
 $local = "http://127.0.0.1:$($r.port)"
 
 Write-Host ''
-Write-Host '  Coach Viral demarre...' -ForegroundColor Magenta
+Write-Host "  Coach Viral demarre (IA : $ia)..." -ForegroundColor Magenta
 
 $serveur = Start-Process node -ArgumentList '--no-warnings', 'server.mjs' -WorkingDirectory $App -PassThru -WindowStyle Hidden `
   -RedirectStandardOutput (Join-Path $Logs 'serveur.txt') -RedirectStandardError (Join-Path $Logs 'serveur-erreurs.txt')
@@ -84,6 +90,6 @@ Start-Process $local
 Write-Host '  Laissez cette fenetre ouverte. Appuyez sur Entree pour arreter Coach Viral.' -ForegroundColor Gray
 $null = Read-Host
 foreach ($p in $tunnel, $serveur) { if ($p -and -not $p.HasExited) { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } }
-Remove-Item Env:ANTHROPIC_API_KEY -ErrorAction SilentlyContinue
+Remove-Item Env:ANTHROPIC_API_KEY, Env:GEMINI_API_KEY -ErrorAction SilentlyContinue
 Remove-Item $pids -Force -ErrorAction SilentlyContinue
 Write-Host '  Arrete.'

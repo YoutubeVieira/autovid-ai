@@ -102,19 +102,35 @@ if ($LASTEXITCODE -eq 0) { Ok 'Voix Kokoro installee' } else { Info 'Kokoro non 
 
 # 5. Reglages
 Etape '5/6  Reglages'
-$cleFichier = Join-Path $Config 'cle-api.txt'
+$reglages = Join-Path $Config 'reglages.json'
+$ia = 'gemini'
+if (Test-Path $reglages) {
+  $ancien = Get-Content $reglages -Raw | ConvertFrom-Json
+  if ($ancien.ia) { $ia = $ancien.ia } elseif (Test-Path (Join-Path $Config 'cle-api.txt')) { $ia = 'claude' }
+} else {
+  Write-Host '    Quelle IA utiliser ?' -ForegroundColor Yellow
+  Write-Host '      1 = Gemini de Google : GRATUIT (cle gratuite sur aistudio.google.com) - recommande'
+  Write-Host '      2 = Claude : payant a l usage (console.anthropic.com), reponses souvent meilleures'
+  $choix = Read-Host '    Votre choix (1 ou 2)'
+  if ($choix -eq '2') { $ia = 'claude' }
+}
+if ($ia -eq 'gemini') { $cleFichier = Join-Path $Config 'cle-gemini.txt'; $ou = 'aistudio.google.com > Get API key' }
+else { $cleFichier = Join-Path $Config 'cle-api.txt'; $ou = 'console.anthropic.com > API Keys' }
 if (-not (Test-Path $cleFichier)) {
-  Write-Host '    Collez votre cle API Claude (console.anthropic.com > API Keys). Elle reste chiffree sur ce PC.' -ForegroundColor Yellow
+  Write-Host "    Collez votre cle API ($ou). Clic droit pour coller. Elle reste chiffree sur ce PC." -ForegroundColor Yellow
   $sec = Read-Host '    Cle API' -AsSecureString
   $sec | ConvertFrom-SecureString | Set-Content $cleFichier
-} else { Ok 'Cle API deja enregistree (supprimez config\cle-api.txt pour la changer)' }
+} else { Ok "Cle deja enregistree (supprimez $cleFichier pour la changer)" }
 
-$reglages = Join-Path $Config 'reglages.json'
 if (-not (Test-Path $reglages)) {
   $code = -join ((48..57) + (97..122) | Get-Random -Count 8 | ForEach-Object { [char]$_ })
-  @{ code_acces = $code; voix = 'kokoro,edge'; port = 8080; radar_heure = '' } | ConvertTo-Json | Set-Content $reglages -Encoding UTF8
+  @{ ia = $ia; code_acces = $code; voix = 'kokoro,edge'; port = 8080; radar_heure = '' } | ConvertTo-Json | Set-Content $reglages -Encoding UTF8
   Ok "Code d'acces cree : $code (a saisir dans Reglages sur le telephone)"
-} else { Ok 'Reglages gardes' }
+} else {
+  $r = Get-Content $reglages -Raw | ConvertFrom-Json
+  if (-not $r.ia) { $r | Add-Member -NotePropertyName ia -NotePropertyValue $ia; $r | ConvertTo-Json | Set-Content $reglages -Encoding UTF8 }
+  Ok "Reglages gardes (IA : $ia)"
+}
 
 # 6. Raccourci
 Etape '6/6  Raccourci sur le Bureau'

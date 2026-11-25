@@ -15,6 +15,7 @@ import { renderFacecam } from "./lib/captions.mjs";
 import { run as runCmd } from "./lib/render.mjs";
 import { QUOTAS } from "./lib/billing.mjs";
 import { Radar } from "./lib/radar.mjs";
+import { GeminiClient } from "./lib/gemini.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const WEB = path.join(here, "web");
@@ -94,7 +95,10 @@ export function allowed(ip, now = Date.now(), perHour = Number(process.env.LIMIT
 /* ---------- Erreurs ---------- */
 
 export function errorReply(e) {
-  if (e instanceof CoachError) return [e.code === "entree" ? 400 : 502, { erreur: e.message }];
+  if (e instanceof CoachError) {
+    const status = { entree: 400, limite: 429, cle: 500, reseau: 503, quota: 429 }[e.code] || 502;
+    return [status, { erreur: e.message }];
+  }
   if (e instanceof Anthropic.AuthenticationError) return [500, { erreur: "La clé de l'API Claude du serveur est invalide." }];
   if (e instanceof Anthropic.RateLimitError) return [429, { erreur: "Trop de demandes en même temps. Réessayez dans une minute." }];
   if (e instanceof Anthropic.BadRequestError) return [502, { erreur: "Demande refusée par l'IA (fichier trop lourd ?)." }];
@@ -478,8 +482,19 @@ export function createServer({ client, accessCode = process.env.CODE_ACCES || ""
   });
 }
 
+/* Choix de l'IA : IA=gemini (gratuit avec une clé Google AI Studio) ou IA=claude.
+   Sans réglage : Claude si sa clé est présente, sinon Gemini. */
+export function chooseAI(env = process.env) {
+  const wanted = (env.IA || "").toLowerCase();
+  if (wanted === "gemini" || (!wanted && !env.ANTHROPIC_API_KEY && env.GEMINI_API_KEY)) {
+    if (!env.GEMINI_API_KEY) console.warn("Attention : GEMINI_API_KEY n'est pas définie, l'IA ne répondra pas.");
+    return new GeminiClient({ key: env.GEMINI_API_KEY, model: env.GEMINI_MODELE || "gemini-flash-latest" });
+  }
+  if (!env.ANTHROPIC_API_KEY) console.warn("Attention : ni ANTHROPIC_API_KEY ni GEMINI_API_KEY ne sont définies, l'IA ne répondra pas.");
+  return new Anthropic();
+}
+
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  if (!process.env.ANTHROPIC_API_KEY) console.warn("Attention : ANTHROPIC_API_KEY n'est pas définie, l'IA ne répondra pas.");
   let billing = null, stripe = null;
   if (process.env.VENTE === "1") {
     const { default: Stripe } = await import("stripe");
@@ -488,5 +503,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     billing = new Billing({ db: openDb(path.join(studio.DATA, "abonnes.sqlite")), stripe, price: process.env.STRIPE_PRIX, publicUrl: process.env.URL_PUBLIQUE });
   }
   const port = Number(process.env.PORT || 8080);
-  createServer({ client: new Anthropic(), billing, stripe }).listen(port, process.env.HOST || undefined, () => console.log(`Coach viral prêt sur http://localhost:${port}`));
+  const client = chooseAI();
+  console.log("IA utilisée : " + (client.provider === "gemini" ? "Gemini (" + client.model + ")" : "Claude"));
+  createServer({ client, billing, stripe }).listen(port, process.env.HOST || undefined, () => console.log(`Coach viral prêt sur http://localhost:${port}`));
 }

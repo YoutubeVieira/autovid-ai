@@ -64,12 +64,12 @@ export async function redditSignals(subreddits, fetchImpl = fetch) {
 
 /* Recherche web par Claude : renvoie un résumé texte avec les adresses trouvées. */
 export async function webResearch(client, niche, lang, { maxUses = 5 } = {}) {
-  const messages = [{
-    role: "user",
-    content: `Find what is trending RIGHT NOW (last 7 days) in the niche "${niche}" for short-video creators in ${COUNTRY[lang] || "FR"}: ` +
-      "news, challenges, viral sounds or formats, frequent questions, events coming up in the next 2 weeks. " +
-      "Report each signal in one line with its date and URL. Do not invent anything; say when you find nothing."
-  }];
+  const prompt = `Find what is trending RIGHT NOW (last 7 days) in the niche "${niche}" for short-video creators in ${COUNTRY[lang] || "FR"}: ` +
+    "news, challenges, viral sounds or formats, frequent questions, events coming up in the next 2 weeks. " +
+    "Report each signal in one line with its date and URL. Do not invent anything; say when you find nothing.";
+  /* Gemini : recherche Google intégrée (gratuite dans les limites de l'offre gratuite). */
+  if (client?.provider === "gemini") return client.search({ content: prompt });
+  const messages = [{ role: "user", content: prompt }];
   let response;
   for (let i = 0; i < 4; i++) {
     response = await client.beta.messages.create({

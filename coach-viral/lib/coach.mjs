@@ -2,6 +2,7 @@
    Chaque fonction reçoit le client Anthropic en paramètre, ce qui permet de la tester sans réseau. */
 import * as z from "zod/v4";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { GeminiError } from "./gemini.mjs";
 
 export const MODEL = process.env.COACH_MODEL || "claude-opus-5-5";
 
@@ -95,6 +96,11 @@ function imageBlocks(images) {
 }
 
 export async function ask(client, { lang, content, schema, effort = "medium", maxTokens = 16000 }) {
+  /* Gemini (gratuit) : même demande, même format de réponse. */
+  if (client?.provider === "gemini") {
+    try { return await client.parseJson({ system: system(lang), content, schema, maxTokens }); }
+    catch (e) { if (e instanceof GeminiError) throw new CoachError(e.kind, e.message); throw e; }
+  }
   const response = await client.beta.messages.parse({
     model: MODEL,
     max_tokens: maxTokens,

@@ -78,6 +78,21 @@ Un bouton « Créer la vidéo » envoie le thème au Studio.
 
 Les captures d'écran sont jointes au résultat. Sur un dépôt privé, GitHub offre 2 000 minutes par mois, et un passage dure quelques minutes.
 
+## Gemini : l'option 100 % gratuite
+
+L'application marche avec **Gemini** (Google) au lieu de Claude :
+- `IA=gemini` et `GEMINI_API_KEY` ;
+- la clé est gratuite sur aistudio.google.com ;
+- l'installateur Windows propose Gemini par défaut.
+
+À savoir :
+- **L'abonnement Gemini Pro (Google AI Pro) ne donne pas de clé API** : la clé AI Studio est une chose séparée, avec une offre gratuite limitée (nombre de demandes par minute et par jour).
+- Quand la limite est atteinte, l'application affiche « Limite gratuite de Gemini atteinte » : il suffit de réessayer plus tard.
+- Le modèle se règle avec `GEMINI_MODELE` (par défaut `gemini-flash-latest`).
+- Le radar utilise la recherche Google intégrée à Gemini.
+- Sur l'offre gratuite, Google peut utiliser les données envoyées pour améliorer ses produits (à vérifier dans les conditions de Google AI Studio) : n'y mettez rien de confidentiel.
+- **Les vrais appels à Gemini n'ont pas pu être testés** dans l'environnement de développement (Google bloqué). La requête suit le SDK officiel `@google/genai` 3.6.1 : faites un premier essai.
+
 ## Combien ça coûte vraiment
 
 **L'abonnement Claude (claude.ai Pro ou Max) ne couvre pas l'application.** L'application appelle l'API Claude, facturée à part sur console.anthropic.com, avec des crédits prépayés.
@@ -139,6 +154,9 @@ Ou avec Docker : `docker build -t coach-viral . && docker run -p 8080:8080 -e AN
 | `RENDUS_SIMULTANES` | Vidéos fabriquées en même temps | 1 |
 | `LIMITE_PAR_HEURE` | Demandes par adresse et par heure | 60 |
 | `COACH_MODEL` | Modèle Claude | `claude-opus-5-5` |
+| `IA` | `gemini` ou `claude` (sans réglage : Claude si sa clé existe, sinon Gemini) | — |
+| `GEMINI_API_KEY` | Clé gratuite Google AI Studio | — |
+| `GEMINI_MODELE` | Modèle Gemini | `gemini-flash-latest` |
 | `RADAR_NICHES` | Niches de départ, séparées par `;` | — |
 | `RADAR_HEURE` | Heure du passage quotidien du radar (0-23) | désactivé |
 | `RADAR_JETON` | Jeton secret pour le robot GitHub qui lance le radar | — |
@@ -184,7 +202,7 @@ Le fichier `render.yaml` à la racine du dépôt déploie l'image Docker sur Ren
 ## Tests
 
 ```bash
-npm test                         # 31 tests : coach, rendu vidéo, sous-titres, voix, abonnement, studio, radar, clips (fausse IA)
+npm test                         # 37 tests : coach, rendu vidéo, sous-titres, voix, abonnement, studio, radar, clips (fausse IA)
 node tests/smoke.mjs             # parcours navigateur : idées, score, profil, publier
 node tests/smoke-studio.mjs      # parcours navigateur : radar, studio, image de référence, clips, voix
 ```
@@ -194,6 +212,7 @@ node tests/smoke-studio.mjs      # parcours navigateur : radar, studio, image de
 | Fichier | Rôle |
 |---|---|
 | `server.mjs` | Serveur : pages, accès, abonnement, studio, voix, file d'attente des fabrications |
+| `lib/gemini.mjs` | Gemini (gratuit) : même service que Claude, réponses structurées |
 | `lib/coach.mjs` | Consignes données à Claude et formats des réponses |
 | `lib/studio.mjs` | Téléchargement, analyse de style, nouvelle version, style d'après une image, fabrication |
 | `lib/render.mjs` | Modèle vidéo « citation » |
