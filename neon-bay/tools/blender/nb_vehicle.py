@@ -264,14 +264,14 @@ def tex_mat(name, color, metallic=0.0, roughness=0.5, img=None, normal=None, nst
 
 
 def vehicle_materials(paint, paint_metal=0.55, paint_rough=0.3, rim=(0.78, 0.79, 0.81),
-                      rim_metal=0.9, rim_rough=0.3, trim=(0.035, 0.036, 0.04), glass_alpha=0.42,
+                      rim_metal=0.9, rim_rough=0.3, trim=(0.035, 0.036, 0.04), glass_alpha=0.55,
                       extras=()):
     """Contract materials of every vehicle (+ extras: 'Livery', 'SirenRed', 'SirenBlue',
     'Canvas', each given as (name, kwargs))."""
     t = vehicle_textures()
     M = {
         "Paint": nb.material("Paint", paint, metallic=paint_metal, roughness=paint_rough),
-        "Glass": nb.material("Glass", (0.025, 0.04, 0.055), metallic=0.3, roughness=0.05, alpha=glass_alpha),
+        "Glass": nb.material("Glass", (0.02, 0.03, 0.04), metallic=0.3, roughness=0.05, alpha=glass_alpha),
         "Trim": tex_mat("Trim", trim, 0.0, 0.62, normal=t["trim_n"], nstrength=0.5),
         "Tyre": tex_mat("Tyre", (0.03, 0.03, 0.032), 0.0, 0.9, normal=t["tyre_n"], nstrength=1.0),
         "Rim": tex_mat("Rim", rim, rim_metal, rim_rough, img=t["rim"]),
@@ -686,7 +686,7 @@ def stencil(text, origin, right, up, height, mat, normal_off=0.003, name="Stenci
 
 # =========================================================================== wheels
 def wheel(name, R, width, rim_r, loc, side, style="alloy5", segs=18, disc=True, nuts=5,
-          tyre_mat="Tyre", rim_mat="Rim", disc_mat="Rim", hub_mat="Rim"):
+          tyre_mat="Tyre", rim_mat="Rim", disc_mat="Rim", hub_mat="Rim", beadlock=12, hub_nuts=8):
     """Tyre + rim + nuts (+ brake disc), origin at the hub, outer face towards side*Y.
     style: alloy5 | sport | suv6 | steel | army."""
     h = width / 2
@@ -713,8 +713,7 @@ def wheel(name, R, width, rim_r, loc, side, style="alloy5", segs=18, disc=True, 
     parts.append(t)
     # ---- rim barrel (lathe; outer face at +y)
     lip = rim_r + 0.008
-    barrel = [(rim_r - 0.012, -h * 0.80), (rim_r + 0.004, -h * 0.80), (rim_r - 0.004, -h * 0.70),
-              (rim_r - 0.022, -h * 0.55), (rim_r - 0.022, h * 0.62), (rim_r - 0.006, h * 0.74),
+    barrel = [(rim_r - 0.004, -h * 0.80), (rim_r - 0.022, -h * 0.55), (rim_r - 0.022, h * 0.62),
               (lip, h * 0.80), (rim_r - 0.004, h * 0.88)]
     if style == "army":
         barrel = [(rim_r - 0.01, -h * 0.80), (rim_r + 0.006, -h * 0.80), (rim_r - 0.02, -h * 0.6),
@@ -725,10 +724,12 @@ def wheel(name, R, width, rim_r, loc, side, style="alloy5", segs=18, disc=True, 
     if style in ("steel", "army"):
         # pressed steel disc with vent holes (as dark recesses) + hub cap
         dish = [(rim_r - 0.022, face_y - 0.02), (rim_r * 0.72, face_y + 0.01), (rim_r * 0.45, face_y + 0.03),
-                (0.09 if style == "army" else 0.075, face_y + 0.04)]
+                (0.075 * rim_r / 0.2 if style == "army" else 0.075, face_y + 0.04)]
         parts.append(lathe(dish, segs, (0, 0, 0), "Y", rim_mat, name=name + "_dish", fix=False, smooth=40, flip=True))
         if style == "army":
-            hub = [(0.10, face_y + 0.04), (0.085, face_y + 0.10), (0.06, face_y + 0.11), (0.0, face_y + 0.11)]
+            kk = rim_r / 0.2
+            hub = [(0.075 * kk, face_y + 0.035), (0.065 * kk, face_y + 0.09 * kk), (0.045 * kk, face_y + 0.1 * kk),
+                   (0.0, face_y + 0.1 * kk)]
         else:
             hub = [(0.075, face_y + 0.04), (0.07, face_y + 0.06), (0.04, face_y + 0.075), (0.0, face_y + 0.078)]
         parts.append(lathe(hub, 12, (0, 0, 0), "Y", hub_mat, name=name + "_hub", fix=False, smooth=40, flip=True))
@@ -738,16 +739,16 @@ def wheel(name, R, width, rim_r, loc, side, style="alloy5", segs=18, disc=True, 
             rr = rim_r * 0.6
             c = (rr * math.cos(a), face_y + 0.024, rr * math.sin(a))
             parts.append(cyl(0.03, 0.012, c, "Y", "Trim", sides=8, caps=(False, True), name=name + "_hole"))
-        if style == "army":   # bead-lock ring bolts + 8 hub bolts
-            for k in range(12):
-                a = 2 * math.pi * k / 12
+        if style == "army":   # bead-lock ring bolts + hub nuts
+            for k in range(beadlock):
+                a = 2 * math.pi * k / beadlock
                 rr = rim_r - 0.012
                 parts.append(cyl(0.011, 0.02, (rr * math.cos(a), h * 0.82, rr * math.sin(a)), "Y", hub_mat, sides=6,
                                  caps=(False, True), name=name + "_bolt"))
-            nr = 0.078
-            for k in range(8):
-                a = 2 * math.pi * k / 8
-                parts.append(cyl(0.012, 0.03, (nr * math.cos(a), face_y + 0.06, nr * math.sin(a)), "Y", hub_mat,
+            nr = 0.105 * rim_r / 0.2
+            for k in range(hub_nuts):
+                a = 2 * math.pi * k / hub_nuts
+                parts.append(cyl(0.013, 0.03, (nr * math.cos(a), face_y + 0.035, nr * math.sin(a)), "Y", hub_mat,
                                  sides=6, caps=(False, True), name=name + "_nut"))
             nuts = 0
     else:
@@ -802,7 +803,7 @@ def brake_caliper(x, y_face, z, R_disc, side, mat, h=0.06):
     """Calliper block hugging the top-rear of the disc (body part: does not spin)."""
     a = math.radians(125)
     cx, cz = x + math.cos(a) * R_disc * 0.82, z + math.sin(a) * R_disc * 0.82
-    o = cbox((cx, y_face, cz), (0.11, h, 0.065), mat, bv=0.012, rot=(0, -(a - math.pi / 2), 0), name="Caliper")
+    o = cbox((cx, y_face, cz), (0.11, h, 0.065), mat, bv=0.0, rot=(0, -(a - math.pi / 2), 0), name="Caliper")
     return o
 
 

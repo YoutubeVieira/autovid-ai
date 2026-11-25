@@ -213,7 +213,7 @@ class Car:
         c, L = self.c, self.L
         x0, x1 = -L / 2, L / 2
         xs = set()
-        n = int(L / 0.2)
+        n = int(L / 0.22)
         for i in range(n + 1):
             xs.add(x0 + L * i / n)
         nf, nr = c["nose"]
@@ -554,7 +554,7 @@ def rear_details(car, surf, parts):
     zp = car.belt(x0 + 0.05) - 0.2 if car.kind not in ("van", "suv") else car.belt(x0 + 0.05) - 0.08
     loc, _ = surf.front(0, zp, -1)
     xp = (loc.x if loc is not None else x0) - 0.004
-    parts.append(V.cbox((xp + 0.01, 0, zp), (0.02, 0.56, 0.15), "Trim", bv=0.006, name="PlateRecess"))
+    parts.append(V.cbox((xp + 0.01, 0, zp), (0.02, 0.56, 0.15), "Trim", name="PlateRecess"))
     parts.append(plate((xp - 0.002, 0, zp), -1))
     # diffuser / bumper lower
     zb = car.clear(x0) + 0.02
@@ -582,7 +582,7 @@ def rear_details(car, surf, parts):
         parts.append(V.cyl(r * 0.8, 0.01, (xd - 0.03, y, z), "X", "Trim", sides=12, caps=(True, False), name="ExhaustIn"))
         del prof
     # third brake light
-    if c.get("rw") is not None and car.kind != "sports":
+    if c.get("rw") is not None and car.kind not in ("sports", "suv"):
         xb = c["rw"] + 0.03
         zb3 = car.belt(xb) + 0.035
         loc, nrm = surf.top(xb, 0)
@@ -634,8 +634,8 @@ def mirrors(car, surf, parts):
     hous = V.part("Mirror", verts, faces, "Livery" if car.police else "Paint")
     V.fix_normals(hous)
     nb.auto_smooth(hous, 50)
-    glass = V.cbox((xm - 0.052, y0 + 0.165, zm), (0.006, 0.13, 0.075), "Rim", bv=0.006, name="MirrorGlass")
-    arm = V.cbox((xm + 0.005, y0 + 0.04, zm - 0.04), (0.06, 0.11, 0.025), "Trim", bv=0.008, name="MirrorArm")
+    glass = V.cbox((xm - 0.052, y0 + 0.165, zm), (0.006, 0.13, 0.075), "Rim", name="MirrorGlass")
+    arm = V.cbox((xm + 0.005, y0 + 0.04, zm - 0.04), (0.06, 0.11, 0.025), "Trim", name="MirrorArm")
     for p in (hous, glass, arm):
         parts += [p, V.mirror_y(p)]
 
@@ -759,7 +759,7 @@ def wipers_antenna_rails(car, surf, parts):
         yl = 0.55
         cx, cy = xw - 0.02, y0 + yl / 2 * math.cos(ang)
         parts.append(V.cbox((cx, cy, zw + 0.012), (0.018, yl, 0.012), "Trim", rot=(0, 0, ang), name="Wiper"))
-        parts.append(V.cbox((cx + 0.012, y0, zw), (0.04, 0.04, 0.02), "Trim", bv=0.006, name="WiperPivot"))
+        parts.append(V.cbox((cx + 0.012, y0, zw), (0.04, 0.04, 0.02), "Trim", name="WiperPivot"))
     # antenna
     if c.get("antenna") == "fin" and c.get("rr") is not None:
         xa = c["rr"] + 0.12
@@ -1000,10 +1000,16 @@ def build_car(kind):
     if c.get("side_intake"):
         x = c["xr"] + car.ra + 0.16
         z = car.belt(x) - 0.16
-        p = V.patch(surf, lambda a, b: ((x - 0.1 + 0.3 * a, 3, z - 0.07 + 0.11 * b + 0.04 * a), (0, -1, 0)), 3, 1, 0.002,
-                    "Trim", name="SideIntake", depth=0.01)
+        p = V.patch(surf, lambda a, b: ((x - 0.12 + 0.3 * a, 3, z - 0.06 + 0.1 * b + 0.03 * a), (0, -1, 0)), 3, 1, 0.002,
+                    "Trim", name="SideIntake")
         if p:
             parts += [p, V.mirror_y(p)]
+        for k in range(3):
+            zz = z - 0.03 + 0.03 * k
+            loc, _ = surf.side(x + 0.03, zz + 0.012, 1)
+            if loc is not None:
+                sl = V.cbox((x + 0.03, loc.y + 0.004, zz + 0.012), (0.24, 0.008, 0.012), "Trim", name="IntakeSlat")
+                parts += [sl, V.mirror_y(sl)]
     if car.police:
         police_kit(car, surf, parts)
     body = V.finish(parts, "Body")

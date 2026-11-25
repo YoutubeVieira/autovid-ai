@@ -1259,7 +1259,7 @@ def seam_piping(name, piece, bvh, mats, mat, zmin, width=0.013, thick=0.0032):
     piping ribbon that straddles the seam."""
     out = []
     for li, loop in enumerate(boundary_loops(piece, zmin)):
-        pts = resample_loop(loop, 0.024)
+        pts = resample_loop(loop, 0.030)
         for _ in range(6):
             pts = [pts[i] * 0.5 + (pts[i - 1] + pts[(i + 1) % len(pts)]) * 0.25 for i in range(len(pts))]
         P, N = [], []
@@ -1362,7 +1362,7 @@ def make_bucket(sp, bvh, mats):
     crown = nb.mesh_object("HatCrown", verts, faces)
     fix_normals_out(crown, lambda c: C + n * (H * 0.4))
     # brim: two shells (top / bottom) joined at the rolled edge and at the crown
-    NB = 4
+    NB = 3
     verts, faces = [], []
     for i, (d, r) in enumerate(rim):
         p0 = rings[0][i]
@@ -1435,11 +1435,11 @@ def make_sunglasses(sp, bvh_hh, mats):
         # temple: from the outer hinge back along the side of the head, above the ear
         hinge = ring[0]
         tp = [hinge]
-        for y, z in ((0.000, 0.060), (0.035, 0.052), (0.070, 0.036), (0.098, 0.016)):
+        for y, z in ((0.000, 0.046), (0.032, 0.030), (0.064, 0.014), (0.090, 0.000)):
             o = hc + Vector((sx * 0.20, y, z)) * hk
             h = bvh_hh.ray_cast(o, Vector((-sx, 0, 0)), 0.3)
-            print("TEMPLE", sx, o, h[0])
-            tp.append((h[0] + Vector((sx * 0.004, 0, 0))) if h[0] is not None else o)
+            if h[0] is not None:
+                tp.append(h[0] + Vector((sx * 0.004, 0, 0)))
         out.append(tube("Temple", tp, [0.0018] * len(tp), 4, mats, "Gear", cap_end=True, cap_start=True))
     br = [rims[0][7], (rims[0][7] + rims[1][7]) / 2 + w * 0.002, rims[1][7]]
     out.append(tube("Bridge", br, [0.0018] * 3, 4, mats, "Gear", cap_end=False))
@@ -1473,7 +1473,7 @@ def make_whistle(sp, bvh, npts, ndirs, mats):
         q, nn = project(bvh, a + Vector((0, -0.25, 0)), (0, 1, 0), 0.3)
         pts2.append((q + nn * 0.004) if q is not None else a)
     cord = cord + pts2 + [ring[iL]]
-    out = [tube("Lanyard", cord, [0.0024] * len(cord), 4, mats, "Gear", cap_end=False)]
+    out = [tube("Lanyard", cord, [0.0026] * len(cord), 3, mats, "Gear", cap_end=False)]
     # whistle body hanging along the chest
     down = Vector((0, 0, -1))
     ax = (down - Wn * down.dot(Wn)).normalized()
@@ -1494,7 +1494,7 @@ def make_chain(sp, bvh, npts, ndirs, mats):
     zb = sum(p.z for p in ring) / n
     depth = (0.105 if sp.female else 0.135) * k
     pts, rad = [], []
-    m = 40
+    m = 28
     for q in range(m):
         a = 2 * math.pi * q / m                     # 0 = front centre
         f = q * n / m
@@ -1503,15 +1503,15 @@ def make_chain(sp, bvh, npts, ndirs, mats):
         drop = depth * ((1 + math.cos(a)) / 2) ** 1.6
         target = Vector((p.x, p.y, p.z - drop))
         d = Vector((p.x, p.y - 0.022, 0)).normalized()
-        if drop > 0.004:
-            qh, nn = project(bvh, target + d * 0.25, -d, 0.3)
+        if drop > 0.004:          # short rays from just outside: never catch the shoulders
+            qh, nn = project(bvh, target + d * 0.035, -d, 0.05)
             if qh is not None:
                 target = qh + nn * 0.0055
         pts.append(target)
         rad.append(0.0046 if q % 2 else 0.0030)
     pts.append(pts[0])
     rad.append(rad[0])
-    out = [tube("Chain", pts, rad, 5, mats, "Metal", cap_end=False)]
+    out = [tube("Chain", pts, rad, 4, mats, "Metal", cap_end=False)]
     p0 = pts[0]
     qh, nn = project(bvh, p0 + Vector((0, -0.25, -0.018)), (0, 1, 0), 0.3)
     if qh is not None:
@@ -1528,8 +1528,8 @@ def make_earrings(sp, mats):
         lobe = hc + Vector((sx * 0.076, 0.012, -0.050)) * hk
         c = lobe + Vector((sx * 0.002, 0, -0.012))
         ring = [c + Vector((0, math.cos(a) * 0.013, math.sin(a) * 0.013)) for a in
-                (2 * math.pi * i / 12 for i in range(13))]
-        out.append(tube("Hoop", ring, [0.0016] * 13, 4, mats, "Metal", cap_end=False))
+                (2 * math.pi * i / 10 for i in range(11))]
+        out.append(tube("Hoop", ring, [0.0017] * 11, 3, mats, "Metal", cap_end=False))
     return out
 
 
@@ -1657,7 +1657,7 @@ def make_flipflops(sp, bvh, mats):
             h = bvh.ray_cast(Vector((end.x + sx * side * 0.1, end.y, 0.024)), Vector((-sx * side, 0, 0)), 0.2)
             pts.append((h[0] + Vector((sx * side * 0.003, 0, 0))) if h[0] is not None else end)
             pts.append(Vector((pts[-1].x, pts[-1].y, 0.012)))
-            out.append(tube("Strap", pts, [0.0042] * len(pts), 5, mats, "Shoes", cap_end=True, cap_start=True))
+            out.append(tube("Strap", pts, [0.0044] * len(pts), 4, mats, "Shoes", cap_end=True, cap_start=True))
     return out
 
 
@@ -2092,6 +2092,7 @@ def build_human(female, variant=""):
     else:
         top, bot = ("jersey", 0.05), ("denim", 0.06)
         TILE["Shirt"], TILE["Pants"] = 0.05, 0.06
+    hat_tex = "denim" if not sp.v4 else {"bucket": bot[0], "cap": top[0]}.get(sp.hat, "denim")
     skin_png = tex["skin_f" if female else "skin_m"]
     if "tattoo" in sp.extras:
         skin_png = nbt.tattoo_skin(skin_png, "skin_" + sp.name[6:], arm_uv_inverse)
@@ -2106,7 +2107,7 @@ def build_human(female, variant=""):
                  else nb.material("Eyes", (0.05, 0.035, 0.025), roughness=0.12)),
         "Lips": nb.material("Lips", C["Lips"], roughness=0.4),
         "EyeWhite": nb.material("EyeWhite", (0.86, 0.83, 0.79), roughness=0.2),
-        "Hat": (tex_material("Hat", C["Hat"], 0.75, tex["denim"], tex["denim_n"], 0.5) if sp.hat
+        "Hat": (tex_material("Hat", C["Hat"], 0.75, tex[hat_tex], tex[hat_tex + "_n"], 0.5) if sp.hat
                 else nb.material("Hat", (0.5, 0.5, 0.5))),
         "Gear": nb.material("Gear", C.get("Gear", (0.03, 0.03, 0.035)), roughness=0.45),
         "Metal": nb.material("Metal", C.get("Metal", (0.8, 0.8, 0.82)), metallic=1.0, roughness=0.25),
@@ -2182,10 +2183,10 @@ def build_human(female, variant=""):
         seam_src.data = pieces["Shirt"].data.copy()
         nb.link(seam_src)
     if sp.v4:
-        budget = {"swim": {"Shirt": 820, "Pants": 620, "Skin": 1750},
-                  "tank": {"Shirt": 900, "Pants": 700, "Skin": 1750},
-                  "crop": {"Shirt": 820, "Pants": 1000, "Shoes": 540, "Skin": 800},
-                  "jersey": {"Shirt": 1250, "Pants": 820, "Shoes": 540, "Skin": 470},
+        budget = {"swim": {"Shirt": 700, "Pants": 520, "Skin": 1150},
+                  "tank": {"Shirt": 820, "Pants": 600, "Skin": 1330},
+                  "crop": {"Shirt": 720, "Pants": 760, "Shoes": 440, "Skin": 640},
+                  "jersey": {"Shirt": 1150, "Pants": 800, "Shoes": 480, "Skin": 460},
                   "jumpsuit": {"Shirt": 1150, "Pants": 1060, "Shoes": 460, "Skin": 480}}[sp.top]
     elif st:
         budget = {"Shirt": 1650, "Pants": 900, "Shoes": 460, "Skin": 60}
@@ -2312,11 +2313,11 @@ def build_human(female, variant=""):
         if scalp(c):
             return 0.0
         return 0.1
-    decimate(head, 1800 if female else 1850, head_keep)
-    decimate(hair_parts[0], 820 if sp.pulled else (560 if female else (
+    decimate(head, (1740 if female else 1800) if sp.v4 else (1800 if female else 1850), head_keep)
+    decimate(hair_parts[0], (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
         520 if sp.hat else (640 if sp.hair == "buzz" else 980))))
     if vol is not None:
-        decimate(vol, 520 if sp.hair == "bun" else 900)
+        decimate(vol, 440 if sp.hair == "bun" else 900)
     head["uv"] = "face"
 
     # ------------------------------------------------ hands
@@ -2324,7 +2325,7 @@ def build_human(female, variant=""):
     for s in ("L", "R"):
         h = metaball_mesh("Hand" + s + "MB", hand_E[s], 0.0032)
         set_material(h, mats, "Skin")
-        decimate(h, 420)
+        decimate(h, 380 if sp.v4 else 420)
         h["uv"] = "strip0" if "tattoo" in sp.extras else "strip"
         hands.append(h)
 
@@ -2499,7 +2500,7 @@ def build_human(female, variant=""):
         c = hc + Vector((0, 0.030, 0.097)) * hk
         ring = [c + Vector((math.cos(a) * 0.050, math.sin(a) * 0.048, 0)) * hk
                 for a in (2 * math.pi * i / 14 for i in range(15))]
-        o = tube("Tie", ring, [0.0065 * hk] * 15, 5, mats, "Trim", cap_end=False)
+        o = tube("Tie", ring, [0.0065 * hk] * 15, 4, mats, "Trim", cap_end=False)
         special[o.name] = "head"
         parts.append(o)
     if sp.hair == "ponytail":

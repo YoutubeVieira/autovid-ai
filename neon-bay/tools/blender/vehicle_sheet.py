@@ -59,14 +59,14 @@ def render(name, view):
     world = bpy.data.worlds.new("W")
     bg = world.node_tree.nodes["Background"]
     bg.inputs["Color"].default_value = (0.55, 0.6, 0.68, 1)
-    bg.inputs["Strength"].default_value = 0.45
+    bg.inputs["Strength"].default_value = 0.3
     scene.world = world
     bpy.ops.mesh.primitive_plane_add(size=60 * L, location=(c.x, c.y, 0.0))
     bpy.context.active_object.data.materials.append(nb.material("Ground", (0.32, 0.33, 0.35), roughness=0.85))
-    light("Key", c + Vector((0.6, -0.9, 1.2)) * L, c, 140 * L * L, 0.9 * L)
+    light("Key", c + Vector((0.6, -0.9, 1.2)) * L, c, 90 * L * L, 0.9 * L)
     light("Fill", c + Vector((-1.0, -0.6, 0.5)) * L, c, 40 * L * L, 1.2 * L, (0.85, 0.9, 1.0))
     light("Rim", c + Vector((-0.5, 1.1, 0.8)) * L, c, 90 * L * L, 0.8 * L, (0.9, 0.95, 1.0))
-    light("Top", c + Vector((0.0, 0.0, 1.4)) * L, c, 60 * L * L, 2.0 * L)
+    light("Top", c + Vector((0.0, 0.0, 1.4)) * L, c, 35 * L * L, 2.0 * L)
     cam_d = bpy.data.cameras.new("Cam")
     cam = nb.link(bpy.data.objects.new("Cam", cam_d))
     scene.camera = cam
