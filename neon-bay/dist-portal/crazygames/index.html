@@ -411,6 +411,11 @@ body.playing.cinecam #game3d{clip-path:inset(5.5vh 0 5.5vh 0)}
 #recDot::before{content:"";position:absolute;left:10px;top:50%;width:9px;height:9px;margin-top:-4.5px;border-radius:50%;background:#ff2e4d;animation:recb 1s infinite}
 @keyframes recb{50%{opacity:.25}}
 body.recording.playing #recDot{display:block}
+
+/* plan « film » pendant la conduite : bandes noires */
+body.playing.filmshot #game3d{clip-path:inset(9vh 0 9vh 0)}
+body.filmshot .hud,body.filmshot #mini,body.filmshot #touch{opacity:.25;transition:opacity .3s}
+body.filmshot #toast,body.filmshot #banner,body.filmshot #msg{visibility:hidden}
 </style>
 </head>
 <body>
