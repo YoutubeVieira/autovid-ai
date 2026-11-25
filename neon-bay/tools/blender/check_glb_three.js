@@ -13,8 +13,12 @@ const { chromium } = require('playwright');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const MODELS = path.join(ROOT, 'models');
-const HUMAN_CLIPS = ['Idle', 'Walk', 'Run', 'Punch', 'Death', 'Aim', 'AimRifle', 'Crouch'];
-const LOOPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch'];
+// v4: every human also has Dance, Dance2 (baile funk), Sit and Workout (prison yard)
+const HUMAN_CLIPS = ['Idle', 'Walk', 'Run', 'Punch', 'Death', 'Aim', 'AimRifle', 'Crouch', 'Dance', 'Dance2', 'Sit', 'Workout'];
+const LOOPS = ['Idle', 'Walk', 'Run', 'Aim', 'AimRifle', 'Crouch', 'Dance', 'Dance2', 'Sit', 'Workout', 'Fly'];
+// animals (gen_animals.py): face +X, materials Fur / Fur2 / Eye, clips per species, <= 4000 tris
+const ANIMAL_CLIPS = { dog: ['Idle', 'Walk', 'Run', 'Sit'], cat: ['Idle', 'Walk', 'Sit'], bird: ['Idle', 'Fly'],
+  parrot: ['Idle', 'Fly'], crab: ['Idle', 'Walk'] };
 // weapon id -> [min length, max length] in metres along X
 const WEAPON_LEN = { pistol: [0.17, 0.26], uzi: [0.35, 0.55], shotgun: [0.9, 1.15], rifle: [0.82, 1.0],
   sniper: [1.1, 1.3], rocket: [1.0, 1.2], minigun: [0.85, 1.1], lmg: [0.95, 1.15], gl: [0.6, 0.85], rail: [0.9, 1.1] };
@@ -62,10 +66,13 @@ const CONTRACT = {
                    'ThumbL', 'ThumbR', 'Thumb2L', 'Thumb2R', 'FingersL', 'FingersR', 'Fingers2L', 'Fingers2R'],
            // baked textures: colour map on these slots (x material.color), fabric normal maps
            textured: ['Skin', 'Shirt', 'Pants', 'Shoes'], normals: ['Shirt', 'Pants'],
-           maxTris: 9000, maxBytes: 900 * 1024 },
+           maxTris: 9000, maxBytes: 1024 * 1024 },   // v4: 1 MB (12 clips + new accessories)
   // v3 weapons: pistol <= 4000 tris, rifles <= 9000, heavy weapons <= 12000 (WEAPON_TRIS), <= 600 KB each
   weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 12000, maxBytes: 600 * 1024 },
   lamp: { mats: ['Bulb'], maxTris: 1500 },
+  animal: { mats: ['Fur', 'Fur2', 'Eye'], maxTris: 4000, maxBytes: 600 * 1024 },
+  // beach / party / prison set dressing (gen_scene_props.py): static, <= 3000 tris
+  sceneprop: { mats: [], maxTris: 3000, maxBytes: 400 * 1024 },
   prop: { mats: [], maxTris: 1500 },
 };
 
@@ -75,6 +82,8 @@ function contractFor(name) {
   if (name.startsWith('human_')) return CONTRACT.human;
   if (name.startsWith('w_')) return CONTRACT.weapon;
   if (name === 'lamp') return CONTRACT.lamp;
+  if (name.startsWith('animal_')) return CONTRACT.animal;
+  if (name.startsWith('prop_')) return CONTRACT.sceneprop;
   return CONTRACT.prop;
 }
 
@@ -200,7 +209,8 @@ function contractFor(name) {
     if (c.maxMats && info.mats.length > c.maxMats) errs.push('too many materials ' + info.mats.length);
     if (c.textured && c !== CONTRACT.human)    // printed maps (court / pitch): 512 px colour texture
       c.textured.forEach(m => { if (!/map512x512/.test(info.texd[m] || '')) errs.push('no 512x512 texture on ' + m); });
-    if (/^prop_/.test(name) && Math.abs(info.min[1]) > 0.01)
+    // hand-held props (gen_scene_props.py) have their origin at the grip, not on the ground
+    if (/^prop_/.test(name) && !['prop_rescue_tube', 'prop_dumbbell'].includes(name) && Math.abs(info.min[1]) > 0.01)
       errs.push('not on the ground (min y ' + info.min[1] + ')');
     if (c.len) {
       if (info.size[0] < c.len[0] || info.size[0] > c.len[1]) errs.push('length ' + info.size[0] + ' outside ' + c.len);
@@ -217,12 +227,20 @@ function contractFor(name) {
       const fl = info.wheels.find(w => w.name === 'Wheel_FL'), rl = info.wheels.find(w => w.name === 'Wheel_RL');
       if (fl && rl && !(fl.pos[0] > rl.pos[0] && fl.pos[2] < 0)) errs.push('front not towards +X / left not at -Z');
     }
+    if (c === CONTRACT.animal) {
+      const id = name.slice(7);
+      (ANIMAL_CLIPS[id] || []).forEach(n => { if (!info.clipNames.includes(n)) errs.push('missing clip ' + n); });
+      if (!info.skinned) errs.push('animal must be skinned');
+      if (Math.abs(info.min[1]) > 0.01) errs.push('not on the ground (min y ' + info.min[1] + ')');
+      if (!(info.size[0] >= info.size[2] * 0.6 || id === 'crab' || id === 'bird' || id === 'parrot')) errs.push('not facing +X');
+    }
+    if (c === CONTRACT.sceneprop && info.clipNames.length) errs.push('props must be static');
     if (c === CONTRACT.human) {
       // human_f / human_f2: 1.71 m (+ hair); human_m: 1.80 m; human_m2: 1.765 m + cap
       const h = name.startsWith('human_f') ? [1.66, 1.76] : [1.75, 1.85];
       c.textured.forEach(m => { if (!/map512x512/.test(info.texd[m] || '')) errs.push('no 512x512 texture on ' + m); });
       c.normals.forEach(m => { if (!/normal/.test(info.texd[m] || '')) errs.push('no normal map on ' + m); });
-      if (name === 'human_m2' && !info.mats.includes('Hat')) errs.push('missing material Hat');
+      if (['human_m2', 'human_m3', 'human_m4'].includes(name) && !info.mats.includes('Hat')) errs.push('missing material Hat');
       if (info.size[1] < h[0] || info.size[1] > h[1]) errs.push('height ' + info.size[1] + ' outside ' + h);
       if (Math.abs(info.min[1]) > 0.005) errs.push('feet not on y=0 (min y ' + info.min[1] + ')');
       if (!info.human || !(info.human.handLx > 0 && info.human.handRx < 0)) errs.push('not facing +Z (HandL must be at +X)');

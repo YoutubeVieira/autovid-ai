@@ -141,11 +141,11 @@ def make_lifeguard_tower():
         for t in (0.35, 0.7):
             q = V((sx * 0.37, -hd - (rl - 0.2) * t, H + 0.85 - (H) * t))
             P.append(beam("RailPost", q, V((q.x, q.y, q.z - 0.85)), 0.025, white))
-    P.append(turn(bx("RampDeck", (0.70, math.hypot(rl, H), 0.035), tuple(ramp_c), wood), ramp_c, -ang))
+    P.append(turn(bx("RampDeck", (0.70, math.hypot(rl, H), 0.035), tuple(ramp_c), wood), ramp_c, ang))
     for i in range(9):
         t = (i + 0.5) / 9
         c = V((0, -hd - rl * t, H * (1 - t) + 0.04))
-        P.append(turn(bx("Cleat", (0.66, 0.04, 0.03), tuple(c), dark), c, -ang))
+        P.append(turn(bx("Cleat", (0.66, 0.04, 0.03), tuple(c), dark), c, ang))
     # flag pole on the roof ridge + waving flag (two colour halves)
     top = V((hx - 0.15, 0.375, rz + 0.24))
     P.append(cyl("Pole", 0.022, 1.6, tuple(top + V((0, 0, 0.8))), metal, 8))
@@ -187,7 +187,8 @@ def make_parasol():
         m.use_backface_culling = False
     P = []
     H, R, N = 2.25, 1.05, 16
-    P.append(cyl("Pole", 0.022, H + 0.25, (0, 0, (H + 0.25) / 2 - 0.25), wood, 10))
+    P.append(cyl("Pole", 0.022, H, (0, 0, H / 2), wood, 10))
+    P.append(cyl("Base", 0.06, 0.05, (0, 0, 0.025), metal, 10, r2=0.03))    # sand anchor collar
     P.append(cyl("Joint", 0.032, 0.08, (0, 0, 1.2), metal, 10))
     P.append(cyl("Runner", 0.035, 0.10, (0, 0, H - 0.45), metal, 10))
     # canopy: N panels, each a curved fan (rings), double-sided, stripe colours alternate
@@ -390,7 +391,7 @@ def make_speaker_stack():
     cab = nb.material("Cabinet", (0.06, 0.06, 0.07), roughness=0.8)
     cone = nb.material("Cone", (0.12, 0.12, 0.13), roughness=0.6)
     metal = nb.material("Metal", (0.65, 0.65, 0.68), metallic=1.0, roughness=0.3)
-    grille = nb.material("Grille", (0.15, 0.15, 0.16), metallic=0.5, roughness=0.5)
+    grille = nb.material("Grille", (0.30, 0.30, 0.32), metallic=0.5, roughness=0.45)
     neon = nb.material("Neon", (0.2, 1.0, 0.3), emission=(0.2, 1.0, 0.3), strength=6.0)
     P = []
 
@@ -422,12 +423,23 @@ def make_speaker_stack():
         else:   # horn
             prof = [(0.0, 0.0)]
             hw_, hh_ = w * 0.42, h * 0.32
-            v = [(x - hw_, front, z + h / 2 - hh_), (x + hw_, front, z + h / 2 - hh_),
-                 (x + hw_, front, z + h / 2 + hh_), (x - hw_, front, z + h / 2 + hh_),
+            fr = front - 0.012                     # horn mouth flange slightly proud of the baffle
+            for sz in (-1, 1):                     # flange: top / bottom bars around the mouth
+                P.append(bx("HornFlange", (2 * hw_ + 0.05, 0.02, 0.025), (x, fr, z + h / 2 + sz * (hh_ + 0.012)),
+                            metal))
+            v = [(x - hw_, fr, z + h / 2 - hh_), (x + hw_, fr, z + h / 2 - hh_),
+                 (x + hw_, fr, z + h / 2 + hh_), (x - hw_, fr, z + h / 2 + hh_),
                  (x - 0.03, front + 0.10, z + h / 2 - 0.02), (x + 0.03, front + 0.10, z + h / 2 - 0.02),
                  (x + 0.03, front + 0.10, z + h / 2 + 0.02), (x - 0.03, front + 0.10, z + h / 2 + 0.02)]
             f = [(0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7), (4, 5, 6, 7)]
             o = nb.mesh_object("Horn", v, f, [grille])
+            bm = bmesh.new()
+            bm.from_mesh(o.data)
+            for fc in bm.faces:                    # the horn is seen from the inside: face the viewer
+                if fc.calc_center_median().y > fr + 0.001 and fc.normal.y > 0.2:
+                    fc.normal_flip()
+            bm.to_mesh(o.data)
+            bm.free()
             P.append(o)
             del prof
         # neon edge strip on the front bottom edge
@@ -537,11 +549,18 @@ PROPS = {"lifeguard_tower": make_lifeguard_tower, "parasol": make_parasol, "towe
          "dj_booth": make_dj_booth, "speaker_stack": make_speaker_stack, "weights": make_weights,
          "dumbbell": make_dumbbell, "rescue_tube": make_rescue_tube}
 TEXTURED = {"dj_booth"}
+HANDHELD = {"dumbbell", "rescue_tube"}
 
 if __name__ == "__main__":
     for n in [a for a in sys.argv[1:] if a in PROPS] or list(PROPS):
         nb.reset_scene()
         PROPS[n]()
         t = nb.scene_tris()
+        if n not in HANDHELD:                  # ground props: nothing below the ground plane
+            for o in bpy.context.scene.objects:
+                if o.type == "MESH":
+                    for v in o.data.vertices:
+                        if v.co.z < 0:
+                            v.co.z = 0.0
         nb.export_glb("prop_" + n, texcoords=n in TEXTURED)
         print("[props] prop_%s: %d tris" % (n, t))

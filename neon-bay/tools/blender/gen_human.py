@@ -500,8 +500,8 @@ def hair_volume_elements(sp):
 
     E = Fam()
     if sp.hair == "bun":               # top bun (afro puff) on the pulled-back cap
-        E.ell(P(0, 0.030, 0.118), (0.056, 0.054, 0.046), "Head", "Hair", s=2.2)
-        E.ell(P(0, 0.034, 0.140), (0.044, 0.044, 0.030), "Head", "Hair", s=2.2)
+        E.ell(P(0, 0.030, 0.112), (0.056, 0.054, 0.044), "Head", "Hair", s=2.2)
+        E.ell(P(0, 0.034, 0.130), (0.044, 0.044, 0.028), "Head", "Hair", s=2.2)
         return E.E
     if sp.hair != "bob":
         return E.E                     # pulled-back / short hair: cap only (+ ponytail built separately)
