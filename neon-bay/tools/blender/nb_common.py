@@ -247,7 +247,7 @@ def write_js_fallback(glb_path):
         f.write("window.NB_MODEL_DATA=window.NB_MODEL_DATA||{};window.NB_MODEL_DATA.%s='%s';" % (key, b64))
 
 
-def export_glb(name, animations=False, objects=None, texcoords=False):
+def export_glb(name, animations=False, objects=None, texcoords=False, morph=False):
     os.makedirs(MODELS, exist_ok=True)
     path = os.path.join(MODELS, name + ".glb")
     for o in bpy.context.scene.objects:
@@ -271,7 +271,185 @@ def export_glb(name, animations=False, objects=None, texcoords=False):
                   export_frame_step=1, export_optimize_animation_size=True,
                   export_anim_slide_to_zero=True, export_skins=True,
                   export_def_bones=True, export_all_influences=False)
+    if morph:   # shape keys -> named morph targets (+ normals), sparse accessors (only the moved vertices)
+        kw.update(export_morph=True, export_morph_normal=True, export_morph_tangent=False,
+                  export_try_sparse_sk=True, export_try_omit_sparse_sk=False, export_morph_animation=False,
+                  export_apply=False)   # the armature is the only modifier (applying would drop the keys)
     bpy.ops.export_scene.gltf(**kw)
+    if morph:
+        compact_morph_targets(path)
     write_js_fallback(path)
     print("[nb] wrote %s (%.1f KB, %d tris)" % (path, os.path.getsize(path) / 1024, scene_tris()))
     return path
+
+
+# --------------------------------------------------------------------------- morph targets
+def _glb_read(path):
+    import json
+    import struct
+    with open(path, "rb") as f:
+        b = f.read()
+    jn = struct.unpack_from("<I", b, 12)[0]
+    js = json.loads(b[20:20 + jn])
+    off = 20 + jn
+    bn = struct.unpack_from("<I", b, off)[0]
+    return js, b[off + 8:off + 8 + bn]
+
+
+def _glb_write(path, js, bin_):
+    import json
+    import struct
+    jb = json.dumps(js, separators=(",", ":")).encode()
+    jb += b" " * (-len(jb) % 4)
+    bin_ += b"\0" * (-len(bin_) % 4)
+    total = 12 + 8 + len(jb) + 8 + len(bin_)
+    with open(path, "wb") as f:
+        f.write(struct.pack("<4sII", b"glTF", 2, total))
+        f.write(struct.pack("<I4s", len(jb), b"JSON") + jb)
+        f.write(struct.pack("<I4s", len(bin_), b"BIN\0") + bin_)
+
+
+def compact_morph_targets(path, pos_eps=5e-5, nrm_eps=0.015):
+    """Rewrite the morph targets of a .glb so that they stay small:
+    - deltas below pos_eps (m) / nrm_eps are zeroed (the exporter leaves float noise on every normal
+      of every primitive), then every target is a sparse accessor holding only the moved vertices;
+    - POSITION deltas stay float32 (three.js r128 Box3 / bounding spheres read them raw);
+    - NORMAL deltas become normalized int8 (KHR_mesh_quantization, ~0.5 deg; only the shader
+      reads them, as floats in -1..1);
+    - targets of a primitive that do not move (shirt, trousers...) share one empty accessor, and all
+      sparse indices / values live in two buffer views (less JSON)."""
+    import numpy as np
+    js, bin_ = _glb_read(path)
+    views, accs = js["bufferViews"], js["accessors"]
+    ctype = {5126: np.float32, 5125: np.uint32, 5123: np.uint16, 5122: np.int16, 5121: np.uint8, 5120: np.int8}
+    norm_div = {5120: 127.0, 5121: 255.0, 5122: 32767.0, 5123: 65535.0}
+
+    def view_bytes(i):
+        v = views[i]
+        o = v.get("byteOffset", 0)
+        return bin_[o:o + v["byteLength"]]
+
+    def decode(a):
+        n = a["count"]
+        out = np.zeros((n, 3), np.float32)
+        div = norm_div.get(a["componentType"], 1.0) if a.get("normalized") else 1.0
+        if "bufferView" in a:
+            raw = np.frombuffer(view_bytes(a["bufferView"]), ctype[a["componentType"]], n * 3, a.get("byteOffset", 0))
+            out = raw.reshape(n, 3).astype(np.float32) / div
+        if "sparse" in a:
+            sp = a["sparse"]
+            idx = np.frombuffer(view_bytes(sp["indices"]["bufferView"]), ctype[sp["indices"]["componentType"]],
+                                sp["count"], sp["indices"].get("byteOffset", 0))
+            val = np.frombuffer(view_bytes(sp["values"]["bufferView"]), ctype[a["componentType"]], sp["count"] * 3,
+                                sp["values"].get("byteOffset", 0)).reshape(-1, 3)
+            out[idx.astype(np.int64)] = val.astype(np.float32) / div
+        return out
+    old_acc = set()
+    new_accs = list(accs)            # morph accessors are re-created at the end of the list
+    idx_blob, val_blob = bytearray(), bytearray()
+    plan = []
+    for m in js["meshes"]:
+        for pr in m["primitives"]:
+            empty = None
+            for t in pr.get("targets", []):
+                for key in list(t):
+                    ai = t[key]
+                    old_acc.add(ai)
+                    a = accs[ai]
+                    d = decode(a)
+                    eps = pos_eps if key == "POSITION" else nrm_eps
+                    keep = np.where(np.linalg.norm(d, axis=1) >= eps)[0]
+                    if not len(keep):
+                        if empty is None:
+                            idx_blob.extend(b"\0" * (-len(idx_blob) % 4))
+                            val_blob.extend(b"\0" * (-len(val_blob) % 4))
+                            empty = len(new_accs)
+                            new_accs.append({"componentType": 5126, "count": a["count"], "type": "VEC3",
+                                             "min": [0.0, 0.0, 0.0], "max": [0.0, 0.0, 0.0],
+                                             "sparse": {"count": 1, "indices": {"bufferView": "I", "byteOffset": len(idx_blob),
+                                                                                 "componentType": 5121},
+                                                        "values": {"bufferView": "V", "byteOffset": len(val_blob)}}})
+                            idx_blob.extend(b"\0")
+                            val_blob.extend(b"\0" * 12)
+                        t[key] = empty
+                        continue
+                    it, idt = (5121, np.uint8) if keep[-1] < 256 else ((5123, np.uint16) if keep[-1] < 65536
+                                                                       else (5125, np.uint32))
+                    vals = d[keep]
+                    na = {"count": a["count"], "type": "VEC3"}
+                    if key == "POSITION":
+                        full = np.zeros((a["count"], 3), np.float32)
+                        full[keep] = vals
+                        na.update(componentType=5126, min=full.min(0).tolist(), max=full.max(0).tolist())
+                        vb = vals.astype(np.float32).tobytes()
+                    else:
+                        na.update(componentType=5120, normalized=True)
+                        vb = np.clip(np.round(vals * 127.0), -127, 127).astype(np.int8).tobytes()
+                    idx_blob.extend(b"\0" * (-len(idx_blob) % 4))
+                    val_blob.extend(b"\0" * (-len(val_blob) % 4))
+                    na["sparse"] = {"count": int(len(keep)),
+                                    "indices": {"bufferView": "I", "byteOffset": len(idx_blob), "componentType": it},
+                                    "values": {"bufferView": "V", "byteOffset": len(val_blob)}}
+                    idx_blob.extend(keep.astype(idt).tobytes())
+                    val_blob.extend(vb)
+                    t[key] = len(new_accs)
+                    new_accs.append(na)
+                    plan.append(key)
+    # drop the old morph accessors, renumber every accessor reference
+    keep_ids = [i for i in range(len(new_accs)) if i not in old_acc]
+    amap = {o: n for n, o in enumerate(keep_ids)}
+    js["accessors"] = accs = [new_accs[i] for i in keep_ids]
+    for m in js["meshes"]:
+        for pr in m["primitives"]:
+            pr["attributes"] = {k: amap[v] for k, v in pr["attributes"].items()}
+            if "indices" in pr:
+                pr["indices"] = amap[pr["indices"]]
+            for t in pr.get("targets", []):
+                for k in t:
+                    t[k] = amap[t[k]]
+    for an in js.get("animations", []):
+        for smp in an["samplers"]:
+            smp["input"], smp["output"] = amap[smp["input"]], amap[smp["output"]]
+    for sk in js.get("skins", []):
+        if "inverseBindMatrices" in sk:
+            sk["inverseBindMatrices"] = amap[sk["inverseBindMatrices"]]
+    # rebuild the binary chunk: the views still referenced, then the two sparse views
+    used = {a["bufferView"] for a in accs if isinstance(a.get("bufferView"), int)}
+    for a in accs:
+        sp = a.get("sparse")
+        if sp and isinstance(sp["indices"]["bufferView"], int):
+            used |= {sp["indices"]["bufferView"], sp["values"]["bufferView"]}
+    used |= {im["bufferView"] for im in js.get("images", []) if "bufferView" in im}
+    out, nviews, remap = bytearray(), [], {}
+
+    def add_view(data, src=None):
+        out.extend(b"\0" * (-len(out) % 4))
+        v = {"buffer": 0, "byteOffset": len(out), "byteLength": len(data)}
+        for k in ("target", "byteStride"):
+            if src and k in src:
+                v[k] = src[k]
+        out.extend(data)
+        nviews.append(v)
+        return len(nviews) - 1
+    for i, v in enumerate(views):
+        if i in used:
+            remap[i] = add_view(view_bytes(i), v)
+    vi, vv = add_view(bytes(idx_blob)), add_view(bytes(val_blob))
+    for a in accs:
+        if isinstance(a.get("bufferView"), int):
+            a["bufferView"] = remap[a["bufferView"]]
+        sp = a.get("sparse")
+        if sp:
+            for part, new in (("indices", vi), ("values", vv)):
+                b = sp[part]["bufferView"]
+                sp[part]["bufferView"] = new if b in ("I", "V") else remap[b]
+    for im in js.get("images", []):
+        if "bufferView" in im:
+            im["bufferView"] = remap[im["bufferView"]]
+    js["bufferViews"] = nviews
+    out.extend(b"\0" * (-len(out) % 4))
+    js["buffers"] = [{"byteLength": len(out)}]
+    for k in ("extensionsUsed", "extensionsRequired"):
+        js[k] = sorted(set(js.get(k, [])) | {"KHR_mesh_quantization"})
+    _glb_write(path, js, bytes(out))
+    print("[nb] morph targets: %d sparse accessors, %.1f KB" % (len(plan), (len(idx_blob) + len(val_blob)) / 1024))

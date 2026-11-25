@@ -2033,6 +2033,9 @@ def arm_uv_inverse(u, v):
     return None
 
 
+UNTEXTURED = {"Hair", "Eyes", "Lips", "EyeWhite", "Gear", "Metal", "Lens", "Trim", "Sole"}
+
+
 def assign_uvs(parts, sp):
     for o in parts:
         mode = o.get("uv", "")
@@ -2060,7 +2063,296 @@ def assign_uvs(parts, sp):
         elif mode == "armcyl":
             uv_armcyl(o, sp)
         else:
-            _uv(o)
+            uv = _uv(o)
+            used = {o.data.materials[p.material_index].name for p in o.data.polygons if o.data.materials}
+            if used and used <= UNTEXTURED - ({"Eyes"} if sp.v4 else set()):
+                # v5: untextured part -> one constant UV (a new UV map holds a 0..1 square per face,
+                # which split every vertex at export and multiplied the morph target data)
+                uv.data.foreach_set("uv", [0.5] * (2 * len(uv.data)))
+
+
+# --------------------------------------------------------------------------- facial expressions (v5)
+# Shape keys on the joined Body mesh, exported as glTF morph targets (three.js:
+# mesh.morphTargetDictionary / morphTargetInfluences). They only move the face: head skin + brows
+# (same displacement field: the brows follow the skin), lips, eyelids (rotate around the eye
+# centre), lashes (follow the upper lid), mouth inside (bag + teeth, follow the jaw). Eyes and
+# irises never move. Every value is in head-local metres (d = (co - hc) / hk, Blender Z up, -Y front).
+EXPRESSIONS = ["Blink", "Smile", "Angry", "Fear", "Surprise", "Sad", "MouthOpen", "JawClench"]
+ZL = -0.0889                        # mouth line (slit of head_elements, where the lips meet)
+MOUTH_A, MOUTH_B = 0.0170, 0.0034   # mouth opening cut in the head (ellipse half width / height)
+JAW_PIVOT = (0.0, 0.008, -0.038)    # jaw hinge (rotation about X)
+LASH_TH = 52.0                      # lash line angle above the eye centre (lash_line / lash_cards)
+# brow = (raise all, raise inner, raise outer, frown inner = down + forward, squeeze towards the nose)
+# eu / el = skin above / below the eye opening moved up (+) ; lid = (upper lid closes +deg, lower lid
+# closes +deg) ; corner = mouth corners (out, back, up) ; cheek = (up, forward) ; chin = mentalis up ;
+# nose = wings (out, up) ; jawout = masseter bulge ; pout = lips forward ; ulup = upper lip up ;
+# ll = lower lip (up, forward) ; press = lips pressed thin (0..1) ; roll = lips rolled in ; jaw = degrees
+EXPR = {
+    "Blink": dict(blink=1.0, brow=(-0.0008, 0, 0, 0, 0)),
+    "Smile": dict(corner=(0.0045, 0.0030, 0.0080), cheek=(0.0040, 0.0016), el=0.0018, lid=(3, 9), ulup=0.0012,
+                  jaw=2.5, brow=(0.0008, 0, 0, 0, 0)),
+    "Angry": dict(brow=(0, 0, 0.0016, 0.0070, 0.0038), eu=-0.0012, lid=(10, 6), nose=(0.0016, 0.0010),
+                  corner=(-0.0010, 0.0005, -0.0028), press=0.45, chin=0.0022, jawout=0.0016),
+    "Fear": dict(brow=(0.0030, 0.0070, -0.0010, 0, 0.0022), eu=0.0038, el=-0.0016, lid=(-15, -6), jaw=6.0,
+                 corner=(0.0042, 0.0020, -0.0042), ll=(-0.0016, 0), ulup=0.0010),
+    "Surprise": dict(brow=(0.0090, 0, 0.0010, 0, 0), eu=0.0042, el=-0.0010, lid=(-17, -5), jaw=10.0,
+                     corner=(-0.0058, -0.0016, 0.0), pout=0.0016, ulup=0.0016),
+    "Sad": dict(brow=(0, 0.0068, -0.0026, 0, 0.0016), lid=(10, 0), corner=(0.0008, 0.0010, -0.0058), chin=0.0022,
+                ll=(0.0010, 0.0012)),
+    "MouthOpen": dict(jaw=13.0, ulup=0.0022),
+    "JawClench": dict(press=0.55, roll=0.0012, corner=(0.0026, 0.0020, -0.0006), jawout=0.0022, chin=0.0032),
+}
+
+
+def _sst(e0, e1, x):
+    """Smoothstep from e0 (0) to e1 (1); e1 < e0 gives a falling step."""
+    t = np.clip((np.asarray(x, dtype=np.float64) - e0) / (e1 - e0), 0.0, 1.0)
+    return t * t * (3 - 2 * t)
+
+
+def mouth_rho(d):
+    return math.hypot(d.x / MOUTH_A, (d.z - ZL) / MOUTH_B)
+
+
+def cut_mouth(head, sp):
+    """Open the mouth slit of the dense head mesh (hidden by the lip tubes at rest) so that the jaw
+    can open onto a mouth inside; the rim of the hole is snapped onto a smooth ellipse."""
+    hc, hk = sp.hc, sp.hk
+    bm = bmesh.new()
+    bm.from_mesh(head.data)
+    dead = [f for f in bm.faces if (lambda d: d.y < -0.07 and mouth_rho(d) < 1.0)(
+        (f.calc_center_median() - hc) / hk)]
+    bmesh.ops.delete(bm, geom=dead, context="FACES")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+    for v in bm.verts:
+        d = (v.co - hc) / hk
+        if v.is_boundary and d.y < -0.06 and mouth_rho(d) < 2.5:
+            r = max(mouth_rho(d), 1e-6)
+            v.co = hc + Vector((d.x / r, d.y, ZL + (d.z - ZL) / r)) * hk
+    bm.to_mesh(head.data)
+    bm.free()
+    head.data.update()
+
+
+def eye_open_range(bvh, c, r):
+    """Angles (deg, about X, 0 = front) of the top and bottom of the eyeball seen from the front."""
+    vis = {}
+    for th in range(-80, 82, 2):
+        a = math.radians(th)
+        p = c + Vector((0, -math.cos(a), math.sin(a))) * r
+        vis[th] = bvh.ray_cast(p + Vector((0, -0.0004, 0)), Vector((0, -1, 0)), 0.08)[0] is None
+    up = lo = 0
+    while vis.get(up + 2):
+        up += 2
+    while vis.get(lo - 2):
+        lo -= 2
+    return up, lo
+
+
+def make_lid(name, c, rho, th_edge, th_far, r_in, mats, nb_=8, nt=4, bmin=12.0):
+    """Eyelid: a shell patch around the eyeball between two great circles through the eye corners
+    (the X axis): edge at th_edge, buried end at th_far; + a margin strip down to r_in. Rotating it
+    about X through the eye centre opens / closes it."""
+    X, F, Z = Vector((1, 0, 0)), Vector((0, -1, 0)), Vector((0, 0, 1))
+
+    def P(beta, th, rad):
+        b, t = math.radians(beta), math.radians(th)
+        return c + (X * math.cos(b) + (F * math.cos(t) + Z * math.sin(t)) * math.sin(b)) * rad
+    betas = [bmin + (180 - 2 * bmin) * j / nb_ for j in range(nb_ + 1)]
+    W = nb_ + 1
+    verts = [P(b, th_edge + (th_far - th_edge) * i / nt, rho) for i in range(nt + 1) for b in betas]
+    verts += [P(b, th_edge, r_in) for b in betas]
+    faces = [(i * W + j, i * W + j + 1, (i + 1) * W + j + 1, (i + 1) * W + j) for i in range(nt) for j in range(nb_)]
+    R = (nt + 1) * W
+    faces += [(R + j, R + j + 1, j + 1, j) for j in range(nb_)]
+    o = nb.mesh_object(name, verts, faces)
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.faces.ensure_lookup_table()
+    f0 = bm.faces[W // 2]
+    if f0.normal.dot(f0.calc_center_median() - c) < 0:
+        for fc in bm.faces:
+            fc.normal_flip()
+    bm.to_mesh(o.data)
+    bm.free()
+    return set_material(o, mats, "Skin")
+
+
+def make_mouth_inside(sp, mats):
+    """Mouth inside, only seen when the jaw opens: a bag (back half of an ellipsoid, Lips colour,
+    facing inwards) behind the opening + upper and lower teeth (EyeWhite) just behind the lips."""
+    hc, hk = sp.hc, sp.hk
+
+    def P(x, y, z):
+        return hc + Vector((x, y, z)) * hk
+    out = []
+    C, A, B, Dp = Vector((0, -0.070, ZL)), 0.021, 0.0135, 0.026
+    nu, rows = 8, (0.0, 35.0, 70.0)
+    verts = [P(C.x + A * math.cos(u) * math.cos(v), C.y + Dp * math.sin(v), C.z + B * math.sin(u) * math.cos(v))
+             for v in (math.radians(r) for r in rows) for u in (2 * math.pi * i / nu for i in range(nu))]
+    verts.append(P(C.x, C.y + Dp, C.z))
+    faces = [(i * nu + j, i * nu + (j + 1) % nu, (i + 1) * nu + (j + 1) % nu, (i + 1) * nu + j)
+             for i in range(len(rows) - 1) for j in range(nu)]
+    e = len(verts) - 1
+    faces += [((len(rows) - 1) * nu + j, (len(rows) - 1) * nu + (j + 1) % nu, e) for j in range(nu)]
+    bag = nb.mesh_object("MouthIn", verts, faces)
+    cw = P(C.x, C.y, C.z)
+    fix_normals_out(bag, lambda q: q + (q - cw))          # normals towards the centre: seen from the mouth
+    bag["fx"] = "bag"
+    out.append(set_material(bag, mats, "Lips"))
+    for name, z0, z1, bite in (("TeethUp", ZL + 0.0012, ZL + 0.0085, ZL + 0.0012),
+                               ("TeethLow", ZL - 0.0085, ZL - 0.0012, ZL - 0.0012)):
+        n, Rt, y0 = 7, 0.019, -0.0855
+        arc = [math.radians(-62 + 124 * i / (n - 1)) for i in range(n)]
+        verts, faces = [], []
+        for ph in arc:
+            x, yv = Rt * math.sin(ph), y0 + Rt * (1 - math.cos(ph))
+            inward = Vector((-math.sin(ph), math.cos(ph), 0)) * 0.0032
+            verts += [P(x, yv, z0), P(x, yv, z1), P(x, yv, bite) + inward * hk]
+        for i in range(n - 1):
+            a, b = 3 * i, 3 * (i + 1)
+            faces.append((a, b, b + 1, a + 1))                  # front
+            ed = a if bite == z0 else a + 1                    # front vertex on the biting edge
+            faces.append((ed, a + 2, b + 2, ed + 3))           # biting edge (towards the tongue)
+        o = nb.mesh_object(name, verts, faces)
+        bm = bmesh.new()
+        bm.from_mesh(o.data)
+        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+        bm.faces.ensure_lookup_table()
+        if bm.faces[(n - 1) // 2 * 2].normal.y > 0:          # middle front face must look forward (-Y)
+            for fc in bm.faces:
+                fc.normal_flip()
+        bm.to_mesh(o.data)
+        bm.free()
+        o["fx"] = "teethup" if name == "TeethUp" else "teethlow"
+        out.append(set_material(o, mats, "EyeWhite"))
+    return out
+
+
+def _rot_x(P, center, ang):
+    v = P - center
+    ca, sa = np.cos(ang), np.sin(ang)
+    out = v.copy()
+    out[:, 1] = v[:, 1] * ca - v[:, 2] * sa
+    out[:, 2] = v[:, 1] * sa + v[:, 2] * ca
+    return center + out
+
+
+def face_keys(body, sp, spans, eyes):
+    """Add the EXPRESSIONS shape keys (0..1) to the joined Body mesh.
+    spans: [(tag, first vertex, end)] ; eyes: {side: dict(c=eye centre, up, lo, meet)} (angles in deg)."""
+    me = body.data
+    n = len(me.vertices)
+    co = np.empty(n * 3)
+    me.vertices.foreach_get("co", co)
+    co = co.reshape(n, 3)
+    hc, hk = np.array(sp.hc), sp.hk
+    tag = np.array([""] * n, dtype=object)
+    for t_, a_, b_ in spans:
+        tag[a_:b_] = t_
+    D = (co - hc) / hk
+    x, y, z = D[:, 0], D[:, 1], D[:, 2]
+    sx = np.where(x >= 0, 1.0, -1.0)
+    ax = np.abs(x)
+    is_lu, is_ll = tag == "lipup", tag == "liplow"
+    skin = (tag == "skin") | is_lu | is_ll
+    # brows (+ forehead, upper orbit): t 0 = inner end .. 1 = outer end
+    t = np.clip((ax - 0.008) / 0.046, 0, 1)
+    zb = 0.017 + 0.005 * np.sin(np.pi * t * 0.9) - 0.004 * t
+    dzb = z - zb
+    WB = (np.where(dzb >= 0, 1 - _sst(0, 0.024, dzb), _sst(-0.019, -0.002, dzb))
+          * (1 - _sst(0.058, 0.075, ax)) * _sst(-0.035, -0.065, y))
+    inner, outer = (1 - t) ** 1.3, t ** 2
+    # around the eye opening
+    fe = _sst(-0.04, -0.07, y)
+    EU = np.exp(-(((ax - 0.031) / 0.017) ** 2 + ((z - 0.004) / 0.010) ** 2)) * _sst(-0.009, -0.004, z) * fe
+    EL = np.exp(-(((ax - 0.031) / 0.016) ** 2 + ((z + 0.020) / 0.009) ** 2)) * _sst(-0.006, -0.011, z) * fe
+    # mouth and lower face
+    fm = _sst(-0.05, -0.075, y)
+    CW = np.exp(-(((ax - 0.021) / 0.011) ** 2 + ((z - ZL) / 0.010) ** 2)) * fm
+    M = np.exp(-((x / 0.020) ** 2 + ((z - ZL) / 0.009) ** 2)) * fm
+    UL = np.exp(-((x / 0.019) ** 2 + ((z - ZL - 0.006) / 0.007) ** 2)) * fm * _sst(ZL - 0.001, ZL + 0.0015, z)
+    LL = np.exp(-((x / 0.019) ** 2 + ((z - ZL + 0.007) / 0.007) ** 2)) * fm * _sst(ZL + 0.001, ZL - 0.0015, z)
+    gx = np.exp(-(x / 0.019) ** 2)
+    UL = np.where(is_lu, gx, np.where(is_ll, 0.0, UL))
+    LL = np.where(is_ll, gx, np.where(is_lu, 0.0, LL))
+    CK = np.exp(-(((ax - 0.036) / 0.018) ** 2 + ((z + 0.055) / 0.016) ** 2)) * _sst(-0.02, -0.05, y)
+    CH = np.exp(-((x / 0.020) ** 2 + ((z + 0.116) / 0.014) ** 2)) * _sst(-0.02, -0.05, y)
+    NW = np.exp(-(((ax - 0.011) / 0.007) ** 2 + ((z + 0.054) / 0.007) ** 2)) * _sst(-0.06, -0.08, y)
+    MS = np.exp(-(((ax - 0.047) / 0.013) ** 2 + ((z + 0.085) / 0.018) ** 2 + ((y + 0.02) / 0.025) ** 2))
+    # jaw: hard split on the mouth line in front, wider blend on the cheeks, nothing on the neck / nape
+    bw = 0.0012 + 0.012 * _sst(0.013, 0.032, ax)
+    WJ = _sst(ZL + bw, ZL - bw, z) * _sst(0.02, -0.015, y) * _sst(-0.19, -0.14, z)
+    cf = _sst(0.010, 0.0215, ax) * 0.5
+    WJ = np.where(is_ll, 1 - cf, np.where(is_lu, cf, WJ))
+    WJ = np.where(tag == "bag", _sst(ZL + 0.004, ZL - 0.004, z), WJ)
+    WJ = np.where(tag == "teethup", 0.0, np.where(tag == "teethlow", 1.0, WJ))
+    WJ = np.where(skin | np.isin(tag, ["bag", "teethup", "teethlow"]), WJ, 0.0)
+    piv = hc + np.array(JAW_PIVOT) * hk
+    # lip tube centre lines (rings of 8 vertices) for the pressed lips
+    lipc = co.copy()
+    for t_, a_, b_ in spans:
+        if t_ in ("lipup", "liplow"):
+            lipc[a_:b_] = np.repeat(co[a_:b_].reshape(-1, 8, 3).mean(1), 8, axis=0)
+    lips = is_lu | is_ll
+    for name in EXPRESSIONS:
+        e = EXPR[name]
+        new = co.copy()
+        a = math.radians(e.get("jaw", 0.0))
+        if a:
+            m = WJ > 1e-5
+            new[m] = _rot_x(co[m], piv, WJ[m] * a)
+        d = np.zeros_like(co)
+        r_, i_, o_, f_, s_ = e.get("brow", (0, 0, 0, 0, 0))
+        d[:, 2] += WB * (r_ + i_ * inner + o_ * outer - f_ * inner)
+        d[:, 1] -= WB * inner * f_ * 0.5
+        d[:, 0] -= sx * WB * inner * s_
+        d[:, 2] += e.get("eu", 0) * EU + e.get("el", 0) * EL
+        cx_, cy_, cz_ = e.get("corner", (0, 0, 0))
+        d[:, 0] += sx * cx_ * CW
+        d[:, 1] += cy_ * CW
+        d[:, 2] += cz_ * CW
+        ck = e.get("cheek", (0, 0))
+        d[:, 2] += ck[0] * CK
+        d[:, 1] -= ck[1] * CK
+        ch = e.get("chin", 0)
+        d[:, 2] += ch * CH
+        d[:, 1] -= ch * 0.4 * CH
+        nw = e.get("nose", (0, 0))
+        d[:, 0] += sx * nw[0] * NW
+        d[:, 2] += nw[1] * NW
+        d[:, 0] += sx * e.get("jawout", 0) * MS
+        d[:, 1] -= e.get("pout", 0) * M
+        d[:, 2] += e.get("ulup", 0) * UL
+        ll = e.get("ll", (0, 0))
+        d[:, 2] += ll[0] * LL
+        d[:, 1] -= ll[1] * LL
+        d[~skin] = 0
+        new += d * hk
+        pr = e.get("press", 0)
+        if pr:
+            new[lips, 2] -= (co[lips, 2] - lipc[lips, 2]) * pr
+            new[lips, 1] += e.get("roll", 0) * hk
+        for side, E in eyes.items():
+            c = np.array(E["c"])
+            ms = sx == side
+            if e.get("blink"):
+                du, dl = E["up"] - E["meet"] + 1.0, E["meet"] - E["lo"] + 1.0
+            else:
+                du, dl = e.get("lid", (0, 0))
+            if du:
+                for tg, k_ in (("lidup", 1.0), ("lash", (LASH_TH - E["meet"]) / max(1.0, E["up"] - E["meet"]))):
+                    m = ms & (tag == tg)
+                    new[m] = _rot_x(new[m], c, math.radians(du * k_))
+            if dl:
+                m = ms & (tag == "lidlow")
+                new[m] = _rot_x(new[m], c, -math.radians(dl))
+        kb = body.shape_key_add(name=name, from_mix=False)
+        kb.data.foreach_set("co", new.ravel())
+        kb.value = 0.0
+        mv = np.linalg.norm(new - co, axis=1)
+        print("[face] %-9s moves %4d vertices, max %.1f mm" % (name, int((mv > 1e-6).sum()), mv.max() * 1000))
 
 
 
@@ -2364,8 +2656,12 @@ def build_human(female, variant=""):
             v.co = v.co + v.normal * (0.0032 * strand_ridge(sp, d) * (0.4 + 0.6 * fall))
         hair_parts.append(vol)
 
+    cut_mouth(head, sp)                 # v5: mouth opening for the expressions (under the lips at rest)
+
     def head_keep(c):
         d = (c - hc) / hk
+        if d.y < -0.06 and abs(mouth_rho(d) - 1.0) < 0.45:
+            return 1.0                                   # rim of the mouth opening
         if d.y < -0.035 and -0.15 < d.z < 0.03 and abs(d.x) < 0.07:
             return 0.55                                  # face
         if abs(d.x) > 0.062 and -0.08 < d.z < 0.02:
@@ -2379,6 +2675,7 @@ def build_human(female, variant=""):
     if vol is not None:
         decimate(vol, 440 if sp.hair == "bun" else 900)
     head["uv"] = "face"
+    head["fx"] = "skin"
 
     # ------------------------------------------------ hands
     hands = []
@@ -2487,7 +2784,8 @@ def build_human(female, variant=""):
             sole["uv"] = "sole"
             parts.append(sole)
 
-    # ------------------------------------------------ eyes, lash lines and eyebrows
+    # ------------------------------------------------ eyes, lash lines, eyelids and eyebrows
+    eyes = {}
     for sx in (1, -1):
         ex, ez = sx * 0.031 * hk, hc.z - 0.007 * hk
         hit = bvh_head.ray_cast(Vector((ex, -0.5, ez)), Vector((0, 1, 0)))
@@ -2495,6 +2793,18 @@ def build_human(female, variant=""):
         cy = (hit[0].y if hit[0] is not None else hc.y - 0.08) - 0.0015 + r
         eye = nb.uv_sphere("Eye", r, (ex, cy, ez), 10, 6)
         parts.append(set_material(eye, mats, "EyeWhite"))
+        # v5 eyelids: hidden just outside the visible part of the eyeball, rotate to close
+        ec = Vector((ex, cy, ez))
+        up, lo = eye_open_range(bvh_head, ec, r)
+        meet = lo + 0.32 * (up - lo)
+        eyes[sx] = dict(c=ec, up=up + 1.0, lo=lo - 1.0, meet=meet)
+        print("[face] eye %+d: open from %d to %d deg, lids meet at %.0f" % (sx, lo, up, meet))
+        for nm, e0, e1, nt in (("LidUp", up + 1.0, up + 96.0, 4), ("LidLow", lo - 1.0, lo - 76.0, 3)):
+            lid = make_lid(nm, ec, r + 0.0007 * hk, e0, e1, r + 0.0001, mats, nb_=8, nt=nt)
+            lid["uv"] = "face"
+            lid["fx"] = "lidup" if nm == "LidUp" else "lidlow"
+            special[lid.name] = "head"
+            parts.append(lid)
         if sp.v4:   # textured iris (planar UV), lash line + lash card in the Hair colour
             ri = 0.0060 * hk
             iris = nb.uv_sphere("Iris", ri, (ex, cy - r + 0.0013, ez), 10, 5, scale=(1, 0.42, 1))
@@ -2503,10 +2813,12 @@ def build_human(female, variant=""):
             ll = lash_line(Vector((ex, cy, ez)), r, sx, hk, mats)
             parts.append(set_material(ll, mats, "Hair"))
             parts.append(lash_cards(Vector((ex, cy, ez)), r, sx, hk, mats, female))
+            ll["fx"] = parts[-1]["fx"] = "lash"
         else:
             iris = nb.uv_sphere("Iris", 0.0058 * hk, (ex, cy - r + 0.0012, ez), 8, 4, scale=(1, 0.45, 1))
             parts.append(set_material(iris, mats, "Eyes"))
             parts.append(lash_line(Vector((ex, cy, ez)), r, sx, hk, mats))
+            parts[-1]["fx"] = "lash"
         # eyebrow: tapered slab following the brow surface (thicker than v2: reads from 10 m)
         n = 7
         top, bot = [], []
@@ -2532,6 +2844,7 @@ def build_human(female, variant=""):
         m = len(top) - 1
         faces += [(0, 1, 2, 3), (4 * m + 3, 4 * m + 2, 4 * m + 1, 4 * m)]
         brow = nb.mesh_object("Brow", verts, faces)
+        brow["fx"] = "skin"                                # follows the skin in the expressions
         bmb = bmesh.new()
         bmb.from_mesh(brow.data)
         bmesh.ops.recalc_face_normals(bmb, faces=bmb.faces)
@@ -2572,14 +2885,21 @@ def build_human(female, variant=""):
             parts.append(o)
 
     print("[human] parts:", ", ".join("%s=%d" % (o.name, nb.tri_count(o)) for o in parts))
-    parts += make_lips(bvh_head, hc, hk, female, mats)
+    for o in make_lips(bvh_head, hc, hk, female, mats):
+        o["fx"] = "lipup" if o.name.startswith("LipUp") else "liplow"
+        parts.append(o)
+    for o in make_mouth_inside(sp, mats):
+        special[o.name] = "head"
+        parts.append(o)
     assign_uvs(parts, sp)
-    # vertex ranges of the parts that need special skin weights (join keeps the vertex order)
-    ranges, off = [], 0
+    # vertex ranges of the parts that need special skin weights / expression rules (join keeps the order)
+    ranges, spans, off = [], [], 0
     for o in parts:
         nv = len(o.data.vertices)
         if o.name in special:
             ranges.append((special[o.name], off, off + nv))
+        if o.get("fx"):
+            spans.append((o["fx"], off, off + nv))
         off += nv
     body = nb.join(parts, "Body")
     bm = bmesh.new()
@@ -2588,6 +2908,8 @@ def build_human(female, variant=""):
     bm.to_mesh(body.data)
     bm.free()
     nb.auto_smooth(body, 75)
+    body.shape_key_add(name="Basis", from_mix=False)
+    face_keys(body, sp, spans, eyes)
 
     # ------------------------------------------------ skin weights
     armobj = build_armature(sp)
@@ -2716,7 +3038,7 @@ def build_human(female, variant=""):
     mod.object = armobj
     tris = nb.tri_count(body)
     make_actions(armobj, sp)
-    path = nb.export_glb(sp.name, animations=True, texcoords=True)
+    path = nb.export_glb(sp.name, animations=True, texcoords=True, morph=True)
     return path, tris
 
 
