@@ -516,21 +516,20 @@ def hair_volume_elements(sp):
         return E.E
     if sp.hair != "bob":
         return E.E                     # pulled-back / short hair: cap only (+ ponytail built separately)
-    if sp.female:
-        E.ell(P(0, 0.016, 0.010), (0.086, 0.102, 0.108), "Head", "Hair")                  # crown volume
-        E.ell(P(0, 0.040, -0.085), (0.086, 0.074, 0.112), "Head", "Hair")                 # back
-        E.ell(P(0, 0.052, -0.172), (0.078, 0.048, 0.078), "Head", "Hair")                 # to the shoulders
+    if sp.female:                      # v5 bob: clean dome, curtains to the jaw, tips curling in
+        E.ell(P(0, 0.012, 0.012), (0.084, 0.100, 0.106), "Head", "Hair")                  # crown dome
+        E.ell(P(0, 0.040, -0.080), (0.084, 0.072, 0.105), "Head", "Hair")                 # back
+        E.ell(P(0, 0.046, -0.160), (0.074, 0.046, 0.060), "Head", "Hair", s=2.4)          # back, to the nape
         for sx in (1, -1):
-            E.ell(P(sx * 0.080, 0.012, -0.075), (0.022, 0.050, 0.100), "Head", "Hair")    # side curtains
-            E.ell(P(sx * 0.074, 0.022, -0.168), (0.020, 0.044, 0.064), "Head", "Hair")
-            E.ell(P(sx * 0.046, -0.072, 0.050), (0.040, 0.024, 0.024), "Head", "Hair",
-                  axis=(sx * 0.6, 0, 1))                                                    # fringe sweep
-        for i in range(7):                                                                  # tips
-            a = math.radians(-70 + i * 140 / 6)
-            E.ell(P(0.074 * math.sin(a), 0.045 + 0.028 * math.cos(a), -0.232 - 0.012 * (i % 2)),
-                  (0.022, 0.020, 0.036), "Head", "Hair", s=3)
-        # keep the face clear: a negative volume carves a smooth opening (closed surface)
-        E.ell(P(0, -0.105, -0.062), (0.060, 0.065, 0.088), "Head", "Hair", neg=True)
+            E.ell(P(sx * 0.079, 0.006, -0.072), (0.022, 0.056, 0.098), "Head", "Hair")    # side curtains
+            E.ell(P(sx * 0.066, 0.008, -0.160), (0.024, 0.054, 0.046), "Head", "Hair", s=2.4)   # tips (in)
+        # side-swept fringe (part on her left): from the part across the top of the forehead
+        E.ell(P(-0.012, -0.078, 0.052), (0.058, 0.022, 0.024), "Head", "Hair", axis=(1, 0, 0.30),
+              lateral=(0, 1, 0), s=2.2)
+        E.ell(P(-0.060, -0.060, 0.022), (0.024, 0.024, 0.040), "Head", "Hair", s=2.2)
+        # keep the face clear: negative volumes carve a smooth opening
+        E.ell(P(0, -0.112, -0.070), (0.062, 0.068, 0.090), "Head", "Hair", neg=True)
+        E.ell(P(0, -0.120, 0.000), (0.050, 0.040, 0.026), "Head", "Hair", neg=True, s=2.5)
     return E.E
 
 
@@ -877,14 +876,19 @@ def strand_ridge(sp, d):
         q = d - T
         q = q - A * q.dot(A)
         phi = math.atan2(q.x, q.dot(U))
-        return math.cos(22 * phi)
-    if sp.female:                      # bob: locks fall from the crown
+        return _clump(22 * phi)
+    if sp.female:                      # bob: locks fall from the centre part / crown (v5: wider clumps)
         q = d - Vector((0, 0.01, 0.08))
         phi = math.atan2(q.x, -q.y)
-        return math.cos(26 * phi + 9 * q.length)
+        return _clump(18 * phi + 7 * q.length)
     q = d - Vector((0, 0.045, 0.088))  # short cut: combed out from the crown, slight swirl
     phi = math.atan2(q.x, -q.y)
-    return math.cos(17 * phi + 14 * q.length)
+    return _clump(13 * phi + 12 * q.length)
+
+
+def _clump(a):
+    """v5 lock profile in [-1, 1]: rounded clumps separated by narrow grooves (period 2 pi)."""
+    return 2.0 * abs(math.cos(a * 0.5)) ** 0.6 - 1.0
 
 
 def cap_frame(sp):
@@ -3044,15 +3048,15 @@ def build_human(female, variant=""):
             off *= 1.0 + 0.32 * rid
         elif sp.hair == "buzz":            # shaved / buzz cut: a thin even shell
             off = 0.0036 + 0.0008 * top
-        elif female:
-            off = 0.008 + 0.006 * top
-            off *= 1.0 + 0.22 * rid
+        elif female:                       # v5: smooth base under the locks
+            off = 0.0065 + 0.0045 * top
+            off *= 1.0 + 0.06 * rid
         else:
             side = max(0.0, min(1.0, (abs(d.x) - 0.045) / 0.03))
-            off = 0.0055 + 0.013 * top * (1 - 0.6 * side)
-            off *= 1.0 + 0.30 * rid * (0.4 + 0.6 * top) + 0.10 * math.sin(d.x * 95 + 1.3) * math.sin(d.y * 60 + d.z * 40)
+            off = 0.0042 + 0.0075 * top * (1 - 0.6 * side)
+            off *= 1.0 + 0.08 * rid * (0.4 + 0.6 * top)
         r = ring.get(v, 9)
-        v.co = v.co + nrm[v] * off * (0.10 + 0.90 * smooth(r / 7.0))
+        v.co = v.co + nrm[v] * off * (-0.06 + 1.06 * smooth(r / 7.0))   # v5: the edge sinks into the skin
     hair_parts = [nb.bm_to_object("HairCap", capbm)]
     hair_parts[0]["uv"] = "hair"
     set_material(hair_parts[0], mats, "Hair")
@@ -3101,7 +3105,7 @@ def build_human(female, variant=""):
     relax_on_surface(head, bvh_dense_face, 3, 0.45)  # even triangles (no facets), back on the dense surface
     bpy.data.objects.remove(dense)
     decimate(hair_parts[0], -TRI_TRIM.get(sp.name, (1.0, 0))[1] + (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
-        520 if sp.hat else (640 if sp.hair == "buzz" else 980))))
+        520 if sp.hat else (640 if sp.hair == "buzz" else 620))))
     if vol is not None:
         decimate(vol, 440 if sp.hair == "bun" else 900)
     head["uv"] = "face"
@@ -3247,7 +3251,8 @@ def build_human(female, variant=""):
             o["uv"] = "box:Hat"
             special[o.name] = "head"
             parts.append(o)
-        trim_under_hat(hair_parts[0], sp)
+        for o_ in hair_parts:
+            trim_under_hat(o_, sp)
     if "sunglasses" in sp.extras:
         bvh_hh = bvh_of([head] + hair_parts)
         for o in make_sunglasses(sp, bvh_hh, mats):
