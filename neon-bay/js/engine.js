@@ -2978,7 +2978,7 @@ let openTimers = [];
 // Film d'introduction (voix off, Néon Studio) : version verticale sur téléphone en portrait ; repli sur les sous-titres si la vidéo ne se lit pas
 let openVid = null;
 function playOpeningFilm() {
-  const wrap = screenEl.querySelector('.opening-wrap'); if (!wrap) return false;
+  const wrap = screenEl.querySelector('.opening-wrap'); if (!wrap || ((I18 && I18.lang) || 'fr') !== 'fr') return false; // voix off en français
   const portrait = innerHeight > innerWidth * 1.15, v = document.createElement('video');
   v.className = 'op-film'; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.src = portrait ? 'media/intro-vertical.mp4' : 'media/intro.mp4';
   let fell = false; const fallback = () => { if (fell || S.screen !== 'intro') return; fell = true; v.remove(); openVid = null; document.body.classList.remove('opfilm'); playOpening(true); };
