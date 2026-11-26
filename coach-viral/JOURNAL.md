@@ -15,6 +15,19 @@ Les entrées les plus récentes sont en haut.
 
 ---
 
+## 2026-11-26 — Claude Code (cloud)
+
+**Fait**
+- Fiche Play Store (`store/`) : icône 512, bannière 1024×500, 6 captures 1080×1920 tirées de l'application (`node store/generer-visuels.mjs`),
+  textes FR / PT-BR / EN dans `store/textes.json` (longueurs vérifiées).
+
+**À faire avant publication** (détail dans `store/README.md`)
+- Serveur en ligne permanent (HTTPS, adresse fixe), paquet Android (Bubblewrap / PWABuilder), compte Google Play.
+- Paiement : Google Play Billing ou programme de facturation alternative (Stripe seul non autorisé en principe dans une appli Play).
+- Politique de confidentialité, formulaire Sécurité des données, bouton « Signaler » sur les contenus IA.
+
+---
+
 ## 2026-11-25 — Claude Code (cloud)
 
 **Fait**
