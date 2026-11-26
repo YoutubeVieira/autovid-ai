@@ -2975,8 +2975,24 @@ const OPEN_LINES = [
   ['Trente nuits', 'Une seule question : jusqu’où tu montes ?'],
 ];
 let openTimers = [];
-function playOpening() {
+// Film d'introduction (voix off, Néon Studio) : version verticale sur téléphone en portrait ; repli sur les sous-titres si la vidéo ne se lit pas
+let openVid = null;
+function playOpeningFilm() {
+  const wrap = screenEl.querySelector('.opening-wrap'); if (!wrap || ((I18 && I18.lang) || 'fr') !== 'fr') return false; // voix off en français
+  const portrait = innerHeight > innerWidth * 1.15, v = document.createElement('video');
+  v.className = 'op-film'; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto'; v.src = portrait ? 'media/intro-vertical.mp4' : 'media/intro.mp4';
+  let fell = false; const fallback = () => { if (fell || S.screen !== 'intro') return; fell = true; v.remove(); openVid = null; document.body.classList.remove('opfilm'); playOpening(true); };
+  v.addEventListener('error', fallback); v.addEventListener('ended', () => endOpening());
+  v.addEventListener('timeupdate', () => { const bar = screenEl.querySelector('.op-bar i'); if (bar && v.duration) bar.style.width = (v.currentTime / v.duration * 100) + '%'; });
+  wrap.prepend(v); openVid = v; document.body.classList.add('opening', 'opfilm'); R3.introStart = 0;
+  au('init'); au('setMusic', null);
+  const pr = v.play(); if (pr && pr.catch) pr.catch(fallback);
+  openTimers.push(setTimeout(() => { if (openVid === v && v.readyState < 2) fallback(); }, 6000)); // réseau trop lent : on n'attend pas
+  return true;
+}
+function playOpening(noFilm) {
   openTimers.forEach(clearTimeout); openTimers = [];
+  if (!noFilm && playOpeningFilm()) return;
   au('init'); au('setMusic', 'usa'); au('setIntensity', .4);
   R3.introStart = performance.now(); document.body.classList.add('opening');
   const cap = screenEl.querySelector('.op-cap'), ttl = screenEl.querySelector('.op-ttl'), txt = screenEl.querySelector('.op-txt'), bar = screenEl.querySelector('.op-bar i');
@@ -2989,7 +3005,8 @@ function playOpening() {
   openTimers.push(setTimeout(endOpening, 600 + OPEN_LINES.length * OPEN_SHOT * 1000 + 3200));
 }
 function endOpening() {
-  openTimers.forEach(clearTimeout); openTimers = []; R3.introStart = 0; R3.mode = null; document.body.classList.remove('opening');
+  openTimers.forEach(clearTimeout); openTimers = []; R3.introStart = 0; R3.mode = null; document.body.classList.remove('opening', 'opfilm');
+  if (openVid) { try { openVid.pause(); openVid.removeAttribute('src'); openVid.load(); } catch (e) {} openVid.remove(); openVid = null; }
   try { if (canVoice()) speechSynthesis.cancel(); } catch (e) {}
   save.seenOpen = 1; persist(); au('setMusic', 'menu'); au('setIntensity', 0); if (S.screen === 'intro') showScreen('home');
 }

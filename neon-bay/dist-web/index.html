@@ -265,6 +265,8 @@ body.opening .opening-wrap .lb{height:11vh}
 .op-cap.in{opacity:1;transform:translate(-50%,0)}
 .op-ttl{display:block;font-family:var(--display);font-size:clamp(12px,1.8vw,15px);letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
 .op-txt{font-size:clamp(16px,2.6vw,24px);line-height:1.35;color:#fff;font-weight:600}
+.op-film{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;z-index:2}
+body.opfilm .opening-wrap .lb,body.opfilm .op-cap,body.opfilm .op-logo{display:none}body.opfilm .op-skip{top:calc(14px + env(safe-area-inset-top,0px))}body.opfilm .op-bar{z-index:3}
 .op-logo{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;transform:scale(.92);transition:opacity 1s,transform 1.4s;z-index:2;pointer-events:none}
 .op-logo.in{opacity:1;transform:scale(1)}.op-logo p{font-family:var(--display);color:var(--gold);letter-spacing:.1em;margin-top:8px}
 .op-skip{position:absolute;right:calc(16px + env(safe-area-inset-right,0px));top:calc(11vh + 12px);z-index:3;background:rgba(0,0,0,.5);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:6px 14px;font:600 13px var(--body,inherit);display:none}
