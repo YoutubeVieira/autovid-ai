@@ -68,7 +68,7 @@ const CONTRACT = {
                    'ThumbL', 'ThumbR', 'Thumb2L', 'Thumb2R', 'FingersL', 'FingersR', 'Fingers2L', 'Fingers2R'],
            // baked textures: colour map on these slots (x material.color), fabric normal maps
            textured: ['Skin', 'Shirt', 'Pants', 'Shoes'], normals: ['Shirt', 'Pants'],
-           maxTris: 9000, maxBytes: 1.15 * 1024 * 1024 },   // v5: 1.15 MB (12 clips + 8 face morph targets)
+           maxTris: 12000, maxBytes: 1.35 * 1024 * 1024 },  // v5 faces: 12 000 tris, 1.35 MB (12 clips + 8 morphs + face maps)
   // v3 weapons: pistol <= 4000 tris, rifles <= 9000, heavy weapons <= 12000 (WEAPON_TRIS), <= 600 KB each
   weapon: { mats: ['Body', 'Metal', 'Grip', 'Glow'], maxTris: 12000, maxBytes: 600 * 1024 },
   lamp: { mats: ['Bulb'], maxTris: 1500 },

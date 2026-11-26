@@ -525,7 +525,7 @@ def _skin5(female, stubble):
         ztop = -0.064 + 0.050 * t * t
         zbot = -0.175 + 0.075 * t * t
         m = np.clip((ztop - dz) / 0.008, 0, 1) * np.clip((dz - zbot) / 0.03, 0, 1) * np.clip((1.06 - t) / 0.12, 0, 1)
-        m *= 1.0 - blob(0.0, -0.0889, 0.020, 0.0055)                      # not on the lips
+        m *= 1.0 - blob(0.0, -0.0850, 0.020, 0.0055)                      # not on the lips
         m *= 0.70 + 0.30 * np.clip(1 - (t - 0.3) / 0.6, 0, 1)
         rng = np.random.RandomState(21)
         speck = rng.rand(n, n).astype(np.float32)

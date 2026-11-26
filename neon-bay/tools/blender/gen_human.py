@@ -438,12 +438,14 @@ def head_elements(sp):
     H.ell(P(0, -0.044, 0.026), S(0.061, 0.041, 0.054), "Head", "Skin", s=2.0)                 # round forehead
     H.ell(P(0, -0.028, -0.046), S(0.051, 0.055, 0.058) if f else S(0.053, 0.056, 0.060), "Head", "Skin")
     # rounded U-shaped jaw (wider and squarer on the men) instead of jaw-line capsules: no ridge
-    H.ell(P(0, -0.022, -0.080), S(0.041, 0.050, 0.025) if f else S(0.047, 0.051, 0.027), "Head", "Skin", s=2.0)
+    H.ell(P(0, -0.024, -0.082), S(0.041, 0.048, 0.024) if f else S(0.047, 0.051, 0.027), "Head", "Skin",
+          s=1.7 if f else 2.0)
     for sx in (1, -1):
         # full, soft cheeks, high under the eyes (rounder on the women)
         H.ell(P(sx * 0.036, -0.058, -0.040 if f else -0.043), S(0.023, 0.023, 0.022), "Head", "Skin", s=2.0)
         H.ell(P(sx * 0.046, -0.046, -0.024), S(0.017, 0.020, 0.014), "Head", "Skin", s=2.0)      # cheekbone (soft)
-        H.ell(P(sx * 0.034, -0.046, -0.070), S(0.021, 0.024, 0.024), "Head", "Skin", s=2.0)      # lower cheek (full)
+        H.ell(P(sx * 0.035, -0.045, -0.066), S(0.020, 0.024, 0.022) if f else S(0.024, 0.026, 0.026), "Head", "Skin",
+              s=2.0)                                                                           # lower cheek (full)
         if not f:                                       # men: a soft jaw corner
             H.ell(P(sx * 0.040, -0.004, -0.092), S(0.012, 0.020, 0.014), "Head", "Skin", s=1.8)
         # soft brow (stronger on the men)
@@ -466,13 +468,13 @@ def head_elements(sp):
         H.ell(P(sx * 0.0098, -0.0905, -0.0505), S(0.0058, 0.0062, 0.0055), "Head", "Skin", s=5)
         H.ell(P(sx * 0.0066, -0.0955, -0.0565), S(0.0026, 0.0032, 0.0019), "Head", "Skin", s=5, neg=True)
     # mouth: muzzle, lips, slit
-    H.ell(P(0, -0.068, -0.086), S(0.025, 0.020, 0.024), "Head", "Skin", s=2.5)
+    H.ell(P(0, -0.068, ZL + 0.002), S(0.025, 0.020, 0.024), "Head", "Skin", s=2.5)
     lip = 1.2 if f else 1.0
-    H.ell(P(0, -0.0850, -0.0835), (0.019 * hk, 0.0060 * hk * lip, 0.0055 * hk * lip), "Head", "Skin", s=5)
-    H.ell(P(0, -0.0838, -0.0950), (0.017 * hk, 0.0068 * hk * lip, 0.0062 * hk * lip), "Head", "Skin", s=5)
+    H.ell(P(0, -0.0850, ZL + 0.0054), (0.019 * hk, 0.0060 * hk * lip, 0.0055 * hk * lip), "Head", "Skin", s=5)
+    H.ell(P(0, -0.0838, ZL - 0.0061), (0.017 * hk, 0.0068 * hk * lip, 0.0062 * hk * lip), "Head", "Skin", s=5)
     H.caps(P(-0.020, -0.094, ZL), P(0.020, -0.094, ZL), 0.0016, "Head", "Skin", s=6, neg=True)
     # chin (defined but soft), jaw floor, hollow under the chin
-    H.ell(P(0, -0.069, -0.106), S(0.015, 0.014, 0.014) if f else S(0.020, 0.016, 0.015), "Head", "Skin", s=2.6)
+    H.ell(P(0, -0.069, -0.106), S(0.019, 0.014, 0.014) if f else S(0.021, 0.016, 0.015), "Head", "Skin", s=2.2)
     H.ell(P(0, -0.032, -0.098), S(0.034, 0.042, 0.013) if f else S(0.040, 0.044, 0.014), "Head", "Skin", s=2.2)
     H.ell(P(0, -0.046, -0.139), S(0.030, 0.024, 0.012), "Head", "Skin", s=1.3, neg=True)
     return H.E
@@ -519,17 +521,13 @@ def hair_volume_elements(sp):
     if sp.female:                      # v5 bob: clean dome, curtains to the jaw, tips curling in
         E.ell(P(0, 0.012, 0.012), (0.084, 0.100, 0.106), "Head", "Hair")                  # crown dome
         E.ell(P(0, 0.040, -0.080), (0.084, 0.072, 0.105), "Head", "Hair")                 # back
-        E.ell(P(0, 0.046, -0.160), (0.074, 0.046, 0.060), "Head", "Hair", s=2.4)          # back, to the nape
+        E.ell(P(0, 0.066, -0.158), (0.074, 0.040, 0.060), "Head", "Hair", s=2.4)          # back, to the nape
         for sx in (1, -1):
-            E.ell(P(sx * 0.079, 0.006, -0.072), (0.022, 0.056, 0.098), "Head", "Hair")    # side curtains
-            E.ell(P(sx * 0.066, 0.008, -0.160), (0.024, 0.054, 0.046), "Head", "Hair", s=2.4)   # tips (in)
-        # side-swept fringe (part on her left): from the part across the top of the forehead
-        E.ell(P(-0.012, -0.078, 0.052), (0.058, 0.022, 0.024), "Head", "Hair", axis=(1, 0, 0.30),
-              lateral=(0, 1, 0), s=2.2)
-        E.ell(P(-0.060, -0.060, 0.022), (0.024, 0.024, 0.040), "Head", "Hair", s=2.2)
+            E.ell(P(sx * 0.079, 0.012, -0.072), (0.022, 0.052, 0.098), "Head", "Hair")    # side curtains
+            E.ell(P(sx * 0.066, 0.024, -0.158), (0.024, 0.042, 0.046), "Head", "Hair", s=2.4)   # tips (in)
         # keep the face clear: negative volumes carve a smooth opening
-        E.ell(P(0, -0.112, -0.070), (0.062, 0.068, 0.090), "Head", "Hair", neg=True)
-        E.ell(P(0, -0.120, 0.000), (0.050, 0.040, 0.026), "Head", "Hair", neg=True, s=2.5)
+        E.ell(P(0, -0.108, -0.095), (0.062, 0.070, 0.110), "Head", "Hair", neg=True)
+        E.ell(P(0, -0.118, 0.030), (0.036, 0.046, 0.046), "Head", "Hair", neg=True, s=2.5)   # centre-part arch
     return E.E
 
 
@@ -687,7 +685,7 @@ def add_hair_volume(vol, head_E, hc, hk, female, mats):
     bm = bmesh.new()
     bm.from_mesh(vol.data)
     co = np.array([v.co for v in bm.verts])
-    inside = fields(head_E, co).sum(1) > THRESH + 0.05
+    inside = fields(head_E, co).sum(1) > THRESH + 0.35       # v5: cut edge well under the skin (no jagged rim)
     bm.verts.ensure_lookup_table()
     bmesh.ops.delete(bm, geom=[f for f in bm.faces if all(inside[v.index] for v in f.verts)], context="FACES")
     bm.to_mesh(vol.data)
@@ -2196,7 +2194,7 @@ def lid_edge(beta, upper, sx):
     return LID_LO - 4.0 * t
 
 
-def carve_eye_sockets(head, sp, margin_up=14.0, margin_lo=8.0):
+def carve_eye_sockets(head, sp, margin_up=14.0, margin_lo=5.0):
     """Wrap the skin around each eyeball: skin in front of the eye opening (+ margins that the lids
     cover at rest) is pulled radially onto the eyeball and cut away; the hole rim is snapped onto a
     sphere just inside the lid shells, which hide it. The skin then folds into the socket on a
@@ -2274,7 +2272,7 @@ def make_eye_v5(sp, sx, mats, iris_tex=True):
     return eye, iris
 
 
-def make_lid_v5(name, c, r, sx, upper, rho, mats, nb_=14, nt=5, bmin=5.0):
+def make_lid_v5(name, c, r, sx, upper, rho, mats, nb_=10, nt=4, bmin=5.0):
     """Visible eyelid at rest: a shell patch around the eyeball whose edge follows lid_edge() (almond
     opening), buried end 96 / 76 deg further, + a lid-margin strip down to the eyeball. Rotating it
     about X through the eye centre opens / closes it."""
@@ -2404,11 +2402,11 @@ def make_lips_v5(bvh_head, sp, mats):
                 bow = 1.0 + 0.30 * math.exp(-((abs(u) - 0.30) / 0.16) ** 2) - 0.22 * math.exp(-(u / 0.10) ** 2)
                 rv = (0.0026 * lipf * taper * bow + 0.0004) * hk          # half height
                 zc = ZL + rv / hk * 0.95 - 0.0010 * u * u
-                rd = (0.0026 * lipf * taper + 0.0005) * hk
+                rd = (0.0030 * lipf * taper + 0.0005) * hk
             else:
                 rv = (0.0036 * lipf * taper + 0.0004) * hk
                 zc = ZL - rv / hk * 0.92 + 0.0006 * u * u
-                rd = (0.0031 * lipf * taper + 0.0005) * hk
+                rd = (0.0036 * lipf * taper + 0.0005) * hk
             z = hc.z + zc * hk
             # cast above / below the mouth opening (cut_mouth), then slide to the lip centre line
             zcast = hc.z + (max(zc, ZL + MOUTH_B * (1.0 - u * u) ** 0.5 + 0.0012) if upper else
@@ -2453,7 +2451,7 @@ def make_lips_v5(bvh_head, sp, mats):
 # centre), lashes (follow the upper lid), mouth inside (bag + teeth, follow the jaw). Eyes and
 # irises never move. Every value is in head-local metres (d = (co - hc) / hk, Blender Z up, -Y front).
 EXPRESSIONS = ["Blink", "Smile", "Angry", "Fear", "Surprise", "Sad", "MouthOpen", "JawClench"]
-ZL = -0.0889                        # mouth line (slit of head_elements, where the lips meet)
+ZL = -0.0850                        # mouth line (slit of head_elements, where the lips meet; v5: 3.9 mm higher)
 MOUTH_A, MOUTH_B = 0.0170, 0.0034   # mouth opening cut in the head (ellipse half width / height)
 JAW_PIVOT = (0.0, 0.008, -0.038)    # jaw hinge (rotation about X)
 LASH_TH = 52.0                      # lash line angle above the eye centre (lash_line / lash_cards)
@@ -2481,7 +2479,7 @@ EXPR = {
 
 # v5: the eyelids / mouth inside cost ~380 triangles; the fullest variants give them back on the
 # clothes (budget factor) and the hair cap (triangles) to stay under 9000
-HEAD_TRIS = 3300                    # v5 head budget (face + skull cap, before the cap moves to Body)
+HEAD_TRIS = 3000                    # v5 head budget (face + skull cap, before the cap moves to Body)
 TRI_TRIM = {"human_f2": (0.93, 100), "human_f3": (0.92, 120), "human_f4": (0.92, 120), "human_m4": (0.95, 60)}
 
 
@@ -2842,7 +2840,7 @@ def build_human(female, variant=""):
                               tex[top[0] + "_n"], 0.55),
         "Pants": tex_material("Pants", C["Pants"], 0.85, tex[bot[0]], tex[bot[0] + "_n"], 0.55),
         "Shoes": tex_material("Shoes", C["Shoes"], 0.5, tex["shoes"]),
-        "Hair": tex_material("Hair", C["Hair"], 0.42, t5["hair"]),        # v5: strands + glossy band
+        "Hair": tex_material("Hair", C["Hair"], 0.48, t5["hair"]),        # v5: strands + glossy band
         "Eyes": tex_material("Eyes", (1.0, 1.0, 1.0), 0.06, t5["iris"]),   # v5: colour + catch lights in the map
         "Lips": nb.material("Lips", C["Lips"], roughness=0.4),
         "EyeWhite": nb.material("EyeWhite", (0.93, 0.91, 0.88), roughness=0.12),
@@ -3016,7 +3014,7 @@ def build_human(female, variant=""):
     bm.free()
     bvh_dense = BVHTree.FromObject(head, bpy.context.evaluated_depsgraph_get())
     bnd = [v for v in capbm.verts if v.is_boundary]
-    for _ in range(8):
+    for _ in range(16):                 # v5: smoother hairline
         new = {}
         for v in bnd:
             nb_ = [e.other_vert(v) for e in v.link_edges if e.is_boundary]
@@ -3053,11 +3051,13 @@ def build_human(female, variant=""):
             off *= 1.0 + 0.06 * rid
         else:
             side = max(0.0, min(1.0, (abs(d.x) - 0.045) / 0.03))
-            off = 0.0042 + 0.0075 * top * (1 - 0.6 * side)
-            off *= 1.0 + 0.08 * rid * (0.4 + 0.6 * top)
+            front = max(0.0, min(1.0, (-0.03 - d.y) / 0.05)) * top
+            off = 0.0042 + 0.0075 * top * (1 - 0.6 * side) + 0.0045 * front     # v5: short taper + front quiff
+            off *= 1.0 + 0.22 * rid * (0.3 + 0.7 * top)
         r = ring.get(v, 9)
-        v.co = v.co + nrm[v] * off * (-0.06 + 1.06 * smooth(r / 7.0))   # v5: the edge sinks into the skin
+        v.co = v.co + nrm[v] * off * (0.03 + 0.97 * smooth(r / 7.0))
     hair_parts = [nb.bm_to_object("HairCap", capbm)]
+    taubin_smooth(hair_parts[0], 3)
     hair_parts[0]["uv"] = "hair"
     set_material(hair_parts[0], mats, "Hair")
 
@@ -3074,7 +3074,9 @@ def build_human(female, variant=""):
                 v.co = v.co + v.normal * (0.0028 * cur)
                 continue
             fall = max(0.0, min(1.0, (0.06 - d.z) / 0.10))         # locks deepen towards the tips
-            v.co = v.co + v.normal * (0.0032 * strand_ridge(sp, d) * (0.4 + 0.6 * fall))
+            v.co = v.co + v.normal * (0.0030 * strand_ridge(sp, d) * (0.5 + 0.5 * fall))
+        if sp.hair != "bun":
+            taubin_smooth(vol, 4)                                  # v5: soft, sculpted locks
         vol["uv"] = "hair"
         hair_parts.append(vol)
 
@@ -3107,7 +3109,7 @@ def build_human(female, variant=""):
     decimate(hair_parts[0], -TRI_TRIM.get(sp.name, (1.0, 0))[1] + (680 if sp.v4 else 820) if sp.pulled else (560 if female else (
         520 if sp.hat else (640 if sp.hair == "buzz" else 620))))
     if vol is not None:
-        decimate(vol, 440 if sp.hair == "bun" else 900)
+        decimate(vol, 440 if sp.hair == "bun" else 1250)
     head["uv"] = "face"
     head["fx"] = "skin"
 

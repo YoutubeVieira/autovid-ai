@@ -57,6 +57,10 @@ def render(path, tmp, tag):
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.view_settings.view_transform = "AgX"
+    try:
+        scene.view_settings.look = "AgX - Punchy"
+    except TypeError:
+        pass
     setup_engine(scene, os.environ.get("NB_RENDER_ENGINE", "CYCLES"))
     scene.cycles.samples = int(os.environ.get("NB_SAMPLES", "24"))
     out = []
