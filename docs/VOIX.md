@@ -13,7 +13,7 @@ Définies dans `packs/voices/cast.json`, utilisables avec `python3 packs/voices/
 | 7 | Femme | Voix claire | Kokoro `ff_siwis` | CC BY 4.0 (mention : SIWIS, Univ. d'Édimbourg) | comprise |
 | 8 | Femme | Mamie (grave, lente, tremblante) | Supertonic voix 4 + effets | idem¹ | comprise |
 | 9 | Enfant | Petit garçon | Supertonic voix 5, hauteur +5, timbre rapproché | idem¹ | comprise |
-| 10 | Enfant | Petite fille | Supertonic voix 1, hauteur +3 | idem¹ | à réécouter |
+| 10 | Enfant | Petite fille | Supertonic voix 1, hauteur +3 | idem¹ | comprise |
 | 11 | Bébé | Bébé | Supertonic voix 1, hauteur +9, lent | idem¹ | comprise |
 | 12 | Animal | Chat | Supertonic voix 3, hauteur +7, vibrato | idem¹ | comprise |
 | 13 | Animal | Chien (rauque) | Supertonic voix 7, saturation | idem¹ | comprise |
