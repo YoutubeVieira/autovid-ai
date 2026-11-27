@@ -18,7 +18,8 @@ here = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
 ap.add_argument("script")
 ap.add_argument("--out", required=True)
-ap.add_argument("--engine", default="piper", choices=["piper", "supertonic"])
+ap.add_argument("--engine", default="piper", choices=["piper", "supertonic", "kokoro"])
+ap.add_argument("--kokoro-model", help="dossier kokoro-multi-lang-v1_0 extrait (voix francaise: --speaker 30 = ff_siwis)")
 ap.add_argument("--st-model", help="dossier du modele supertonic extrait")
 ap.add_argument("--lang", default="fr")
 ap.add_argument("--voice", default="siwis")
@@ -31,7 +32,35 @@ ap.add_argument("--total", type=float, help="duree totale de la piste (s); sinon
 a = ap.parse_args()
 
 meta = json.load(open(os.path.join(here, "voices.json"), encoding="utf-8"))
-if a.engine == "supertonic":
+if a.engine == "kokoro":
+    # Kokoro 82M (Apache-2.0). Pas de phonemiseur francais dans le wheel sherpa: on phonemise avec l'espeak de piper-tts
+    # puis on appelle le modele ONNX directement (jetons = phonemes IPA, y compris la tilde combinante des nasales).
+    import numpy as np
+    import onnxruntime as ort
+    from piper.phonemize_espeak import EspeakPhonemizer
+    K = a.kokoro_model or os.path.join(a.models, "kokoro-multi-lang-v1_0")
+    cfg = {"credit": "Voix: Kokoro-82M ff_siwis (donnees SIWIS, University of Edinburgh, CC BY 4.0)", "license": "modele Apache-2.0; voix ff_siwis CC BY 4.0"}
+    _sess = ort.InferenceSession(os.path.join(K, "model.onnx"), providers=["CPUExecutionProvider"])
+    _voices = np.fromfile(os.path.join(K, "voices.bin"), dtype=np.float32).reshape(-1, 510, 1, 256)
+    _tok = {}
+    for _l in open(os.path.join(K, "tokens.txt"), encoding="utf-8"):
+        _p = _l.rstrip("\n").rsplit(" ", 1)
+        if len(_p) == 2:
+            _tok[_p[0]] = int(_p[1])
+    _phon = EspeakPhonemizer()
+
+    def synth(text):
+        out = []
+        for sent in _phon.phonemize("fr", text):
+            ids = [_tok[c] for c in "".join(sent) if c in _tok][:500]
+            if not ids:
+                continue
+            style = _voices[a.speaker, len(ids), 0][None, :]
+            wav = _sess.run(None, {"tokens": np.array([[0] + ids + [0]], dtype=np.int64), "style": style,
+                                   "speed": np.array([a.speed], dtype=np.float32)})[0].reshape(-1)
+            out += list(wav) + [0.0] * int(0.12 * 24000)
+        return out, 24000
+elif a.engine == "supertonic":
     import sherpa_onnx
     M = a.st_model or os.path.join(a.models, meta["engines"]["supertonic"]["archive"])
     cfg = {"credit": "Voix: Supertonic 3 (Supertone), voix n\u00b0%d" % a.speaker, "license": meta["engines"]["supertonic"]["license"]}

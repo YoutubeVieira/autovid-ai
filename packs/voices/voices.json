@@ -55,6 +55,17 @@
       "langs": "fr, en, ...",
       "sample_rate": 44100,
       "pip": "sherpa-onnx>=2.0"
+    },
+    "kokoro": {
+      "archive": "kokoro-multi-lang-v1_0",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-multi-lang-v1_0.tar.bz2",
+      "license": "modele Apache-2.0; la voix francaise ff_siwis vient des donnees SIWIS (CC BY 4.0): mention requise",
+      "voices": "une seule voix francaise: ff_siwis (femme, --speaker 30)",
+      "sample_rate": 24000
+    },
+    "edge_local": {
+      "script": "edge_local.py",
+      "note": "A lancer sur ton ordinateur (Vivienne, Remy, Denise, Henri...). Service Microsoft inaccessible depuis l'environnement cloud; licence commerciale: preferer Azure AI Speech."
     }
   }
 }
