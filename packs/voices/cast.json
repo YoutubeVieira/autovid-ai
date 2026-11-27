@@ -1,0 +1,20 @@
+{
+  "note": "15 voix prêtes à l'emploi pour la série. Les voix d'enfant, de bébé et d'animaux sont des voix libres transformées (hauteur + timbre + effets): elles sonnent « dessin animé », pas comme de vrais enfants ou animaux (aucun modèle libre français d'enfant n'existe).",
+  "voices": [
+    {"id": 1,  "groupe": "homme",  "nom": "Narrateur grave",       "engine": "supertonic", "speaker": 9, "speed": 1.05},
+    {"id": 2,  "groupe": "homme",  "nom": "Homme posé",            "engine": "supertonic", "speaker": 8, "speed": 1.05},
+    {"id": 3,  "groupe": "homme",  "nom": "Jeune homme",           "engine": "supertonic", "speaker": 6, "speed": 1.1},
+    {"id": 4,  "groupe": "homme",  "nom": "Voix chaude (Tom)",     "engine": "piper", "voice": "tom", "speed": 1.05, "licence": "AGPLv3 - à vérifier avant monétisation"},
+    {"id": 5,  "groupe": "femme",  "nom": "Narratrice douce",      "engine": "supertonic", "speaker": 0, "speed": 1.05},
+    {"id": 6,  "groupe": "femme",  "nom": "Femme dynamique",       "engine": "supertonic", "speaker": 2, "speed": 1.12},
+    {"id": 7,  "groupe": "femme",  "nom": "Voix claire (Kokoro)",  "engine": "kokoro", "speaker": 30, "speed": 1.05, "licence": "CC BY 4.0 (SIWIS) - mention requise"},
+    {"id": 8,  "groupe": "femme",  "nom": "Mamie",                 "engine": "supertonic", "speaker": 4, "speed": 0.92, "pitch": -1.5, "formant": "preserved", "fx": "vibrato=f=5:d=0.12"},
+    {"id": 9,  "groupe": "enfant", "nom": "Petit garçon",          "engine": "supertonic", "speaker": 5, "speed": 1.1, "pitch": 5, "formant": "shifted"},
+    {"id": 10, "groupe": "enfant", "nom": "Petite fille",          "engine": "supertonic", "speaker": 1, "speed": 1.05, "pitch": 3.0, "formant": "shifted"},
+    {"id": 11, "groupe": "bébé",   "nom": "Bébé",                  "engine": "supertonic", "speaker": 1, "speed": 0.85, "pitch": 9, "formant": "shifted", "fx": "vibrato=f=7:d=0.25"},
+    {"id": 12, "groupe": "animal", "nom": "Chat",                  "engine": "supertonic", "speaker": 3, "speed": 1.0, "pitch": 7, "formant": "shifted", "fx": "vibrato=f=6:d=0.35,tremolo=f=9:d=0.25"},
+    {"id": 13, "groupe": "animal", "nom": "Chien",                 "engine": "supertonic", "speaker": 7, "speed": 1.05, "pitch": -2, "formant": "preserved", "fx": "asoftclip=type=tanh:threshold=0.5,tremolo=f=14:d=0.3"},
+    {"id": 14, "groupe": "animal", "nom": "Oiseau",                "engine": "supertonic", "speaker": 2, "speed": 1.25, "pitch": 10, "formant": "shifted", "fx": "tremolo=f=18:d=0.4,vibrato=f=11:d=0.3"},
+    {"id": 15, "groupe": "animal", "nom": "Ours / dinosaure",      "engine": "supertonic", "speaker": 9, "speed": 0.85, "pitch": -6, "formant": "preserved", "fx": "asoftclip=type=tanh:threshold=0.6,lowpass=f=3500"}
+  ]
+}

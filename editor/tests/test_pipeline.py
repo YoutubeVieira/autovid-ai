@@ -121,3 +121,41 @@ class PixelPresetAndSrtTest(unittest.TestCase):
             out = (tmp / "b.srt").read_text()
             self.assertIn("00:00:00,200 --> 00:00:02,800", out)
             self.assertIn("00:00:04,600 --> 00:00:08,400", out)
+
+
+class CorrectorTest(unittest.TestCase):
+    def test_audio_fix_clipped_quiet_leading_silence(self):
+        from autoeditor import corrector as co
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            src, dst = tmp / "a.wav", tmp / "b.wav"
+            # 1 s de silence + sinus tres fort (ecrete) de 3 s
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono:d=1",
+                            "-f", "lavfi", "-i", "sine=f=440:d=3", "-filter_complex", "[1]volume=9,alimiter=limit=1:level=disabled[s];[0][s]concat=n=2:v=0:a=1",
+                            str(src)], check=True)
+            preset = cli.load_preset("shortform_9x16")
+            before, after = co.fix_audio(src, dst, preset)
+            codes = {i["code"] for i in before["issues"]}
+            self.assertIn("silence_debut", codes)
+            self.assertTrue(codes & {"volume", "crete", "saturation"})
+            self.assertTrue(after["ok"])
+            self.assertAlmostEqual(after["mesures"]["lufs"], -14.0, delta=1.5)
+            self.assertLess(after["mesures"]["duree"], before["mesures"]["duree"])   # le silence de debut est rogne
+
+    def test_video_fix_format_black_head_and_sync(self):
+        from autoeditor import corrector as co
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            src, dst = tmp / "v.mp4", tmp / "w.mp4"
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i", "color=c=black:s=640x480:r=25:d=1",
+                            "-f", "lavfi", "-i", "testsrc2=s=640x480:r=25:d=3", "-f", "lavfi", "-i", "sine=f=330:d=4",
+                            "-filter_complex", "[0][1]concat=n=2:v=1:a=0[v]", "-map", "[v]", "-map", "2:a", "-c:v", "libx264", "-pix_fmt", "yuv444p",
+                            "-c:a", "aac", "-shortest", str(src)], check=True)
+            preset = cli.load_preset("shortform_9x16")
+            before, after = co.fix_video(src, dst, preset)
+            codes = {i["code"] for i in before["issues"]}
+            self.assertTrue({"format", "noir_debut", "pix_fmt"} <= codes)
+            self.assertEqual((after["mesures"]["width"], after["mesures"]["height"]), (1080, 1920))
+            self.assertNotIn("noir_debut", {i["code"] for i in after["issues"]})
+            self.assertEqual(after["mesures"]["pix_fmt"], "yuv420p")
+            self.assertTrue(after["ok"])

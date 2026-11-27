@@ -24,6 +24,7 @@ ap.add_argument("--engine", default="piper", choices=["piper", "supertonic", "ko
 ap.add_argument("--kokoro-model", help="dossier kokoro-multi-lang-v1_0 extrait (voix francaise: --speaker 30 = ff_siwis)")
 ap.add_argument("--st-model", help="dossier du modele supertonic extrait")
 ap.add_argument("--lang", default="fr")
+ap.add_argument("--cast", type=int, help="numero de voix (1-15) de cast.json: moteur, voix, vitesse, hauteur et effets predefinis")
 ap.add_argument("--verify", action="store_true", help="controle Whisper: teste plusieurs ecritures de chaque phrase et garde la mieux comprise")
 ap.add_argument("--asr-model", help="dossier sherpa-onnx-whisper-base extrait")
 ap.add_argument("--voice", default="siwis")
@@ -34,6 +35,13 @@ ap.add_argument("--fx", default="none", choices=["none", "viral"], help="viral =
 ap.add_argument("--pitch", type=float, default=0.0, help="demi-tons (ex. -1.5 = voix plus grave), necessite ffmpeg avec rubberband")
 ap.add_argument("--total", type=float, help="duree totale de la piste (s); sinon fin de la derniere phrase")
 a = ap.parse_args()
+a.formant, a.cast_fx = "preserved", ""
+if a.cast:
+    _c = next(v for v in json.load(open(os.path.join(here, "cast.json"), encoding="utf-8"))["voices"] if v["id"] == a.cast)
+    a.engine, a.speaker, a.speed = _c["engine"], _c.get("speaker", 0), _c.get("speed", 1.0)
+    a.voice = _c.get("voice", a.voice)
+    a.pitch = _c.get("pitch", a.pitch)
+    a.formant, a.cast_fx = _c.get("formant", "preserved"), _c.get("fx", "")
 
 meta = json.load(open(os.path.join(here, "voices.json"), encoding="utf-8"))
 if a.engine == "kokoro":
@@ -183,18 +191,24 @@ json.dump({"voice": a.voice, "credit": cfg["credit"], "license": cfg["license"],
 VIRAL = ("highpass=f=85,equalizer=f=140:t=q:w=1:g=3.5,equalizer=f=320:t=q:w=1.2:g=-2,"
          "equalizer=f=3300:t=q:w=1.1:g=4.5,equalizer=f=9000:t=q:w=1.5:g=-3,"
          "acompressor=threshold=-24dB:ratio=5:attack=3:release=70:makeup=7,asoftclip=type=tanh:threshold=0.8,alimiter=limit=0.85,loudnorm=I=-16:TP=-2:LRA=7")
-if a.fx != "none" or a.pitch:
+if a.fx != "none" or a.pitch or a.cast_fx:
     import shutil
     import subprocess
     raw = os.path.join(a.out, "voice_raw.wav")
     shutil.copy(os.path.join(a.out, "voice.wav"), raw)
     chain = []
     if a.pitch:
-        chain.append(f"rubberband=pitch={2 ** (a.pitch / 12):.5f}:formant=preserved")
+        chain.append(f"rubberband=pitch={2 ** (a.pitch / 12):.5f}:formant={a.formant}")
+    if a.cast_fx:
+        chain.append(a.cast_fx)
     if a.fx == "viral":
         chain.append(VIRAL)
-    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", raw, "-af", ",".join(chain),
+    mid = os.path.join(a.out, "voice_fx.wav")
+    # deux passes: (hauteur + effets) puis normalisation. Enchainer rubberband + vibrato + loudnorm en une seule passe donne du silence.
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", raw, "-af", ",".join(chain) if chain else "anull", mid], check=True)
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", mid, "-af", "loudnorm=I=-16:TP=-2:LRA=9",
                     os.path.join(a.out, "voice.wav")], check=True)
+    os.remove(mid)
 print(f"{len(cues)} phrases, {total:.1f}s -> {a.out}/voice.wav | credit: {cfg['credit']}")
 for w_ in warn:
     print("ATTENTION:", w_)

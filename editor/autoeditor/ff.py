@@ -18,7 +18,7 @@ def run(cmd):
     return p
 
 
-def probe(path):
+def probe(path, need_video=True):
     p = run(["ffprobe", "-v", "error", "-show_entries",
              "format=duration:stream=codec_type,codec_name,width,height,r_frame_rate",
              "-of", "json", str(path)])
@@ -26,7 +26,10 @@ def probe(path):
     video = next((s for s in data["streams"] if s["codec_type"] == "video"), None)
     audio = next((s for s in data["streams"] if s["codec_type"] == "audio"), None)
     if video is None:
-        raise RuntimeError(f"Aucun flux video dans {path}")
+        if need_video:
+            raise RuntimeError(f"Aucun flux video dans {path}")
+        return {"duration": float(data["format"]["duration"]), "width": 0, "height": 0, "fps": 0.0, "video_codec": None,
+                "has_audio": audio is not None, "audio_codec": audio["codec_name"] if audio else None}
     num, den = (video.get("r_frame_rate") or "30/1").split("/")
     fps = float(num) / float(den or 1) if float(den or 1) else 30.0
     return {

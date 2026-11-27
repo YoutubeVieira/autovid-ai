@@ -73,9 +73,10 @@ def sfx_events(plan, preset, events, sfx_dir):
     m, g = cfg["map"], cfg.get("gain", 0.5)
     out = []
     for e in events:
-        if e["type"] == "sfx":  # evenement direct: son nomme
-            if os.path.exists(os.path.join(sfx_dir, e["name"] + ".wav")):
-                out.append((e["t"], os.path.join(sfx_dir, e["name"] + ".wav"), g))
+        if e["type"] == "sfx":  # evenement direct: son nomme (option: file=musique.mp3, gain, dur = duree + fondu de sortie)
+            p = os.path.join(sfx_dir, e.get("file") or e["name"] + ".wav")
+            if os.path.exists(p):
+                out.append((e["t"], p, g * e.get("gain", 1.0), e.get("dur")))
             continue
         key = {"badge": f"badge:{e.get('color', 'yellow')}", "counter": "counter", "cut": "cut",
                "pop": "pop", "milestone": "milestone"}.get(e["type"])
@@ -83,9 +84,9 @@ def sfx_events(plan, preset, events, sfx_dir):
         names = m.get(key) or []
         for name in ([names] if isinstance(names, str) else names):
             if os.path.exists(os.path.join(sfx_dir, name + ".wav")):
-                out.append((e["t"], os.path.join(sfx_dir, name + ".wav"), g))
+                out.append((e["t"], os.path.join(sfx_dir, name + ".wav"), g, None))
     if plan["outro"] > 0 and "outro" in m:
-        out.append((plan["content_duration"], os.path.join(sfx_dir, m["outro"] + ".wav"), g))
+        out.append((plan["content_duration"], os.path.join(sfx_dir, m["outro"] + ".wav"), g, None))
     return [x for x in out if x[0] < plan["output_duration"]]
 
 
@@ -111,9 +112,10 @@ def _audio_graph(shots, main_idx, plan, a, music_idx, sfx):
         src = "mx"
     if sfx:
         labs = []
-        for k, (idx, t, gain) in enumerate(sfx):
+        for k, (idx, t, gain, dur) in enumerate(sfx):
             ms = int(t * 1000)
-            parts.append(f"[{idx}:a]aformat=sample_rates=48000:channel_layouts=stereo,volume={gain},adelay={ms}|{ms}[s{k}]")
+            cut = f",atrim=0:{dur:.3f},afade=t=out:st={max(0.0, dur - 0.5):.3f}:d=0.5" if dur else ""
+            parts.append(f"[{idx}:a]aformat=sample_rates=48000:channel_layouts=stereo{cut},volume={gain},adelay={ms}|{ms}[s{k}]")
             labs.append(f"[s{k}]")
         parts.append(f"[{src}]" + "".join(labs) + f"amix=inputs={len(sfx) + 1}:duration=first:dropout_transition=0:normalize=0[sx]")
         src = "sx"
@@ -153,8 +155,8 @@ def render(plan, source, out_path, preset, ass_path=None, music=None, has_audio=
     voice_idx = add_input(voice) if voice else None
     music_idx = add_input(music, loop=True) if music else None
     mapped = []
-    for ev_t, path, gain in sfx_events(plan, preset, [dict(e, t=map_time(plan, e["t"]) if map_time(plan, e["t"]) is not None else e["t"]) for e in (events or [])], sfx_dir):
-        mapped.append((add_input(path), ev_t, gain))
+    for ev_t, path, gain, dur in sfx_events(plan, preset, [dict(e, t=map_time(plan, e["t"]) if map_time(plan, e["t"]) is not None else e["t"]) for e in (events or [])], sfx_dir):
+        mapped.append((add_input(path), ev_t, gain, dur))
 
     graph, amap = list(vgraph), []
     main_idx = voice_idx if voice_idx is not None else (0 if has_audio else None)

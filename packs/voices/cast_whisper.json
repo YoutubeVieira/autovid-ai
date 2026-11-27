@@ -1,0 +1,77 @@
+[
+ {
+  "id": 1,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série. Cette ville à zéro habitant."
+ },
+ {
+  "id": 2,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 3,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série. Cette ville à zéro habitant."
+ },
+ {
+  "id": 4,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 5,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série. Cette ville a zéro habitant."
+ },
+ {
+  "id": 6,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 7,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série. Cette ville a zéro habitant."
+ },
+ {
+  "id": 8,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 9,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 10,
+  "erreur": 0.615,
+  "entendu": "Bonjour, je suis une voix d'assérie. C'est du laser aux habitants."
+ },
+ {
+  "id": 11,
+  "erreur": 0.077,
+  "entendu": "Bonjour, je suis une voix de la série. Cette ville a 0 habitants."
+ },
+ {
+  "id": 12,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série \"Cette ville à zéro habitant\"."
+ },
+ {
+  "id": 13,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ },
+ {
+  "id": 14,
+  "erreur": 0.231,
+  "entendu": "Bonjour, je suis une voix de la série. Cette vie la vérothèque habitant."
+ },
+ {
+  "id": 15,
+  "erreur": 0.0,
+  "entendu": "Bonjour, je suis une voix de la série, cette ville à zéro habitant."
+ }
+]

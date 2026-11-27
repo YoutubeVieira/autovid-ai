@@ -106,6 +106,37 @@ def cmd_srt(a):
             print("ATTENTION:", w)
 
 
+def cmd_check(a):
+    from . import corrector as co
+    preset = load_preset(a.preset)
+    try:
+        is_video = probe(a.input)["height"] > 16 and a.kind != "audio"
+    except RuntimeError:
+        is_video = False
+    rep = (co.check_video(a.input, preset, tuple(a.duree) if a.duree else None) if is_video
+           else co.check_audio(a.input, preset, a.expect, a.asr_model))
+    print(co.format_report(rep, a.input))
+    if a.json:
+        _save(a.json, rep)
+    return 0 if rep["ok"] else 1
+
+
+def cmd_fix(a):
+    from . import corrector as co
+    preset = load_preset(a.preset)
+    try:
+        is_video = probe(a.input)["height"] > 16 and a.kind != "audio"
+    except RuntimeError:
+        is_video = False
+    if is_video:
+        before, after = co.fix_video(a.input, a.out, preset, add_silent_audio=a.silent_audio)
+    else:
+        before, after = co.fix_audio(a.input, a.out, preset, a.expect, a.asr_model)
+    print(co.format_report(before, "AVANT"))
+    print(co.format_report(after, "APRES -> " + str(a.out)))
+    return 0 if after["ok"] else 1
+
+
 def main(argv=None):
     p = argparse.ArgumentParser(prog="autoeditor", description=__doc__)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -127,6 +158,17 @@ def main(argv=None):
     ps.add_argument("action", choices=["export", "import"])
     ps.add_argument("input"); ps.add_argument("--out", required=True); ps.add_argument("--lang", default="en")
     ps.set_defaults(fn=cmd_srt)
+    for name, fn, extra in (("check", cmd_check, True), ("fix", cmd_fix, False)):
+        pc = sub.add_parser(name, help="correcteur audio/video: " + ("detecte les defauts" if extra else "detecte et repare"))
+        pc.add_argument("input"); pc.add_argument("--preset", default="shortform_9x16")
+        pc.add_argument("--kind", choices=["auto", "audio"], default="auto")
+        pc.add_argument("--expect", help="texte attendu (controle Whisper de la diction)")
+        pc.add_argument("--asr-model", help="dossier sherpa-onnx-whisper-base/small extrait")
+        if extra:
+            pc.add_argument("--json"); pc.add_argument("--duree", type=float, nargs=2, help="duree cible min max (s)")
+        else:
+            pc.add_argument("-o", "--out", required=True); pc.add_argument("--silent-audio", action="store_true")
+        pc.set_defaults(fn=fn)
     a = p.parse_args(argv)
     try:
         return a.fn(a) or 0
