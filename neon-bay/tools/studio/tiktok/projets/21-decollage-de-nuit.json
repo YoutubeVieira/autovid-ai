@@ -1,0 +1,698 @@
+{
+ "v": 1,
+ "name": "Décollage de nuit",
+ "duration": 12.4,
+ "aspect": "9:16",
+ "res": 720,
+ "amb": "night",
+ "bloom": true,
+ "rain": false,
+ "wet": false,
+ "grade": "teal",
+ "fades": false,
+ "objects": [
+  {
+   "id": "cam",
+   "asset": "camera",
+   "name": "Caméra",
+   "color": {},
+   "clip": "Idle",
+   "keys": [
+    {
+     "t": 0,
+     "p": [
+      9,
+      1,
+      15
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 62,
+     "tg": "rocket",
+     "ty": 15,
+     "sh": 0.8,
+     "ease": "linear"
+    },
+    {
+     "t": 1.3,
+     "p": [
+      8.6,
+      1,
+      14.4
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 62,
+     "tg": "rocket",
+     "ty": 15,
+     "sh": 0.8,
+     "ease": "cut"
+    },
+    {
+     "t": 1.301,
+     "p": [
+      40,
+      3,
+      70
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 42,
+     "tg": "rocket",
+     "ty": 16,
+     "sh": 0,
+     "ease": "ease"
+    },
+    {
+     "t": 3.4,
+     "p": [
+      32,
+      4,
+      56
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 42,
+     "tg": "rocket",
+     "ty": 16,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 3.401,
+     "p": [
+      14,
+      1.2,
+      30
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 46,
+     "tg": "rocket",
+     "ty": 8,
+     "sh": 0.5,
+     "ease": "linear"
+    },
+    {
+     "t": 4.6,
+     "p": [
+      13.8,
+      1.2,
+      29.6
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 46,
+     "tg": "rocket",
+     "ty": 8,
+     "sh": 0.5,
+     "ease": "cut"
+    },
+    {
+     "t": 4.601,
+     "p": [
+      24,
+      2,
+      40
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 44,
+     "tg": "rocket",
+     "ty": 10,
+     "sh": 6,
+     "ease": "linear"
+    },
+    {
+     "t": 7,
+     "p": [
+      26,
+      3,
+      44
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 44,
+     "tg": "rocket",
+     "ty": 10,
+     "sh": 6,
+     "ease": "cut"
+    },
+    {
+     "t": 7.001,
+     "p": [
+      -5,
+      1.6,
+      30
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 60,
+     "tg": "rocket",
+     "ty": 10,
+     "sh": 3,
+     "ease": "linear"
+    },
+    {
+     "t": 8.4,
+     "p": [
+      -4,
+      1.6,
+      30
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 60,
+     "tg": "rocket",
+     "ty": 10,
+     "sh": 3,
+     "ease": "cut"
+    },
+    {
+     "t": 8.801,
+     "p": [
+      60,
+      12,
+      120
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 36,
+     "tg": "rocket",
+     "ty": 0,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 10.6,
+     "p": [
+      60,
+      8,
+      120
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 36,
+     "tg": "rocket",
+     "ty": 0,
+     "sh": 0,
+     "ease": "cut"
+    }
+   ],
+   "base": {
+    "p": [
+     0,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "fov": 50
+  },
+  {
+   "id": "street",
+   "asset": "street",
+   "name": "Ville",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     0,
+     0,
+     -50
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "seed": 21,
+   "length": 200
+  },
+  {
+   "id": "rocket",
+   "asset": "rocket",
+   "name": "Fusée",
+   "color": {},
+   "clip": "Idle",
+   "keys": [
+    {
+     "t": 0,
+     "p": [
+      0,
+      0,
+      0
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "ease": "linear"
+    },
+    {
+     "t": 3.4,
+     "p": [
+      0,
+      0,
+      0
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ]
+    },
+    {
+     "t": 7,
+     "p": [
+      0,
+      30,
+      0
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "ease": "linear"
+    },
+    {
+     "t": 14,
+     "p": [
+      0,
+      330,
+      0
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ]
+    }
+   ],
+   "base": {
+    "p": [
+     0,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "ignite": 1.2
+  },
+  {
+   "id": "hero",
+   "asset": "human_m",
+   "name": "Toi",
+   "color": {
+    "Shirt": "#21e6ff"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     12,
+     0,
+     26
+    ],
+    "r": [
+     0,
+     3.8415926535897933,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "car_suv1",
+   "asset": "car_suv",
+   "name": "Rover",
+   "color": {
+    "Paint": "#f4f4f4"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -14,
+     0,
+     16
+    ],
+    "r": [
+     0,
+     0.7,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "lamp2",
+   "asset": "lamp",
+   "name": "Projecteur",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -12,
+     0,
+     10
+    ],
+    "r": [
+     0,
+     3.141592653589793,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "lamp3",
+   "asset": "lamp",
+   "name": "Projecteur",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     0,
+     0,
+     10
+    ],
+    "r": [
+     0,
+     3.141592653589793,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "lamp4",
+   "asset": "lamp",
+   "name": "Projecteur",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     12,
+     0,
+     10
+    ],
+    "r": [
+     0,
+     3.141592653589793,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  }
+ ],
+ "titles": [
+  {
+   "t": 0,
+   "d": 1.5,
+   "text": "3… 2… 1…",
+   "style": "hook",
+   "cut": true,
+   "size": 1.3
+  },
+  {
+   "t": 1.5,
+   "d": 2.1,
+   "text": "Pas de tir",
+   "style": "sub",
+   "sub": "Néon Bay · 3 h du matin"
+  },
+  {
+   "t": 5,
+   "d": 1.8,
+   "text": "Quand la ville devient trop petite.",
+   "style": "caption"
+  },
+  {
+   "t": 8.4,
+   "d": 0.4,
+   "text": "",
+   "style": "card",
+   "cut": true
+  },
+  {
+   "t": 8.9,
+   "d": 1.7,
+   "text": "Prochain arrêt :\nla Lune.",
+   "style": "title"
+  },
+  {
+   "t": 10.6,
+   "d": 1.8,
+   "text": "",
+   "style": "card",
+   "cut": true
+  },
+  {
+   "t": 10.6,
+   "d": 1.8,
+   "text": "NÉON|BAY",
+   "sub": "Joue gratuitement\nlien en bio",
+   "style": "logo"
+  }
+ ],
+ "flashes": [
+  4.6
+ ],
+ "slow": [
+  {
+   "t": 4.6,
+   "d": 2.4,
+   "speed": 0.3
+  }
+ ],
+ "tiktok": {
+  "n": 21,
+  "slug": "21-decollage-de-nuit",
+  "series": "Fusée vers la Lune et Mars",
+  "seriesKey": "fusee",
+  "lang": "fr",
+  "title": "Décollage de nuit",
+  "hook": "3… 2… 1…",
+  "legend": "Quand la police de 4 pays te cherche, il reste une solution : la fusée.\nLune ou Mars, tu choisis quoi ?",
+  "hashtags": [
+   "#espace",
+   "#lune",
+   "#jeuvideo",
+   "#fusee",
+   "#gaming",
+   "#neonbay"
+  ],
+  "music": "moon",
+  "hot": "4-9",
+  "duration": 12.4,
+  "plan": [
+   {
+    "t": 0,
+    "d": 1.3,
+    "label": "contre-plongée : la fusée, les tuyères s’allument"
+   },
+   {
+    "t": 1.3,
+    "d": 2.1,
+    "label": "plan large lent : la fusée sur son pas de tir"
+   },
+   {
+    "t": 3.4,
+    "d": 1.2,
+    "label": "par-dessus l’épaule du héros qui regarde"
+   },
+   {
+    "t": 4.6,
+    "d": 2.4,
+    "label": "ralenti du décollage, la caméra tremble"
+   },
+   {
+    "t": 7,
+    "d": 1.4,
+    "label": "au téléphone depuis la rue"
+   },
+   {
+    "t": 8.4,
+    "d": 0.4,
+    "label": "noir"
+   },
+   {
+    "t": 8.8,
+    "d": 1.8,
+    "label": "la fusée file vers le ciel"
+   },
+   {
+    "t": 10.6,
+    "d": 1.8,
+    "label": "carte finale"
+   }
+  ]
+ }
+}

@@ -1,0 +1,1038 @@
+{
+ "v": 1,
+ "name": "Standoff in the rain (EN)",
+ "duration": 12.4,
+ "aspect": "9:16",
+ "res": 720,
+ "amb": "storm",
+ "bloom": true,
+ "rain": true,
+ "wet": true,
+ "grade": "teal",
+ "fades": false,
+ "objects": [
+  {
+   "id": "cam",
+   "asset": "camera",
+   "name": "Caméra",
+   "color": {},
+   "clip": "Idle",
+   "keys": [
+    {
+     "t": 0,
+     "p": [
+      1.7,
+      1.55,
+      1.2
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 34,
+     "tg": "b",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 1.2,
+     "p": [
+      1.55,
+      1.55,
+      1.05
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 34,
+     "tg": "b",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 1.201,
+     "p": [
+      -13,
+      1.3,
+      2.2
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 46,
+     "tg": "mid",
+     "ty": 0.6,
+     "sh": 0,
+     "ease": "ease"
+    },
+    {
+     "t": 3.4,
+     "p": [
+      -9,
+      1.5,
+      1.6
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 46,
+     "tg": "mid",
+     "ty": 0.6,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 3.401,
+     "p": [
+      -4.4,
+      1.7,
+      0.9
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "b",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 4.2,
+     "p": [
+      -4.3,
+      1.7,
+      0.8
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "b",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 4.201,
+     "p": [
+      4.4,
+      1.7,
+      -0.9
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "a",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 5,
+     "p": [
+      4.3,
+      1.7,
+      -0.8
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "a",
+     "ty": 1.5,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 5.001,
+     "p": [
+      1.6,
+      1.55,
+      1.1
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 30,
+     "tg": "b",
+     "ty": 1.55,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 5.7,
+     "p": [
+      1.5,
+      1.55,
+      1
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 30,
+     "tg": "b",
+     "ty": 1.55,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 5.701,
+     "p": [
+      1,
+      1.4,
+      2.8
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 50,
+     "tg": "b",
+     "ty": 1.3,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 7.2,
+     "p": [
+      3.4,
+      1.5,
+      3.2
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 50,
+     "tg": "b",
+     "ty": 1.3,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 8.7,
+     "p": [
+      5.6,
+      1.5,
+      1.4
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 50,
+     "tg": "b",
+     "ty": 1.3,
+     "sh": 0,
+     "ease": "cut"
+    },
+    {
+     "t": 9.101,
+     "p": [
+      0,
+      30,
+      40
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "mid",
+     "ty": 0,
+     "sh": 0,
+     "ease": "linear"
+    },
+    {
+     "t": 10.6,
+     "p": [
+      0,
+      30,
+      40
+     ],
+     "r": [
+      0,
+      0,
+      0
+     ],
+     "s": [
+      1,
+      1,
+      1
+     ],
+     "f": 40,
+     "tg": "mid",
+     "ty": 0,
+     "sh": 0,
+     "ease": "cut"
+    }
+   ],
+   "base": {
+    "p": [
+     0,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "fov": 50
+  },
+  {
+   "id": "street",
+   "asset": "street",
+   "name": "Rue Néon Bay",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     0,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "seed": 7,
+   "length": 160
+  },
+  {
+   "id": "palm1",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -70,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     -70,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm2",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -54,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     -54,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm3",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -38,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     -38,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm4",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -22,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     -22,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm5",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -6,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     -6,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm6",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     10,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     10,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm7",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     26,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     26,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm8",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     42,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     42,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "palm9",
+   "asset": "palm",
+   "name": "Palmier",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     58,
+     0.18,
+     -11
+    ],
+    "r": [
+     0,
+     58,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "neon10",
+   "asset": "neon",
+   "name": "Enseigne",
+   "color": {
+    "Color": "#ff2e93"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -40,
+     4.5,
+     -11.85
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1.6,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "neon11",
+   "asset": "neon",
+   "name": "Enseigne",
+   "color": {
+    "Color": "#21e6ff"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -19,
+     5.5,
+     11.85
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1.6,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "neon12",
+   "asset": "neon",
+   "name": "Enseigne",
+   "color": {
+    "Color": "#ff2e93"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     2,
+     6.5,
+     -11.85
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1.6,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "neon13",
+   "asset": "neon",
+   "name": "Enseigne",
+   "color": {
+    "Color": "#21e6ff"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     23,
+     4.5,
+     11.85
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1.6,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "neon14",
+   "asset": "neon",
+   "name": "Enseigne",
+   "color": {
+    "Color": "#ff2e93"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     44,
+     5.5,
+     -11.85
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1.6,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "a",
+   "asset": "human_m",
+   "name": "Rafa",
+   "color": {
+    "Shirt": "#16141c",
+    "Hair": "#0c0c0c"
+   },
+   "clip": "Aim",
+   "keys": [],
+   "base": {
+    "p": [
+     -3,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     1.5707963267948966,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "weapon": "pistol"
+  },
+  {
+   "id": "b",
+   "asset": "human_f",
+   "name": "Lia",
+   "color": {
+    "Shirt": "#c8102e"
+   },
+   "clip": "AimRifle",
+   "keys": [],
+   "base": {
+    "p": [
+     3,
+     0,
+     0
+    ],
+    "r": [
+     0,
+     -1.5707963267948966,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "weapon": "rifle"
+  },
+  {
+   "id": "mid",
+   "asset": "cube",
+   "name": "Repère mid",
+   "color": {},
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     0,
+     0.9,
+     0
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     0.001,
+     0.001,
+     0.001
+    ]
+   }
+  },
+  {
+   "id": "car_sedan15",
+   "asset": "car_sedan",
+   "name": "Voiture phares allumés",
+   "color": {
+    "Paint": "#101016"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     20,
+     0,
+     -3
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   }
+  },
+  {
+   "id": "light16",
+   "asset": "light",
+   "name": "Lumière néon",
+   "color": {
+    "Color": "#ff2e93"
+   },
+   "clip": "Idle",
+   "keys": [],
+   "base": {
+    "p": [
+     -6,
+     3,
+     -5
+    ],
+    "r": [
+     0,
+     0,
+     0
+    ],
+    "s": [
+     1,
+     1,
+     1
+    ]
+   },
+   "intensity": 2
+  }
+ ],
+ "titles": [
+  {
+   "t": 0,
+   "d": 1.6,
+   "text": "Only one walks away.",
+   "style": "hook",
+   "cut": true
+  },
+  {
+   "t": 1.4,
+   "d": 2,
+   "text": "Néon Bay",
+   "style": "sub",
+   "sub": "USA"
+  },
+  {
+   "t": 6.1,
+   "d": 2.2,
+   "text": "Nobody blinks.",
+   "style": "title"
+  },
+  {
+   "t": 8.7,
+   "d": 0.4,
+   "text": "",
+   "style": "card",
+   "cut": true
+  },
+  {
+   "t": 9.1,
+   "d": 1.5,
+   "text": "Everyone has a price.",
+   "style": "card"
+  },
+  {
+   "t": 10.6,
+   "d": 1.8,
+   "text": "",
+   "style": "card",
+   "cut": true
+  },
+  {
+   "t": 10.6,
+   "d": 1.8,
+   "text": "NÉON|BAY",
+   "sub": "Play free\nlink in bio",
+   "style": "logo"
+  }
+ ],
+ "flashes": [
+  5.7
+ ],
+ "slow": [
+  {
+   "t": 5.7,
+   "d": 3,
+   "speed": 0.2
+  }
+ ],
+ "tiktok": {
+  "n": 15,
+  "slug": "15-standoff-in-the-rain-en",
+  "series": "Duel et braquage au ralenti",
+  "seriesKey": "duel",
+  "lang": "en",
+  "title": "Standoff in the rain (EN)",
+  "hook": "Only one walks away.",
+  "legend": "Two guns, a wet street, no witnesses.\nPistol or rifle?",
+  "hashtags": [
+   "#slowmotion",
+   "#cinematic",
+   "#openworld",
+   "#indiegame",
+   "#gaming",
+   "#neonbay"
+  ],
+  "music": "usa",
+  "hot": "5-9",
+  "duration": 12.4,
+  "plan": [
+   {
+    "t": 0,
+    "d": 1.2,
+    "label": "très gros plan : Lia met en joue"
+   },
+   {
+    "t": 1.2,
+    "d": 2.2,
+    "label": "plan large lent dans l’axe des deux"
+   },
+   {
+    "t": 3.4,
+    "d": 0.8,
+    "label": "par-dessus l’épaule de Rafa"
+   },
+   {
+    "t": 4.2,
+    "d": 0.8,
+    "label": "contrechamp"
+   },
+   {
+    "t": 5,
+    "d": 0.7,
+    "label": "gros plan Lia"
+   },
+   {
+    "t": 5.7,
+    "d": 3,
+    "label": "bullet time : la caméra tourne, le temps s’arrête"
+   },
+   {
+    "t": 8.7,
+    "d": 0.4,
+    "label": "noir"
+   },
+   {
+    "t": 9.1,
+    "d": 1.5,
+    "label": "carton titre"
+   },
+   {
+    "t": 10.6,
+    "d": 1.8,
+    "label": "carte finale"
+   }
+  ]
+ }
+}

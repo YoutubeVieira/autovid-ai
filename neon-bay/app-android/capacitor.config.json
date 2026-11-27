@@ -1,0 +1,20 @@
+{
+  "appId": "com.neonbay.mafia",
+  "appName": "Néon Bay",
+  "webDir": "www",
+  "backgroundColor": "#0D0B1A",
+  "loggingBehavior": "none",
+  "android": {
+    "backgroundColor": "#0D0B1A",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SystemBars": {
+      "hidden": true,
+      "style": "DARK",
+      "insetsHandling": "css",
+      "initialViewportFitValueHint": "cover"
+    }
+  }
+}

@@ -1,0 +1,211 @@
+{
+ "id": 4,
+ "name": "Speedrunner",
+ "role": "Toujours en voiture, nitro, aucun détour : chemin le plus rapide",
+ "levels": [
+  {
+   "n": 1,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 5,
+     "time": 205,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 7,
+     "time": 167,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 372,
+   "stars": 0,
+   "money": 4695
+  },
+  {
+   "n": 2,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 186,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 125,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 311,
+   "stars": 0,
+   "money": 3260
+  },
+  {
+   "n": 3,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 2,
+     "time": 221,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 9,
+     "time": 204,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 425,
+   "stars": 0,
+   "money": 4411
+  },
+  {
+   "n": 4,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "tunnel",
+     "idx": 5,
+     "time": 267,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 7,
+     "time": 150,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 417,
+   "stars": 0,
+   "money": 5287
+  },
+  {
+   "n": 5,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "goto",
+     "idx": 0,
+     "time": 137,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 110,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 247,
+   "stars": 0,
+   "money": 3377
+  }
+ ],
+ "totalGame": 1772,
+ "attempts": 10,
+ "timing": [
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 54,
+   "route": 1216,
+   "need": 23
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 59,
+   "route": 3307,
+   "need": 56
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 71,
+   "route": 7258,
+   "need": 102
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 64,
+   "route": 6052,
+   "need": 95
+  },
+  {
+   "n": 3,
+   "idx": 4,
+   "type": "garage",
+   "time": 53,
+   "route": 1536,
+   "need": 29
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 58,
+   "route": 6157,
+   "need": 106
+  }
+ ],
+ "gameErrors": 0,
+ "gameError1": "",
+ "errors": [],
+ "wall": 10,
+ "profile": {
+  "diff": 1,
+  "aimErr": 0.06,
+  "think": 1,
+  "range": 330,
+  "car": true,
+  "carDist": 250,
+  "drive": 1.1,
+  "run": true,
+  "heal": true,
+  "fightBack": true,
+  "shop": "weapons",
+  "strafe": false,
+  "tunnel": false,
+  "nitro": true,
+  "melee": false,
+  "wander": false,
+  "noCheckpoint": false,
+  "copsMax": 3,
+  "id": 4,
+  "name": "Speedrunner",
+  "role": "Toujours en voiture, nitro, aucun détour : chemin le plus rapide"
+ }
+}

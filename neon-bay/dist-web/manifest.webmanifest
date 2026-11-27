@@ -1,0 +1,18 @@
+{
+  "name": "Néon Bay",
+  "short_name": "Néon Bay",
+  "description": "Jeu d'action en monde ouvert : 30 niveaux, 4 pays, missions, poursuites et chefs de gang.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0d0b1a",
+  "theme_color": "#0d0b1a",
+  "categories": ["games", "action"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

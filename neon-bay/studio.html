@@ -1,0 +1,190 @@
+<title>Néon Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Studio sombre façon logiciel 3D : viewport au centre, bibliothèque à gauche, inspecteur à droite, timeline en bas. Un seul thème, volontairement sombre. */
+:root {
+  --bg: #0d0c14; --panel: #15131f; --panel2: #1c1a29; --line: #2b2840; --ink: #ece9f7; --mute: #8f8aa8;
+  --accent: #21e6ff; --key: #ff2e93; --warn: #ffb627; --ok: #6fe39a;
+  --ui: "Chakra Petch", "Segoe UI", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 13px/1.35 var(--ui); overflow: hidden; }
+header select { width: auto; max-width: 46vw; }
+button, select, input { font: inherit; color: inherit; }
+button { background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; }
+button:hover { border-color: #46406a; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+[hidden] { display: none !important; }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.on { border-color: var(--accent); color: var(--accent); }
+button.prim { background: var(--accent); color: #041318; border-color: var(--accent); font-weight: 700; }
+button.keyb { color: var(--key); border-color: rgba(255,46,147,.5); }
+select, input[type=number], input[type=text] { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; min-height: 30px; width: 100%; }
+input[type=color] { width: 36px; height: 30px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); padding: 2px; }
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr auto; padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-area-inset-right, 0px); }
+header { display: flex; align-items: center; gap: 8px; padding: 8px max(12px, env(safe-area-inset-left, 0px)); border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+header h1 { font-size: 15px; letter-spacing: .14em; text-transform: uppercase; margin: 0 8px 0 0; white-space: nowrap; }
+header h1 b { color: var(--accent); }
+.grow { flex: 1; }
+.tc { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--accent); min-width: 92px; text-align: center; }
+.main { min-height: 0; display: grid; grid-template-columns: 210px 1fr 260px; }
+aside { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; min-height: 0; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+aside.right { border-right: 0; border-left: 1px solid var(--line); }
+h2 { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); margin: 0 0 6px; }
+.lib { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lib button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 7px 8px; }
+.lib button small { color: var(--mute); font-size: 10px; }
+.view { position: relative; min-width: 0; min-height: 0; background: #000; overflow: hidden; }
+.view canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.frame { position: absolute; pointer-events: none; border: 1px dashed rgba(33,230,255,.55); box-shadow: 0 0 0 9999px rgba(0,0,0,.45); }
+.frame.cam { border-color: rgba(255,46,147,.7); box-shadow: 0 0 0 9999px #000; }
+.vtools { position: absolute; left: 8px; top: 8px; display: flex; gap: 6px; flex-wrap: wrap; max-width: calc(100% - 16px); }
+.vtools button { background: rgba(13,12,20,.82); }
+.hint { position: absolute; left: 8px; bottom: 8px; color: var(--mute); font-size: 11px; background: rgba(13,12,20,.7); padding: 4px 8px; border-radius: 6px; pointer-events: none; }
+.rec { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(5,4,10,.55); font-family: var(--mono); font-size: 14px; color: var(--key); pointer-events: none; }
+.outliner { display: flex; flex-direction: column; gap: 3px; }
+.outliner button { text-align: left; display: flex; justify-content: space-between; gap: 6px; padding: 5px 8px; min-height: 30px; }
+.outliner button span { color: var(--mute); font-size: 10px; }
+.outliner button.sel { border-color: var(--accent); background: rgba(33,230,255,.08); }
+.field { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 6px; }
+.field label { color: var(--mute); font-size: 11px; }
+.vec { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+.vec input { font-family: var(--mono); font-size: 11px; padding: 3px 4px; }
+.row { display: flex; gap: 6px; flex-wrap: wrap; }
+.colors { display: flex; flex-wrap: wrap; gap: 8px; }
+.colors label { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; color: var(--mute); }
+.empty { color: var(--mute); font-size: 12px; }
+textarea { width: 100%; box-sizing: border-box; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 6px; font: 12px/1.4 var(--ui); color: var(--ink); resize: vertical; }
+.filebtn { display: inline-flex; align-items: center; background: var(--panel2); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer; min-height: 32px; box-sizing: border-box; }
+.gen { border: 1px solid rgba(33,230,255,.35); border-radius: 10px; padding: 8px; background: rgba(33,230,255,.04); }
+.gen .lib { margin-top: 6px; }
+footer { background: var(--panel); border-top: 1px solid var(--line); padding: 6px max(10px, env(safe-area-inset-left, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 6px; }
+.tbar { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.tbar label { color: var(--mute); font-size: 11px; display: flex; align-items: center; gap: 4px; }
+.tbar input[type=number] { width: 64px; }
+.tl { position: relative; height: 128px; overflow-y: auto; overflow-x: hidden; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); touch-action: none; user-select: none; }
+.ruler { position: sticky; top: 0; height: 20px; background: var(--panel2); border-bottom: 1px solid var(--line); z-index: 2; }
+.ruler i { position: absolute; top: 0; bottom: 0; border-left: 1px solid var(--line); font: 10px var(--mono); color: var(--mute); padding-left: 3px; font-style: normal; }
+.track { position: relative; height: 24px; border-bottom: 1px solid rgba(43,40,64,.6); }
+.track.sel { background: rgba(33,230,255,.06); }
+.track em { position: absolute; left: 6px; top: 4px; font-size: 10px; color: var(--mute); font-style: normal; pointer-events: none; z-index: 1; }
+.kf { position: absolute; top: 6px; width: 11px; height: 11px; margin-left: -5.5px; background: var(--key); transform: rotate(45deg); border: 1px solid #fff3; cursor: pointer; z-index: 1; }
+.kf.cur { background: #fff; }
+.ph { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); z-index: 3; pointer-events: none; box-shadow: 0 0 8px var(--accent); }
+.toast { position: fixed; left: 50%; bottom: calc(190px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--panel2); border: 1px solid var(--line); padding: 8px 14px; border-radius: 8px; z-index: 20; }
+.tabs { display: none; }
+@media (max-width: 860px) {
+  .main { grid-template-columns: 1fr; grid-template-rows: minmax(220px, 46vh) 1fr; }
+  aside { display: none; border: 0; }
+  aside.show { display: flex; grid-row: 2; }
+  .view { grid-row: 1; }
+  .tabs { display: flex; gap: 4px; }
+  .tabs button { flex: 1; }
+  header h1 { font-size: 13px; }
+  .tl { height: 104px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Néon <b>Studio</b></h1>
+    <select id="tpl" aria-label="Modèle de scène">
+      <option value="">Scènes prêtes…</option>
+      <option value="trailer">Bande-annonce complète (46 s)</option>
+      <option value="chase">Poursuite de nuit</option>
+      <option value="arrival">Arrivée à Morro Azul</option>
+      <option value="duel">Face-à-face</option>
+      <option value="launch">Décollage de la fusée</option>
+      <option value="empty">Scène vide</option>
+    </select>
+    <button id="play" class="prim" aria-label="Lecture">▶ Lecture</button>
+    <span class="tc" id="tc">00:00.00</span>
+    <span class="grow"></span>
+    <button id="snap">Image PNG</button>
+    <button id="recBtn" class="keyb">● Exporter la vidéo</button>
+    <button id="saveBtn">Projet ↓</button>
+    <label class="row" style="align-items:center"><input type="file" id="loadIn" accept=".json,application/json" hidden><button id="loadBtn">Projet ↑</button></label>
+  </header>
+
+  <div class="main">
+    <aside id="pLib">
+      <div class="tabs"><button data-tab="pLib" class="on">Bibliothèque</button><button data-tab="pObj">Objet</button></div>
+      <section class="gen"><h2>Générateur 3D</h2>
+        <textarea id="genPrompt" rows="3" placeholder="Décris l'objet : une moto de course néon, un phare breton, un food truck de tacos…"></textarea>
+        <div class="row" style="margin-top:6px"><button id="genGo" class="prim">Créer le modèle</button><label class="filebtn" id="genImgL" hidden><input type="file" id="genImg" accept="image/*" hidden><span>Depuis une photo</span></label><button id="genStop" hidden>Arrêter</button></div>
+        <p class="empty" id="genStatus">Claude construit le modèle pièce par pièce, modifiable ensuite par une phrase.</p>
+        <div class="lib" id="libGen"></div>
+      </section>
+      <section><h2>Personnages</h2><div class="lib" id="libChars"></div></section>
+      <section><h2>Armes</h2><div class="lib" id="libWeap"></div></section>
+      <section><h2>Véhicules</h2><div class="lib" id="libCars"></div></section>
+      <section><h2>Décor</h2><div class="lib" id="libProps"></div></section>
+      <section><h2>Formes</h2><div class="lib" id="libPrims"></div></section>
+      <section><h2>Ambiance</h2>
+        <div class="field"><label for="amb">Lumière</label><select id="amb"><option value="night">Nuit néon</option><option value="moon">Lune</option><option value="sunset">Coucher de soleil</option><option value="day">Plein jour</option><option value="storm">Orage</option></select></div>
+        <div class="row" style="margin-top:8px"><button id="bloomBtn" class="on">Halo néon</button><button id="rainBtn">Pluie</button><button id="wetBtn">Sol mouillé</button></div>
+      </section>
+      <section><h2>Film</h2>
+        <div class="field"><label for="grade">Étalonnage</label><select id="grade"><option value="none">Naturel</option><option value="teal">Bleu-orange</option><option value="neon">Néon saturé</option><option value="noir">Film noir</option><option value="warm">Doré</option></select></div>
+        <div class="row" style="margin-top:8px"><button id="fadesBtn">Fondus début et fin</button></div>
+        <h2 style="margin-top:10px">Titre à l'instant courant</h2>
+        <input type="text" id="tText" placeholder="Texte du titre">
+        <input type="text" id="tSub" placeholder="Sous-titre (facultatif)" style="margin-top:4px">
+        <div class="row" style="margin-top:4px"><select id="tStyle" style="flex:1"><option value="title">Titre centré</option><option value="card">Carton noir</option><option value="sub">Bandeau bas</option><option value="logo">Logo (MOT1|MOT2)</option></select><input type="number" id="tDur" value="2.5" min=".5" max="20" step=".5" style="width:64px" aria-label="Durée du titre"></div>
+        <div class="row" style="margin-top:6px"><button id="tAdd">Ajouter le titre</button><button id="flashAdd">Flash</button><button id="slowAdd">Ralenti 2 s</button></div>
+        <div class="outliner" id="fxList" style="margin-top:6px"></div>
+      </section>
+    </aside>
+
+    <div class="view" id="view">
+      <canvas id="cv"></canvas>
+      <div class="frame" id="frame"></div>
+      <div class="vtools">
+        <button data-mode="translate" class="on" title="Déplacer (W)">Déplacer</button>
+        <button data-mode="rotate" title="Tourner (E)">Tourner</button>
+        <button data-mode="scale" title="Échelle (R)">Échelle</button>
+        <button id="camView" title="Voir par la caméra (C)">Vue caméra</button>
+        <button id="camHere" title="Mettre la caméra à cet endroit">Caméra ici</button>
+      </div>
+      <div class="hint" id="hint">Glisser : tourner la vue · molette ou pincer : zoom · clic : choisir un objet</div>
+      <div class="rec" id="rec" hidden></div>
+    </div>
+
+    <aside class="right" id="pObj">
+      <div class="tabs"><button data-tab="pLib">Bibliothèque</button><button data-tab="pObj" class="on">Objet</button></div>
+      <section><h2>Scène</h2><div class="outliner" id="outliner"></div></section>
+      <section id="insp"></section>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="tbar">
+      <button id="toStart" aria-label="Début">⏮</button>
+      <button id="addKey" class="keyb">◆ Clé</button>
+      <button id="delKey">Suppr. clé</button>
+      <button id="autoKey" class="on" title="Chaque déplacement crée une clé à l'instant courant">Clé auto</button>
+      <label>Durée <input type="number" id="dur" min="1" max="120" step="1" value="12"> s</label>
+      <label>Format <select id="aspect"><option value="16:9">16:9 · YouTube</option><option value="9:16">9:16 · TikTok</option><option value="2.39">2.39 · Cinéma</option></select></label>
+      <label>Qualité <select id="res"><option value="720">720p</option><option value="1080">1080p</option></select></label>
+    </div>
+    <div class="tl" id="tl"><div class="ruler" id="ruler"></div><div id="tracks"></div><div class="ph" id="ph"></div></div>
+  </footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/GLTFLoader.js"></script>
+<script src="vendor/SkeletonUtils.js"></script>
+<script src="vendor/OrbitControls.js"></script>
+<script src="vendor/TransformControls.js"></script>
+<script src="vendor/RoomEnvironment.js"></script>
+<script src="vendor/Sky.js"></script>
+<script src="vendor/Reflector.js"></script>
+<script src="vendor/GLTFExporter.js"></script>
+<script src="vendor/jszip.min.js"></script>
+<script src="vendor/postfx.js"></script>
+<script src="js/studio.js"></script>

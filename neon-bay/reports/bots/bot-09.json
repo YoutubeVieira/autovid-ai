@@ -1,0 +1,208 @@
+{
+ "id": 9,
+ "name": "Radin",
+ "role": "N’achète rien : le jeu se finit-il sans boutique ?",
+ "levels": [
+  {
+   "n": 1,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "buy",
+     "idx": 3,
+     "time": 229,
+     "from": 0
+    },
+    {
+     "ok": true,
+     "time": 181,
+     "from": 0
+    }
+   ],
+   "ok": true,
+   "time": 410,
+   "stars": 3,
+   "money": 6887
+  },
+  {
+   "n": 2,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "bribe",
+     "idx": 4,
+     "time": 195,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escort",
+     "idx": 1,
+     "time": 142,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 337,
+   "stars": 0,
+   "money": 10287
+  },
+  {
+   "n": 3,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 1,
+     "time": 62,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 2,
+     "time": 132,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 194,
+   "stars": 0,
+   "money": 11160
+  },
+  {
+   "n": 4,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "MC Ozone n’a pas survécu",
+     "step": "escort",
+     "idx": 0,
+     "time": 54,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 2,
+     "time": 102,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 156,
+   "stars": 0,
+   "money": 11872
+  },
+  {
+   "n": 5,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 78,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escape",
+     "idx": 2,
+     "time": 289,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 367,
+   "stars": 0,
+   "money": 13672
+  }
+ ],
+ "totalGame": 1464,
+ "attempts": 10,
+ "timing": [
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 54,
+   "route": 1280,
+   "need": 24
+  },
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 48,
+   "route": 450,
+   "need": 9
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 62,
+   "route": 3639,
+   "need": 59
+  },
+  {
+   "n": 1,
+   "idx": 9,
+   "type": "race",
+   "time": 65,
+   "route": 5693,
+   "need": 88
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 67,
+   "route": 6573,
+   "need": 98
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 58,
+   "route": 5985,
+   "need": 103
+  }
+ ],
+ "gameErrors": 0,
+ "gameError1": "",
+ "errors": [],
+ "wall": 7,
+ "profile": {
+  "diff": 1,
+  "aimErr": 0.12,
+  "think": 1,
+  "range": 330,
+  "car": true,
+  "carDist": 700,
+  "drive": 0.8,
+  "run": true,
+  "heal": true,
+  "fightBack": true,
+  "shop": "none",
+  "strafe": false,
+  "tunnel": false,
+  "nitro": false,
+  "melee": false,
+  "wander": false,
+  "noCheckpoint": false,
+  "copsMax": 2,
+  "id": 9,
+  "name": "Radin",
+  "role": "N’achète rien : le jeu se finit-il sans boutique ?"
+ }
+}

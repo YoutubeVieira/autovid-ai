@@ -1,0 +1,489 @@
+{
+ "id": 2,
+ "name": "Joueur moyen",
+ "role": "Référence : temps typique pour finir les 30 niveaux en Normal",
+ "levels": [
+  {
+   "n": 1,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "deliver",
+     "idx": 4,
+     "time": 180,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 2,
+     "time": 106,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "collect",
+     "idx": 5,
+     "time": 365,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 651,
+   "stars": 0,
+   "money": 3368
+  },
+  {
+   "n": 2,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "bribe",
+     "idx": 4,
+     "time": 586,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 143,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "race",
+     "idx": 3,
+     "time": 204,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 933,
+   "stars": 0,
+   "money": 7566
+  },
+  {
+   "n": 3,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 4,
+     "time": 135,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 2,
+     "time": 317,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 2,
+     "time": 222,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 674,
+   "stars": 0,
+   "money": 8433
+  },
+  {
+   "n": 4,
+   "tries": [
+    {
+     "ok": false,
+     "stuck": true,
+     "reason": "bloqué",
+     "step": "elim",
+     "idx": 2,
+     "time": 509,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "tunnel",
+     "idx": 5,
+     "time": 256,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "escort",
+     "idx": 6,
+     "time": 225,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 990,
+   "stars": 0,
+   "money": 13265
+  },
+  {
+   "n": 5,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "escape",
+     "idx": 2,
+     "time": 243,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 235,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 1,
+     "time": 179,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 657,
+   "stars": 0,
+   "money": 14368
+  },
+  {
+   "n": 6,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 3,
+     "time": 177,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tyrell n’a pas survécu",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 78,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "jailbreak",
+     "idx": 1,
+     "time": 108,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 363,
+   "stars": 0,
+   "money": 10805
+  },
+  {
+   "n": 7,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "destroy",
+     "idx": 2,
+     "time": 261,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 1,
+     "time": 68,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 3,
+     "time": 300,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 629,
+   "stars": 0,
+   "money": 14295
+  },
+  {
+   "n": 8,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 3,
+     "time": 121,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Arrêté par la police",
+     "step": "collect",
+     "idx": 3,
+     "time": 182,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 3,
+     "time": 151,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 454,
+   "stars": 0,
+   "money": 16385
+  },
+  {
+   "n": 9,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Temps écoulé",
+     "step": "garage",
+     "idx": 3,
+     "time": 72,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "tunnel",
+     "idx": 7,
+     "time": 240,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "collect",
+     "idx": 5,
+     "time": 131,
+     "from": 5
+    }
+   ],
+   "ok": false,
+   "time": 443,
+   "stars": 0,
+   "money": 19330
+  },
+  {
+   "n": 10,
+   "tries": [
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 1,
+     "time": 85,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "il Consigliere n’a pas survécu",
+     "step": "escort",
+     "idx": 2,
+     "time": 88,
+     "from": 0
+    },
+    {
+     "ok": false,
+     "reason": "Tu as été mis K.O.",
+     "step": "elim",
+     "idx": 1,
+     "time": 44,
+     "from": 0
+    }
+   ],
+   "ok": false,
+   "time": 217,
+   "stars": 0,
+   "money": 20990
+  }
+ ],
+ "totalGame": 6011,
+ "attempts": 30,
+ "timing": [
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 69,
+   "route": 3270,
+   "need": 47
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 57,
+   "route": 3048,
+   "need": 54
+  },
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 68,
+   "route": 2941,
+   "need": 43
+  },
+  {
+   "n": 1,
+   "idx": 2,
+   "type": "garage",
+   "time": 81,
+   "route": 3072,
+   "need": 38
+  },
+  {
+   "n": 1,
+   "idx": 4,
+   "type": "deliver",
+   "time": 74,
+   "route": 3767,
+   "need": 51
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 84,
+   "route": 6179,
+   "need": 74
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 81,
+   "route": 6260,
+   "need": 77
+  },
+  {
+   "n": 2,
+   "idx": 3,
+   "type": "race",
+   "time": 94,
+   "route": 5873,
+   "need": 63
+  },
+  {
+   "n": 3,
+   "idx": 4,
+   "type": "garage",
+   "time": 71,
+   "route": 4162,
+   "need": 59
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 74,
+   "route": 6443,
+   "need": 87
+  },
+  {
+   "n": 4,
+   "idx": 1,
+   "type": "race",
+   "time": 68,
+   "route": 5353,
+   "need": 79
+  },
+  {
+   "n": 6,
+   "idx": 2,
+   "type": "deliver",
+   "time": 46,
+   "route": 3294,
+   "need": 72
+  },
+  {
+   "n": 9,
+   "idx": 3,
+   "type": "garage",
+   "time": 48,
+   "route": 2880,
+   "need": 60
+  },
+  {
+   "n": 9,
+   "idx": 3,
+   "type": "garage",
+   "time": 42,
+   "route": 1536,
+   "need": 37
+  },
+  {
+   "n": 9,
+   "idx": 4,
+   "type": "deliver",
+   "time": 39,
+   "route": 3101,
+   "need": 80
+  }
+ ],
+ "gameErrors": 0,
+ "gameError1": "",
+ "errors": [],
+ "wall": 44,
+ "profile": {
+  "diff": 1,
+  "aimErr": 0.12,
+  "think": 1,
+  "range": 330,
+  "car": true,
+  "carDist": 700,
+  "drive": 0.8,
+  "run": true,
+  "heal": true,
+  "fightBack": true,
+  "shop": "basic",
+  "strafe": false,
+  "tunnel": false,
+  "nitro": false,
+  "melee": false,
+  "wander": false,
+  "noCheckpoint": false,
+  "copsMax": 2,
+  "id": 2,
+  "name": "Joueur moyen",
+  "role": "Référence : temps typique pour finir les 30 niveaux en Normal"
+ }
+}

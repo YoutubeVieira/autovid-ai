@@ -1,0 +1,88 @@
+{
+  "_info": "12 plans pour la bande-annonce IA de Néon Bay (3 par pays). Prompts en anglais pour Veo. Ces images sont générées par IA : ce ne sont pas des images du jeu (voir VEO.md).",
+  "defaults": {
+    "backend": "gemini",
+    "model": "veo-3.1-fast-generate-preview",
+    "vertexModel": "veo-3.1-fast-generate-001",
+    "aspectRatio": "9:16",
+    "resolution": "720p",
+    "durationSeconds": 6,
+    "generateAudio": false,
+    "style": "Stylized cinematic look, saturated neon color palette, mobile game trailer aesthetic, slightly toy-like low-poly 3D world, dynamic camera, high contrast, clean readable composition for a vertical phone screen, no on-screen text.",
+    "negativePrompt": "text, subtitles, captions, watermark, logo, brand names, readable signs, license plates, real celebrities, real people likeness, blood, gore, injuries, weapons pointed at people, realistic violence, dead bodies, drugs, nudity, flicker, distorted faces, extra limbs, blurry, low quality"
+  },
+  "shots": [
+    {
+      "id": "nb-ville",
+      "title": "Néon Bay : la baie au crépuscule",
+      "durationSeconds": 4,
+      "prompt": "Slow aerial drone shot gliding over a fictional American beach city at dusk: glass towers glowing pink and cyan, pastel art deco buildings, rows of palm trees, a ferris wheel lit up on the pier, waves rolling onto a wide beach, purple and orange sky."
+    },
+    {
+      "id": "nb-poursuite",
+      "title": "Néon Bay : poursuite sur le front de mer",
+      "durationSeconds": 6,
+      "prompt": "Night car chase along a neon-lit beachfront boulevard: a bright pink retro muscle car drifts around a corner under palm trees, two generic police cruisers with flashing red and blue lights follow close behind, sparks fly as the car scrapes a barrier, low tracking camera beside the wheels, wet asphalt reflecting neon."
+    },
+    {
+      "id": "nb-perso",
+      "title": "Néon Bay : le héros sur le toit",
+      "durationSeconds": 4,
+      "prompt": "Cinematic low-angle shot of a stylized fictional hero in a dark jacket and sneakers standing on a rooftop at night, back to the camera, looking over the glowing neon skyline, wind moving his jacket, a helicopter searchlight sweeping across the clouds in the distance."
+    },
+    {
+      "id": "pl-ville",
+      "title": "Porto Lumi : canaux et campanile",
+      "durationSeconds": 4,
+      "prompt": "Golden hour establishing shot of a fictional Mediterranean harbor town: ochre and salmon facades with terracotta roofs, narrow canals with small wooden boats, a tall bell tower and a domed church, cypress trees on the hills, warm lantern lights turning on, camera slowly pushing forward over the water."
+    },
+    {
+      "id": "pl-poursuite",
+      "title": "Porto Lumi : course-poursuite en scooter",
+      "durationSeconds": 6,
+      "prompt": "Fast chase through narrow cobblestone streets of a fictional Italian town at sunset: a rider on a red retro scooter weaves between cafe tables and fruit stands, a small white car squeezes through the alley behind, oranges bounce across the cobblestones, laundry lines overhead, handheld camera following at speed."
+    },
+    {
+      "id": "pl-perso",
+      "title": "Porto Lumi : la famille se réunit",
+      "durationSeconds": 4,
+      "prompt": "Moody cinematic shot inside a candle-lit trattoria at night: three stylized fictional characters in elegant 1950s suits and fedoras sit around a table with an old map of the harbor, one slides a brass key across the table, warm amber light and deep shadows, slow dolly-in."
+    },
+    {
+      "id": "sv-ville",
+      "title": "Sierra Verde : la ville au pied des montagnes",
+      "durationSeconds": 4,
+      "prompt": "Sweeping aerial shot of a fictional colonial town in a green mountain valley: brightly painted houses in yellow, blue and pink with red tile roofs, a white church with two towers, a winding river, dense jungle and misty mountains, morning sun rays cutting through the clouds."
+    },
+    {
+      "id": "sv-poursuite",
+      "title": "Sierra Verde : le 4x4 et la piste de brousse",
+      "durationSeconds": 6,
+      "prompt": "Action shot on a muddy jungle dirt road: a battered green off-road 4x4 bursts through hanging vines and splashes across a shallow river, a small propeller plane takes off from a hidden dirt airstrip just above it, a parked pickup truck behind them explodes into a big orange fireball, camera low in the mud, debris and water spray."
+    },
+    {
+      "id": "sv-perso",
+      "title": "Sierra Verde : la pilote de brousse",
+      "durationSeconds": 4,
+      "prompt": "Cinematic close-up of a stylized fictional female bush pilot with a leather jacket, aviator goggles pushed up on her head and a confident smile, standing next to her small propeller plane at sunset, jungle in the background, propeller starting to spin, warm rim light."
+    },
+    {
+      "id": "ma-ville",
+      "title": "Morro Azul : les collines colorées",
+      "durationSeconds": 4,
+      "prompt": "Vibrant aerial shot of a fictional hillside neighborhood in a Brazilian-inspired coastal city at sunset: stacked colorful houses climbing the hills, blue water tanks on rooftops, a cable car passing overhead, a giant granite rock by the sea, a wave-patterned beach promenade, a small football pitch with kids playing."
+    },
+    {
+      "id": "ma-poursuite",
+      "title": "Morro Azul : moto dans les ruelles",
+      "durationSeconds": 6,
+      "prompt": "High-energy chase on a dirt motorbike racing down steep narrow staircases and alleys of a colorful hillside neighborhood at night, string lights and murals of abstract shapes on the walls, a generic police car with flashing lights blocked at the bottom of the stairs, the bike jumps over it, slow motion at the peak of the jump, cyan and pink neon glow."
+    },
+    {
+      "id": "ma-perso",
+      "title": "Morro Azul : le baile au sommet",
+      "durationSeconds": 4,
+      "prompt": "Cinematic night shot of a rooftop street party on top of a colorful hillside: a stylized fictional young leader in a cyan cap and chain turns toward the camera with a smile as fireworks burst over the bay behind him, crowd dancing under colored lights, slow orbit camera, festive and confident mood."
+    }
+  ]
+}
