@@ -44,20 +44,23 @@ def interp(kind):
 
 
 # ------------------------------------------------------------------ distribution
-VIVID = [(0.92, 0.22, 0.22), (0.98, 0.70, 0.12), (0.18, 0.55, 0.92), (0.22, 0.75, 0.38), (0.90, 0.35, 0.70),
-         (0.97, 0.50, 0.12), (0.55, 0.38, 0.88), (0.12, 0.72, 0.78)]
-HAIRS = [(0.2, 0.12, 0.06), (0.05, 0.05, 0.06), (0.65, 0.4, 0.15), (0.9, 0.7, 0.25), (0.55, 0.12, 0.1)]
+_P = city.PAL["primaires"]
+_H = city.H
+VIVID = [_H(_P["rouge"]), _H(_P["bleu_ciel"]), _H(_P["or"]), _H(_P["vert"]), _H(_P["bleu_profond"]),
+         _H(_P["rouge"]), _H(_P["bleu_ciel"]), _H(_P["or"])]
+HAIRS = [_H(city.PAL["bois_brique"]["brun_fonce"]), _H(city.PAL["neutres"]["quasi_noir"]), _H(city.PAL["bois_brique"]["brun"]),
+         _H(city.PAL["bois_brique"]["ocre"]), _H(_P["rouge"])]
 rnd = random.Random(11)
 
 STARS = {  # les 6 premiers habitants, avec metier
-    "Ana": dict(shirt=(0.9, 0.3, 0.45), pants=(0.2, 0.2, 0.5), hair="long", hair_color=HAIRS[0], accessory="bag", skin=bk.SKINS[1]),
+    "Ana": dict(shirt=_H(_P["rouge"]), pants=_H(_P["bleu_profond"]), hair="long", hair_color=HAIRS[0], accessory="bag", skin=bk.SKINS[1]),
     "Luc": dict(shirt=(0.97, 0.97, 0.97), pants=(0.2, 0.5, 0.65), hair="cap", accessory="cross", skin=bk.SKINS[3], hair_color=HAIRS[1]),
-    "Lea": dict(shirt=(0.95, 0.15, 0.15), pants=(0.98, 0.78, 0.1), hair="spiky", hair_color=HAIRS[3], accessory="whistle", skin=bk.SKINS[2]),
+    "Lea": dict(shirt=_H(_P["rouge"]), pants=_H(_P["or"]), hair="spiky", hair_color=HAIRS[3], accessory="whistle", skin=bk.SKINS[2]),
     "Marc": dict(shirt=(0.95, 0.9, 0.85), pants=(0.3, 0.3, 0.35), hat="chef", accessory="apron", hair="cap", skin=bk.SKINS[4], face="happy", hair_color=HAIRS[2]),
-    "Yan": dict(shirt=(0.2, 0.55, 0.3), pants=(0.45, 0.35, 0.2), hat="cap", hat_color=(0.98, 0.8, 0.1), hair="cap", skin=bk.SKINS[1], hair_color=HAIRS[4]),
-    "Zoe": dict(shirt=(0.55, 0.38, 0.88), pants=(0.15, 0.15, 0.3), hair="bun", hair_color=HAIRS[4], skin=bk.SKINS[0], face="happy"),
+    "Yan": dict(shirt=_H(_P["vert"]), pants=_H(city.PAL["bois_brique"]["brun"]), hat="cap", hat_color=_H(_P["or"]), hair="cap", skin=bk.SKINS[1], hair_color=HAIRS[4]),
+    "Zoe": dict(shirt=_H(_P["bleu_ciel"]), pants=_H(_P["bleu_profond"]), hair="bun", hair_color=HAIRS[4], skin=bk.SKINS[0], face="happy"),
 }
-MAIRE = dict(shirt=(0.12, 0.2, 0.6), pants=(0.1, 0.1, 0.14), hat="tophat", accessory="sash", hair="grey", skin=bk.SKINS[0], face="happy")
+MAIRE = dict(shirt=_H(_P["bleu_profond"]), pants=_H(city.PAL["neutres"]["quasi_noir"]), hat="tophat", accessory="sash", hair="grey", skin=bk.SKINS[0], face="happy")
 Z0 = 0.05
 chars = {}
 for i, (n, spec) in enumerate(STARS.items()):
@@ -142,39 +145,84 @@ bk.key_obj(maire, 409, scale=1.5, loc=(0, 36.7, 0.42), rot_z=0)
 bk.wave(maire, 409, 480, side="R")
 ev(410, "badge", text="ELECTION DU MAIRE", color="yellow")
 
-# ------------------------------------------------------------------ cameras (un par plan, lies par marqueurs)
+# ------------------------------------------------------------------ plan heros: piece d'or geante "100"
+gold = bk.mat("gold", _H(_P["or"]), 0.22)
+gold.node_tree.nodes["Principled BSDF"].inputs["Metallic"].default_value = 1.0
+cb = city._Static("Coin")
+cb.cyl((0, 0, 0), 0.95, 0.95, 0.16, "hips", gold, seg=48, rot=bk.Matrix.Rotation(math.pi / 2, 3, 'X'))
+cb.cyl((0, -0.085, 0), 0.8, 0.8, 0.02, "hips", bk.mat("goldrim", _H(city.PAL["bois_brique"]["brun"]), 0.3), seg=48, rot=bk.Matrix.Rotation(math.pi / 2, 3, 'X'))
+coin = cb.finish(col)
+coin.location = (0, 10, 1.7)
+cu = bpy.data.curves.new("coin_txt", 'FONT')
+cu.body, cu.size, cu.extrude, cu.align_x, cu.align_y = "100", 0.62, 0.03, 'CENTER', 'CENTER'
+txt = bpy.data.objects.new("coin_txt", cu)
+col.objects.link(txt)
+txt.parent = coin
+txt.location = (0, -0.12, 0)
+txt.rotation_euler = (math.radians(90), 0, 0)
+txt.data.materials.append(bk.mat("coin_ink", _H(city.PAL["bois_brique"]["brun_fonce"]), 0.4))
+interp('BEZIER')
+bk.key_obj(coin, 350, scale=0.0001, loc=(0, 10, 1.7))
+bk.key_obj(coin, 356, scale=1.15, loc=(0, 10, 1.7))
+bk.key_obj(coin, 360, scale=1.0, loc=(0, 10, 1.7))
+bk.key_obj(coin, 366, scale=1.0, loc=(0, 10, 1.7))
+bk.key_obj(coin, 367, scale=0.0001, loc=(0, 10, 1.7))
+coin.rotation_euler = (0, 0, math.radians(-28))
+coin.keyframe_insert("rotation_euler", frame=351)
+coin.rotation_euler = (0, 0, math.radians(28))
+coin.keyframe_insert("rotation_euler", frame=366)
+ev(352, "badge", text="100 HABITANTS", color="yellow")
+
+# ------------------------------------------------------------------ cameras: montage RAPIDE (plans de 1 a 2 s)
 interp('BEZIER')
 cams = []
 
 
-def shot(i, loc0, loc1, tgt0, tgt1, lens=30):
-    f0, f1 = SH[i], SH[i + 1] - 1
-    cd = bpy.data.cameras.new(f"Cam{i + 1}")
+def shot(n, f0, f1, loc0, loc1, tgt0, tgt1, lens=30):
+    cd = bpy.data.cameras.new(f"Cam{n}")
     cd.lens = lens
-    co = bpy.data.objects.new(f"Cam{i + 1}", cd)
+    cd.dof.use_dof = True
+    cd.dof.aperture_fstop = 3.2
+    co = bpy.data.objects.new(f"Cam{n}", cd)
     col.objects.link(co)
-    tgt = bpy.data.objects.new(f"Target{i + 1}", None)
+    tgt = bpy.data.objects.new(f"Target{n}", None)
     col.objects.link(tgt)
     c = co.constraints.new('TRACK_TO')
     c.target, c.track_axis, c.up_axis = tgt, 'TRACK_NEGATIVE_Z', 'UP_Y'
+    cd.dof.focus_object = tgt
     for f, l, t in ((f0, loc0, tgt0), (f1, loc1, tgt1)):
         co.location, tgt.location = l, t
         co.keyframe_insert("location", frame=f)
         tgt.keyframe_insert("location", frame=f)
-    m = sc.timeline_markers.new(f"shot{i + 1}", frame=f0)
+    m = sc.timeline_markers.new(f"shot{n}", frame=f0)
     m.camera = co
-    cams.append(co)
+    cams.append((f0, co))
 
 
-shot(0, (0, -1.0, 0.9), (0, 7.0, 1.1), (0, 40, 3.0), (0, 40, 3.2))            # rue vide
-shot(1, (2.6, 4.5, 0.95), (1.6, 5.6, 1.0), (0.6, 10, 0.7), (0.6, 10, 0.75), 34)  # Ana
-shot(2, (0.0, 3.5, 0.85), (0.4, 4.6, 0.95), (0.0, 11, 0.6), (0.3, 11, 0.65), 28)  # le rang
-shot(3, (0, 0.5, 3.4), (0, 3.5, 1.4), (0, 14, 0.5), (0, 13, 0.7), 26)             # la foule, grue
-shot(4, (-1.3, 32.6, 1.0), (-0.5, 33.8, 1.15), (0, 36.7, 1.05), (0, 36.7, 1.15), 34)  # le maire
-for f in SH[1:5]:
-    ev(f, "cut")
+SHOTS = [  # (debut, fin, cam_debut, cam_fin, cible_debut, cible_fin, focale)
+    (1, 36, (0, -2.0, 1.0), (0, 6.0, 1.2), (0, 40, 3.0), (0, 40, 3.4), 28),          # rue vide, travelling avant tres rapide
+    (37, 60, (0, 14, 14), (0, 19, 6.5), (0, 22, 0), (0, 22, 0.5), 30),               # vue du ciel qui plonge
+    (61, 84, (0.6, 1.5, 0.25), (0.6, 14, 0.4), (0, 30, 0.6), (0, 30, 0.6), 24),      # rase-sol sur les lignes de la route
+    (85, 108, (3.2, 6.0, 1.0), (1.6, 7.2, 1.0), (3.8, 10, 0.7), (1.2, 10, 0.7), 32),  # Ana entre (travelling lateral)
+    (109, 132, (0.9, 7.0, 0.95), (0.7, 7.9, 0.95), (1.8, 10, 0.8), (0.6, 10, 0.85), 55),  # gros plan Ana
+    (133, 168, (-0.5, 7.6, 0.35), (0.3, 8.6, 0.55), (0.6, 10, 0.95), (0.6, 10, 1.0), 34),  # contre-plongee, elle salue
+    (169, 200, (0, 4.0, 0.9), (0.3, 6.2, 1.0), (0, 11, 0.7), (0, 11, 0.75), 28),     # le rang apparait
+    (201, 230, (-3.6, 7.0, 1.0), (-2.2, 8.2, 1.0), (-1.8, 10.8, 0.8), (-1.6, 11, 0.85), 40),  # coup de camera a gauche
+    (231, 288, (0, 3.0, 0.8), (0, 5.8, 1.0), (0, 11, 0.7), (0, 11, 0.8), 24),        # poussee sur le groupe
+    (289, 320, (0, 0.5, 3.4), (0, 3.0, 2.0), (0, 16, 0.5), (0, 15, 0.6), 26),        # la foule arrive, vue haute
+    (321, 350, (2.8, 8.0, 0.3), (0.6, 10.2, 0.4), (0, 13, 0.6), (0, 13, 0.7), 30),   # rase-sol, jambes qui courent
+    (351, 366, (0.5, 4.2, 1.8), (0.2, 5.4, 1.8), (0, 10, 1.75), (0, 10, 1.75), 50),    # plan heros: la piece geante 100
+    (367, 380, (0, 1.5, 6.0), (0, 6.5, 3.6), (0, 16, 0.5), (0, 15, 0.7), 22),        # grue: les 100 habitants
+    (381, 408, (0, 6.0, 1.2), (0, 7.2, 1.3), (0, 12.5, 1.0), (0, 12.5, 1.1), 45),    # la foule en fete
+    (409, 440, (-2.4, 31.0, 1.1), (-1.0, 32.6, 1.4), (0, 36.7, 1.4), (0, 36.7, 1.5), 32),  # le maire
+    (441, 480, (0.0, 32.6, 1.55), (0.0, 33.9, 1.6), (0, 36.7, 1.6), (0, 36.7, 1.62), 40),   # push final sur son visage
+]
+for n, (f0, f1, l0, l1, t0, t1, lens) in enumerate(SHOTS, 1):
+    shot(n, f0, f1, l0, l1, t0, t1, lens)
+for f0, _ in cams[1:]:
+    ev(f0, "cut")
 sc.frame_start, sc.frame_end = 1, 480
-sc.camera = cams[0]
+sc.camera = cams[0][1]
 
 # ------------------------------------------------------------------ rendu
 sc.render.engine = 'CYCLES'
@@ -187,7 +235,7 @@ try:
     sc.view_settings.view_transform = 'Khronos PBR Neutral'
 except TypeError:
     pass
-sc.view_settings.exposure = -0.6
+sc.view_settings.exposure = -0.75
 
 os.makedirs(args.out, exist_ok=True)
 with open(os.path.join(args.out, "events.json"), "w", encoding="utf-8") as fh:

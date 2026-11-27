@@ -95,6 +95,40 @@ for k in range(2):
     foot.append(mix(noise(0.07, 0.6, a=0.002, r=0.06, lp=0.2), tone(90, 0.07, 0.5, a=0.001, r=0.06, decay=30)))
 M.append(save("footsteps", mix(*foot, offsets=[0, 0.28]), "Deux pas", "arrivee d'un habitant"))
 
+
+# ---- effets "montage viral" : impacts graves, montees, glitchs, zooms
+def square(freq, dur, vol=0.3, a=0.002, r=0.02):
+    n = int(SR * dur)
+    return [(1.0 if math.sin(2 * math.pi * freq * i / SR) > 0 else -1.0) * vol * env(i / SR, dur, a, r) for i in range(n)]
+
+
+def riser(dur=1.2):
+    n = int(SR * dur)
+    s, y, ph = [], 0.0, 0.0
+    for i in range(n):
+        t = i / SR
+        k = t / dur
+        y += (0.04 + 0.5 * k * k) * (rnd.uniform(-1, 1) - y)
+        ph += 2 * math.pi * (180 + 1900 * k * k) / SR
+        s.append((y * 0.7 + math.sin(ph) * 0.25) * (0.15 + 0.85 * k) * min(1.0, (dur - t) / 0.03))
+    return s
+
+
+boom = mix(tone(62, 0.9, 0.95, a=0.001, r=0.5, decay=4.5, f_end=34), noise(0.12, 0.7, a=0.001, r=0.1, lp=0.35),
+           tone(110, 0.25, 0.5, a=0.001, r=0.2, decay=14, f_end=50))
+M.append(save("boom", [max(-0.95, min(0.95, v * 1.5)) for v in boom], "Impact grave (boom)", "coupe sur un gros plan, palier, mot choc"))
+M.append(save("riser", riser(1.2), "Montee de tension", "avant une revelation, avant le palier"))
+M.append(save("whoosh_fast", noise(0.22, 0.95, a=0.04, r=0.15, lp=0.2, bp=0.03), "Souffle tres court", "whip pan, coupe rapide"))
+M.append(save("swipe", mix(noise(0.16, 0.8, a=0.03, r=0.1, lp=0.3, bp=0.05), tone(900, 0.16, 0.12, a=0.02, r=0.1, f_end=2400)), "Glissement", "transition laterale"))
+gl = []
+for k in range(7):
+    gl.append(square(rnd.choice([220, 330, 440, 660, 990, 1500]), rnd.uniform(0.015, 0.045), 0.35))
+M.append(save("glitch", mix(*gl, offsets=[k * 0.035 for k in range(7)]), "Glitch numerique", "apparition brusque, erreur, effet 'jeu'"))
+M.append(save("shutter", mix(noise(0.03, 0.7, a=0.001, r=0.025, lp=0.7), noise(0.05, 0.6, a=0.001, r=0.04, lp=0.5), offsets=[0, 0.09]), "Obturateur photo", "arret sur image, gros plan fixe"))
+M.append(save("zap", tone(2600, 0.2, 0.45, a=0.001, r=0.08, harm=(1, 0.7, 0.5), f_end=180), "Zap descendant", "apparition d'un personnage"))
+M.append(save("bass_drop", mix(tone(120, 0.9, 0.9, a=0.002, r=0.5, decay=3.0, f_end=28), noise(0.05, 0.4, a=0.001, r=0.04, lp=0.3)), "Chute de basse", "debut d'un plan fort, titre"))
+M.append(save("pop_double", mix(tone(520, 0.08, 0.7, a=0.002, r=0.06, f_end=880, decay=18), tone(700, 0.08, 0.7, a=0.002, r=0.06, f_end=1200, decay=18), offsets=[0, 0.09]), "Double bulle", "apparition de deux habitants"))
+
 with open(os.path.join(out, "manifest.json"), "w", encoding="utf-8") as fh:
     json.dump({"license": "CC0 1.0 - sons synthetises par make_sfx.py, aucun echantillon tiers", "sample_rate": SR, "sounds": M}, fh, indent=2, ensure_ascii=False)
 with open(os.path.join(out, "LICENSE.txt"), "w", encoding="utf-8") as fh:

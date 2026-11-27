@@ -79,15 +79,59 @@
       "badge:green": "coin",
       "badge:red": "error_buzz",
       "counter": "tick",
-      "cut": "whoosh",
+      "cut": "whoosh_fast",
       "outro": "stamp",
-      "milestone": "level_up",
-      "pop": "pop"
+      "milestone": [
+        "level_up",
+        "boom"
+      ],
+      "pop": "pop_double",
+      "impact": "boom",
+      "riser": "riser"
     }
   },
   "episode": {
     "label": "ÉPISODE 1",
     "seconds": 3.0,
     "size": 30
+  },
+  "fx": {
+    "punch": {
+      "on": [
+        "cut",
+        "badge",
+        "milestone",
+        "impact"
+      ],
+      "zoom": 0.17,
+      "tau": 0.11,
+      "dur": 0.5
+    },
+    "shake": {
+      "on": [
+        "cut",
+        "milestone",
+        "impact"
+      ],
+      "amp": 16,
+      "dur": 0.32,
+      "freq": 70
+    },
+    "whip": {
+      "on": [
+        "cut"
+      ],
+      "sigma": 26,
+      "pre": 0.04,
+      "post": 0.07
+    },
+    "flash": {
+      "on": [
+        "milestone",
+        "impact"
+      ],
+      "dur": 0.12,
+      "amount": 0.35
+    }
   }
 }

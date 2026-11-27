@@ -21,6 +21,8 @@ ap.add_argument("--voice", default="siwis")
 ap.add_argument("--speaker", type=int, default=0, help="upmc: 0=jessica, 1=pierre")
 ap.add_argument("--speed", type=float, default=1.0)
 ap.add_argument("--models", default=os.path.join(here, "models"))
+ap.add_argument("--fx", default="none", choices=["none", "viral"], help="viral = voix de narrateur TikTok: egaliseur + compression + limiteur")
+ap.add_argument("--pitch", type=float, default=0.0, help="demi-tons (ex. -1.5 = voix plus grave), necessite ffmpeg avec rubberband")
 ap.add_argument("--total", type=float, help="duree totale de la piste (s); sinon fin de la derniere phrase")
 a = ap.parse_args()
 
@@ -85,6 +87,21 @@ with open(os.path.join(a.out, "voice.srt"), "w", encoding="utf-8") as f:
         f.write(f"{i}\n{ts(c['start'])} --> {ts(c['end'])}\n{c['text']}\n\n")
 json.dump({"voice": a.voice, "credit": cfg["credit"], "license": cfg["license"], "duration": round(total, 2), "cues": cues, "warnings": warn},
           open(os.path.join(a.out, "voice.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+VIRAL = ("highpass=f=85,equalizer=f=140:t=q:w=1:g=3.5,equalizer=f=320:t=q:w=1.2:g=-2,"
+         "equalizer=f=3300:t=q:w=1.1:g=4.5,equalizer=f=9000:t=q:w=1.5:g=-3,"
+         "acompressor=threshold=-24dB:ratio=5:attack=3:release=70:makeup=7,asoftclip=type=tanh:threshold=0.8,alimiter=limit=0.85,loudnorm=I=-16:TP=-2:LRA=7")
+if a.fx != "none" or a.pitch:
+    import shutil
+    import subprocess
+    raw = os.path.join(a.out, "voice_raw.wav")
+    shutil.copy(os.path.join(a.out, "voice.wav"), raw)
+    chain = []
+    if a.pitch:
+        chain.append(f"rubberband=pitch={2 ** (a.pitch / 12):.5f}:formant=preserved")
+    if a.fx == "viral":
+        chain.append(VIRAL)
+    subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", raw, "-af", ",".join(chain),
+                    os.path.join(a.out, "voice.wav")], check=True)
 print(f"{len(cues)} phrases, {total:.1f}s -> {a.out}/voice.wav | credit: {cfg['credit']}")
 for w_ in warn:
     print("ATTENTION:", w_)

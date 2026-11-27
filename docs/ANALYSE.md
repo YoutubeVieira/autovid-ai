@@ -62,3 +62,39 @@ Mesures: 35,3 s, 720x1280, 30 fps, H.264, AAC 44,1 kHz. Loudness **-14,1 LUFS** 
 2. Rythme de texte ~1 groupe de 1-3 mots toutes les 0,5-1 s (le preset actuel `max_words: 3` convient; ajouter une option de police pixel et une couleur de mot cle par mot pre-defini).
 3. HUD / badges / chiffres en gros bloc: **pas encore gere** par le monteur (necessite des calques graphiques, ex. Remotion/HyperFrames, ou des overlays ASS/PNG).
 4. Queue silencieuse finale de ~1,8 s + carton-titre de fin: a ajouter comme option `outro`.
+
+
+---
+
+# Compte de reference TikTok « Dans cette ville... » (captures d'ecran)
+
+Source: 7 captures de la grille du profil (miniatures de 20 K a 1,9 M de vues). Palette mesuree par k-means sur 84 miniatures (`docs/palette_analysis.py`), reprise telle quelle dans `blender/blocky/palette_ref.json` (couleurs par defaut de la ville et des personnages).
+
+## Couleurs (mesurees)
+| Role | Couleur | Part des pixels |
+|---|---|---|
+| Rouge | `#CC130E` | 3,0 % |
+| Bleu ciel | `#198AE6` | 5,1 % |
+| Bleu profond | `#1B478C` | 2,8 % |
+| Or / jaune | `#E59C18` | 1,9 % |
+| Vert | `#267722` | 3,3 % |
+| Pierre creme / gris chaud / blanc casse | `#DEC5A1` `#9F978C` `#F6F5F5` | 7,8 % / 7,9 % / 8,0 % |
+| Ocre, brun, brun fonce (bois, brique, peaux) | `#C18552` `#895818` `#582811` | 4,9 % / 6,0 % / 6,9 % |
+| Route, pave, quasi noir | `#4E4D55` `#73716E` `#120E10` | 9,5 % / 9,7 % / 9,3 % |
+| Bleu nuit | `#1E2841` | 8,0 % |
+
+Saturation moyenne 0,48; luminosite moyenne 0,44; **seules 5 % des miniatures sont sombres** (la serie est surtout diurne, ciel bleu franc), 45 % sont claires. Regle: cinq teintes pleines (rouge, bleu, or, vert, brun) sur un decor de pierre creme et de gris chaud; pas de pastel.
+
+## Style d'image
+- Figurines en blocs (corps cubique, tete cubique, joues roses, yeux noirs allonges) rendues en 3D avec matieres plastique/metal, ombres douces et **profondeur de champ faible** (fond flou, effet maquette).
+- Decor de petite ville francaise: facades en pierre creme, volets verts/bleus/rouges, mairie avec drapeaux, guirlandes de fanions, lampadaires, places pavees; variantes thematiques (temple grec, montagne, desert, ferme, nuit de fete sous la pluie).
+- Texte integre au decor (panneaux « INTERDIT DE SE BATTRE », affiches « DISPARU », « EN DIRECT », compteurs lumineux), pastille doree « EPISODE 2 », sous-titres mot par mot (une seule parole a l'ecran) en blanc gras a contour noir vers 65 % de la hauteur.
+
+## Plans (types releves)
+1. **Gros plan visage** (yeux, joues, sourire) qui remplit le cadre; 2. **objet heros** plein cadre (piece d'or avec tete de mort, panneau « NON », couronne flottante, jauge de vitesse); 3. **rue en perspective centrale** symetrique, lampadaires qui guident l'oeil vers le batiment; 4. **contre-plongee** sur un personnage ou une foule en fete; 5. **plan d'ensemble de place** avec foule ou alignement de personnages; 6. **coupe en section** (maison posee sur un puits/sous-sol); 7. plans de reaction rapproches (visages inquiets, bouches ouvertes); 8. gros plan sur panneau/affiche pour lire l'information.
+Rythme: une idee par plan, 1 a 2 s, alternance gros plan / plan large, coupes sur les mots forts.
+
+## Applique dans le depot
+- Couleurs par defaut: `blender/blocky/palette_ref.json` (ville, vetements, peaux, volets, drapeaux).
+- Style: profondeur de champ (f/3,2), piece d'or heros « 100 », contre-plongees, gros plans, rase-sol, vue du ciel, travelling rapide (15 plans pour 20 s dans `episode01.py`).
+- Montage rapide (`pixel_game` -> `fx`): zoom « punch » a chaque coupe, secousse, flou de balayage, flash sur les paliers.

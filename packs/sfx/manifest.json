@@ -85,6 +85,60 @@
       "duration_s": 0.35,
       "description": "Deux pas",
       "use": "arrivee d'un habitant"
+    },
+    {
+      "file": "boom.wav",
+      "duration_s": 0.9,
+      "description": "Impact grave (boom)",
+      "use": "coupe sur un gros plan, palier, mot choc"
+    },
+    {
+      "file": "riser.wav",
+      "duration_s": 1.2,
+      "description": "Montee de tension",
+      "use": "avant une revelation, avant le palier"
+    },
+    {
+      "file": "whoosh_fast.wav",
+      "duration_s": 0.22,
+      "description": "Souffle tres court",
+      "use": "whip pan, coupe rapide"
+    },
+    {
+      "file": "swipe.wav",
+      "duration_s": 0.16,
+      "description": "Glissement",
+      "use": "transition laterale"
+    },
+    {
+      "file": "glitch.wav",
+      "duration_s": 0.23,
+      "description": "Glitch numerique",
+      "use": "apparition brusque, erreur, effet 'jeu'"
+    },
+    {
+      "file": "shutter.wav",
+      "duration_s": 0.14,
+      "description": "Obturateur photo",
+      "use": "arret sur image, gros plan fixe"
+    },
+    {
+      "file": "zap.wav",
+      "duration_s": 0.2,
+      "description": "Zap descendant",
+      "use": "apparition d'un personnage"
+    },
+    {
+      "file": "bass_drop.wav",
+      "duration_s": 0.9,
+      "description": "Chute de basse",
+      "use": "debut d'un plan fort, titre"
+    },
+    {
+      "file": "pop_double.wav",
+      "duration_s": 0.17,
+      "description": "Double bulle",
+      "use": "apparition de deux habitants"
     }
   ]
 }

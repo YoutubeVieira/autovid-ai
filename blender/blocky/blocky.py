@@ -30,7 +30,7 @@ def mat(name, rgb, rough=0.5):
     return m
 
 
-SKINS = [(0.96, 0.78, 0.60), (0.85, 0.62, 0.45), (0.62, 0.42, 0.30), (0.42, 0.28, 0.20), (0.98, 0.85, 0.70)]
+SKINS = [(0.87, 0.77, 0.63), (0.76, 0.52, 0.32), (0.54, 0.35, 0.09), (0.35, 0.16, 0.07), (0.96, 0.88, 0.78)]  # palette du compte de reference
 BONES = ["hips", "spine", "head",
          "upper_arm.L", "forearm.L", "hand.L", "upper_arm.R", "forearm.R", "hand.R",
          "thigh.L", "shin.L", "foot.L", "thigh.R", "shin.R", "foot.R"]

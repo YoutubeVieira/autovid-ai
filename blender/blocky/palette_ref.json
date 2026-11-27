@@ -1,0 +1,14 @@
+{
+  "source": "k-means sur 84 miniatures de 7 captures du compte de reference (docs/ANALYSE.md, section TikTok 'Dans cette ville'), jour 95 % / nuit 5 %",
+  "primaires": { "rouge": "#CC130E", "bleu_ciel": "#198AE6", "bleu_profond": "#1B478C", "or": "#E59C18", "vert": "#267722" },
+  "pierre_sable": { "creme": "#DEC5A1", "gris_chaud": "#9F978C", "blanc_casse": "#F6F5F5" },
+  "bois_brique": { "ocre": "#C18552", "brun": "#895818", "brun_fonce": "#582811" },
+  "neutres": { "route": "#4E4D55", "pave": "#73716E", "quasi_noir": "#120E10" },
+  "nuit": { "bleu_nuit": "#1E2841", "horizon": "#A3B9D1" },
+  "regles": [
+    "Tout est dans 5 teintes pleines (rouge, bleu, jaune-or, vert, brun) sur un decor de pierre creme/gris chaud: pas de pastel.",
+    "Les vetements des habitants prennent les primaires saturees; les peaux et les cheveux restent dans les bruns/ocres.",
+    "Ciel bleu franc (#198AE6 en haut vers #A3B9D1 a l'horizon) le jour; scenes de nuit en bleu #1E2841 avec lampes jaune-or.",
+    "Saturation moyenne ~0,48, contraste fort, ombres douces."
+  ]
+}

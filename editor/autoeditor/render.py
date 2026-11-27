@@ -20,6 +20,51 @@ def _video_chain(shots, W, H, fps):
     return parts, labels
 
 
+def _times(plan, events, kinds):
+    out = []
+    for e in events or []:
+        if e["type"] in kinds:
+            mt = map_time(plan, e["t"])
+            out.append(e["t"] if mt is None else mt)
+    return sorted(out)
+
+
+def fx_chain(plan, preset, events, W, H):
+    """Montage rapide: zoom 'punch' qui retombe, secousse, flou de balayage (whip) et flash, cales sur les evenements."""
+    fx = preset.get("fx")
+    if not fx:
+        return None
+    parts = []
+    wh = fx.get("whip")
+    wt = _times(plan, events, wh["on"]) if wh else []
+    if wt:
+        en = "+".join(f"between(t,{t - wh['pre']:.3f},{t + wh['post']:.3f})" for t in wt)
+        parts.append(f"gblur=sigma={wh['sigma']}:sigmaV=0:steps=2:enable='{en}'")
+    pz, sk, fl = fx.get("punch"), fx.get("shake"), fx.get("flash")
+    base = 1.0 + (sk["amp"] * 2.2 / W if sk else 0.0) + 0.02
+    z_terms, sx_terms, sy_terms = [], [], []
+    if pz:
+        for t in _times(plan, events, pz["on"]):
+            z_terms.append(f"between(t,{t:.3f},{t + pz['dur']:.3f})*{pz['zoom']}*exp(-(t-{t:.3f})/{pz['tau']})")
+    if sk:
+        for t in _times(plan, events, sk["on"]):
+            env = f"between(t,{t:.3f},{t + sk['dur']:.3f})*exp(-(t-{t:.3f})*9)"
+            sx_terms.append(f"{env}*{sk['amp']}*sin(t*{sk['freq']})")
+            sy_terms.append(f"{env}*{sk['amp'] * 0.7:.2f}*cos(t*{sk['freq'] * 1.3:.1f})")
+    z = f"{base:.3f}" + "".join(f"+{x}" for x in z_terms)
+    sx = "0" + "".join(f"+{x}" for x in sx_terms)
+    sy = "0" + "".join(f"+{x}" for x in sy_terms)
+    parts.append(f"scale=w='trunc(iw*({z})/2)*2':h='trunc(ih*({z})/2)*2':eval=frame:flags=bicubic")
+    parts.append(f"crop=w={W}:h={H}:x='(iw-ow)/2+({sx})':y='(ih-oh)/2+({sy})'")
+    if fl:
+        ft = _times(plan, events, fl["on"])
+        if ft:
+            b = "+".join(f"between(t,{t:.3f},{t + fl['dur']:.3f})*{fl['amount']}*(1-(t-{t:.3f})/{fl['dur']})" for t in ft)
+            parts.append(f"eq=brightness='{b}':eval=frame")
+    parts.append("setsar=1")
+    return ",".join(parts)
+
+
 def sfx_events(plan, preset, events, sfx_dir):
     """Evenements -> [(temps_sortie, fichier_wav, gain)] selon la table sfx.map du preset."""
     cfg = preset.get("sfx", {})
@@ -30,9 +75,11 @@ def sfx_events(plan, preset, events, sfx_dir):
     for e in events:
         key = {"badge": f"badge:{e.get('color', 'yellow')}", "counter": "counter", "cut": "cut",
                "pop": "pop", "milestone": "milestone"}.get(e["type"])
-        name = m.get(key)
-        if name and os.path.exists(os.path.join(sfx_dir, name + ".wav")):
-            out.append((e["t"], os.path.join(sfx_dir, name + ".wav"), g))
+        key = key or {"riser": "riser", "impact": "impact"}.get(e["type"])
+        names = m.get(key) or []
+        for name in ([names] if isinstance(names, str) else names):
+            if os.path.exists(os.path.join(sfx_dir, name + ".wav")):
+                out.append((e["t"], os.path.join(sfx_dir, name + ".wav"), g))
     if plan["outro"] > 0 and "outro" in m:
         out.append((plan["content_duration"], os.path.join(sfx_dir, m["outro"] + ".wav"), g))
     return [x for x in out if x[0] < plan["output_duration"]]
@@ -81,6 +128,10 @@ def render(plan, source, out_path, preset, ass_path=None, music=None, has_audio=
     if plan["outro"] > 0:
         vgraph.append(f"[vc]tpad=stop_mode=clone:stop_duration={plan['outro']}[vp]")
         last_v = "vp"
+    fxc = fx_chain(plan, preset, events, W, H)
+    if fxc:
+        vgraph.append(f"[{last_v}]{fxc}[vf]")
+        last_v = "vf"
     if ass_path:
         fd = f":fontsdir={_q(fonts_dir)}" if fonts_dir else ""
         vgraph.append(f"[{last_v}]ass={_q(ass_path)}{fd}[vs]")
