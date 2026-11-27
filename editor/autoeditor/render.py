@@ -73,6 +73,10 @@ def sfx_events(plan, preset, events, sfx_dir):
     m, g = cfg["map"], cfg.get("gain", 0.5)
     out = []
     for e in events:
+        if e["type"] == "sfx":  # evenement direct: son nomme
+            if os.path.exists(os.path.join(sfx_dir, e["name"] + ".wav")):
+                out.append((e["t"], os.path.join(sfx_dir, e["name"] + ".wav"), g))
+            continue
         key = {"badge": f"badge:{e.get('color', 'yellow')}", "counter": "counter", "cut": "cut",
                "pop": "pop", "milestone": "milestone"}.get(e["type"])
         key = key or {"riser": "riser", "impact": "impact"}.get(e["type"])

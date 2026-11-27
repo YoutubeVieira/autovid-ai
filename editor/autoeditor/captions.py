@@ -57,7 +57,7 @@ def build_ass(plan, srt_path, preset, hook_text=None, events=None):
 ScriptType: v4.00+
 PlayResX: {W}
 PlayResY: {H}
-WrapStyle: 2
+WrapStyle: 0
 
 [V4+ Styles]
 Format: Name,Fontname,Fontsize,PrimaryColour,SecondaryColour,OutlineColour,BackColour,Bold,Italic,Underline,StrikeOut,ScaleX,ScaleY,Spacing,Angle,BorderStyle,Outline,Shadow,Alignment,MarginL,MarginR,MarginV,Encoding
@@ -109,6 +109,12 @@ def _game_events(plan, preset, events):
         oy = hud.get("top_offset", 0)
         out.append(f"Dialogue: 2,{_t(0)},{_t(base)},HUD,,0,0,0,,{_rect(W, bh, '0A1020', '60', 0, oy)}")
         out.append(f"Dialogue: 3,{_t(0)},{_t(base)},HUD,,0,0,0,,{{\\an7\\pos(36,{40 + oy})\\fs{hud['title_size']}\\1c{_bgr('FFFFFF')}&}}{_esc(hud['title'])}")
+        subs = [(0.0, hud.get("default_sub", ""))] + [(e["t"], e["text"]) for e in events if e["type"] == "hud_sub"]
+        subs.sort(key=lambda x: x[0])
+        for i, (t0, txt) in enumerate(subs):
+            t1 = subs[i + 1][0] if i + 1 < len(subs) else base
+            if t1 > t0 and txt:
+                out.append(f"Dialogue: 3,{_t(t0)},{_t(t1)},HUD,,0,0,0,,{{\\an7\\pos(36,{40 + oy + hud['title_size'] + 14})\\fs{max(8, hud['title_size'] - 6)}\\1c{_bgr('C8D0E0')}&}}{_esc(txt)}")
         steps = [(0.0, 0)] + [(e["t"], e["value"]) for e in events if e["type"] == "counter"]
         steps.sort()
         for i, (t0, val) in enumerate(steps):
@@ -136,5 +142,5 @@ def _game_events(plan, preset, events):
     if plan["outro"] > 0 and ot:
         out.append(f"Dialogue: 5,{_t(base)},{_t(total)},HUD,,0,0,0,,{_rect(W, H, '0A1020', '30')}")
         out.append(f"Dialogue: 6,{_t(base)},{_t(total)},HUD,,0,0,0,,{{\\an5\\pos({W // 2},{H // 2 - 40})\\fs{ot['title_size']}\\fscx140\\fscy140\\t(0,180,\\fscx100\\fscy100)\\1c{_bgr(preset['captions']['highlight'])}&}}{_wrap(ot['title'], 14)}")
-        out.append(f"Dialogue: 6,{_t(base)},{_t(total)},HUD,,0,0,0,,{{\\an5\\pos({W // 2},{H // 2 + 150})\\fs{ot['subtitle_size']}\\1c{_bgr('FFFFFF')}&}}{_esc(ot['subtitle'])}")
+        out.append(f"Dialogue: 6,{_t(base)},{_t(total)},HUD,,0,0,0,,{{\\an5\\pos({W // 2},{H // 2 + 150})\\fs{ot['subtitle_size']}\\1c{_bgr('FFFFFF')}&}}{_esc(ot['subtitle']).replace('|', chr(92) + 'N')}")
     return out

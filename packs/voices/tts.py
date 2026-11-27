@@ -1,22 +1,26 @@
 """Synthese vocale francaise hors-ligne a partir d'un script minute.
-Format du script (une ligne par phrase):   <debut_en_secondes> | <texte>
+Format du script (une ligne par phrase):   <debut_en_secondes> | <texte affiche> [|| <texte dit>]
 Exemple:   3.6 | Mais des que tu t'abonnes, quelqu'un arrive.
+           +0.15 | Phrase suivante, enchainee 0,15 s apres la precedente
+           4.0 | Habitant de Caraguá || habitant de Caragoua      (orthographe phonetique pour la voix, sous-titre intact)
 
 Usage: python3 tts.py script.txt --out voix_dir [--voice siwis] [--speaker 0] [--speed 1.0] [--models dossier]
 Sortie: voice.wav (piste calee sur les horodatages), voice.srt (sous-titres a la bonne seconde), voice.json
-Necessite: pip install piper-tts  (et python3 download_voices.py)"""
+Moteurs: --engine piper (pip install piper-tts + download_voices.py) ou --engine supertonic (pip install sherpa-onnx, voix 0-9, 5-9 = hommes)."""
 import argparse
 import json
 import os
 import struct
 import wave
 
-from piper import PiperVoice, SynthesisConfig
 
 here = os.path.dirname(os.path.abspath(__file__))
 ap = argparse.ArgumentParser()
 ap.add_argument("script")
 ap.add_argument("--out", required=True)
+ap.add_argument("--engine", default="piper", choices=["piper", "supertonic"])
+ap.add_argument("--st-model", help="dossier du modele supertonic extrait")
+ap.add_argument("--lang", default="fr")
 ap.add_argument("--voice", default="siwis")
 ap.add_argument("--speaker", type=int, default=0, help="upmc: 0=jessica, 1=pierre")
 ap.add_argument("--speed", type=float, default=1.0)
@@ -26,17 +30,36 @@ ap.add_argument("--pitch", type=float, default=0.0, help="demi-tons (ex. -1.5 = 
 ap.add_argument("--total", type=float, help="duree totale de la piste (s); sinon fin de la derniere phrase")
 a = ap.parse_args()
 
-cfg = json.load(open(os.path.join(here, "voices.json"), encoding="utf-8"))["voices"][a.voice]
-d = os.path.join(a.models, cfg["archive"])
-onnx = next(f for f in os.listdir(d) if f.endswith(".onnx"))
-voice = PiperVoice.load(os.path.join(d, onnx), config_path=os.path.join(d, onnx + ".json"))
-syn = SynthesisConfig(speaker_id=a.speaker if cfg["speakers"] > 1 else None, length_scale=1.0 / a.speed)
+meta = json.load(open(os.path.join(here, "voices.json"), encoding="utf-8"))
+if a.engine == "supertonic":
+    import sherpa_onnx
+    M = a.st_model or os.path.join(a.models, meta["engines"]["supertonic"]["archive"])
+    cfg = {"credit": "Voix: Supertonic 3 (Supertone), voix n\u00b0%d" % a.speaker, "license": meta["engines"]["supertonic"]["license"]}
+    _tts = sherpa_onnx.OfflineTts(sherpa_onnx.OfflineTtsConfig(model=sherpa_onnx.OfflineTtsModelConfig(
+        supertonic=sherpa_onnx.OfflineTtsSupertonicModelConfig(
+            duration_predictor=M + "/duration_predictor.int8.onnx", text_encoder=M + "/text_encoder.int8.onnx",
+            vector_estimator=M + "/vector_estimator.int8.onnx", vocoder=M + "/vocoder.int8.onnx",
+            tts_json=M + "/tts.json", unicode_indexer=M + "/unicode_indexer.bin", voice_style=M + "/voice.bin"),
+        num_threads=2)))
 
+    def synth(text):
+        gc = sherpa_onnx.GenerationConfig()
+        gc.sid, gc.num_steps, gc.speed = a.speaker, 24, a.speed
+        gc.extra["lang"] = a.lang
+        g = _tts.generate(text, gc)
+        return list(g.samples), g.sample_rate
+else:
+    from piper import PiperVoice, SynthesisConfig
+    cfg = meta["voices"][a.voice]
+    d = os.path.join(a.models, cfg["archive"])
+    onnx = next(f for f in os.listdir(d) if f.endswith(".onnx"))
+    voice = PiperVoice.load(os.path.join(d, onnx), config_path=os.path.join(d, onnx + ".json"))
+    syn = SynthesisConfig(speaker_id=a.speaker if cfg["speakers"] > 1 else None, length_scale=1.0 / a.speed)
 
-def synth(text):
-    pcm = b"".join(c.audio_int16_bytes for c in voice.synthesize(text, syn_config=syn))
-    n = len(pcm) // 2
-    return [x / 32768.0 for x in struct.unpack(f"<{n}h", pcm)], voice.config.sample_rate
+    def synth(text):
+        pcm = b"".join(c.audio_int16_bytes for c in voice.synthesize(text, syn_config=syn))
+        n = len(pcm) // 2
+        return [x / 32768.0 for x in struct.unpack(f"<{n}h", pcm)], voice.config.sample_rate
 
 
 lines = []
@@ -44,12 +67,17 @@ for raw in open(a.script, encoding="utf-8"):
     raw = raw.strip()
     if raw and not raw.startswith("#") and "|" in raw:
         t, text = raw.split("|", 1)
-        lines.append((float(t), text.strip()))
+        shown, _, said = text.partition("||")
+        lines.append((t.strip(), shown.strip(), (said or shown).strip()))
 
 clips, sr = [], None
-for t, text in lines:
-    samples, sr = synth(text)
-    clips.append((t, text, samples))
+prev_end = 0.0
+for t, text, said in lines:
+    samples, sr = synth(said)
+    # debut absolu ("3.6") ou enchaine apres la phrase precedente ("+0.15" = pause de 0,15 s)
+    start = prev_end + float(t[1:]) if t.startswith("+") else float(t)
+    prev_end = start + len(samples) / sr
+    clips.append((start, text, samples))
 
 end = max(t + len(s) / sr for t, _, s in clips)
 total = a.total or end + 0.3

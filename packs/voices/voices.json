@@ -45,5 +45,16 @@
       "credit": "Voix: modele Piper gilles (donnees CC0), aucune mention requise",
       "recommended": "Seule voix masculine sans contrainte de licence, mais qualite 'low' (16 kHz): le traitement `--fx viral` aide, la diction reste plus robotique que tom."
     }
+  },
+  "engines": {
+    "supertonic": {
+      "archive": "sherpa-onnx-supertonic-3-tts-int8-2026-05-11",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
+      "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+      "voices": "10 voix: 0-4 femmes, 5-9 hommes (9 = homme grave et pose, par defaut)",
+      "langs": "fr, en, ...",
+      "sample_rate": 44100,
+      "pip": "sherpa-onnx>=2.0"
+    }
   }
 }

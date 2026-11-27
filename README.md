@@ -82,3 +82,4 @@ export default function AutoVidCreator() {
 - `editor/` : monteur autonome ffmpeg (presets `shortform_9x16` et `pixel_game`), `docs/ANALYSE.md` : analyse des videos de reference.
 - `packs/` : bruitages CC0, voix francaises gratuites, police pixel. `.claude/agents` + `.claude/skills` : agents et skills.
 - `blender/blocky/` : personnages-figurines articules, ville et episode pilote 3D (`episode01.blend`).
+- `pixel/` : scènes pixel-art par code (`city_pixel.py`, `caragua_fr.py`) et la version française de la vidéo de référence (`pixel/caragua_fr/caragua_pixel_fr.mp4`).

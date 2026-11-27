@@ -1,0 +1,60 @@
+1
+00:00:00,050 --> 00:00:01,633
+Cette page a zéro abonné.
+
+2
+00:00:01,753 --> 00:00:03,433
+Cette ville a zéro habitant.
+
+3
+00:00:03,613 --> 00:00:06,289
+Ici, chaque abonné devient habitant de Caraguá,
+
+4
+00:00:06,389 --> 00:00:07,673
+et gagne un emploi.
+
+5
+00:00:07,923 --> 00:00:09,993
+C'est simple : abonné, donc habitant.
+
+6
+00:00:10,213 --> 00:00:12,130
+Commente ton prénom et un métier,
+
+7
+00:00:12,250 --> 00:00:15,808
+tu apparais au prochain épisode, prénom au-dessus de la tête.
+
+8
+00:00:16,058 --> 00:00:19,049
+Professeur, médecin, éboueur, sauveteur, pêcheur.
+
+9
+00:00:19,229 --> 00:00:20,796
+La ville a besoin de tout.
+
+10
+00:00:21,046 --> 00:00:22,931
+Le conseil a quinze sièges vides.
+
+11
+00:00:23,031 --> 00:00:25,939
+Les quinze premiers à commenter deviennent conseillers.
+
+12
+00:00:26,219 --> 00:00:28,164
+Et la mairie ? Fermée à clé.
+
+13
+00:00:28,364 --> 00:00:30,501
+À cent habitants, élection du maire.
+
+14
+00:00:30,721 --> 00:00:32,612
+Jour un. Zéro habitant.
+
+15
+00:00:32,732 --> 00:00:34,417
+Garde un œil sur la ville.
+
