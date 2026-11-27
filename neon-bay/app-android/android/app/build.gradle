@@ -4,6 +4,10 @@ apply plugin: 'com.android.application'
 // Aucun mot de passe ni keystore dans le dépôt.
 def nbEnv = { String k, String d -> def v = System.getenv(k); return (v != null && v.trim()) ? v.trim() : d }
 def nbKeystore = nbEnv("NB_KEYSTORE", "")
+// version : fichier app/version.properties (à modifier avant chaque envoi), les variables NB_VERSION_* l'emportent
+def nbVer = new Properties()
+def nbVerFile = file("version.properties")
+if (nbVerFile.exists()) nbVerFile.withReader("UTF-8") { nbVer.load(it) }
 
 android {
     namespace = "com.neonbay.mafia"
@@ -12,9 +16,9 @@ android {
         applicationId "com.neonbay.mafia"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        // versionCode : à augmenter à CHAQUE envoi sur Google Play (1, 2, 3...)
-        versionCode nbEnv("NB_VERSION_CODE", "1").toInteger()
-        versionName nbEnv("NB_VERSION_NAME", "1.0.0")
+        // versionCode : à augmenter à CHAQUE envoi sur Google Play (1, 2, 3...), dans app/version.properties
+        versionCode nbEnv("NB_VERSION_CODE", nbVer.getProperty("versionCode", "1")).toInteger()
+        versionName nbEnv("NB_VERSION_NAME", nbVer.getProperty("versionName", "1.0.0"))
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

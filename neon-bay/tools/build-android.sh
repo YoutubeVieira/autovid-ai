@@ -11,8 +11,8 @@
 #   NB_KEYSTORE_PASS  mot de passe du keystore
 #   NB_KEY_ALIAS      alias de la clé           (défaut : upload)
 #   NB_KEY_PASS       mot de passe de la clé    (défaut : le même que NB_KEYSTORE_PASS)
-#   NB_VERSION_CODE   numéro entier, +1 à chaque envoi sur Google Play (défaut : 1)
-#   NB_VERSION_NAME   version affichée aux joueurs (défaut : version de app-android/package.json)
+#   NB_VERSION_CODE   numéro entier, +1 à chaque envoi (défaut : app-android/android/app/version.properties)
+#   NB_VERSION_NAME   version affichée aux joueurs (défaut : version.properties)
 #
 # Prérequis : Node.js 20+, JDK 21, Android SDK (ANDROID_HOME ou app-android/android/local.properties),
 # et l'accès réseau à dl.google.com / maven.google.com (dépendances Android de Gradle).
@@ -69,8 +69,9 @@ fi
 : "${NB_KEYSTORE_PASS:?Définis NB_KEYSTORE_PASS (mot de passe du keystore)}"
 export NB_KEY_ALIAS="${NB_KEY_ALIAS:-upload}"
 export NB_KEY_PASS="${NB_KEY_PASS:-$NB_KEYSTORE_PASS}"
-export NB_VERSION_CODE="${NB_VERSION_CODE:-1}"
-export NB_VERSION_NAME="${NB_VERSION_NAME:-$(node -p "require('$APP/package.json').version")}"
+VP="$APP/android/app/version.properties"
+export NB_VERSION_CODE="${NB_VERSION_CODE:-$(sed -n 's/^versionCode=//p' "$VP" | tr -d '\r')}"
+export NB_VERSION_NAME="${NB_VERSION_NAME:-$(sed -n 's/^versionName=//p' "$VP" | tr -d '\r')}"
 
 if [ -z "${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}" ] && [ ! -f "$APP/android/local.properties" ]; then
   echo "Android SDK introuvable : définis ANDROID_HOME (ex. ~/Android/Sdk) ou crée app-android/android/local.properties (sdk.dir=...)."
