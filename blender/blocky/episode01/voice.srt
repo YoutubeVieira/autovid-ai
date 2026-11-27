@@ -1,0 +1,20 @@
+1
+00:00:00,300 --> 00:00:02,773
+Dans cette ville, il n'y a personne.
+
+2
+00:00:03,700 --> 00:00:06,161
+Mais dès que tu t'abonnes, quelqu'un arrive.
+
+3
+00:00:07,300 --> 00:00:10,005
+Chaque abonné devient un habitant, avec un métier.
+
+4
+00:00:12,300 --> 00:00:14,715
+À cent habitants, la ville élit son maire.
+
+5
+00:00:17,200 --> 00:00:18,547
+Rejoins la ville.
+

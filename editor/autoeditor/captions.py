@@ -106,8 +106,9 @@ def _game_events(plan, preset, events):
     hud = preset.get("hud", {})
     if hud.get("enabled"):
         bh = hud["bar_height"]
-        out.append(f"Dialogue: 2,{_t(0)},{_t(base)},HUD,,0,0,0,,{_rect(W, bh, '0A1020', '60')}")
-        out.append(f"Dialogue: 3,{_t(0)},{_t(base)},HUD,,0,0,0,,{{\\an7\\pos(36,40)\\fs{hud['title_size']}\\1c{_bgr('FFFFFF')}&}}{_esc(hud['title'])}")
+        oy = hud.get("top_offset", 0)
+        out.append(f"Dialogue: 2,{_t(0)},{_t(base)},HUD,,0,0,0,,{_rect(W, bh, '0A1020', '60', 0, oy)}")
+        out.append(f"Dialogue: 3,{_t(0)},{_t(base)},HUD,,0,0,0,,{{\\an7\\pos(36,{40 + oy})\\fs{hud['title_size']}\\1c{_bgr('FFFFFF')}&}}{_esc(hud['title'])}")
         steps = [(0.0, 0)] + [(e["t"], e["value"]) for e in events if e["type"] == "counter"]
         steps.sort()
         for i, (t0, val) in enumerate(steps):
@@ -115,8 +116,8 @@ def _game_events(plan, preset, events):
             if t1 <= t0:
                 continue
             col = preset["captions"]["highlight"]
-            out.append(f"Dialogue: 3,{_t(t0)},{_t(t1)},HUD,,0,0,0,,{{\\an9\\pos({W - 36},34)\\fs{hud['counter_size']}\\1c{_bgr(col)}&}}{val} / {hud['counter_max']}")
-            out.append(f"Dialogue: 3,{_t(t0)},{_t(t1)},HUD,,0,0,0,,{{\\an9\\pos({W - 36},{34 + hud['counter_size'] + 22})\\fs{hud['title_size'] - 6}\\1c{_bgr('FFFFFF')}&}}{val} {hud['counter_label']}")
+            out.append(f"Dialogue: 3,{_t(t0)},{_t(t1)},HUD,,0,0,0,,{{\\an9\\pos({W - 36},{34 + oy})\\fs{hud['counter_size']}\\1c{_bgr(col)}&}}{val} / {hud['counter_max']}")
+            out.append(f"Dialogue: 3,{_t(t0)},{_t(t1)},HUD,,0,0,0,,{{\\an9\\pos({W - 36},{34 + oy + hud['counter_size'] + 22})\\fs{hud['title_size'] - 6}\\1c{_bgr('FFFFFF')}&}}{val} {hud['counter_label']}")
     bd = preset.get("badge", {})
     for e in events:
         if e["type"] != "badge":
@@ -127,6 +128,10 @@ def _game_events(plan, preset, events):
         out.append(
             f"Dialogue: 4,{_t(t0)},{_t(t1)},Badge,,0,0,0,,{{\\an5\\pos({W // 2},{bd['y']})\\fs{bd['size']}"
             f"\\fscx60\\fscy60\\t(0,140,\\fscx100\\fscy100)\\fad(60,220)\\1c{_bgr('111111')}&\\3c{_bgr(col)}&\\4c{_bgr(col)}&}}{txt}")
+    ep = preset.get("episode")
+    if ep and hud.get("enabled"):
+        y = hud.get("top_offset", 0) + hud["bar_height"] + 70
+        out.append(f"Dialogue: 4,{_t(0.2)},{_t(min(base, ep['seconds']))},Badge,,0,0,0,,{{\\an5\\pos({W // 2},{y})\\fs{ep['size']}\\fad(150,300)\\1c{_bgr('FFFFFF')}&\\3c{_bgr('111111')}&\\4c{_bgr('111111')}&}}{_esc(ep['label'])}")
     ot = preset.get("outro", {})
     if plan["outro"] > 0 and ot:
         out.append(f"Dialogue: 5,{_t(base)},{_t(total)},HUD,,0,0,0,,{_rect(W, H, '0A1020', '30')}")

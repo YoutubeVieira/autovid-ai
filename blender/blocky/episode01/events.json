@@ -1,0 +1,134 @@
+{
+  "fps": 24,
+  "frames": 480,
+  "events": [
+    {
+      "t": 4.542,
+      "type": "counter",
+      "value": 1,
+      "label": "1"
+    },
+    {
+      "t": 4.542,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 5.583,
+      "type": "badge",
+      "text": "+1 EMPLOI",
+      "color": "green"
+    },
+    {
+      "t": 7.125,
+      "type": "counter",
+      "value": 2,
+      "label": "2"
+    },
+    {
+      "t": 7.125,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 7.875,
+      "type": "counter",
+      "value": 3,
+      "label": "3"
+    },
+    {
+      "t": 7.875,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 8.625,
+      "type": "counter",
+      "value": 4,
+      "label": "4"
+    },
+    {
+      "t": 8.625,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 9.375,
+      "type": "counter",
+      "value": 5,
+      "label": "5"
+    },
+    {
+      "t": 9.375,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 10.125,
+      "type": "counter",
+      "value": 6,
+      "label": "6"
+    },
+    {
+      "t": 10.125,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 12.0,
+      "type": "counter",
+      "value": 7,
+      "label": "7"
+    },
+    {
+      "t": 13.708,
+      "type": "counter",
+      "value": 40,
+      "label": "40"
+    },
+    {
+      "t": 15.583,
+      "type": "counter",
+      "value": 100,
+      "label": "100"
+    },
+    {
+      "t": 15.583,
+      "type": "badge",
+      "text": "100 / 100",
+      "color": "yellow"
+    },
+    {
+      "t": 15.583,
+      "type": "milestone"
+    },
+    {
+      "t": 17.042,
+      "type": "badge",
+      "text": "ELECTION DU MAIRE",
+      "color": "yellow"
+    },
+    {
+      "t": 3.5,
+      "type": "cut"
+    },
+    {
+      "t": 7.0,
+      "type": "cut"
+    },
+    {
+      "t": 12.0,
+      "type": "cut"
+    },
+    {
+      "t": 17.0,
+      "type": "cut"
+    }
+  ]
+}

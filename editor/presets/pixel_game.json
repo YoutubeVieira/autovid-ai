@@ -1,11 +1,30 @@
 {
   "name": "pixel_game",
-  "description": "Style 'jeu de ville' (reference: Caragua Pixel): HUD en haut, badges +1, sous-titres pixel, carton de fin, bruitages. Voir docs/ANALYSE.md video C.",
-  "target": { "width": 1080, "height": 1920, "fps": 30 },
-  "audio": { "lufs": -14.0, "true_peak": -1.5, "lra": 11.0, "music_gain": 0.14 },
+  "description": "Style 'jeu de ville' (reference: Caragua Pixel): HUD en haut, badges +1, sous-titres pixel, carton de fin, bruitages. Voir docs/ANALYSE.md video C. Zones de securite TikTok: HUD sous la barre du haut (130 px), sous-titres au-dessus de la zone description/boutons.",
+  "target": {
+    "width": 1080,
+    "height": 1920,
+    "fps": 30
+  },
+  "audio": {
+    "lufs": -14.0,
+    "true_peak": -1.5,
+    "lra": 11.0,
+    "music_gain": 0.14
+  },
   "cut_silences": false,
-  "silence": { "noise_db": -35, "min_silence": 0.35, "keep_pad": 0.08, "min_keep": 0.25 },
-  "pacing": { "max_shot": 99, "zoom_cycle": [1.0] },
+  "silence": {
+    "noise_db": -35,
+    "min_silence": 0.35,
+    "keep_pad": 0.08,
+    "min_keep": 0.25
+  },
+  "pacing": {
+    "max_shot": 99,
+    "zoom_cycle": [
+      1.0
+    ]
+  },
   "captions": {
     "font": "Press Start 2P",
     "fonts_dir": "../../packs/fonts",
@@ -18,7 +37,13 @@
     "outline": 6,
     "margin_v": 430
   },
-  "hook": { "seconds": 0, "size": 40, "margin_v": 330, "text_color": "111111", "box_color": "FFFFFF" },
+  "hook": {
+    "seconds": 0,
+    "size": 40,
+    "margin_v": 330,
+    "text_color": "111111",
+    "box_color": "FFFFFF"
+  },
   "hud": {
     "enabled": true,
     "title": "JOUR 1 · LA VILLE VIDE",
@@ -26,15 +51,43 @@
     "counter_max": 100,
     "bar_height": 150,
     "title_size": 26,
-    "counter_size": 34
+    "counter_size": 34,
+    "top_offset": 130
   },
-  "badge": { "size": 46, "y": 520, "seconds": 1.5,
-             "colors": { "yellow": "FFD400", "green": "3DDC6E", "red": "E5484D" } },
-  "outro": { "seconds": 2.2, "title": "LA VILLE DES ABONNÉS", "subtitle": "JOUR 1 · LA VILLE VIDE · 0 / 100", "title_size": 52, "subtitle_size": 24 },
+  "badge": {
+    "size": 46,
+    "y": 520,
+    "seconds": 0.7,
+    "colors": {
+      "yellow": "FFD400",
+      "green": "3DDC6E",
+      "red": "E5484D"
+    }
+  },
+  "outro": {
+    "seconds": 2.2,
+    "title": "LA VILLE DES ABONNÉS",
+    "subtitle": "ABONNE-TOI · DEVIENS HABITANT",
+    "title_size": 52,
+    "subtitle_size": 24
+  },
   "sfx": {
-    "enabled": true, "gain": 0.55,
-    "map": { "badge:yellow": "ding", "badge:green": "coin", "badge:red": "error_buzz",
-             "counter": "tick", "cut": "whoosh", "outro": "stamp", "milestone": "level_up",
-             "pop": "pop" }
+    "enabled": true,
+    "gain": 0.55,
+    "map": {
+      "badge:yellow": "ding",
+      "badge:green": "coin",
+      "badge:red": "error_buzz",
+      "counter": "tick",
+      "cut": "whoosh",
+      "outro": "stamp",
+      "milestone": "level_up",
+      "pop": "pop"
+    }
+  },
+  "episode": {
+    "label": "ÉPISODE 1",
+    "seconds": 3.0,
+    "size": 30
   }
 }
