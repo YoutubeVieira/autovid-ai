@@ -79,4 +79,6 @@ export default function AutoVidCreator() {
 
 ## Monteur autonome
 
-Voir `editor/README.md` (pipeline ffmpeg), `docs/ANALYSE.md` (analyse des videos de reference) et `.claude/agents` + `.claude/skills` (agents et skills).
+- `editor/` : monteur autonome ffmpeg (presets `shortform_9x16` et `pixel_game`), `docs/ANALYSE.md` : analyse des videos de reference.
+- `packs/` : bruitages CC0, voix francaises gratuites, police pixel. `.claude/agents` + `.claude/skills` : agents et skills.
+- `blender/blocky/` : personnages-figurines articules, ville et episode pilote 3D (`episode01.blend`).

@@ -1,0 +1,90 @@
+{
+  "license": "CC0 1.0 - sons synthetises par make_sfx.py, aucun echantillon tiers",
+  "sample_rate": 44100,
+  "sounds": [
+    {
+      "file": "pop.wav",
+      "duration_s": 0.09,
+      "description": "Bulle courte",
+      "use": "apparition d'un personnage, +1"
+    },
+    {
+      "file": "ding.wav",
+      "duration_s": 0.5,
+      "description": "Clochette claire",
+      "use": "badge +1 HABITANT"
+    },
+    {
+      "file": "coin.wav",
+      "duration_s": 0.42,
+      "description": "Piece de jeu",
+      "use": "gain, emploi, recompense"
+    },
+    {
+      "file": "level_up.wav",
+      "duration_s": 0.92,
+      "description": "Arpege montant",
+      "use": "palier atteint (100 habitants)"
+    },
+    {
+      "file": "whoosh.wav",
+      "duration_s": 0.45,
+      "description": "Souffle rapide",
+      "use": "changement de plan, zoom"
+    },
+    {
+      "file": "swoosh_up.wav",
+      "duration_s": 0.35,
+      "description": "Souffle montant",
+      "use": "titre qui entre"
+    },
+    {
+      "file": "click.wav",
+      "duration_s": 0.02,
+      "description": "Clic sec",
+      "use": "bouton, interface"
+    },
+    {
+      "file": "tick.wav",
+      "duration_s": 0.03,
+      "description": "Tic leger",
+      "use": "compteur qui monte"
+    },
+    {
+      "file": "error_buzz.wav",
+      "duration_s": 0.35,
+      "description": "Buzzer grave",
+      "use": "porte fermee, TRANCADA / bloque"
+    },
+    {
+      "file": "stamp.wav",
+      "duration_s": 0.25,
+      "description": "Tampon / impact sourd",
+      "use": "carton-titre, apparition d'un gros chiffre"
+    },
+    {
+      "file": "sparkle.wav",
+      "duration_s": 0.37,
+      "description": "Scintillement",
+      "use": "mot cle surligne"
+    },
+    {
+      "file": "fanfare.wav",
+      "duration_s": 1.9,
+      "description": "Petite fanfare",
+      "use": "election du maire, victoire"
+    },
+    {
+      "file": "crowd_cheer.wav",
+      "duration_s": 2.0,
+      "description": "Foule en liesse (bruit module)",
+      "use": "la ville se remplit, fete"
+    },
+    {
+      "file": "footsteps.wav",
+      "duration_s": 0.35,
+      "description": "Deux pas",
+      "use": "arrivee d'un habitant"
+    }
+  ]
+}

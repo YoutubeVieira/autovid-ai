@@ -22,6 +22,8 @@ def check(out_path, preset, plan=None):
         lufs, tp = float(loud["input_i"]), float(loud["input_tp"])
         add("loudness", abs(lufs - a["lufs"]) <= 1.0, f"{lufs:.1f} LUFS (cible {a['lufs']})")
         add("true_peak", tp <= a["true_peak"] + 0.3, f"{tp:.1f} dBTP (max {a['true_peak']})")
-        long_sil = [s for s in detect_silences(out_path, preset["silence"]["noise_db"], 0.6)]
-        add("pas_de_silence_long", not long_sil, f"{len(long_sil)} silence(s) > 0.6s")
+        tail = (plan or {}).get("outro", 0)
+        long_sil = [s for s in detect_silences(out_path, preset["silence"]["noise_db"], 0.6)
+                    if not (tail and s[0] >= info["duration"] - tail - 0.3)]
+        add("pas_de_silence_long", preset.get("cut_silences", True) is False or not long_sil, f"{len(long_sil)} silence(s) > 0.6s hors carton de fin")
     return {"passed": all(c["ok"] for c in checks), "checks": checks, "info": info}

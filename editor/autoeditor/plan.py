@@ -1,4 +1,4 @@
-"""Plan de montage (EDL): coupe des silences, jump-cuts avec punch-in."""
+"""Plan de montage (EDL): coupe des silences, jump-cuts avec punch-in, carton de fin."""
 
 
 def keep_segments(duration, silences, silence_cfg):
@@ -31,7 +31,10 @@ def split_shots(segs, max_shot):
 
 def build_plan(analysis, preset):
     d = analysis["info"]["duration"]
-    segs = keep_segments(d, analysis.get("silences", []), preset["silence"])
+    if preset.get("cut_silences", True):
+        segs = keep_segments(d, analysis.get("silences", []), preset["silence"])
+    else:
+        segs = []
     if not segs:
         segs = [(0.0, d)]
     shots = split_shots(segs, preset["pacing"]["max_shot"])
@@ -46,8 +49,9 @@ def build_plan(analysis, preset):
             "contiguous": prev_out is not None and abs(prev_out - a) < 1e-6,
         })
         t += b - a
-    return {"source": analysis["file"], "shots": edl, "output_duration": round(t, 3),
-            "removed": round(d - t, 3)}
+    outro = float(preset.get("outro", {}).get("seconds", 0))
+    return {"source": analysis["file"], "shots": edl, "content_duration": round(t, 3), "outro": outro,
+            "output_duration": round(t + outro, 3), "removed": round(d - t, 3)}
 
 
 def map_time(plan, t):

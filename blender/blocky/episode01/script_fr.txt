@@ -1,0 +1,6 @@
+# Episode pilote - "La ville des abonnes" (voix off, horodatage en secondes depuis le debut)
+0.3 | Dans cette ville, il n'y a personne.
+3.7 | Mais dès que tu t'abonnes, quelqu'un arrive.
+7.3 | Chaque abonné devient un habitant, avec un métier.
+12.3 | À cent habitants, la ville élit son maire.
+17.2 | Rejoins la ville.

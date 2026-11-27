@@ -80,3 +80,44 @@ class PipelineTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
+
+class PixelPresetAndSrtTest(unittest.TestCase):
+    def test_pixel_game_hud_badges_sfx_outro(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            src = tmp / "frames"
+            src.mkdir()
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                            "testsrc2=size=450x800:rate=24:duration=3", str(src / "f_%04d.png")], check=True)
+            ev = tmp / "events.json"
+            ev.write_text(json.dumps({"fps": 24, "events": [
+                {"t": 0.5, "type": "counter", "value": 1, "label": "1"},
+                {"t": 0.5, "type": "badge", "text": "+1 HABITANT", "color": "yellow"},
+                {"t": 1.5, "type": "cut"}]}), encoding="utf-8")
+            voice = tmp / "voice.wav"
+            subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-f", "lavfi", "-i",
+                            "sine=f=300:d=3", str(voice)], check=True)
+            rc = cli.main(["run", str(src), "--out-dir", str(tmp / "o"), "--preset", "pixel_game",
+                           "--events", str(ev), "--audio", str(voice)])
+            self.assertEqual(rc, 0)
+            plan = json.loads((tmp / "o" / "plan.json").read_text())
+            self.assertAlmostEqual(plan["output_duration"], plan["content_duration"] + 2.2, delta=0.01)
+            ass = (tmp / "o" / "captions.ass").read_text()
+            self.assertIn("1 / 100", ass)
+            self.assertIn("+1 HABITANT", ass)
+            self.assertIn("LA VILLE DES", ass)
+
+    def test_srt_roundtrip_keeps_timing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            (tmp / "a.srt").write_text(SRT, encoding="utf-8")
+            cli.main(["srt", "export", str(tmp / "a.srt"), "--out", str(tmp / "c.json"), "--lang", "en"])
+            data = json.loads((tmp / "c.json").read_text())
+            for c in data["cues"]:
+                c["translation"] = "Hello " + c["text"][:10]
+            (tmp / "c.json").write_text(json.dumps(data), encoding="utf-8")
+            cli.main(["srt", "import", str(tmp / "c.json"), "--out", str(tmp / "b.srt")])
+            out = (tmp / "b.srt").read_text()
+            self.assertIn("00:00:00,200 --> 00:00:02,800", out)
+            self.assertIn("00:00:04,600 --> 00:00:08,400", out)

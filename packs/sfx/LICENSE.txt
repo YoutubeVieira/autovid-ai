@@ -1,0 +1,2 @@
+Tous les sons de ce dossier sont generes par make_sfx.py (synthese pure).
+Dedie au domaine public (CC0 1.0): usage commercial libre, aucune attribution requise.

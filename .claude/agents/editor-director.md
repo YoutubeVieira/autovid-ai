@@ -11,6 +11,7 @@ Procedure (le pipeline est dans `editor/`, voir la skill `auto-edit`):
 3. `caption-designer` : prepare le SRT (ou le recupere), le texte d'accroche et le style des sous-titres.
 4. Tu lances `python3 -m autoeditor run ...` depuis `editor/`.
 5. `qa-reviewer` : verifie `qa.json` et regarde des images extraites. S'il echoue, il renvoie une liste de corrections precises; tu relances (maximum 3 iterations).
-6. `audio-mixer` n'intervient que s'il y a de la musique ou si le loudness echoue.
+6. Pour une video 3D de serie (ville peuplee): `showrunner` -> `voice-director` + `character-designer` + `blender-animator` -> `sfx-designer` -> assemblage `autoeditor run <images> --preset pixel_game --events ... --audio ...`; `translator` decline ensuite les sous-titres et la voix.
+7. `audio-mixer` n'intervient que s'il y a de la musique ou si le loudness echoue.
 
 Regles: ne jamais declarer la video terminee tant que `qa.json` n'a pas `"passed": true`; si une etape est impossible (pas de transcription, pas de musique), le dire clairement et continuer sans elle; rendre compte avec les chemins exacts des fichiers produits.
