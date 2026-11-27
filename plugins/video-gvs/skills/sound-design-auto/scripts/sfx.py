@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """Sound design automatique : place un son sur chaque moment listé par l'animation, puis mixe avec la musique.
 
-Les sons sont synthétisés ici (souffle « whoosh », « pop », petit « tick », « clic », respiration) :
-aucun fichier extérieur, donc aucun problème de droits. Les moments viennent de la page HTML
-(window.SFX), donc ils tombent exactement sur les animations.
+Deux sortes de sons :
+- synthétisés ici (souffle « whoosh », « pop », petit « tick », « clic », respiration) : champ "type" ;
+- vrais enregistrements de la bibliothèque (studio-bibliotheque, par exemple le dossier voix-emotions,
+  licence CC0) : champ "son" avec le nom du fichier sans extension (ex. "vrai-pleurs-enfant-1"),
+  cherché dans le dossier --bibliotheque, ou champ "fichier" avec un chemin.
+Les moments viennent de la page HTML (window.SFX), donc ils tombent exactement sur les animations.
 
     node render.js wellness-60.html --events sons.json
-    python sfx.py sons.json --music musique.wav --out mix.wav [--video video-muette.mp4 --final video.mp4]
+    python sfx.py sons.json --music musique.wav --out mix.wav [--bibliotheque dossier] [--video video-muette.mp4 --final video.mp4]
 """
 import argparse, json, subprocess, wave
+from pathlib import Path
 import numpy as np
 
 SR = 44100
@@ -84,12 +88,54 @@ def read_wav(path):
         return x.reshape(-1, w.getnchannels()) if w.getnchannels() == 2 else np.stack([x, x], 1)
 
 
+AUDIO_EXT = {".wav", ".mp3", ".ogg", ".flac", ".m4a", ".aif", ".aiff"}
+
+
+def index_bibliotheque(dossier):
+    """Nom de fichier sans extension -> chemin, pour tous les sons du dossier et de ses sous-dossiers."""
+    idx = {}
+    if dossier:
+        for f in sorted(Path(dossier).rglob("*")):
+            if f.suffix.lower() in AUDIO_EXT:
+                idx.setdefault(f.stem.lower(), f)
+    return idx
+
+
+def read_audio(path, max_s=None):
+    """Décode n'importe quel fichier son (ffmpeg) en stéréo 44,1 kHz, avec un petit fondu de sortie."""
+    cmd = ["ffmpeg", "-v", "error", "-i", str(path)] + (["-t", str(max_s)] if max_s else []) + \
+          ["-f", "f32le", "-ac", "2", "-ar", str(SR), "-"]
+    raw = subprocess.run(cmd, check=True, capture_output=True).stdout
+    x = np.frombuffer(raw, "<f4").astype(float).reshape(-1, 2)
+    if max_s:
+        fade = min(len(x), int(0.08 * SR))
+        if fade:
+            x = x.copy(); x[-fade:] *= np.linspace(1, 0, fade)[:, None]
+    return x
+
+
+def charger_son(e, biblio, cache):
+    if "fichier" in e or "son" in e:
+        if "fichier" in e:
+            path = Path(e["fichier"])
+        else:
+            path = biblio.get(str(e["son"]).lower())
+            if path is None:
+                raise SystemExit(f"Son introuvable dans la bibliothèque : {e['son']} (vérifier --bibliotheque et le nom)")
+        key = (str(path), e.get("duree"))
+        if key not in cache:
+            cache[key] = read_audio(path, e.get("duree"))
+        return cache[key]
+    return cache.setdefault(e["type"], MAKERS[e["type"]]())
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("events")
     ap.add_argument("--music")
     ap.add_argument("--music-gain", type=float, default=0.75)
     ap.add_argument("--sfx-gain", type=float, default=0.8)
+    ap.add_argument("--bibliotheque", help="dossier de la bibliothèque de sons (ex. studio-bibliotheque dézippé)")
     ap.add_argument("--out", default="mix.wav")
     ap.add_argument("--video"); ap.add_argument("--final")
     a = ap.parse_args()
@@ -97,8 +143,9 @@ def main():
     n = int(ev["duration"] * SR)
     fx = np.zeros((n, 2))
     cache = {}
+    biblio = index_bibliotheque(a.bibliotheque)
     for e in ev["sfx"]:
-        s = cache.setdefault(e["type"], MAKERS[e["type"]]())
+        s = charger_son(e, biblio, cache)
         i = int(e["t"] * SR)
         if i < 0 or i >= n:
             continue
