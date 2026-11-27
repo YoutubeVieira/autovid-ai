@@ -8,6 +8,7 @@ Usage: python3 tts.py script.txt --out voix_dir [--voice siwis] [--speaker 0] [-
 Sortie: voice.wav (piste calee sur les horodatages), voice.srt (sous-titres a la bonne seconde), voice.json
 Moteurs: --engine piper (pip install piper-tts + download_voices.py) ou --engine supertonic (pip install sherpa-onnx, voix 0-9, 5-9 = hommes)."""
 import argparse
+import sys
 import json
 import os
 import struct
@@ -22,6 +23,8 @@ ap.add_argument("--engine", default="piper", choices=["piper", "supertonic", "ko
 ap.add_argument("--kokoro-model", help="dossier kokoro-multi-lang-v1_0 extrait (voix francaise: --speaker 30 = ff_siwis)")
 ap.add_argument("--st-model", help="dossier du modele supertonic extrait")
 ap.add_argument("--lang", default="fr")
+ap.add_argument("--verify", action="store_true", help="controle Whisper: teste plusieurs ecritures de chaque phrase et garde la mieux comprise")
+ap.add_argument("--asr-model", help="dossier sherpa-onnx-whisper-base extrait")
 ap.add_argument("--voice", default="siwis")
 ap.add_argument("--speaker", type=int, default=0, help="upmc: 0=jessica, 1=pierre")
 ap.add_argument("--speed", type=float, default=1.0)
@@ -101,8 +104,38 @@ for raw in open(a.script, encoding="utf-8"):
 
 clips, sr = [], None
 prev_end = 0.0
+verif = []
+sys.path.insert(0, os.path.join(here, "..", "..", "editor"))
+import prononciation as _pr
 for t, text, said in lines:
-    samples, sr = synth(said)
+    if a.verify and a.asr_model:
+        from autoeditor import asr as _asr
+        base = said if said != text else text
+        cands = [("brut", _pr.fix(base, "overrides")), ("leger", _pr.fix(base, "light")), ("complet", _pr.fix(base, "full"))]
+        seen, best = set(), None
+        for name, cand in cands:
+            if cand in seen:
+                continue
+            seen.add(cand)
+            sm, sr_ = synth(cand)
+            tmpw = os.path.join(a.out, "_verify.wav")
+            os.makedirs(a.out, exist_ok=True)
+            with wave.open(tmpw, "w") as w_:
+                w_.setnchannels(1)
+                w_.setsampwidth(2)
+                w_.setframerate(sr_)
+                w_.writeframes(b"".join(struct.pack("<h", int(max(-1, min(1, v)) * 32767)) for v in sm))
+            heard = _asr.transcribe(a.asr_model, tmpw)
+            wer, diffs = _asr.compare(text, heard)
+            if best is None or wer < best[0] - 1e-9:
+                best = (wer, name, cand, sm, sr_, heard)
+        os.remove(os.path.join(a.out, "_verify.wav"))
+        wer, name, said, samples, sr, heard = best
+        verif.append({"phrase": text, "variante": name, "texte_envoye": said, "entendu": heard, "erreur_mots": wer})
+    else:
+        if not a.verify:
+            said = _pr.fix(said, "overrides") if a.engine == "supertonic" else said
+        samples, sr = synth(said)
     # debut absolu ("3.6") ou enchaine apres la phrase precedente ("+0.15" = pause de 0,15 s)
     start = prev_end + float(t[1:]) if t.startswith("+") else float(t)
     prev_end = start + len(samples) / sr
@@ -142,7 +175,7 @@ def ts(x):
 with open(os.path.join(a.out, "voice.srt"), "w", encoding="utf-8") as f:
     for i, c in enumerate(cues, 1):
         f.write(f"{i}\n{ts(c['start'])} --> {ts(c['end'])}\n{c['text']}\n\n")
-json.dump({"voice": a.voice, "credit": cfg["credit"], "license": cfg["license"], "duration": round(total, 2), "cues": cues, "warnings": warn},
+json.dump({"voice": a.voice, "credit": cfg["credit"], "license": cfg["license"], "duration": round(total, 2), "cues": cues, "warnings": warn, "verification": verif},
           open(os.path.join(a.out, "voice.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
 VIRAL = ("highpass=f=85,equalizer=f=140:t=q:w=1:g=3.5,equalizer=f=320:t=q:w=1.2:g=-2,"
          "equalizer=f=3300:t=q:w=1.1:g=4.5,equalizer=f=9000:t=q:w=1.5:g=-3,"

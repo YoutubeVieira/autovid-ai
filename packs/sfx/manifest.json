@@ -1,5 +1,5 @@
 {
-  "license": "CC0 1.0 - sons synthetises par make_sfx.py, aucun echantillon tiers",
+  "license": "CC0 1.0 - sons synthetises par make_sfx.py et make_sfx2.py, aucun echantillon tiers",
   "sample_rate": 44100,
   "sounds": [
     {
@@ -139,6 +139,138 @@
       "duration_s": 0.17,
       "description": "Double bulle",
       "use": "apparition de deux habitants"
+    },
+    {
+      "file": "roar.wav",
+      "duration_s": 1.9,
+      "description": "Rugissement de grand dinosaure",
+      "use": "T-Rex, monstre"
+    },
+    {
+      "file": "roar_small.wav",
+      "duration_s": 0.9,
+      "description": "Cri aigu de petit dinosaure",
+      "use": "petit dino, creature"
+    },
+    {
+      "file": "stomp.wav",
+      "duration_s": 1.6,
+      "description": "Pas lourds d'un dinosaure",
+      "use": "dino qui marche"
+    },
+    {
+      "file": "rumble.wav",
+      "duration_s": 3.5,
+      "description": "Grondement sourd (tremblement de terre)",
+      "use": "ambiance, avant le choc"
+    },
+    {
+      "file": "meteor_whistle.wav",
+      "duration_s": 2.6,
+      "description": "Sifflement d'un astéroïde qui tombe",
+      "use": "météorite"
+    },
+    {
+      "file": "explosion.wav",
+      "duration_s": 3.2,
+      "description": "Explosion / impact géant",
+      "use": "impact de l'astéroïde"
+    },
+    {
+      "file": "wind_ash.wav",
+      "duration_s": 5.0,
+      "description": "Vent et cendres",
+      "use": "ciel noir après l'impact"
+    },
+    {
+      "file": "laugh_man.wav",
+      "duration_s": 0.94,
+      "description": "Rire d'homme (ha ha ha)",
+      "use": "rire"
+    },
+    {
+      "file": "laugh_woman.wav",
+      "duration_s": 0.94,
+      "description": "Rire de femme",
+      "use": "rire"
+    },
+    {
+      "file": "laugh_child.wav",
+      "duration_s": 0.91,
+      "description": "Rire d'enfant",
+      "use": "rire"
+    },
+    {
+      "file": "giggle.wav",
+      "duration_s": 0.81,
+      "description": "Petit rire aigu / gloussement",
+      "use": "rire espiègle"
+    },
+    {
+      "file": "laugh_crowd.wav",
+      "duration_s": 2.14,
+      "description": "Rire de foule",
+      "use": "ambiance, humour"
+    },
+    {
+      "file": "cry_baby.wav",
+      "duration_s": 1.33,
+      "description": "Pleurs de bébé",
+      "use": "bébé, détresse"
+    },
+    {
+      "file": "sob.wav",
+      "duration_s": 2.28,
+      "description": "Sanglots (adulte)",
+      "use": "tristesse"
+    },
+    {
+      "file": "scream.wav",
+      "duration_s": 1.0,
+      "description": "Cri de peur",
+      "use": "peur, danger"
+    },
+    {
+      "file": "gasp.wav",
+      "duration_s": 0.5,
+      "description": "Inspiration de surprise",
+      "use": "peur, étonnement"
+    },
+    {
+      "file": "oh_surprise.wav",
+      "duration_s": 0.6,
+      "description": "« Oooh » de surprise (homme)",
+      "use": "étonnement"
+    },
+    {
+      "file": "applause.wav",
+      "duration_s": 3.0,
+      "description": "Applaudissements",
+      "use": "victoire, élection"
+    },
+    {
+      "file": "music_aventure.mp3",
+      "duration_s": 15.48,
+      "description": "Boucle entraînante (chiptune, do majeur)",
+      "use": "épisodes, arrivée des habitants"
+    },
+    {
+      "file": "music_suspense.mp3",
+      "duration_s": 20.87,
+      "description": "Boucle de tension (la mineur)",
+      "use": "avant la catastrophe, mystère"
+    },
+    {
+      "file": "music_victoire.mp3",
+      "duration_s": 7.27,
+      "description": "Boucle de victoire (fanfare chiptune)",
+      "use": "palier atteint, élection"
+    },
+    {
+      "file": "music_calme.mp3",
+      "duration_s": 24.0,
+      "description": "Boucle douce (nappes + pluck)",
+      "use": "monde vide, nouveau départ"
     }
   ]
 }
