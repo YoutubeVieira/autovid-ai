@@ -1,0 +1,9 @@
+# Épisode 1 - La fin des dinosaures (≈ 27 s). <début_s | +pause> | <sous-titre> || <texte dit>
+0.15 | Il y a soixante-six millions d'années, les dinosaures régnaient. || Il y a soixante-six millions d'années, les dinosaures régnaient. // Il y a soixante-six millions d'années, les dinosaures régnè.
++0.25 | Puis le ciel s'est embrasé.
++0.90 | Un astéroïde. Rien n'a survécu. || Un astéroïde. Rien n'a survécu. // Un astéroïd. Rien n'a sur-vécu. // Un astérohide. Rien na survécu.
++0.65 | La fin des dinosaures.
++0.30 | Aujourd'hui, la planète est vide.
++0.20 | Elle peut renaître, avec toi.
++0.20 | Commente ton prénom, et ce que tu veux être.
++0.20 | Abonne-toi : épisode deux, les premiers habitants.

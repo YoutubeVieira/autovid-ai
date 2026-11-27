@@ -3,6 +3,7 @@ Format du script (une ligne par phrase):   <debut_en_secondes> | <texte affiche>
 Exemple:   3.6 | Mais des que tu t'abonnes, quelqu'un arrive.
            +0.15 | Phrase suivante, enchainee 0,15 s apres la precedente
            4.0 | Habitant de Caraguá || habitant de Caragoua      (orthographe phonetique pour la voix, sous-titre intact)
+           Plusieurs essais: `|| texte A // texte B` + --verify --asr-model: Whisper garde la variante la mieux comprise
 
 Usage: python3 tts.py script.txt --out voix_dir [--voice siwis] [--speaker 0] [--speed 1.0] [--models dossier]
 Sortie: voice.wav (piste calee sur les horodatages), voice.srt (sous-titres a la bonne seconde), voice.json
@@ -110,8 +111,10 @@ import prononciation as _pr
 for t, text, said in lines:
     if a.verify and a.asr_model:
         from autoeditor import asr as _asr
-        base = said if said != text else text
+        alts = [x.strip() for x in said.split("//")]          # variantes ecrites a la main: "texte A // texte B"
+        base = alts[0]
         cands = [("brut", _pr.fix(base, "overrides")), ("leger", _pr.fix(base, "light")), ("complet", _pr.fix(base, "full"))]
+        cands += [(f"variante{i}", x) for i, x in enumerate(alts[1:], 1)]
         seen, best = set(), None
         for name, cand in cands:
             if cand in seen:

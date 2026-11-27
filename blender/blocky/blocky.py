@@ -84,7 +84,7 @@ class _Builder:
         self._tag(v, bone, material)
         return v
 
-    def finish(self, collection):
+    def finish(self, collection, bevel=0.012):
         me = bpy.data.meshes.new(self.name)
         self.bm.to_mesh(me)
         self.bm.free()
@@ -95,14 +95,111 @@ class _Builder:
         for b in BONES:
             ob.vertex_groups.new(name=b)
         bev = ob.modifiers.new("Bevel", 'BEVEL')
-        bev.width, bev.segments, bev.limit_method = 0.012, 2, 'ANGLE'
+        bev.width, bev.segments, bev.limit_method = bevel, 2, 'ANGLE'
         return ob
+
+
+# ------------------------------------------------------------------ expressions de visage (style figurine)
+FACES = {}
+EXPRESSIONS = ["smile", "happy", "laugh", "surprise", "scared", "cry", "sad", "angry", "wink", "love", "tongue", "sleepy"]
+
+
+def face_parts(b, expr):
+    """Yeux, sourcils, bouche et accessoires (larmes, sueur...) d'une expression, sur la face avant de la tete (y=-0.152)."""
+    BLK, WHT = mat("face_black", (0.02, 0.02, 0.03), 0.3), mat("white", (0.95, 0.95, 0.95))
+    RED, PINK = mat("mouth", (0.55, 0.12, 0.12)), mat("blush", (0.95, 0.5, 0.5), 0.8)
+    BLUE, TONG = mat("tear", (0.45, 0.72, 1.0), 0.15), mat("tongue", (0.92, 0.38, 0.5))
+    HOT = mat("heart", (0.95, 0.15, 0.35), 0.4)
+    ey = -0.152
+    R = lambda ang: Matrix.Rotation(ang, 3, 'Y')
+
+    def bx(x, z, w, h, m=BLK, rot=None, d=0.02):
+        b.box((x, ey, z), (w, d, h), "head", m, rot=rot)
+
+    def blush(k=1.0):
+        for sx in (-1, 1):
+            bx(sx * 0.105, 0.82, 0.05 * k, 0.03 * k, PINK, d=0.015)
+
+    def smile_mouth(w=0.10):
+        bx(0, 0.785, w, 0.02)
+        for sx in (-1, 1):
+            bx(sx * (w / 2 + 0.005), 0.80, 0.02, 0.025)
+
+    def eyes_tall(h=0.075, z=0.89):
+        for sx in (-1, 1):
+            bx(sx * 0.07, z, 0.045, h)
+
+    def brows(z, ang, w=0.075):
+        for sx in (-1, 1):
+            bx(sx * 0.07, z, w, 0.018, BLK, R(ang * sx))
+
+    if expr == "smile":
+        eyes_tall(); smile_mouth(); blush()
+    elif expr == "happy":
+        for sx in (-1, 1):
+            bx(sx * 0.07 - 0.015, 0.885, 0.035, 0.02, BLK, R(0.6)); bx(sx * 0.07 + 0.015, 0.885, 0.035, 0.02, BLK, R(-0.6))
+        bx(0, 0.785, 0.13, 0.05, RED); bx(0, 0.805, 0.12, 0.018, WHT); blush(1.2)
+    elif expr == "laugh":
+        for sx in (-1, 1):
+            bx(sx * 0.07 - 0.015, 0.89, 0.04, 0.025, BLK, R(0.6)); bx(sx * 0.07 + 0.015, 0.89, 0.04, 0.025, BLK, R(-0.6))
+            bx(sx * 0.125, 0.85, 0.018, 0.05, BLUE)
+        bx(0, 0.775, 0.15, 0.075, RED); bx(0, 0.805, 0.13, 0.02, WHT); bx(0, 0.752, 0.08, 0.025, TONG); blush(1.3)
+    elif expr == "surprise":
+        for sx in (-1, 1):
+            bx(sx * 0.07, 0.89, 0.065, 0.085, WHT); bx(sx * 0.07, 0.89, 0.03, 0.04, BLK, d=0.024)
+        brows(0.975, -0.15, 0.06); bx(0, 0.775, 0.055, 0.065, RED); blush(0.8)
+    elif expr == "scared":
+        for sx in (-1, 1):
+            bx(sx * 0.07, 0.89, 0.07, 0.09, WHT); bx(sx * 0.07 + sx * 0.005, 0.885, 0.018, 0.03, BLK, d=0.024)
+        brows(0.985, 0.45, 0.07)
+        for i, (x, z) in enumerate([(-0.04, 0.775), (-0.013, 0.79), (0.013, 0.775), (0.04, 0.79)]):
+            bx(x, z, 0.03, 0.02)
+        bx(0.125, 0.955, 0.025, 0.045, BLUE)
+    elif expr in ("cry", "sad"):
+        eyes_tall(0.06, 0.885)
+        brows(0.955, 0.45, 0.07)
+        bx(0, 0.775, 0.07, 0.02)
+        for sx in (-1, 1):
+            bx(sx * 0.045, 0.755, 0.025, 0.025); 
+        if expr == "cry":
+            for sx in (-1, 1):
+                bx(sx * 0.075, 0.80, 0.022, 0.1, BLUE); bx(sx * 0.075, 0.74, 0.03, 0.03, BLUE)
+            bx(0, 0.76, 0.06, 0.03, RED)
+    elif expr == "angry":
+        for sx in (-1, 1):
+            bx(sx * 0.07, 0.885, 0.05, 0.04)
+        brows(0.94, -0.5, 0.085)
+        bx(0, 0.78, 0.11, 0.045, RED); bx(0, 0.795, 0.1, 0.016, WHT); bx(0, 0.768, 0.1, 0.014, WHT)
+    elif expr == "wink":
+        bx(-0.07, 0.89, 0.045, 0.075); bx(0.07, 0.885, 0.05, 0.016)
+        smile_mouth(0.11); blush()
+    elif expr == "love":
+        for sx in (-1, 1):
+            bx(sx * 0.07, 0.89, 0.045, 0.045, HOT, R(0.785)); bx(sx * 0.07, 0.915, 0.02, 0.02, HOT)
+        bx(0, 0.785, 0.12, 0.04, RED); blush(1.5)
+    elif expr == "tongue":
+        eyes_tall(); bx(0, 0.79, 0.11, 0.022)
+        bx(0.02, 0.76, 0.05, 0.05, TONG); blush()
+    elif expr == "sleepy":
+        for sx in (-1, 1):
+            bx(sx * 0.07, 0.885, 0.05, 0.014)
+        bx(0, 0.78, 0.05, 0.03, RED); blush(0.8)
+    else:
+        raise ValueError("expression inconnue: " + expr)
+
+
+def set_face(arm, frame, expr):
+    """Change l'expression a l'image `frame` (un seul visage visible; interpolation constante)."""
+    for e, ob in FACES[arm.name].items():
+        ob.hide_render = ob.hide_viewport = (e != expr)
+        ob.keyframe_insert("hide_render", frame=frame)
+        ob.keyframe_insert("hide_viewport", frame=frame)
 
 
 # ------------------------------------------------------------------ personnage
 def make_character(name, collection, shirt=(0.9, 0.2, 0.2), pants=(0.15, 0.2, 0.5), shoes=(0.15, 0.1, 0.1),
                    skin=None, hair="cap", hair_color=(0.25, 0.15, 0.08), hat=None, hat_color=(0.1, 0.1, 0.1),
-                   accessory=None, face="smile", scale=1.0, seed=0):
+                   accessory=None, face="smile", faces=None, scale=1.0, seed=0):
     rnd = random.Random(seed)
     skin = skin or rnd.choice(SKINS)
     S, P, SH = mat(f"{name}_shirt", shirt), mat(f"{name}_pants", pants), mat(f"{name}_shoes", shoes, 0.7)
@@ -115,21 +212,6 @@ def make_character(name, collection, shirt=(0.9, 0.2, 0.2), pants=(0.15, 0.2, 0.
     b.box((0, 0, 0.375), (0.32, 0.17, 0.07), "hips", P)
     # tete
     b.box((0, 0, 0.85), (0.30, 0.30, 0.30), "head", SK)
-    ey = -0.152
-    if face in ("smile", "happy", "shock", "angry"):
-        h = 0.075 if face != "shock" else 0.10
-        for sx in (-1, 1):
-            b.box((sx * 0.07, ey, 0.89), (0.045, 0.02, h), "head", BLK)
-            if face == "angry":
-                b.box((sx * 0.07, ey, 0.955), (0.07, 0.02, 0.018), "head", BLK, rot=Matrix.Rotation(sx * 0.4, 3, 'Y'))
-        if face == "shock":
-            b.box((0, ey, 0.79), (0.06, 0.02, 0.06), "head", MOUTH)
-        else:
-            b.box((0, ey, 0.785), (0.10, 0.02, 0.02), "head", BLK)
-            for sx in (-1, 1):
-                b.box((sx * 0.055, ey, 0.80), (0.02, 0.02, 0.025), "head", BLK)
-        for sx in (-1, 1):
-            b.box((sx * 0.105, ey, 0.82), (0.05, 0.015, 0.03), "head", mat("blush", (0.95, 0.5, 0.5), 0.8))
     # cheveux
     if hair == "cap":
         b.box((0, 0, 1.03), (0.32, 0.32, 0.07), "head", HR)
@@ -214,6 +296,17 @@ def make_character(name, collection, shirt=(0.9, 0.2, 0.2), pants=(0.15, 0.2, 0.
     mod.object = arm
     arm.scale = (scale, scale, scale)
     ob.scale = (1, 1, 1)
+    # visages: un objet par expression, un seul visible a la fois (voir set_face)
+    FACES[arm.name] = {}
+    for i, expr in enumerate(faces or [face]):
+        fb = _Builder(f"{name}_face_{expr}")
+        face_parts(fb, expr)
+        fo = fb.finish(collection, bevel=0.004)
+        fo.parent = arm
+        m2 = fo.modifiers.new("Armature", 'ARMATURE')
+        m2.object = arm
+        fo.hide_render = fo.hide_viewport = (i != 0)
+        FACES[arm.name][expr] = fo
     return arm, ob
 
 
