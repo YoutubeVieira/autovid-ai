@@ -1,5 +1,7 @@
 # Néon Bay sur Google Play : le guide
 
+> **Nouveau : la méthode recommandée est l'app Android autonome (Capacitor), sans site web. Voir `PLAYSTORE.md`.** Ce guide-ci décrit l'ancienne méthode TWA (site + Bubblewrap/PWABuilder).
+
 ## Ce qui est déjà prêt dans le projet
 - **Achat dans l'app** (`js/store.js`) : dans l'application Android, le bouton « Acheter le jeu complet » passe par Google Play Billing. Il y a aussi un bouton « Restaurer mes achats », et le jeu retrouve tout seul un achat déjà fait sur le même compte Google.
 - **Codes web conservés** : un joueur qui a acheté un code sur ton site peut toujours le saisir dans l'app. Dans l'app, il n'y a aucun lien vers ton site et aucun prix du site (règle Google Play).

@@ -21,3 +21,5 @@ app-android/android/local.properties
 *.keystore
 *.p12
 keystore.properties
+# archive envoyée au PC de l'utilisateur (40 Mo)
+marketing/*.zip
