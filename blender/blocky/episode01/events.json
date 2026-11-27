@@ -3,6 +3,22 @@
   "frames": 480,
   "events": [
     {
+      "t": 1.5,
+      "type": "cut"
+    },
+    {
+      "t": 2.5,
+      "type": "cut"
+    },
+    {
+      "t": 3.5,
+      "type": "cut"
+    },
+    {
+      "t": 4.5,
+      "type": "cut"
+    },
+    {
       "t": 4.542,
       "type": "counter",
       "value": 1,
@@ -15,10 +31,18 @@
       "color": "yellow"
     },
     {
+      "t": 5.5,
+      "type": "cut"
+    },
+    {
       "t": 5.583,
       "type": "badge",
       "text": "+1 EMPLOI",
       "color": "green"
+    },
+    {
+      "t": 7.0,
+      "type": "cut"
     },
     {
       "t": 7.125,
@@ -45,6 +69,10 @@
       "color": "yellow"
     },
     {
+      "t": 8.333,
+      "type": "cut"
+    },
+    {
       "t": 8.625,
       "type": "counter",
       "value": 4,
@@ -69,6 +97,10 @@
       "color": "yellow"
     },
     {
+      "t": 9.583,
+      "type": "cut"
+    },
+    {
       "t": 10.125,
       "type": "counter",
       "value": 6,
@@ -87,10 +119,40 @@
       "label": "7"
     },
     {
+      "t": 12.0,
+      "type": "cut"
+    },
+    {
+      "t": 13.333,
+      "type": "cut"
+    },
+    {
+      "t": 13.383000000000001,
+      "type": "riser"
+    },
+    {
       "t": 13.708,
       "type": "counter",
       "value": 40,
       "label": "40"
+    },
+    {
+      "t": 14.583,
+      "type": "cut"
+    },
+    {
+      "t": 14.625,
+      "type": "badge",
+      "text": "100 HABITANTS",
+      "color": "yellow"
+    },
+    {
+      "t": 14.625,
+      "type": "impact"
+    },
+    {
+      "t": 15.25,
+      "type": "cut"
     },
     {
       "t": 15.583,
@@ -109,26 +171,30 @@
       "type": "milestone"
     },
     {
+      "t": 15.833,
+      "type": "cut"
+    },
+    {
+      "t": 17.0,
+      "type": "cut"
+    },
+    {
+      "t": 17.0,
+      "type": "impact"
+    },
+    {
       "t": 17.042,
       "type": "badge",
       "text": "ELECTION DU MAIRE",
       "color": "yellow"
     },
     {
-      "t": 3.5,
+      "t": 18.333,
       "type": "cut"
     },
     {
-      "t": 7.0,
-      "type": "cut"
-    },
-    {
-      "t": 12.0,
-      "type": "cut"
-    },
-    {
-      "t": 17.0,
-      "type": "cut"
+      "t": 18.333,
+      "type": "impact"
     }
   ]
 }

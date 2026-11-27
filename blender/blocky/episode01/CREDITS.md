@@ -1,6 +1,6 @@
-# Episode 01 - La ville des abonnes
+# Episode 01 - La ville des abonnes (v2, montage rapide)
 
-- Voix off: SIWIS (University of Edinburgh), CC BY 4.0 - a mentionner dans la description de la video.
+- Voix off: modele Piper « tom » (Tjiho, French-tts-model-piper), licence AGPLv3 - a VERIFIER avant monetisation. Alternatives: `siwis` (CC BY 4.0, voix de femme, mention a ajouter), `gilles` (CC0, qualite basse).
 - Bruitages: pack CC0 du depot (`packs/sfx`). Police: Press Start 2P (OFL).
-- Personnages, ville et animation: generes par script (`blender/blocky`), originaux.
-- Pas de musique dans cette version.
+- Couleurs: palette mesuree sur le compte de reference (`blender/blocky/palette_ref.json`).
+- Personnages, ville et animation: generes par script (`blender/blocky`), originaux. Pas de musique.

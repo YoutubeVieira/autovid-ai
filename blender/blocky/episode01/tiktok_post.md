@@ -1,11 +1,11 @@
 # Episode 1 - publication TikTok
 
-Fichier: `episode01_tiktok.mp4` (1080x1920, 22 s, H.264/AAC, -14 LUFS).
+Fichier: `episode01_tiktok.mp4` (1080x1920, 22 s, 15 plans, zooms rapides, voix masculine).
 
 **Description (a coller)**
 Dans cette ville, il n'y a personne… Abonne-toi et tu deviens un habitant 🏙️
 Épisode 1 · Jour 1 : la ville vide (0/100). Reviens pour l'épisode 2.
-Voix : SIWIS (University of Edinburgh), CC BY 4.0
+Voix : modèle Piper "tom" (voir CREDITS.md pour la licence)
 
 **Hashtags (a adapter)**: #serie #animation3d #blender #ville #abonnetoi #episode1
 
