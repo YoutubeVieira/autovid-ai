@@ -4,3 +4,20 @@ marketing/veo/
 marketing/studio/
 marketing/tiktok/
 __pycache__/
+# app Android (Capacitor)
+node_modules/
+app-android/www/
+app-android/dist/
+app-android/android/.gradle/
+app-android/android/build/
+app-android/android/app/build/
+app-android/android/capacitor-cordova-android-plugins/
+app-android/android/app/src/main/assets/public/
+app-android/android/local.properties
+*.aab
+*.apk
+# clés de signature : JAMAIS dans git
+*.jks
+*.keystore
+*.p12
+keystore.properties

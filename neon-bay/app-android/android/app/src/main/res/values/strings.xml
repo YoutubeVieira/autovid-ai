@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Néon Bay</string>
+    <string name="title_activity_main">Néon Bay</string>
+    <string name="package_name">com.neonbay.mafia</string>
+    <string name="custom_url_scheme">com.neonbay.mafia</string>
+</resources>

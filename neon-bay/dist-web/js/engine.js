@@ -3210,8 +3210,8 @@ const SCREENS = {
       ${ST.state.error ? `<p class="note bad">${esc(ST.state.error)}</p>` : ''}` : `
       <div class="price">${D.SHOP_CONFIG.price}</div>
       ${url ? `<a class="btn primary" href="${esc(url)}" target="_blank" rel="noopener">Acheter le jeu complet</a>` : `<p class="note">Le jeu complet arrive très bientôt sur les boutiques. En attendant, le niveau 1 et la balade libre sont offerts.</p>`}`}
-      <label class="lab" for="code">Tu as déjà un code ?</label>
-      <div class="row"><input id="code" placeholder="NBAY-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"><button class="btn" data-code="1">Valider</button></div>
+      ${isPlay() && D.SHOP_CONFIG.playCodes === false ? '' : `<label class="lab" for="code">Tu as déjà un code ?</label>
+      <div class="row"><input id="code" placeholder="NBAY-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false"><button class="btn" data-code="1">Valider</button></div>`}
       ${m ? `<p class="note ${m.ok ? 'ok' : 'bad'}">${esc(m.t)}</p>` : ''}
     </div>`;
   },
@@ -3382,6 +3382,14 @@ function buy(id) {
 function flashNote(t) { const n = document.createElement('div'); n.className = 'flash'; n.textContent = TR(t); screenEl.appendChild(n); setTimeout(() => n.remove(), 1500); }
 function pauseGame() { if (S.mode !== 'play') return; $('rotate').hidden = true; S.rot = false; if (PORTAL) PORTAL.stop(); S.mode = 'pause'; au('duck', true); showScreen('pause'); }
 function resumeGame() { if (PORTAL) PORTAL.start(); S.mode = 'play'; au('duck', false); showScreen(null); lastT = performance.now(); }
+// bouton Retour d'Android (app native, voir js/native.js) : renvoie false s'il n'y a rien à fermer (l'app passe alors en arrière-plan)
+window.NB_BACK = () => {
+  const tr = document.querySelector('.trailer button'); if (tr) { tr.click(); return true; }
+  if (S.mode === 'play' && !S.screen) { pauseGame(); return true; }
+  const back = !screenEl.hidden && screenEl.querySelector('.top button, [data-resume]'); if (back) { back.click(); return true; }
+  if (S.mode === 'pause') { resumeGame(); return true; }
+  return false;
+};
 function goLevel(n) { if (n > 1 && !save.premium && !PORTAL) { showScreen('unlock'); return; } if (n > save.maxLevel) { flashNote('Termine le niveau ' + (n - 1) + ' d’abord'); return; } showScreen('brief', { n }); }
 { let lastHov = null, hovT = 0; screenEl.addEventListener('mouseover', e => { const b = e.target.closest('button,a,.mm'); if (!b || b === lastHov) return; lastHov = b; const t = performance.now(); if (t - hovT > 60) { hovT = t; au('hover'); } }); }
 screenEl.addEventListener('click', e => {

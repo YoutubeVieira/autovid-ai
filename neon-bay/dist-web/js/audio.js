@@ -324,6 +324,9 @@ window.NB_AUDIO = (() => {
   function sfxRain(len = 10, vol = .14) { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, vol), t = now(); const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = true; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = 1800; const g = ctx.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(1, t + 1); g.gain.setValueAtTime(1, t + len - 1); g.gain.exponentialRampToValueAtTime(.0001, t + len); s.connect(f); f.connect(g); g.connect(d); s.start(t); s.stop(t + len); }
   function sfxPop(vol = .3) { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, vol), t = now(); tone(d, t, 'sine', 700, 1500, .09, .8); tone(d, t + .02, 'triangle', 1400, 1400, .06, .25); }
   function sfxSting(vol = .4) { if (!ctx || !prefs.sfx) return; const d = out(sfxBus, 0, vol), t = now(); [523, 659, 784, 1047].forEach((f, i) => tone(d, t + i * .04, 'triangle', f, f, 1.4, .5, .01)); noise(d, t, 1.2, 'highpass', 6000, .5, .15, .01); }
-  const api = { sfxWhoosh, sfxImpact, sfxRiser, sfxSiren, sfxEngine, sfxRumble, sfxRain, sfxPop, sfxSting, lock, alarm, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, hover, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
+  // app en arrière-plan : on coupe le son (appelé par js/native.js et quand l'onglet est caché)
+  function bg(off) { if (!ctx) return; try { off ? ctx.suspend() : ctx.resume(); } catch (e) {} }
+  document.addEventListener('visibilitychange', () => bg(document.hidden));
+  const api = { bg, sfxWhoosh, sfxImpact, sfxRiser, sfxSiren, sfxEngine, sfxRumble, sfxRain, sfxPop, sfxSting, lock, alarm, renderOffline, setMute, init, shot, boom, crash, hit, hurt, ko, cash, pickup, step, win, fail, buy, click, hover, deny, whoosh, door, update, setMusic, setIntensity, duck, toggle, prefs, get ready() { return !!ctx; } };
   return api;
 })();

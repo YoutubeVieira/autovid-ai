@@ -9,6 +9,7 @@ window.NB_DATA = (() => {
     salt: 'nb-27359c4a7da65190-', // change-le AVANT de vendre, et garde le même dans tools/generate-codes.js
     playSku: 'full_game',  // identifiant du produit « Jeu complet » créé dans la Play Console
     verifyUrl: '',         // (recommandé) adresse d'un petit serveur qui vérifie l'achat et en accuse réception, voir ANDROID.md
+    playCodes: true,       // app Google Play : false = cacher le champ « Tu as déjà un code ? » (codes vendus hors Play, voir PLAYSTORE.md)
   };
 
 
