@@ -26,7 +26,7 @@ class MondeTest(unittest.TestCase):
         lines, chosen = monde.plan_script("Test", 3, new, 0, len(new))
         self.assertLessEqual(monde.estimate(lines), 30.0)
         self.assertGreaterEqual(len(chosen), 1)
-        self.assertTrue(any("manque" in l for l in lines))
+        self.assertTrue(any("Palier" in l for l in lines))   # 24 >= 15: le palier est annonce
 
 
 if __name__ == "__main__":

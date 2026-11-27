@@ -150,12 +150,14 @@
   "mis_en_avant": [
     1,
     2,
-    3
+    3,
+    4,
+    5
   ],
   "anciens": [],
   "total_avant": 0,
   "total_apres": 8,
-  "duree_estimee_s": 29.4,
+  "duree_estimee_s": 27.0,
   "ecartes": [
     {
       "ok": false,

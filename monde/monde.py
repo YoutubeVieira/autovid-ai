@@ -91,7 +91,7 @@ def say(text):
 
 def plan_script(titre, num, new, total_before, total_after):
     """Phrases de voix off et habitants mis en avant: on en ajoute tant que la duree estimee (carton de fin compris) reste <= 29,5 s."""
-    def build(chosen):
+    def build(chosen, missing=True):
         lines = [f"Épisode {num} : {titre}.", "Un nouvel habitant arrive." if len(new) == 1 else f"{len(new)} nouveaux habitants arrivent."]
         lines += [f"{c['prenom']}, {c['metier_dit']}." for c in chosen]
         rest = len(new) - len(chosen)
@@ -99,7 +99,7 @@ def plan_script(titre, num, new, total_before, total_after):
             lines.append(f"Et {rest} autre{'s' if rest > 1 else ''} encore.")
         lines.append(f"Le monde compte maintenant {total_after} habitant{'s' if total_after > 1 else ''}.")
         nxt = next(((m, t) for m, t in MILESTONES if total_after < m), None)
-        if nxt:
+        if nxt and missing:
             lines.append(f"Il en manque {nxt[0] - total_after} pour {nxt[1]}.")
         crossed = [t for m, t in MILESTONES if total_before < m <= total_after]
         if crossed:
@@ -112,12 +112,17 @@ def plan_script(titre, num, new, total_before, total_after):
             seen.add(c["look"]["metier"])
             order.append(c)
     order += [c for c in new if c not in order]
-    chosen = []
+    chosen, missing = [], True
     for c in order:
-        if len(chosen) >= 5 or estimate(build(chosen + [c])) > TARGET[1] - 0.5:
+        if len(chosen) >= 5:
             break
+        if estimate(build(chosen + [c], missing)) > TARGET[1] - 0.5:
+            if missing and estimate(build(chosen + [c], False)) <= TARGET[1] - 0.5:
+                missing = False                      # on sacrifie « il en manque N » pour garder un habitant a l'ecran
+            else:
+                break
         chosen.append(c)
-    return build(chosen), chosen
+    return build(chosen, missing), chosen
 
 
 def estimate(lines):
