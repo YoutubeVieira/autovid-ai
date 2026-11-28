@@ -1,11 +1,8 @@
 # Épisode 2 - Les premiers habitants (≈ 27 s). <début | +pause> | texte
 0.15 | Épisode 2 : Les premiers habitants.
-+0.22 | 8 nouveaux habitants arrivent.
-+0.22 | Léa, boulangère.
-+0.22 | Karim, pompier.
-+0.22 | Zoé, astronaute.
-+0.22 | Tom, footballeur.
-+0.22 | Nina, professeure.
-+0.22 | Et 3 autres encore.
-+0.22 | Le monde compte maintenant 8 habitants.
++0.22 | 2 nouveaux habitants arrivent.
++0.22 | Mamie, cuisinière fait maison.
++0.22 | Robin, T-rex singe.
++0.22 | Le monde compte maintenant 2 habitants.
++0.22 | Il en manque 13 pour les 15 premiers conseillers.
 +0.22 | Commente ton prénom et ton métier : le prochain, c'est toi.

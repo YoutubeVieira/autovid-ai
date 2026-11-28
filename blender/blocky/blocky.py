@@ -254,6 +254,16 @@ def make_character(name, collection, shirt=(0.9, 0.2, 0.2), pants=(0.15, 0.2, 0.
     elif hat == "cap":
         b.box((0, 0, 1.045), (0.33, 0.33, 0.07), "head", HT)
         b.box((0, -0.24, 1.02), (0.3, 0.2, 0.025), "head", HT)
+    elif hat == "trexsinge":
+        G = HT
+        b.sphere((0, 0, 1.03), 0.2, "head", G, squash=(1, 1, 0.65))
+        b.box((0, -0.2, 1.0), (0.22, 0.2, 0.1), "head", G)                      # museau de T-rex
+        for sx in (-1, 1):
+            b.sphere((sx * 0.1, -0.1, 1.1), 0.045, "head", mat("trex_eye", (0.97, 0.97, 0.9)))
+            b.box((sx * 0.07, -0.3, 0.955), (0.03, 0.03, 0.04), "head", mat("trex_tooth", (0.97, 0.97, 0.92)))
+            b.sphere((sx * 0.2, 0.0, 1.0), 0.07, "head", mat("singe_ear", (0.45, 0.28, 0.14)))   # oreilles de singe
+        for i in range(3):
+            b.box((0, 0.02 - i * 0.07, 1.14 - i * 0.012), (0.04, 0.05, 0.05), "head", G)
     elif hat == "chef":
         b.cyl((0, 0, 1.14), 0.16, 0.2, 0.22, "head", mat("chefhat", (0.97, 0.97, 0.97)))
     # bras (os: epaule = haut du bloc)
@@ -285,6 +295,11 @@ def make_character(name, collection, shirt=(0.9, 0.2, 0.2), pants=(0.15, 0.2, 0.
         b.box((0, -0.095, 0.47), (0.24, 0.012, 0.24), "spine", mat("apron", (0.97, 0.97, 0.95)))
     elif accessory == "vest":
         b.box((0, 0, 0.53), (0.335, 0.18, 0.2), "spine", mat("vest", (0.98, 0.55, 0.05)))
+    elif accessory == "tail":
+        TL = mat("trex_tail", hat_color)
+        b.box((0, 0.17, 0.2), (0.12, 0.18, 0.12), "spine", TL)
+        b.box((0, 0.3, 0.17), (0.09, 0.16, 0.09), "spine", TL)
+        b.box((0, 0.42, 0.15), (0.06, 0.12, 0.06), "spine", mat("singe_tail", (0.45, 0.28, 0.14)))
     elif accessory == "bag":
         b.box((0.0, 0.1, 0.5), (0.2, 0.1, 0.22), "spine", mat("bag", (0.45, 0.25, 0.12)))
 

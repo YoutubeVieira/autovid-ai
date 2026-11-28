@@ -4,155 +4,44 @@
   "nouveaux": [
     {
       "id": 1,
-      "prenom": "Léa",
-      "metier_dit": "boulangère",
+      "prenom": "Mamie",
+      "metier_dit": "cuisinière fait maison",
       "look": {
-        "metier": "boulanger",
-        "shirt": "blanc",
-        "pants": "gris",
+        "metier": "mamie",
+        "shirt": "creme",
+        "pants": "brun",
         "accessory": "apron",
-        "hat": "chef",
+        "hat": null,
         "hat_color": null,
-        "hair": "cap",
-        "skin": 0,
-        "hair_color": 4,
-        "face": "love"
+        "hair": "grey",
+        "skin": 2,
+        "hair_color": 1,
+        "face": "wink"
       },
       "episode": 2
     },
     {
       "id": 2,
-      "prenom": "Karim",
-      "metier_dit": "pompier",
+      "prenom": "Robin",
+      "metier_dit": "T-rex singe",
       "look": {
-        "metier": "pompier",
-        "shirt": "rouge",
-        "pants": "brun_fonce",
-        "accessory": "vest",
-        "hat": "helmet",
-        "hat_color": "rouge",
-        "hair": "cap",
-        "skin": 4,
-        "hair_color": 1,
-        "face": "smile"
-      },
-      "episode": 2
-    },
-    {
-      "id": 3,
-      "prenom": "Zoé",
-      "metier_dit": "astronaute",
-      "look": {
-        "metier": "astronaute",
-        "shirt": "blanc",
-        "pants": "gris",
-        "accessory": null,
-        "hat": "helmet",
-        "hat_color": "blanc",
-        "hair": "spiky",
-        "skin": 3,
-        "hair_color": 2,
-        "face": "happy"
-      },
-      "episode": 2
-    },
-    {
-      "id": 4,
-      "prenom": "Tom",
-      "metier_dit": "footballeur",
-      "look": {
-        "metier": "sportif",
-        "shirt": "rouge",
-        "pants": "bleu_profond",
-        "accessory": null,
-        "hat": "cap",
-        "hat_color": "rouge",
-        "hair": "long",
-        "skin": 3,
-        "hair_color": 1,
-        "face": "happy"
-      },
-      "episode": 2
-    },
-    {
-      "id": 5,
-      "prenom": "Nina",
-      "metier_dit": "professeure",
-      "look": {
-        "metier": "professeur",
-        "shirt": "bleu_ciel",
-        "pants": "bleu_profond",
-        "accessory": "bag",
-        "hat": null,
-        "hat_color": null,
-        "hair": "cap",
-        "skin": 3,
-        "hair_color": 3,
-        "face": "love"
-      },
-      "episode": 2
-    },
-    {
-      "id": 6,
-      "prenom": "Hugo",
-      "metier_dit": "médecin",
-      "look": {
-        "metier": "medecin",
-        "shirt": "blanc",
-        "pants": "bleu_ciel",
-        "accessory": "cross",
-        "hat": null,
-        "hat_color": null,
-        "hair": "cap",
-        "skin": 1,
-        "hair_color": 3,
-        "face": "happy"
-      },
-      "episode": 2
-    },
-    {
-      "id": 7,
-      "prenom": "Sam",
-      "metier_dit": "pêcheur",
-      "look": {
-        "metier": "pecheur",
+        "metier": "trexsinge",
         "shirt": "vert",
-        "pants": "brun",
-        "accessory": null,
-        "hat": "cap",
-        "hat_color": "or",
-        "hair": "cap",
-        "skin": 3,
-        "hair_color": 2,
-        "face": "tongue"
-      },
-      "episode": 2
-    },
-    {
-      "id": 8,
-      "prenom": "Ines",
-      "metier_dit": "artiste",
-      "look": {
-        "metier": "artiste",
-        "shirt": "rouge",
-        "pants": "quasi_noir",
-        "accessory": "bag",
-        "hat": "beret",
-        "hat_color": "rouge",
-        "hair": "cap",
+        "pants": "brun_fonce",
+        "accessory": "tail",
+        "hat": "trexsinge",
+        "hat_color": "vert",
+        "hair": "bun",
         "skin": 0,
-        "hair_color": 3,
-        "face": "surprise"
+        "hair_color": 0,
+        "face": "love"
       },
       "episode": 2
     }
   ],
   "mis_en_avant": [
     1,
-    2,
-    3,
-    4,
-    5
+    2
   ],
   "anciens": [],
   "musique": [
@@ -172,13 +61,7 @@
     }
   ],
   "total_avant": 0,
-  "total_apres": 8,
-  "duree_estimee_s": 27.0,
-  "ecartes": [
-    {
-      "ok": false,
-      "motif": "contenu écarté (lien, contact ou terme interdit)",
-      "ligne": "www.spam.com achetez"
-    }
-  ]
+  "total_apres": 2,
+  "duree_estimee_s": 27.4,
+  "ecartes": []
 }

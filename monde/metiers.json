@@ -1,21 +1,275 @@
 {
-  "_note": "Métier (synonymes en minuscules sans accent) -> apparence des figurines. Couleurs = palette de référence. Pas de genre déduit: on garde le métier tel que le spectateur l'a écrit.",
-  "professeur": {"alias": ["professeur", "professeure", "prof", "enseignant", "enseignante", "maitre", "maitresse", "instituteur", "institutrice"], "shirt": "bleu_ciel", "pants": "bleu_profond", "accessory": "bag", "hair": "cap"},
-  "medecin": {"alias": ["medecin", "docteur", "docteure", "chirurgien", "chirurgienne", "infirmier", "infirmiere", "dentiste", "veterinaire"], "shirt": "blanc", "pants": "bleu_ciel", "accessory": "cross", "hair": "cap"},
-  "boulanger": {"alias": ["boulanger", "boulangere", "patissier", "patissiere", "boucher", "bouchere"], "shirt": "blanc", "pants": "gris", "accessory": "apron", "hat": "chef"},
-  "cuisinier": {"alias": ["cuisinier", "cuisiniere", "chef", "cheffe", "restaurateur"], "shirt": "blanc", "pants": "bleu_profond", "accessory": "apron", "hat": "chef"},
-  "pompier": {"alias": ["pompier", "pompiere", "sapeur"], "shirt": "rouge", "pants": "brun_fonce", "accessory": "vest", "hat": "helmet", "hat_color": "rouge"},
-  "policier": {"alias": ["policier", "policiere", "gendarme", "agent"], "shirt": "bleu_profond", "pants": "quasi_noir", "accessory": "whistle", "hat": "cap", "hat_color": "bleu_profond"},
-  "pecheur": {"alias": ["pecheur", "pecheuse", "marin"], "shirt": "vert", "pants": "brun", "hat": "cap", "hat_color": "or"},
-  "agriculteur": {"alias": ["agriculteur", "agricultrice", "fermier", "fermiere", "paysan", "paysanne", "jardinier", "jardiniere"], "shirt": "vert", "pants": "brun", "accessory": "vest", "hat": "cap", "hat_color": "creme"},
-  "sauveteur": {"alias": ["sauveteur", "sauveteuse", "nageur", "maitre-nageur"], "shirt": "rouge", "pants": "or", "accessory": "whistle", "hair": "spiky"},
-  "eboueur": {"alias": ["eboueur", "eboueuse", "balayeur", "balayeuse"], "shirt": "or", "pants": "gris", "accessory": "vest"},
-  "facteur": {"alias": ["facteur", "factrice", "livreur", "livreuse"], "shirt": "or", "pants": "bleu_profond", "accessory": "bag", "hat": "cap", "hat_color": "or"},
-  "mecanicien": {"alias": ["mecanicien", "mecanicienne", "plombier", "plombiere", "electricien", "electricienne", "macon", "maconne", "ouvrier", "ouvriere"], "shirt": "bleu_ciel", "pants": "bleu_profond", "hat": "helmet", "hat_color": "or"},
-  "artiste": {"alias": ["artiste", "peintre", "musicien", "musicienne", "chanteur", "chanteuse", "danseur", "danseuse", "acteur", "actrice"], "shirt": "rouge", "pants": "quasi_noir", "accessory": "bag", "hat": "beret", "hat_color": "rouge"},
-  "astronaute": {"alias": ["astronaute", "pilote", "scientifique", "chercheur", "chercheuse"], "shirt": "blanc", "pants": "gris", "hat": "helmet", "hat_color": "blanc"},
-  "sportif": {"alias": ["footballeur", "footballeuse", "sportif", "sportive", "coureur", "coureuse", "basketteur", "basketteuse", "joueur", "joueuse"], "shirt": "rouge", "pants": "bleu_profond", "hat": "cap", "hat_color": "rouge"},
-  "youtubeur": {"alias": ["youtubeur", "youtubeuse", "streamer", "streameuse", "tiktokeur", "tiktokeuse", "createur", "creatrice"], "shirt": "bleu_ciel", "pants": "quasi_noir", "hat": "cap", "hat_color": "bleu_profond"},
-  "maire": {"alias": ["maire"], "shirt": "bleu_profond", "pants": "quasi_noir", "accessory": "sash", "hat": "tophat", "hair": "grey"},
-  "habitant": {"alias": [], "shirt": "or", "pants": "bleu_profond"}
+ "_note": "Métier (synonymes en minuscules sans accent) -> apparence des figurines. Couleurs = palette de référence. Pas de genre déduit: on garde le métier tel que le spectateur l'a écrit.",
+ "professeur": {
+  "alias": [
+   "professeur",
+   "professeure",
+   "prof",
+   "enseignant",
+   "enseignante",
+   "maitre",
+   "maitresse",
+   "instituteur",
+   "institutrice"
+  ],
+  "shirt": "bleu_ciel",
+  "pants": "bleu_profond",
+  "accessory": "bag",
+  "hair": "cap"
+ },
+ "medecin": {
+  "alias": [
+   "medecin",
+   "docteur",
+   "docteure",
+   "chirurgien",
+   "chirurgienne",
+   "infirmier",
+   "infirmiere",
+   "dentiste",
+   "veterinaire"
+  ],
+  "shirt": "blanc",
+  "pants": "bleu_ciel",
+  "accessory": "cross",
+  "hair": "cap"
+ },
+ "boulanger": {
+  "alias": [
+   "boulanger",
+   "boulangere",
+   "patissier",
+   "patissiere",
+   "boucher",
+   "bouchere"
+  ],
+  "shirt": "blanc",
+  "pants": "gris",
+  "accessory": "apron",
+  "hat": "chef"
+ },
+ "mamie": {
+  "alias": [
+   "fait maison",
+   "a la maison"
+  ],
+  "shirt": "creme",
+  "pants": "brun",
+  "accessory": "apron",
+  "hair": "grey"
+ },
+ "cuisinier": {
+  "alias": [
+   "cuisinier",
+   "cuisiniere",
+   "chef",
+   "cheffe",
+   "restaurateur"
+  ],
+  "shirt": "blanc",
+  "pants": "bleu_profond",
+  "accessory": "apron",
+  "hat": "chef"
+ },
+ "pompier": {
+  "alias": [
+   "pompier",
+   "pompiere",
+   "sapeur"
+  ],
+  "shirt": "rouge",
+  "pants": "brun_fonce",
+  "accessory": "vest",
+  "hat": "helmet",
+  "hat_color": "rouge"
+ },
+ "policier": {
+  "alias": [
+   "policier",
+   "policiere",
+   "gendarme",
+   "agent"
+  ],
+  "shirt": "bleu_profond",
+  "pants": "quasi_noir",
+  "accessory": "whistle",
+  "hat": "cap",
+  "hat_color": "bleu_profond"
+ },
+ "pecheur": {
+  "alias": [
+   "pecheur",
+   "pecheuse",
+   "marin"
+  ],
+  "shirt": "vert",
+  "pants": "brun",
+  "hat": "cap",
+  "hat_color": "or"
+ },
+ "agriculteur": {
+  "alias": [
+   "agriculteur",
+   "agricultrice",
+   "fermier",
+   "fermiere",
+   "paysan",
+   "paysanne",
+   "jardinier",
+   "jardiniere"
+  ],
+  "shirt": "vert",
+  "pants": "brun",
+  "accessory": "vest",
+  "hat": "cap",
+  "hat_color": "creme"
+ },
+ "sauveteur": {
+  "alias": [
+   "sauveteur",
+   "sauveteuse",
+   "nageur",
+   "maitre-nageur"
+  ],
+  "shirt": "rouge",
+  "pants": "or",
+  "accessory": "whistle",
+  "hair": "spiky"
+ },
+ "eboueur": {
+  "alias": [
+   "eboueur",
+   "eboueuse",
+   "balayeur",
+   "balayeuse"
+  ],
+  "shirt": "or",
+  "pants": "gris",
+  "accessory": "vest"
+ },
+ "facteur": {
+  "alias": [
+   "facteur",
+   "factrice",
+   "livreur",
+   "livreuse"
+  ],
+  "shirt": "or",
+  "pants": "bleu_profond",
+  "accessory": "bag",
+  "hat": "cap",
+  "hat_color": "or"
+ },
+ "mecanicien": {
+  "alias": [
+   "mecanicien",
+   "mecanicienne",
+   "plombier",
+   "plombiere",
+   "electricien",
+   "electricienne",
+   "macon",
+   "maconne",
+   "ouvrier",
+   "ouvriere"
+  ],
+  "shirt": "bleu_ciel",
+  "pants": "bleu_profond",
+  "hat": "helmet",
+  "hat_color": "or"
+ },
+ "artiste": {
+  "alias": [
+   "artiste",
+   "peintre",
+   "musicien",
+   "musicienne",
+   "chanteur",
+   "chanteuse",
+   "danseur",
+   "danseuse",
+   "acteur",
+   "actrice"
+  ],
+  "shirt": "rouge",
+  "pants": "quasi_noir",
+  "accessory": "bag",
+  "hat": "beret",
+  "hat_color": "rouge"
+ },
+ "astronaute": {
+  "alias": [
+   "astronaute",
+   "pilote",
+   "scientifique",
+   "chercheur",
+   "chercheuse"
+  ],
+  "shirt": "blanc",
+  "pants": "gris",
+  "hat": "helmet",
+  "hat_color": "blanc"
+ },
+ "sportif": {
+  "alias": [
+   "footballeur",
+   "footballeuse",
+   "sportif",
+   "sportive",
+   "coureur",
+   "coureuse",
+   "basketteur",
+   "basketteuse",
+   "joueur",
+   "joueuse"
+  ],
+  "shirt": "rouge",
+  "pants": "bleu_profond",
+  "hat": "cap",
+  "hat_color": "rouge"
+ },
+ "youtubeur": {
+  "alias": [
+   "youtubeur",
+   "youtubeuse",
+   "streamer",
+   "streameuse",
+   "tiktokeur",
+   "tiktokeuse",
+   "createur",
+   "creatrice"
+  ],
+  "shirt": "bleu_ciel",
+  "pants": "quasi_noir",
+  "hat": "cap",
+  "hat_color": "bleu_profond"
+ },
+ "maire": {
+  "alias": [
+   "maire"
+  ],
+  "shirt": "bleu_profond",
+  "pants": "quasi_noir",
+  "accessory": "sash",
+  "hat": "tophat",
+  "hair": "grey"
+ },
+ "trexsinge": {
+  "alias": [
+   "t-rex",
+   "t rex",
+   "trex",
+   "singe"
+  ],
+  "shirt": "vert",
+  "pants": "brun_fonce",
+  "hat": "trexsinge",
+  "hat_color": "vert",
+  "accessory": "tail"
+ },
+ "habitant": {
+  "alias": [],
+  "shirt": "or",
+  "pants": "bleu_profond"
+ }
 }
