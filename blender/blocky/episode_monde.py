@@ -26,6 +26,7 @@ ap.add_argument("--res", type=int, nargs=2, default=[540, 960])
 ap.add_argument("--samples", type=int, default=10)
 ap.add_argument("--range", type=int, nargs=2)
 ap.add_argument("--blend")
+ap.add_argument("--decoupage", help="decoupage.json de realisation/realisation.py: remplace les plans de camera par defaut")
 ap.add_argument("--no-render", action="store_true")
 args = ap.parse_args(argv)
 FPS = 24
@@ -56,7 +57,7 @@ def spawn(h):
     c = lambda k: city.H(COLORS[k]) if k else None
     arm, _ = bk.make_character(f"{h['prenom']}_{h['id']}", col, shirt=c(lk["shirt"]), pants=c(lk["pants"]), hair=lk["hair"],
                                hair_color=HAIR[lk["hair_color"]], skin=bk.SKINS[lk["skin"]], hat=lk.get("hat"), hat_color=c(lk.get("hat_color")) or (0.1, 0.1, 0.1),
-                               accessory=lk.get("accessory"), face="smile", faces=["smile", lk["face"], "happy", "surprise"], seed=h["id"])
+                               accessory=lk.get("accessory"), face="smile", faces=(["smile", lk["face"], "happy", "surprise", "scared", "sad", "angry", "love"] if args.decoupage else ["smile", lk["face"], "happy", "surprise"]), seed=h["id"])
     arm.scale = (0.0001,) * 3
     bk.reset_pose(arm, 1)
     return arm
@@ -95,6 +96,7 @@ feat = [h for h in new if h["id"] in feat_ids]
 others = [h for h in new if h["id"] not in feat_ids]
 total = spec["total_avant"]
 shots = []                                              # (t0, t1, cam0, cam1, tgt0, tgt1, lens)
+spots = {}
 shots.append((0, cues[1]["start"], (0, -3, 2.0), (0, 4, 2.2), (0, 14, 1.5), (0, 14, 1.6), 28))
 for k, h in enumerate(feat):
     cue = cues[2 + k]
@@ -104,6 +106,7 @@ for k, h in enumerate(feat):
     tg = name_tag(a, h)
     side = -1 if k % 2 else 1
     spot = (side * 1.1, 9.0, Z0)
+    spots[h["prenom"]] = (spot, a)
     bk.key_obj(a, fr(t0 - 0.9) - 1, scale=0.0001, loc=(side * 4.5, 9.0, Z0), rot_z=0)
     bk.key_obj(a, fr(t0 - 0.9), scale=1.0, loc=(side * 4.5, 9.0, Z0))
     bk.walk(a, fr(t0 - 0.9), fr(t0 + 0.3), (side * 4.5, 9.0, Z0), spot)
@@ -140,6 +143,57 @@ events.append({"t": round(cues[ci]["start"], 2), "type": "hud_sub", "text": f"{t
 events.append({"t": round(cues[ci]["start"], 2), "type": "sfx", "name": "ding"})
 if any(total >= m > spec["total_avant"] for m in (15, 100)):
     events += [{"t": round(cues[ci]["start"], 2), "type": "milestone"}, {"t": round(cues[ci]["start"], 2), "type": "sfx", "name": "level_up"}]
+
+if args.decoupage:                                      # --- plans de camera, expressions, sons et effets pilotes par le decoupage
+    DEC = json.load(open(args.decoupage, encoding="utf-8"))
+    LENS = 35.0
+    PLAN = {"large": (11.0, 2.4, 1.4, 0.0), "moyen": (4.6, 1.3, 1.0, 0.0), "gros_plan": (2.3, 1.05, 1.0, 0.0), "insert": (1.7, 0.7, 0.55, 0.0),
+            "contre_plongee": (3.6, 0.35, 1.3, 0.0), "reaction": (2.6, 1.05, 1.0, 0.0)}   # distance, hauteur camera, hauteur cible
+    shots, dec_cam = [], []
+    faces_ok = {}
+    for n_, d in enumerate(DEC):
+        who = spots.get(d["sujet"])
+        dist, hz, tz, _ = PLAN.get("moyen" if (who and d["plan"] == "insert") else d["plan"], PLAN["moyen"])   # un personnage se cadre en plan moyen/serre, pas en insert
+        if who and d["plan"] == "gros_plan":
+            dist, hz, tz = 3.0, 1.1, 1.0
+        if who:
+            (sx, sy, _z), arm_ = who
+            tgt = (sx, sy, tz)
+        else:
+            arm_, tgt = None, (0.0, 14.0, tz + 0.3)
+        side_ = 0.5 if n_ % 2 else -0.5
+        cam = d["camera"]
+        c0 = [tgt[0] + side_, tgt[1] - dist, hz]
+        c1 = list(c0)
+        t1_ = list(tgt)
+        if cam.startswith("push_in") or cam == "punch_in":
+            c1[1] += dist * 0.15
+        elif cam == "pull_out_lent":
+            c0[1] += dist * 0.12
+        elif cam == "orbite_legere":
+            c0[0], c1[0] = tgt[0] - 0.8, tgt[0] + 0.8
+        elif cam == "tilt_up":
+            t1_[2] += 0.5
+        elif "shake" in cam:
+            c1[0] += 0.05
+        shots.append((d["debut"], d["fin"], tuple(c0), tuple(c1), tuple(tgt), tuple(t1_), LENS * d["zoom"][0]))
+        dec_cam.append(LENS * d["zoom"][1])
+        if arm_ is not None:
+            try:
+                bk.set_face(arm_, fr(d["debut"]), d["visage"])
+            except Exception:
+                pass
+        if d.get("son"):
+            events.append({"t": round(d["debut"], 2), "type": "sfx", "name": d["son"], "gain": 0.6})
+        if d.get("effet") in ("flash", "shake"):
+            events.append({"t": round(d["debut"], 2), "type": d["effet"]})
+        if d.get("punch_in") and d.get("texte_ecran"):
+            txt, mot = d["texte_ecran"].lower(), d["punch_in"]["mot"].lower()
+            pos = txt.find(mot)
+            if pos >= 0:
+                ratio = pos / max(1, len(txt))
+                events.append({"t": round(d["debut"] + ratio * (d["fin"] - d["debut"]) * 2.4, 2), "type": "punch"})
+    shots[-1] = shots[-1][:1] + (END,) + shots[-1][2:]
 prefs.keyframe_new_interpolation_type = 'BEZIER'
 for mu in spec.get("musique", []):                      # fond sonore different a chaque episode (choisi par monde.py)
     t_mu = cues[ci]["start"] if mu.get("role") == "palier" else 0.0
@@ -162,6 +216,11 @@ for n, (t0, t1, l0, l1, g0, g1, lens) in enumerate(shots, 1):
         co.location, tgt.location = l, g
         co.keyframe_insert("location", frame=f)
         tgt.keyframe_insert("location", frame=f)
+    if args.decoupage:
+        cd.lens = shots[n - 1][6]
+        cd.keyframe_insert("lens", frame=fr(t0))
+        cd.lens = dec_cam[n - 1]
+        cd.keyframe_insert("lens", frame=fr(t1) - 1)
     sc.timeline_markers.new(f"shot{n}", frame=fr(t0)).camera = co
     cams.append(co)
     if n > 1:

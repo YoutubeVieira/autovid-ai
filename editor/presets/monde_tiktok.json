@@ -100,7 +100,8 @@
     "punch": {
       "on": [
         "impact",
-        "milestone"
+        "milestone",
+        "punch"
       ],
       "zoom": 0.17,
       "tau": 0.11,
@@ -108,7 +109,8 @@
     },
     "shake": {
       "on": [
-        "impact"
+        "impact",
+        "shake"
       ],
       "amp": 16,
       "dur": 0.32,
@@ -124,6 +126,7 @@
     },
     "flash": {
       "on": [
+        "flash",
         "impact"
       ],
       "dur": 0.12,

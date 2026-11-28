@@ -187,6 +187,35 @@ def ajouter(args):
     return spec
 
 
+def beats(args):
+    """Annote le script d'un episode (emotions, roles, sujet cadre) -> beats.json pour realisation/realisation.py."""
+    out = os.path.join(HERE, "episodes", f"ep{args.episode:02d}")
+    spec = json.load(open(os.path.join(out, "episode.json"), encoding="utf-8"))
+    lines = [l.split("|", 1)[1].strip() for l in open(os.path.join(out, "script.txt"), encoding="utf-8") if "|" in l and not l.startswith("#")]
+    feat = {c["id"]: c for c in spec["nouveaux"] if c["id"] in spec["mis_en_avant"]}
+    names = {c["prenom"]: c for c in feat.values()}
+    b, k = [], 0
+    for i, l in enumerate(lines):
+        pren = l.split(",")[0]
+        if i == 0:
+            b.append({"role": "hook", "emotion": "curiosite", "mot_fort": spec["titre"].split()[-1]})
+        elif re.match(r"(Un nouvel|\d+ nouveaux)", l):
+            b.append({"role": "contexte", "emotion": "suspense", "mot_fort": "nouveau" if "nouvel" in l else "nouveaux"})
+        elif pren in names:
+            b.append({"role": "montee", "emotion": ["joie", "surprise", "fierte"][k % 3], "sujet": pren, "mot_fort": names[pren]["metier_dit"].split()[0]})
+            k += 1
+        elif l.startswith("Et "):
+            b.append({"role": "montee", "emotion": "surprise", "mot_fort": "autres"})
+        elif l.startswith("Le monde compte"):
+            b.append({"role": "climax", "emotion": "fierte", "mot_fort": "habitants"})
+        elif l.startswith("Il en manque") or l.startswith("Palier"):
+            b.append({"role": "payoff", "emotion": "suspense" if l.startswith("Il en") else "joie", "mot_fort": "manque" if l.startswith("Il en") else "Palier"})
+        else:
+            b.append({"role": "cta", "emotion": "amour", "mot_fort": "prochain"})
+    json.dump(b, open(os.path.join(out, "beats.json"), "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+    print(len(b), "répliques annotées ->", os.path.join(out, "beats.json"))
+
+
 def etat(_):
     st = load()
     print(f"{st['monde']} : {len(st['habitants'])} habitants, {len(st['episodes'])} épisode(s)")
@@ -210,6 +239,9 @@ if __name__ == "__main__":
     pa.add_argument("--max", type=int, default=30, help="habitants max par épisode")
     pa.add_argument("--simuler", action="store_true", help="ne pas enregistrer dans etat.json")
     pa.set_defaults(fn=ajouter)
+    pb = sub.add_parser("beats", help="annote le script (émotions, rôles) pour le moteur de réalisation")
+    pb.add_argument("--episode", type=int, required=True)
+    pb.set_defaults(fn=beats)
     pe = sub.add_parser("etat", help="résumé du monde")
     pe.set_defaults(fn=etat)
     a = p.parse_args()

@@ -4,7 +4,7 @@
 
 beats.json = liste de répliques, dans l'ordre de voice.json:
   {"role": "hook|contexte|montee|climax|payoff|cta", "emotion": "peur|surprise|joie|tristesse|colere|suspense|fierte|curiosite|amour|neutre",
-   "qui": "narrateur" ou un prenom (dialogue), "mot_fort": "mot a souligner", "ecoute": "prenom qui reagit"}
+   "qui": "narrateur" ou un prenom (dialogue), "sujet": personnage cadre pendant la voix off (optionnel), "mot_fort": "mot a souligner", "ecoute": "prenom qui reagit"}
 Regles (voir docs/REALISATION.md): changement visuel au plus toutes les 2,5 s, jamais deux fois le meme plan de suite, hook = texte + mouvement des 0,15 s,
 plan serre sur le pic emotionnel, le personnage qui parle est a l'ecran, plan de reaction apres une replique, punch-in sur le mot fort, silence avant le climax."""
 import argparse
@@ -55,7 +55,7 @@ def decouper(beats, cues):
             shots.append({"debut": round(a, 2), "fin": round(z, 2), "replique": k,
                           "plan": plan, "camera": e["cam"] if i == 0 else "push_in_lent",
                           "zoom": list(e["zoom"] if i == 0 else (1.0, 1.08 if serre else 1.04)),
-                          "sujet": parle if parle != "narrateur" else "decor",
+                          "sujet": b.get("sujet") or (parle if parle != "narrateur" else "decor"),
                           "parle": parle != "narrateur" and i < n,
                           "visage": e["face"], "effet": e["fx"] if i == 0 else None,
                           "son": (ROLE_SFX.get(b.get("role")) or e["sfx"]) if i == 0 else None,

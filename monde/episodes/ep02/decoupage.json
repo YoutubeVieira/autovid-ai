@@ -1,0 +1,193 @@
+[
+ {
+  "debut": 0.15,
+  "fin": 2.98,
+  "replique": 0,
+  "plan": "large",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.12
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": null,
+  "son": "whoosh_fast",
+  "texte_ecran": "Épisode 2 : Les premiers habitants.",
+  "punch_in": {
+   "mot": "habitants",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 3.2,
+  "fin": 5.85,
+  "replique": 1,
+  "plan": "moyen",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.1
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": "riser",
+  "texte_ecran": "2 nouveaux habitants arrivent.",
+  "punch_in": {
+   "mot": "nouveaux",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 6.07,
+  "fin": 8.35,
+  "replique": 2,
+  "plan": "gros_plan",
+  "camera": "orbite_legere",
+  "zoom": [
+   1.0,
+   1.06
+  ],
+  "sujet": "Mamie",
+  "parle": false,
+  "visage": "happy",
+  "effet": null,
+  "son": "giggle",
+  "texte_ecran": "Mamie, cuisinière fait maison.",
+  "punch_in": {
+   "mot": "cuisinière",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 8.57,
+  "fin": 10.39,
+  "replique": 3,
+  "plan": "insert",
+  "camera": "punch_in",
+  "zoom": [
+   1.0,
+   1.18
+  ],
+  "sujet": "Robin",
+  "parle": false,
+  "visage": "surprise",
+  "effet": "flash",
+  "son": "oh_surprise",
+  "texte_ecran": "Robin, T-rex singe.",
+  "punch_in": {
+   "mot": "T-rex",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 10.61,
+  "fin": 13.44,
+  "replique": 4,
+  "plan": "contre_plongee",
+  "camera": "tilt_up",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": "sparkle",
+  "son": "boom",
+  "texte_ecran": "Le monde compte maintenant 2 habitants.",
+  "punch_in": {
+   "mot": "habitants",
+   "zoom": 1.2,
+   "duree": 0.18
+  },
+  "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
+ },
+ {
+  "debut": 13.66,
+  "fin": 15.79,
+  "replique": 5,
+  "plan": "moyen",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.1
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": "fanfare",
+  "texte_ecran": "Il en manque 13 pour les 15 premiers conseillers.",
+  "punch_in": {
+   "mot": "manque",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 15.79,
+  "fin": 17.92,
+  "replique": 5,
+  "plan": "gros_plan",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ },
+ {
+  "debut": 18.14,
+  "fin": 20.17,
+  "replique": 6,
+  "plan": "insert",
+  "camera": "hold_doux",
+  "zoom": [
+   1.0,
+   1.05
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": "pop",
+  "texte_ecran": "Commente ton prénom et ton métier : le prochain, c'est toi.",
+  "punch_in": {
+   "mot": "prochain",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 20.17,
+  "fin": 22.21,
+  "replique": 6,
+  "plan": "contre_plongee",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.04
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ }
+]
