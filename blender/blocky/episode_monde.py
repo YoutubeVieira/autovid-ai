@@ -153,9 +153,9 @@ if args.decoupage:                                      # --- plans de camera, e
     faces_ok = {}
     for n_, d in enumerate(DEC):
         who = spots.get(d["sujet"])
-        dist, hz, tz, _ = PLAN.get("moyen" if (who and d["plan"] == "insert") else d["plan"], PLAN["moyen"])   # un personnage se cadre en plan moyen/serre, pas en insert
-        if who and d["plan"] == "gros_plan":
-            dist, hz, tz = 3.0, 1.1, 1.0
+        dist, hz, tz, _ = PLAN.get("gros_plan" if (who and d["plan"] == "insert") else d["plan"], PLAN["moyen"])   # un personnage se cadre en plan moyen/serre, pas en insert
+        if who and d["plan"] in ("gros_plan", "insert"):
+            dist, hz, tz = 2.7, 1.1, 0.95
         if who:
             (sx, sy, _z), arm_ = who
             tgt = (sx, sy, tz)

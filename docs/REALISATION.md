@@ -41,5 +41,5 @@ Ces règles viennent de la grammaire du cinéma (gros plan = intimité/émotion,
 1. Écrire le script, générer la voix (`tts.py`) -> `voice.json`.
 2. Annoter `beats.json` (rôle, émotion, qui parle, mot fort), lancer `realisation.py`.
 3. Lire `decoupage.md` (tableau plan par plan) ; corriger si l'audit signale un problème.
-4. (À brancher) `episode_monde.py` lira `decoupage.json` pour placer caméras, expressions et sons ; le montage applique punch-in et effets.
+4. Rendu Blender : `episode_monde.py -- ... --decoupage decoupage.json` place caméras, zoom d'objectif, expressions, sons et effets (événements punch/flash/shake lus par le preset `monde_tiktok`). `python3 monde/monde.py beats --episode N` annote automatiquement le script d'un épisode.
 Exemple : `monde/episodes/ep00/decoupage.md`.
