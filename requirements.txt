@@ -8,3 +8,4 @@ mediapipe
 anthropic
 kokoro-onnx
 soundfile
+sherpa-onnx>=2.0

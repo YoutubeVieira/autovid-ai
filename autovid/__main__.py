@@ -88,7 +88,9 @@ def main(argv=None):
                    help="sans intro HyperFrames ni carte de fin Remotion (sinon utilisées si motion/ est installé)")
     c.add_argument("--framing", choices=["auto", "blur", "cover"], default="auto",
                    help="vidéo paysage : blur = entière sur fond flouté, cover = recadrée au centre (sujets plus grands)")
-    c.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto",
+    c.add_argument("--voix", type=int, choices=range(10), metavar="0-9",
+                       help="voix Supertonic 3 : 0-4 femmes, 5-9 hommes (9 par défaut)")
+    c.add_argument("--tts", choices=["auto", "elevenlabs", "supertonic", "kokoro", "none"], default="auto",
                    help="voix off : ElevenLabs (ta voix), Kokoro (voix locale de test), none")
     c.add_argument("--style", choices=["fluide", "analyse"], default="fluide",
                    help="fluide : sans pause, traits et zoom sur le membre ; analyse : arrêts sur image commentés")
@@ -123,7 +125,9 @@ def main(argv=None):
     vi.add_argument("-o", "--out", required=True, help="dossier du projet")
     vi.add_argument("--discipline", choices=["combat", "capoeira"], default="combat")
     vi.add_argument("--handle")
-    vi.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    vi.add_argument("--voix", type=int, choices=range(10), metavar="0-9",
+                       help="voix Supertonic 3 : 0-4 femmes, 5-9 hommes (9 par défaut)")
+    vi.add_argument("--tts", choices=["auto", "elevenlabs", "supertonic", "kokoro", "none"], default="auto")
     vi.add_argument("--framing", choices=["auto", "blur", "cover"], default="auto")
     vi.add_argument("--max-shorts", type=int, default=4)
     vi.add_argument("--ai", choices=["claude"])
@@ -145,7 +149,9 @@ def main(argv=None):
     do.add_argument("--plan", help="plan.json déjà écrit (sinon recherche + script par Claude, clé Anthropic requise)")
     do.add_argument("--images", help="dossier d'images / vidéos à utiliser au lieu de la recherche d'archives")
     do.add_argument("--minutes", type=int, default=8)
-    do.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    do.add_argument("--voix", type=int, choices=range(10), metavar="0-9",
+                       help="voix Supertonic 3 : 0-4 femmes, 5-9 hommes (9 par défaut)")
+    do.add_argument("--tts", choices=["auto", "elevenlabs", "supertonic", "kokoro", "none"], default="auto")
     do.add_argument("--handle", default="")
     do.add_argument("--max-shorts", type=int, default=3)
     do.add_argument("--langue", choices=["fr", "pt"], default="fr", help="pt = public brésilien (portugais du Brésil)")
@@ -155,7 +161,9 @@ def main(argv=None):
     pr = sub.add_parser("projet", help="refaire un montage à partir de son projet.json (modifié dans la plateforme)")
     pr.add_argument("fichier")
     pr.add_argument("-o", "--out", required=True)
-    pr.add_argument("--tts", choices=["auto", "elevenlabs", "kokoro", "none"], default="auto")
+    pr.add_argument("--voix", type=int, choices=range(10), metavar="0-9",
+                       help="voix Supertonic 3 : 0-4 femmes, 5-9 hommes (9 par défaut)")
+    pr.add_argument("--tts", choices=["auto", "elevenlabs", "supertonic", "kokoro", "none"], default="auto")
     pr.add_argument("--workdir")
 
     vc = sub.add_parser("voice-clone", help="clone ta voix (ElevenLabs) à partir de tes enregistrements")
@@ -188,6 +196,9 @@ def main(argv=None):
     w.add_argument("--handle")
 
     args = ap.parse_args(argv)
+    if getattr(args, "voix", None) is not None:   # numéro de voix Supertonic choisi en ligne de commande
+        from . import narration
+        narration.ST_VOICE = args.voix
     if args.cmd in ("combat", "projet", "viral"):
         from .combat import PasHumain
         try:

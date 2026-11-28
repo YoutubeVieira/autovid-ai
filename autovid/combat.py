@@ -745,7 +745,8 @@ def combat(src, out, workdir, music=None, handle=None, max_impacts=6, resolution
     voice_id = voice_id or nar.default_voice()
     engine = nar.voice_segments(segs, voice_id, tts)
     has_voice = engine is not None
-    print("   voix off : " + {"elevenlabs": f"ElevenLabs, voix {voice_id}", "kokoro": "voix test locale Kokoro (ff_siwis)",
+    print("   voix off : " + {"elevenlabs": f"ElevenLabs, voix {voice_id}", "supertonic": f"Supertonic 3, voix n° {nar.ST_VOICE}",
+                               "kokoro": "voix test locale Kokoro (ff_siwis)",
                                None: "script seul (pas de clé ElevenLabs ni Kokoro)"}[engine])
     Path(f"{out_base}.voix.txt").write_text("\n\n".join(f"[{sg['id']}] {sg['fr']}" for sg in segs), encoding="utf-8")
     by_id = {sg["id"]: sg for sg in segs}

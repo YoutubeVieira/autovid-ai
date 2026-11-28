@@ -45,10 +45,19 @@ class NarrationTest(unittest.TestCase):
 
     def test_without_key_words_are_estimated(self):
         segs = [{"id": "hook", "fr": "Regarde sa [pt]ginga[/pt]."}]
-        with mock.patch.dict("os.environ", {}, clear=True):
+        with mock.patch.dict("os.environ", {}, clear=True), \
+                mock.patch.object(nar, "supertonic_available", lambda: False), \
+                mock.patch.object(nar, "kokoro_available", lambda: False):    # aucun moteur local installé
             self.assertFalse(nar.voice_segments(segs, voice_id="abc"))
         self.assertIsNone(segs[0]["audio"])
         self.assertEqual([w["text"] for w in segs[0]["words"]], ["Regarde", "sa", "ginga."])
+
+    def test_auto_prefers_supertonic_over_kokoro(self):
+        segs = [{"id": "x", "fr": "Bonjour."}]
+        fake = lambda text, voice=None, lang="fr", speed=1.0: (np.zeros((480, 2)), [{"text": "Bonjour.", "start": 0, "end": 0.01}], 0.01)  # noqa: E731
+        with mock.patch.dict("os.environ", {}, clear=True), mock.patch.object(nar, "supertonic_available", lambda: True), \
+                mock.patch.object(nar, "synth_supertonic", fake):
+            self.assertEqual(nar.voice_segments(segs), "supertonic")
 
     def test_engine_none_means_no_voice(self):
         segs = [{"id": "outro", "fr": "Abonne-toi."}]

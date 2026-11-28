@@ -209,16 +209,98 @@ def synth_kokoro(text, voice="ff_siwis", speed=1.05, lang=None):
     return (np.concatenate(audio) if audio else np.zeros((0, 2))), words, t
 
 
+# --------------------------------------------------------------------------- Supertonic 3 (hors ligne, commercial OK)
+
+ST_MODEL = "sherpa-onnx-supertonic-3-tts-int8-2026-05-11"
+ST_URL = f"https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/{ST_MODEL}.tar.bz2"
+ST_VOICE = int(os.environ.get("AUTOVID_SUPERTONIC_VOICE", 9))   # 0–4 femmes, 5–9 hommes ; 9 = homme grave et posé
+_ST = None
+
+
+def supertonic_available():
+    import importlib.util
+    return importlib.util.find_spec("sherpa_onnx") is not None
+
+
+def _supertonic():
+    """Charge Supertonic 3 (téléchargé une fois depuis GitHub, ~145 Mo, dans ~/.cache/autovid/tts)."""
+    global _ST
+    if _ST is None:
+        import tarfile
+        import urllib.request
+
+        import sherpa_onnx as so
+        root = Path(os.environ.get("AUTOVID_CACHE", Path.home() / ".cache" / "autovid")) / "tts"
+        d = root / ST_MODEL
+        if not (d / "vocoder.int8.onnx").exists():
+            root.mkdir(parents=True, exist_ok=True)
+            print("  téléchargement de la voix Supertonic 3 (~145 Mo, une seule fois)…")
+            arc = root / f"{ST_MODEL}.tar.bz2"
+            urllib.request.urlretrieve(ST_URL, arc)
+            with tarfile.open(arc) as t:
+                t.extractall(root, filter="data")
+            arc.unlink()
+        f = lambda n: str(d / n)  # noqa: E731
+        mc = so.OfflineTtsModelConfig()
+        mc.supertonic = so.OfflineTtsSupertonicModelConfig(
+            f("duration_predictor.int8.onnx"), f("text_encoder.int8.onnx"), f("vector_estimator.int8.onnx"),
+            f("vocoder.int8.onnx"), f("tts.json"), f("unicode_indexer.bin"), f("voice.bin"))
+        mc.num_threads = max(os.cpu_count() or 2, 2)
+        _ST = so.OfflineTts(so.OfflineTtsConfig(model=mc))
+    return _ST
+
+
+def synth_supertonic(text, voice=None, lang="fr", speed=1.0):
+    """Supertonic 3 : français, portugais, anglais… (31 langues). Les morceaux [pt] d'un texte français sont dits en
+    portugais avec la même voix. Pas d'horodatage des mots : on les répartit selon leur longueur."""
+    import sherpa_onnx as so
+    tts = _supertonic()
+    voice = ST_VOICE if voice is None else voice
+    if lang == "fr":
+        pieces = [(p.strip(), "pt" if i % 2 else "fr")
+                  for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
+    else:
+        pieces = [(plain(text).strip(), lang)]
+    audio, words, t = [], [], 0.0
+    gap = np.zeros((int(0.06 * sfx.SR), 2))
+    for piece, lg in pieces:
+        g = so.GenerationConfig()
+        g.sid, g.num_steps, g.speed, g.extra = int(voice), 24, float(speed), {"lang": lg}
+        out = tts.generate(piece, g)
+        mono = np.asarray(out.samples, dtype=np.float64)
+        if out.sample_rate != sfx.SR:            # 44,1 kHz → 48 kHz pour le mixage
+            idx = np.arange(int(len(mono) * sfx.SR / out.sample_rate)) * out.sample_rate / sfx.SR
+            mono = np.interp(idx, np.arange(len(mono)), mono)
+        loud = np.where(np.abs(mono) > 0.01)[0]
+        if len(loud):
+            mono = mono[max(loud[0] - 400, 0): loud[-1] + 2400]
+        a = np.stack([mono, mono], axis=1)
+        dur = len(a) / sfx.SR
+        ws = piece.split()
+        total = sum(len(w) + 1 for w in ws) or 1
+        cur = t
+        for w in ws:
+            d_w = dur * (len(w) + 1) / total
+            words.append({"text": w, "start": cur, "end": cur + d_w * 0.95, "lang": lg})
+            cur += d_w
+        audio += [a, gap]
+        t += dur + len(gap) / sfx.SR
+    return (np.concatenate(audio) if audio else np.zeros((0, 2))), words, t
+
+
 def voice_segments(segs, voice_id=None, engine="auto", lang=None):
     """Ajoute à chaque segment : audio (ou None), mots horodatés relatifs, durée.
 
-    engine : "elevenlabs" (ta voix clonée), "kokoro" (voix locale gratuite, pour tester), "auto" (ElevenLabs si
-    clé + voix, sinon Kokoro s'il est installé, sinon pas de voix). lang : « pt » = tout en portugais du Brésil
+    engine : "elevenlabs" (ta voix clonée), "supertonic" (Supertonic 3, hors ligne, commercial OK, voix n° 9 par
+    défaut), "kokoro" (voix locale de test), "auto" (ElevenLabs si clé + voix, sinon Supertonic, sinon Kokoro). lang : « pt » = tout en portugais du Brésil
     (voix Kokoro masculine pm_alex), « fr » / None = français avec les termes [pt] en portugais. Renvoie le moteur."""
     if engine == "none":
         engine = None
-    elif engine == "auto":
-        engine = "elevenlabs" if voice_id and _key() else ("kokoro" if kokoro_available() else None)
+    elif engine == "auto":                     # ta voix ElevenLabs, sinon Supertonic 3, sinon Kokoro
+        engine = "elevenlabs" if voice_id and _key() else (
+            "supertonic" if supertonic_available() else ("kokoro" if kokoro_available() else None))
+    elif engine == "supertonic" and not supertonic_available():
+        engine = None
     elif engine == "elevenlabs" and not (voice_id and _key()):
         engine = None
     elif engine == "kokoro" and not kokoro_available():
@@ -226,6 +308,8 @@ def voice_segments(segs, voice_id=None, engine="auto", lang=None):
     for s in segs:
         if engine == "elevenlabs":
             s["audio"], s["words"], s["dur"] = synth(s["fr"], voice_id, lang if lang and lang != "fr" else None)
+        elif engine == "supertonic":
+            s["audio"], s["words"], s["dur"] = synth_supertonic(s["fr"], lang=lang or "fr")
         elif engine == "kokoro":
             if lang == "pt":
                 s["audio"], s["words"], s["dur"] = synth_kokoro(s["fr"], voice="pm_alex", speed=1.0, lang="pt-br")
