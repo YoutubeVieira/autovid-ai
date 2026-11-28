@@ -1,0 +1,32 @@
+1
+00:00:00,150 --> 00:00:03,069
+Il existe une ville où tout est possible.
+
+2
+00:00:03,319 --> 00:00:06,598
+Boulanger, astronaute, maire : tu choisis.
+
+3
+00:00:06,898 --> 00:00:08,681
+Mais elle est vide.
+
+4
+00:00:08,931 --> 00:00:11,142
+Il nous faut mille personnes.
+
+5
+00:00:11,392 --> 00:00:13,382
+Chacune tague dix amis.
+
+6
+00:00:13,682 --> 00:00:16,474
+Dix mille habitants. Dix mille amis.
+
+7
+00:00:16,724 --> 00:00:19,122
+Commente ton prénom et ton métier.
+
+8
+00:00:19,322 --> 00:00:23,406
+Partage, tague tes amis : ils déménagent au paradis.
+

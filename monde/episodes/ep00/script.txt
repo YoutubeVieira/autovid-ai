@@ -1,0 +1,9 @@
+# Épisode 0 - Bienvenue au paradis (≈ 27 s). <début_s | +pause> | texte dit
+0.15 | Il existe une ville où tout est possible.
++0.25 | Boulanger, astronaute, maire : tu choisis.
++0.30 | Mais elle est vide.
++0.25 | Il nous faut mille personnes.
++0.25 | Chacune tague dix amis.
++0.30 | Dix mille habitants. Dix mille amis.
++0.25 | Commente ton prénom et ton métier.
++0.20 | Partage, tague tes amis : ils déménagent au paradis.

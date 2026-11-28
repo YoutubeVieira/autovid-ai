@@ -1,0 +1,50 @@
+{
+  "voice": "siwis",
+  "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
+  "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+  "duration": 23.71,
+  "cues": [
+    {
+      "start": 0.15,
+      "end": 3.069,
+      "text": "Il existe une ville où tout est possible."
+    },
+    {
+      "start": 3.319,
+      "end": 6.598,
+      "text": "Boulanger, astronaute, maire : tu choisis."
+    },
+    {
+      "start": 6.898,
+      "end": 8.681,
+      "text": "Mais elle est vide."
+    },
+    {
+      "start": 8.931,
+      "end": 11.142,
+      "text": "Il nous faut mille personnes."
+    },
+    {
+      "start": 11.392,
+      "end": 13.382,
+      "text": "Chacune tague dix amis."
+    },
+    {
+      "start": 13.682,
+      "end": 16.474,
+      "text": "Dix mille habitants. Dix mille amis."
+    },
+    {
+      "start": 16.724,
+      "end": 19.122,
+      "text": "Commente ton prénom et ton métier."
+    },
+    {
+      "start": 19.322,
+      "end": 23.406,
+      "text": "Partage, tague tes amis : ils déménagent au paradis."
+    }
+  ],
+  "warnings": [],
+  "verification": []
+}
