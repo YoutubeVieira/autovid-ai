@@ -1,0 +1,107 @@
+{
+  "voice": "siwis",
+  "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
+  "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+  "duration": 40.0,
+  "cues": [
+    {
+      "start": 0.15,
+      "end": 4.759,
+      "text": "Il y a soixante-six millions d'années, les dinosaures régnaient."
+    },
+    {
+      "start": 5.009,
+      "end": 7.037,
+      "text": "Puis le ciel s'est embrasé."
+    },
+    {
+      "start": 7.937,
+      "end": 10.68,
+      "text": "Un astéroïde. Rien n'a survécu."
+    },
+    {
+      "start": 11.33,
+      "end": 13.214,
+      "text": "La fin des dinosaures."
+    },
+    {
+      "start": 13.514,
+      "end": 15.828,
+      "text": "Aujourd'hui, la planète est vide."
+    },
+    {
+      "start": 16.028,
+      "end": 18.298,
+      "text": "Elle peut renaître, avec toi."
+    },
+    {
+      "start": 18.498,
+      "end": 21.629,
+      "text": "Commente ton prénom, et ce que tu veux être."
+    },
+    {
+      "start": 21.829,
+      "end": 25.509,
+      "text": "Abonne-toi : épisode deux, les premiers habitants."
+    }
+  ],
+  "warnings": [],
+  "verification": [
+    {
+      "phrase": "Il y a soixante-six millions d'années, les dinosaures régnaient.",
+      "variante": "brut",
+      "texte_envoye": "Il y a soixante-six millions d'années, les dinosaures régnaient.",
+      "entendu": "Il y a 66 millions d'années, les dinosaures régnaient.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Puis le ciel s'est embrasé.",
+      "variante": "brut",
+      "texte_envoye": "Puis le ciel s'est embrasé.",
+      "entendu": "Puis le ciel s'est embrasé.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Un astéroïde. Rien n'a survécu.",
+      "variante": "brut",
+      "texte_envoye": "Un astéroïde. Rien n'a survécu.",
+      "entendu": "Un astéroïde rien n'a survêtue.",
+      "erreur_mots": 0.167
+    },
+    {
+      "phrase": "La fin des dinosaures.",
+      "variante": "brut",
+      "texte_envoye": "La fin des dinosaures.",
+      "entendu": "La fin des Dinosaur",
+      "erreur_mots": 0.25
+    },
+    {
+      "phrase": "Aujourd'hui, la planète est vide.",
+      "variante": "brut",
+      "texte_envoye": "Aujourd'hui, la planète est vide.",
+      "entendu": "Aujourd'hui la planète est vide.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Elle peut renaître, avec toi.",
+      "variante": "brut",
+      "texte_envoye": "Elle peut renaître, avec toi.",
+      "entendu": "Elle peut renêtre avec toi.",
+      "erreur_mots": 0.2
+    },
+    {
+      "phrase": "Commente ton prénom, et ce que tu veux être.",
+      "variante": "brut",
+      "texte_envoye": "Commente ton prénom, et ce que tu veux être.",
+      "entendu": "Commentes ton prénom et ce que tu veux être.",
+      "erreur_mots": 0.111
+    },
+    {
+      "phrase": "Abonne-toi : épisode deux, les premiers habitants.",
+      "variante": "brut",
+      "texte_envoye": "Abonne-toi : épisode deux, les premiers abitan.",
+      "entendu": "Abonne-toi. Épisode 2 Les premiers habitants",
+      "erreur_mots": 0.0
+    }
+  ]
+}

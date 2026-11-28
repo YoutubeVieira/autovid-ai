@@ -1,0 +1,10 @@
+# Épisode 0 - Bienvenue au paradis (≈ 27 s). <début_s | +pause> | texte dit
+0.15 | Dans cette ville, tout est possible.
++0.22 | Partage avec un ami ou une amie. || Partage avec un ami ou une amie. // Partage avec un ami, ou une amie. // Partage à un ami ou à une amie.
++0.25 | Boulanger, astronaute, maire : tu choisis. || Boulanger, astronaute, maire : tu choisis. // Boulanger, astronaute, maire. Tu choisis. // Boulanger, astronaute, maire : à toi de choisir.
++0.30 | Mais la ville est vide. || Mais la ville est vide. // Mais, la ville est vide.
++0.25 | Il nous faut mille personnes.
++0.25 | Chaque personne invite dix amis. || Chaque personne invite dix amis. // Chaque ami invite dix amis. // Chacun invite dix amis.
++0.30 | Dix mille habitants. Dix mille amis. || Dix mille habitants. Dix mille amis. // Dix mille habitants, dix mille amis. // Dix-mille habitants. Dix-mille amis.
++0.25 | Écris ton prénom et ton métier. || Écris ton prénom et ton métier. // Écris ton prénom, et ton métier.
++0.20 | Invite-les : ils déménagent au paradis. || Invite-les : ils déménagent au paradis. // Invite-les, ils déménagent au paradis.

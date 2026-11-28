@@ -1,0 +1,26 @@
+{
+ "episode": 0,
+ "titre": "Bienvenue au paradis",
+ "nouveaux": [],
+ "anciens": [],
+ "mis_en_avant": [],
+ "total_avant": 0,
+ "total_apres": 0,
+ "musique": [
+  {
+   "episode": 0,
+   "mood": "joyeux",
+   "file": "music_gen/joyeux_1.mp3",
+   "gain": 0.3,
+   "role": "fond"
+  },
+  {
+   "episode": 0,
+   "ambiance": "foule",
+   "file": "music_gen/foule_1.mp3",
+   "gain": 0.2,
+   "role": "ambiance"
+  }
+ ],
+ "decalage_cues": 1
+}

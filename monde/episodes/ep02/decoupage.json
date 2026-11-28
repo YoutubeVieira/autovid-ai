@@ -1,0 +1,233 @@
+[
+ {
+  "debut": 0.15,
+  "fin": 2.12,
+  "replique": 0,
+  "plan": "large",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.12
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": null,
+  "son": "whoosh_fast",
+  "texte_ecran": "Dans cette ville, tes commentaires deviennent des habitants.",
+  "punch_in": {
+   "mot": "habitants",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 2.12,
+  "fin": 4.09,
+  "replique": 0,
+  "plan": "contre_plongee",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.04
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ },
+ {
+  "debut": 4.31,
+  "fin": 6.72,
+  "replique": 1,
+  "plan": "gros_plan",
+  "camera": "hold_doux",
+  "zoom": [
+   1.0,
+   1.05
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": "sparkle",
+  "texte_ecran": "Partage avec un ami ou une amie.",
+  "punch_in": {
+   "mot": "ami",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 6.95,
+  "fin": 9.76,
+  "replique": 2,
+  "plan": "moyen",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.1
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": "riser",
+  "texte_ecran": "2 nouveaux habitants arrivent.",
+  "punch_in": {
+   "mot": "nouveaux",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 9.98,
+  "fin": 12.27,
+  "replique": 3,
+  "plan": "gros_plan",
+  "camera": "orbite_legere",
+  "zoom": [
+   1.0,
+   1.06
+  ],
+  "sujet": "Mamie",
+  "parle": false,
+  "visage": "happy",
+  "effet": null,
+  "son": "giggle",
+  "texte_ecran": "Mamie, cuisinière fait maison.",
+  "punch_in": {
+   "mot": "cuisinière",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 12.49,
+  "fin": 14.31,
+  "replique": 4,
+  "plan": "insert",
+  "camera": "punch_in",
+  "zoom": [
+   1.0,
+   1.18
+  ],
+  "sujet": "Robin",
+  "parle": false,
+  "visage": "surprise",
+  "effet": "flash",
+  "son": "oh_surprise",
+  "texte_ecran": "Robin, T-rex singe.",
+  "punch_in": {
+   "mot": "T-rex",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 14.53,
+  "fin": 17.45,
+  "replique": 5,
+  "plan": "contre_plongee",
+  "camera": "tilt_up",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": "sparkle",
+  "son": "boom",
+  "texte_ecran": "Le monde compte maintenant 2 habitants.",
+  "punch_in": {
+   "mot": "habitants",
+   "zoom": 1.2,
+   "duree": 0.18
+  },
+  "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
+ },
+ {
+  "debut": 17.67,
+  "fin": 19.54,
+  "replique": 6,
+  "plan": "moyen",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.1
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": "fanfare",
+  "texte_ecran": "Il en manque 13 pour les 15 premiers conseillers.",
+  "punch_in": {
+   "mot": "manque",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 19.54,
+  "fin": 21.4,
+  "replique": 6,
+  "plan": "gros_plan",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ },
+ {
+  "debut": 21.62,
+  "fin": 23.58,
+  "replique": 7,
+  "plan": "insert",
+  "camera": "hold_doux",
+  "zoom": [
+   1.0,
+   1.05
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": "pop",
+  "texte_ecran": "Commente ton prénom et ton métier : le prochain, c'est toi.",
+  "punch_in": {
+   "mot": "prochain",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 23.58,
+  "fin": 25.53,
+  "replique": 7,
+  "plan": "contre_plongee",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.04
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ }
+]

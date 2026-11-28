@@ -1,0 +1,32 @@
+1
+00:00:00,150 --> 00:00:04,094
+Dans cette ville, tes commentaires deviennent des habitants.
+
+2
+00:00:04,314 --> 00:00:06,725
+Partage avec un ami ou une amie.
+
+3
+00:00:06,945 --> 00:00:09,761
+2 nouveaux habitants arrivent.
+
+4
+00:00:09,981 --> 00:00:12,266
+Mamie, cuisinière fait maison.
+
+5
+00:00:12,486 --> 00:00:14,307
+Robin, T-rex singe.
+
+6
+00:00:14,527 --> 00:00:17,452
+Le monde compte maintenant 2 habitants.
+
+7
+00:00:17,672 --> 00:00:21,403
+Il en manque 13 pour les 15 premiers conseillers.
+
+8
+00:00:21,623 --> 00:00:25,527
+Commente ton prénom et ton métier : le prochain, c'est toi.
+

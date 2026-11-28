@@ -1,0 +1,69 @@
+{
+  "episode": 2,
+  "titre": "Les premiers habitants",
+  "nouveaux": [
+    {
+      "id": 1,
+      "prenom": "Mamie",
+      "metier_dit": "cuisinière fait maison",
+      "look": {
+        "metier": "mamie",
+        "shirt": "creme",
+        "pants": "brun",
+        "accessory": "apron",
+        "hat": null,
+        "hat_color": null,
+        "hair": "grey",
+        "skin": 2,
+        "hair_color": 1,
+        "face": "wink"
+      },
+      "episode": 2
+    },
+    {
+      "id": 2,
+      "prenom": "Robin",
+      "metier_dit": "T-rex singe",
+      "look": {
+        "metier": "trexsinge",
+        "shirt": "vert",
+        "pants": "brun_fonce",
+        "accessory": "tail",
+        "hat": "trexsinge",
+        "hat_color": "vert",
+        "hair": "bun",
+        "skin": 0,
+        "hair_color": 0,
+        "face": "love"
+      },
+      "episode": 2
+    }
+  ],
+  "mis_en_avant": [
+    1,
+    2
+  ],
+  "anciens": [],
+  "musique": [
+    {
+      "episode": 2,
+      "mood": "calme",
+      "file": "music_gen/calme_2.mp3",
+      "gain": 0.3,
+      "role": "fond"
+    },
+    {
+      "episode": 2,
+      "ambiance": "vent",
+      "file": "music_gen/vent_1.mp3",
+      "gain": 0.22,
+      "role": "ambiance"
+    }
+  ],
+  "total_avant": 0,
+  "total_apres": 2,
+  "duree_estimee_s": 27.4,
+  "ecartes": [],
+  "hook": "Dans cette ville, tes commentaires deviennent des habitants.",
+  "decalage_cues": 1
+}

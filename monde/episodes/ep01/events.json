@@ -1,0 +1,157 @@
+{
+  "fps": 24,
+  "content_duration": 25.76,
+  "events": [
+    {
+      "t": 0.0,
+      "type": "hud_sub",
+      "text": "ÉPISODE 1 · LA FIN DES DINOSAURES"
+    },
+    {
+      "t": 0.7,
+      "type": "sfx",
+      "name": "roar"
+    },
+    {
+      "t": 1.7,
+      "type": "cut"
+    },
+    {
+      "t": 1.9,
+      "type": "sfx",
+      "name": "stomp"
+    },
+    {
+      "t": 3.0,
+      "type": "cut"
+    },
+    {
+      "t": 3.2,
+      "type": "sfx",
+      "name": "roar",
+      "gain": 1.0
+    },
+    {
+      "t": 4.9,
+      "type": "sfx",
+      "name": "music_suspense",
+      "file": "music_suspense.mp3",
+      "gain": 0.35,
+      "dur": 4.4
+    },
+    {
+      "t": 4.9,
+      "type": "cut"
+    },
+    {
+      "t": 5.5,
+      "type": "sfx",
+      "name": "gasp"
+    },
+    {
+      "t": 5.9,
+      "type": "cut"
+    },
+    {
+      "t": 6.75,
+      "type": "sfx",
+      "name": "meteor_whistle"
+    },
+    {
+      "t": 7.0,
+      "type": "cut"
+    },
+    {
+      "t": 7.94,
+      "type": "cut"
+    },
+    {
+      "t": 8.9,
+      "type": "sfx",
+      "name": "rumble"
+    },
+    {
+      "t": 9.2,
+      "type": "cut"
+    },
+    {
+      "t": 9.3,
+      "type": "sfx",
+      "name": "explosion",
+      "gain": 1.0
+    },
+    {
+      "t": 9.3,
+      "type": "impact"
+    },
+    {
+      "t": 10.0,
+      "type": "cut"
+    },
+    {
+      "t": 10.3,
+      "type": "sfx",
+      "name": "wind_ash",
+      "gain": 0.8
+    },
+    {
+      "t": 11.33,
+      "type": "cut"
+    },
+    {
+      "t": 13.51,
+      "type": "hud_sub",
+      "text": "PLANÈTE : VIDE"
+    },
+    {
+      "t": 13.51,
+      "type": "cut"
+    },
+    {
+      "t": 13.6,
+      "type": "sfx",
+      "name": "music_calme",
+      "file": "music_calme.mp3",
+      "gain": 0.4,
+      "dur": 12.159
+    },
+    {
+      "t": 16.03,
+      "type": "cut"
+    },
+    {
+      "t": 16.3,
+      "type": "sfx",
+      "name": "sparkle"
+    },
+    {
+      "t": 18.5,
+      "type": "hud_sub",
+      "text": "0 HABITANT · À PEUPLER"
+    },
+    {
+      "t": 18.5,
+      "type": "sfx",
+      "name": "coin"
+    },
+    {
+      "t": 18.5,
+      "type": "cut"
+    },
+    {
+      "t": 18.6,
+      "type": "badge",
+      "text": "0 HABITANT",
+      "color": "red"
+    },
+    {
+      "t": 21.83,
+      "type": "cut"
+    },
+    {
+      "t": 21.9,
+      "type": "sfx",
+      "name": "ding"
+    }
+  ]
+}

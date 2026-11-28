@@ -1,0 +1,119 @@
+{
+  "voice": "siwis",
+  "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
+  "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+  "duration": 25.27,
+  "cues": [
+    {
+      "start": 0.15,
+      "end": 2.736,
+      "text": "Dans cette ville, tout est possible."
+    },
+    {
+      "start": 2.956,
+      "end": 5.443,
+      "text": "Partage avec un ami ou une amie."
+    },
+    {
+      "start": 5.693,
+      "end": 8.832,
+      "text": "Boulanger, astronaute, maire : tu choisis."
+    },
+    {
+      "start": 9.132,
+      "end": 11.077,
+      "text": "Mais la ville est vide."
+    },
+    {
+      "start": 11.327,
+      "end": 13.538,
+      "text": "Il nous faut mille personnes."
+    },
+    {
+      "start": 13.788,
+      "end": 15.955,
+      "text": "Chaque personne invite dix amis."
+    },
+    {
+      "start": 16.255,
+      "end": 19.085,
+      "text": "Dix mille habitants. Dix mille amis."
+    },
+    {
+      "start": 19.335,
+      "end": 21.736,
+      "text": "Écris ton prénom et ton métier."
+    },
+    {
+      "start": 21.936,
+      "end": 24.967,
+      "text": "Invite-les : ils déménagent au paradis."
+    }
+  ],
+  "warnings": [],
+  "verification": [
+    {
+      "phrase": "Dans cette ville, tout est possible.",
+      "variante": "brut",
+      "texte_envoye": "Dans cette ville, tout est possible.",
+      "entendu": "Dans cette ville, tout est possible.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Partage avec un ami ou une amie.",
+      "variante": "variante1",
+      "texte_envoye": "Partage avec un ami, ou une amie.",
+      "entendu": "Partage avec un ami ou une amie.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Boulanger, astronaute, maire : tu choisis.",
+      "variante": "complet",
+      "texte_envoye": "Boulangé, astronaute, maire : tu choisi.",
+      "entendu": "Boulanger, astronaute mère, tu choisis.",
+      "erreur_mots": 0.2
+    },
+    {
+      "phrase": "Mais la ville est vide.",
+      "variante": "brut",
+      "texte_envoye": "Mais la ville est vide.",
+      "entendu": "Mais la ville est vide.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Il nous faut mille personnes.",
+      "variante": "brut",
+      "texte_envoye": "Il nous faut mille personnes.",
+      "entendu": "Il nous faut 1000 personnes.",
+      "erreur_mots": 0.2
+    },
+    {
+      "phrase": "Chaque personne invite dix amis.",
+      "variante": "variante1",
+      "texte_envoye": "Chaque ami invite dix amis.",
+      "entendu": "Chakami invite Dix Amis.",
+      "erreur_mots": 0.4
+    },
+    {
+      "phrase": "Dix mille habitants. Dix mille amis.",
+      "variante": "variante1",
+      "texte_envoye": "Dix mille habitants, dix mille amis.",
+      "entendu": "Dix mille habitants, Dix mille armies.",
+      "erreur_mots": 0.167
+    },
+    {
+      "phrase": "Écris ton prénom et ton métier.",
+      "variante": "brut",
+      "texte_envoye": "Écris ton prénom et ton métier.",
+      "entendu": "Écrise ton prénom et ton métier.",
+      "erreur_mots": 0.167
+    },
+    {
+      "phrase": "Invite-les : ils déménagent au paradis.",
+      "variante": "complet",
+      "texte_envoye": "Invite-les : ils déménage au paradi.",
+      "entendu": "Invite-les, ils déménagent au paradis.",
+      "erreur_mots": 0.0
+    }
+  ]
+}

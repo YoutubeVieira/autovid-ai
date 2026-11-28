@@ -1,0 +1,71 @@
+{
+  "note": "Voix neuronales hors-ligne (Piper via sherpa-onnx). Les modeles (~70 Mo chacun) ne sont PAS dans le depot: python3 download_voices.py les telecharge. Licences lues dans le MODEL_CARD de chaque modele.",
+  "voices": {
+    "siwis": {
+      "archive": "vits-piper-fr_FR-siwis-medium",
+      "speakers": 1,
+      "lang": "fr_FR",
+      "gender": "femme",
+      "license": "CC BY 4.0",
+      "commercial_ok": true,
+      "credit": "Voix: SIWIS (University of Edinburgh), CC BY 4.0",
+      "recommended": "Recommandee pour des videos monetisees: usage commercial autorise avec mention de l'auteur."
+    },
+    "tom": {
+      "archive": "vits-piper-fr_FR-tom-medium",
+      "speakers": 1,
+      "lang": "fr_FR",
+      "gender": "homme (la plus naturelle des voix masculines libres, 44,1 kHz)",
+      "license": "AGPLv3",
+      "commercial_ok": "a verifier",
+      "credit": "Voix: Tjiho (French-tts-model-piper), AGPLv3",
+      "recommended": "Licence copyleft: ne pas l'utiliser pour une video monetisee sans avoir verifie ce que l'AGPLv3 implique pour le son genere."
+    },
+    "upmc": {
+      "archive": "vits-piper-fr_FR-upmc-medium",
+      "speakers": 2,
+      "speaker_names": {
+        "0": "jessica (femme)",
+        "1": "pierre (homme)"
+      },
+      "lang": "fr_FR",
+      "license": "CC BY-SA 4.0",
+      "commercial_ok": "a verifier (partage dans les memes conditions)",
+      "credit": "Voix: UPMC (marytts/upmc-pierre-data), CC BY-SA 4.0",
+      "recommended": "Mention obligatoire et clause 'meme licence': verifier avant monetisation.",
+      "gender": "2 voix: 0=jessica (femme), 1=pierre (homme)"
+    },
+    "gilles": {
+      "archive": "vits-piper-fr_FR-gilles-low",
+      "speakers": 1,
+      "lang": "fr_FR",
+      "gender": "homme",
+      "license": "CC0",
+      "commercial_ok": true,
+      "credit": "Voix: modele Piper gilles (donnees CC0), aucune mention requise",
+      "recommended": "Seule voix masculine sans contrainte de licence, mais qualite 'low' (16 kHz): le traitement `--fx viral` aide, la diction reste plus robotique que tom."
+    }
+  },
+  "engines": {
+    "supertonic": {
+      "archive": "sherpa-onnx-supertonic-3-tts-int8-2026-05-11",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/sherpa-onnx-supertonic-3-tts-int8-2026-05-11.tar.bz2",
+      "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+      "voices": "10 voix: 0-4 femmes, 5-9 hommes (9 = homme grave et pose, par defaut)",
+      "langs": "fr, en, ...",
+      "sample_rate": 44100,
+      "pip": "sherpa-onnx>=2.0"
+    },
+    "kokoro": {
+      "archive": "kokoro-multi-lang-v1_0",
+      "url": "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-multi-lang-v1_0.tar.bz2",
+      "license": "modele Apache-2.0; la voix francaise ff_siwis vient des donnees SIWIS (CC BY 4.0): mention requise",
+      "voices": "une seule voix francaise: ff_siwis (femme, --speaker 30)",
+      "sample_rate": 24000
+    },
+    "edge_local": {
+      "script": "edge_local.py",
+      "note": "A lancer sur ton ordinateur (Vivienne, Remy, Denise, Henri...). Service Microsoft inaccessible depuis l'environnement cloud; licence commerciale: preferer Azure AI Speech."
+    }
+  }
+}

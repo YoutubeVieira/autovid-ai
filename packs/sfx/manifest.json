@@ -1,0 +1,276 @@
+{
+  "license": "CC0 1.0 - sons synthetises par make_sfx.py et make_sfx2.py, aucun echantillon tiers",
+  "sample_rate": 44100,
+  "sounds": [
+    {
+      "file": "pop.wav",
+      "duration_s": 0.09,
+      "description": "Bulle courte",
+      "use": "apparition d'un personnage, +1"
+    },
+    {
+      "file": "ding.wav",
+      "duration_s": 0.5,
+      "description": "Clochette claire",
+      "use": "badge +1 HABITANT"
+    },
+    {
+      "file": "coin.wav",
+      "duration_s": 0.42,
+      "description": "Piece de jeu",
+      "use": "gain, emploi, recompense"
+    },
+    {
+      "file": "level_up.wav",
+      "duration_s": 0.92,
+      "description": "Arpege montant",
+      "use": "palier atteint (100 habitants)"
+    },
+    {
+      "file": "whoosh.wav",
+      "duration_s": 0.45,
+      "description": "Souffle rapide",
+      "use": "changement de plan, zoom"
+    },
+    {
+      "file": "swoosh_up.wav",
+      "duration_s": 0.35,
+      "description": "Souffle montant",
+      "use": "titre qui entre"
+    },
+    {
+      "file": "click.wav",
+      "duration_s": 0.02,
+      "description": "Clic sec",
+      "use": "bouton, interface"
+    },
+    {
+      "file": "tick.wav",
+      "duration_s": 0.03,
+      "description": "Tic leger",
+      "use": "compteur qui monte"
+    },
+    {
+      "file": "error_buzz.wav",
+      "duration_s": 0.35,
+      "description": "Buzzer grave",
+      "use": "porte fermee, TRANCADA / bloque"
+    },
+    {
+      "file": "stamp.wav",
+      "duration_s": 0.25,
+      "description": "Tampon / impact sourd",
+      "use": "carton-titre, apparition d'un gros chiffre"
+    },
+    {
+      "file": "sparkle.wav",
+      "duration_s": 0.37,
+      "description": "Scintillement",
+      "use": "mot cle surligne"
+    },
+    {
+      "file": "fanfare.wav",
+      "duration_s": 1.9,
+      "description": "Petite fanfare",
+      "use": "election du maire, victoire"
+    },
+    {
+      "file": "crowd_cheer.wav",
+      "duration_s": 2.0,
+      "description": "Foule en liesse (bruit module)",
+      "use": "la ville se remplit, fete"
+    },
+    {
+      "file": "footsteps.wav",
+      "duration_s": 0.35,
+      "description": "Deux pas",
+      "use": "arrivee d'un habitant"
+    },
+    {
+      "file": "boom.wav",
+      "duration_s": 0.9,
+      "description": "Impact grave (boom)",
+      "use": "coupe sur un gros plan, palier, mot choc"
+    },
+    {
+      "file": "riser.wav",
+      "duration_s": 1.2,
+      "description": "Montee de tension",
+      "use": "avant une revelation, avant le palier"
+    },
+    {
+      "file": "whoosh_fast.wav",
+      "duration_s": 0.22,
+      "description": "Souffle tres court",
+      "use": "whip pan, coupe rapide"
+    },
+    {
+      "file": "swipe.wav",
+      "duration_s": 0.16,
+      "description": "Glissement",
+      "use": "transition laterale"
+    },
+    {
+      "file": "glitch.wav",
+      "duration_s": 0.23,
+      "description": "Glitch numerique",
+      "use": "apparition brusque, erreur, effet 'jeu'"
+    },
+    {
+      "file": "shutter.wav",
+      "duration_s": 0.14,
+      "description": "Obturateur photo",
+      "use": "arret sur image, gros plan fixe"
+    },
+    {
+      "file": "zap.wav",
+      "duration_s": 0.2,
+      "description": "Zap descendant",
+      "use": "apparition d'un personnage"
+    },
+    {
+      "file": "bass_drop.wav",
+      "duration_s": 0.9,
+      "description": "Chute de basse",
+      "use": "debut d'un plan fort, titre"
+    },
+    {
+      "file": "pop_double.wav",
+      "duration_s": 0.17,
+      "description": "Double bulle",
+      "use": "apparition de deux habitants"
+    },
+    {
+      "file": "roar.wav",
+      "duration_s": 1.9,
+      "description": "Rugissement de grand dinosaure",
+      "use": "T-Rex, monstre"
+    },
+    {
+      "file": "roar_small.wav",
+      "duration_s": 0.9,
+      "description": "Cri aigu de petit dinosaure",
+      "use": "petit dino, creature"
+    },
+    {
+      "file": "stomp.wav",
+      "duration_s": 1.6,
+      "description": "Pas lourds d'un dinosaure",
+      "use": "dino qui marche"
+    },
+    {
+      "file": "rumble.wav",
+      "duration_s": 3.5,
+      "description": "Grondement sourd (tremblement de terre)",
+      "use": "ambiance, avant le choc"
+    },
+    {
+      "file": "meteor_whistle.wav",
+      "duration_s": 2.6,
+      "description": "Sifflement d'un astéroïde qui tombe",
+      "use": "météorite"
+    },
+    {
+      "file": "explosion.wav",
+      "duration_s": 3.2,
+      "description": "Explosion / impact géant",
+      "use": "impact de l'astéroïde"
+    },
+    {
+      "file": "wind_ash.wav",
+      "duration_s": 5.0,
+      "description": "Vent et cendres",
+      "use": "ciel noir après l'impact"
+    },
+    {
+      "file": "laugh_man.wav",
+      "duration_s": 0.94,
+      "description": "Rire d'homme (ha ha ha)",
+      "use": "rire"
+    },
+    {
+      "file": "laugh_woman.wav",
+      "duration_s": 0.94,
+      "description": "Rire de femme",
+      "use": "rire"
+    },
+    {
+      "file": "laugh_child.wav",
+      "duration_s": 0.91,
+      "description": "Rire d'enfant",
+      "use": "rire"
+    },
+    {
+      "file": "giggle.wav",
+      "duration_s": 0.81,
+      "description": "Petit rire aigu / gloussement",
+      "use": "rire espiègle"
+    },
+    {
+      "file": "laugh_crowd.wav",
+      "duration_s": 2.14,
+      "description": "Rire de foule",
+      "use": "ambiance, humour"
+    },
+    {
+      "file": "cry_baby.wav",
+      "duration_s": 1.33,
+      "description": "Pleurs de bébé",
+      "use": "bébé, détresse"
+    },
+    {
+      "file": "sob.wav",
+      "duration_s": 2.28,
+      "description": "Sanglots (adulte)",
+      "use": "tristesse"
+    },
+    {
+      "file": "scream.wav",
+      "duration_s": 1.0,
+      "description": "Cri de peur",
+      "use": "peur, danger"
+    },
+    {
+      "file": "gasp.wav",
+      "duration_s": 0.5,
+      "description": "Inspiration de surprise",
+      "use": "peur, étonnement"
+    },
+    {
+      "file": "oh_surprise.wav",
+      "duration_s": 0.6,
+      "description": "« Oooh » de surprise (homme)",
+      "use": "étonnement"
+    },
+    {
+      "file": "applause.wav",
+      "duration_s": 3.0,
+      "description": "Applaudissements",
+      "use": "victoire, élection"
+    },
+    {
+      "file": "music_aventure.mp3",
+      "duration_s": 15.48,
+      "description": "Boucle entraînante (chiptune, do majeur)",
+      "use": "épisodes, arrivée des habitants"
+    },
+    {
+      "file": "music_suspense.mp3",
+      "duration_s": 20.87,
+      "description": "Boucle de tension (la mineur)",
+      "use": "avant la catastrophe, mystère"
+    },
+    {
+      "file": "music_victoire.mp3",
+      "duration_s": 7.27,
+      "description": "Boucle de victoire (fanfare chiptune)",
+      "use": "palier atteint, élection"
+    },
+    {
+      "file": "music_calme.mp3",
+      "duration_s": 24.0,
+      "description": "Boucle douce (nappes + pluck)",
+      "use": "monde vide, nouveau départ"
+    }
+  ]
+}

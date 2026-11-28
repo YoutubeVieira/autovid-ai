@@ -1,0 +1,17 @@
+# "Caraguá Pixel" - version française (même texte que l'original, resserré pour le français).
+# <début_s | +pause> | <sous-titre> || <texte dit (orthographe phonétique si besoin)>
+0.05 | Cette page a zéro abonné.
++0.12 | Cette ville a zéro habitant.
++0.18 | Ici, chaque abonné devient habitant de Caraguá, || Ici, chaque abonné devient habitant de Caragoua,
++0.10 | et gagne un emploi.
++0.25 | C'est simple : abonné, donc habitant.
++0.22 | Commente ton prénom et un métier,
++0.12 | tu apparais au prochain épisode, prénom au-dessus de la tête.
++0.25 | Professeur, médecin, éboueur, sauveteur, pêcheur.
++0.18 | La ville a besoin de tout.
++0.25 | Le conseil a quinze sièges vides.
++0.10 | Les quinze premiers à commenter deviennent conseillers.
++0.28 | Et la mairie ? Fermée à clé.
++0.20 | À cent habitants, élection du maire.
++0.22 | Jour un. Zéro habitant.
++0.12 | Garde un œil sur la ville.

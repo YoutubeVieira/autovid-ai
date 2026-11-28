@@ -1,0 +1,124 @@
+{
+  "fps": 30,
+  "content_duration": 34.67,
+  "events": [
+    {
+      "t": 0.0,
+      "type": "hud_sub",
+      "text": "0 HABITANTS · 0 EMPLOIS"
+    },
+    {
+      "t": 1.75,
+      "type": "cut"
+    },
+    {
+      "t": 3.61,
+      "type": "cut"
+    },
+    {
+      "t": 4.41,
+      "type": "badge",
+      "text": "+1 HABITANT",
+      "color": "yellow"
+    },
+    {
+      "t": 6.74,
+      "type": "badge",
+      "text": "+1 EMPLOI",
+      "color": "green"
+    },
+    {
+      "t": 7.92,
+      "type": "cut"
+    },
+    {
+      "t": 8.12,
+      "type": "sfx",
+      "name": "coin"
+    },
+    {
+      "t": 10.21,
+      "type": "sfx",
+      "name": "pop"
+    },
+    {
+      "t": 16.06,
+      "type": "cut"
+    },
+    {
+      "t": 16.66,
+      "type": "cut"
+    },
+    {
+      "t": 17.25,
+      "type": "cut"
+    },
+    {
+      "t": 17.85,
+      "type": "cut"
+    },
+    {
+      "t": 18.45,
+      "type": "cut"
+    },
+    {
+      "t": 19.05,
+      "type": "cut"
+    },
+    {
+      "t": 21.05,
+      "type": "hud_sub",
+      "text": "CONSEIL : 0/15 SIÈGES"
+    },
+    {
+      "t": 21.05,
+      "type": "cut"
+    },
+    {
+      "t": 21.55,
+      "type": "sfx",
+      "name": "stamp"
+    },
+    {
+      "t": 26.22,
+      "type": "hud_sub",
+      "text": "MAIRIE : FERMÉE"
+    },
+    {
+      "t": 26.22,
+      "type": "cut"
+    },
+    {
+      "t": 26.47,
+      "type": "sfx",
+      "name": "error_buzz"
+    },
+    {
+      "t": 28.36,
+      "type": "hud_sub",
+      "text": "ÉLECTION DU MAIRE À 100"
+    },
+    {
+      "t": 28.36,
+      "type": "sfx",
+      "name": "ding"
+    },
+    {
+      "t": 28.36,
+      "type": "cut"
+    },
+    {
+      "t": 29.54,
+      "type": "cut"
+    },
+    {
+      "t": 30.72,
+      "type": "hud_sub",
+      "text": "0 HABITANTS"
+    },
+    {
+      "t": 30.72,
+      "type": "cut"
+    }
+  ]
+}

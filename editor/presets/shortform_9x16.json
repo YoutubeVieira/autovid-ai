@@ -1,0 +1,20 @@
+{
+  "name": "shortform_9x16",
+  "description": "Format Reels/TikTok/Shorts derive de l'analyse de 2 videos de reference (voir docs/ANALYSE.md)",
+  "target": { "width": 1080, "height": 1920, "fps": 30 },
+  "audio": { "lufs": -14.0, "true_peak": -1.5, "lra": 11.0, "music_gain": 0.18 },
+  "silence": { "noise_db": -35, "min_silence": 0.35, "keep_pad": 0.08, "min_keep": 0.25 },
+  "pacing": { "max_shot": 3.5, "zoom_cycle": [1.0, 1.12, 1.0, 1.22] },
+  "captions": {
+    "font": "DejaVu Sans",
+    "size": 84,
+    "max_words": 3,
+    "uppercase": false,
+    "primary": "FFFFFF",
+    "highlight": "FFD400",
+    "outline_color": "000000",
+    "outline": 6,
+    "margin_v": 520
+  },
+  "hook": { "seconds": 3.0, "size": 64, "margin_v": 330, "text_color": "111111", "box_color": "FFFFFF" }
+}

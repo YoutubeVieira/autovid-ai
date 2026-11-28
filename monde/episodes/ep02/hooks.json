@@ -1,0 +1,82 @@
+[
+ {
+  "formule": "pov",
+  "texte_ecran": "POV : tu arrives dans notre ville",
+  "phrase_dite": "Tu viens d'arriver dans une ville où tout est possible.",
+  "plan": "gros_plan",
+  "camera": "punch_in",
+  "son": "pop",
+  "note": 8,
+  "pourquoi": "te met dans l'image dès la 1re seconde"
+ },
+ {
+  "formule": "chiffre",
+  "texte_ecran": "2 habitants. Il en manque 13.",
+  "phrase_dite": "2 habitants. Il en manque 13.",
+  "plan": "large",
+  "camera": "pull_out_lent",
+  "son": "tick",
+  "note": 8,
+  "pourquoi": "chiffre précis + manque = suspense mesurable"
+ },
+ {
+  "formule": "question",
+  "texte_ecran": "Et si cette ville existait vraiment ?",
+  "phrase_dite": "Et si cette ville existait vraiment ?",
+  "plan": "insert",
+  "camera": "push_in_lent",
+  "son": "riser",
+  "note": 8,
+  "pourquoi": "boucle ouverte: la réponse est dans la vidéo"
+ },
+ {
+  "formule": "defi",
+  "texte_ecran": "Tague 10 amis. Ils déménagent ici.",
+  "phrase_dite": "Tague 10 amis, et ils déménagent chez nous.",
+  "plan": "moyen",
+  "camera": "orbite_legere",
+  "son": "pop_double",
+  "note": 8,
+  "pourquoi": "appel à l'action dès le départ (épisode 0)"
+ },
+ {
+  "formule": "avant_apres",
+  "texte_ecran": "Avant : vide. Maintenant : 2 habitants.",
+  "phrase_dite": "Hier, la ville était vide. Aujourd'hui, 2 habitants.",
+  "plan": "large",
+  "camera": "tilt_up",
+  "son": "sparkle",
+  "note": 8,
+  "pourquoi": "contraste visible avant/après"
+ },
+ {
+  "formule": "anormal",
+  "texte_ecran": "Cette ville n'a aucune règle",
+  "phrase_dite": "Dans cette ville, aucune règle. Sauf une.",
+  "plan": "large",
+  "camera": "push_in_rapide",
+  "son": "boom",
+  "note": 8,
+  "pourquoi": "détail qui cloche + promesse d'une règle à découvrir"
+ },
+ {
+  "formule": "lieu_regle",
+  "texte_ecran": "Dans cette ville, un ami = un habitant",
+  "phrase_dite": "Dans cette ville, un ami = un habitant.",
+  "plan": "large",
+  "camera": "push_in_lent",
+  "son": "whoosh_fast",
+  "note": 7,
+  "pourquoi": "format n°1 des vidéos FR qui percent (veille 11/2026)"
+ },
+ {
+  "formule": "ciblage",
+  "texte_ecran": "Robin, ton habitant est arrivé",
+  "phrase_dite": "Robin, regarde : ton habitant est arrivé.",
+  "plan": "gros_plan",
+  "camera": "punch_in",
+  "son": "ding",
+  "note": 6,
+  "pourquoi": "interpelle un commentateur par son prénom -> commentaires et partages"
+ }
+]

@@ -1,0 +1,18 @@
+{
+  "_note": "Cas particuliers (prioritaires). Cle = mot ecrit, valeur = ce qu'on envoie a la voix. Ajoute ici les mots que la voix lit mal.",
+  "Caraguá": "Caragoua",
+  "Caragua": "Caragoua",
+  "habitant": "abitan",
+  "habitants": "abitan",
+  "zéro": "zéro",
+  "T-rex": "té rex",
+  "t-rex": "té rex",
+  "œil": "euil",
+  "tague": "tag",
+  "taguer": "tagué",
+  "tagué": "tagué",
+  "amis": "ami",
+  "commente": "commante",
+  "conseillers": "conseillé",
+  "conseillères": "conseillère"
+}

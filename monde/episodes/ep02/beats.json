@@ -1,0 +1,44 @@
+[
+ {
+  "role": "hook",
+  "emotion": "curiosite",
+  "mot_fort": "habitants"
+ },
+ {
+  "role": "contexte",
+  "emotion": "amour",
+  "mot_fort": "ami"
+ },
+ {
+  "role": "contexte",
+  "emotion": "suspense",
+  "mot_fort": "nouveaux"
+ },
+ {
+  "role": "montee",
+  "emotion": "joie",
+  "sujet": "Mamie",
+  "mot_fort": "cuisinière"
+ },
+ {
+  "role": "montee",
+  "emotion": "surprise",
+  "sujet": "Robin",
+  "mot_fort": "T-rex"
+ },
+ {
+  "role": "climax",
+  "emotion": "fierte",
+  "mot_fort": "habitants"
+ },
+ {
+  "role": "payoff",
+  "emotion": "suspense",
+  "mot_fort": "manque"
+ },
+ {
+  "role": "cta",
+  "emotion": "amour",
+  "mot_fort": "prochain"
+ }
+]

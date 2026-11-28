@@ -1,0 +1,56 @@
+{
+  "monde": "Le monde se peuple",
+  "episodes": [
+    {
+      "numero": 1,
+      "titre": "La fin des dinosaures",
+      "arrivees": []
+    },
+    {
+      "numero": 2,
+      "titre": "Les premiers habitants",
+      "arrivees": [
+        1,
+        2
+      ]
+    }
+  ],
+  "habitants": [
+    {
+      "id": 1,
+      "prenom": "Mamie",
+      "metier_dit": "cuisinière fait maison",
+      "look": {
+        "metier": "mamie",
+        "shirt": "creme",
+        "pants": "brun",
+        "accessory": "apron",
+        "hat": null,
+        "hat_color": null,
+        "hair": "grey",
+        "skin": 2,
+        "hair_color": 1,
+        "face": "wink"
+      },
+      "episode": 2
+    },
+    {
+      "id": 2,
+      "prenom": "Robin",
+      "metier_dit": "T-rex singe",
+      "look": {
+        "metier": "trexsinge",
+        "shirt": "vert",
+        "pants": "brun_fonce",
+        "accessory": "tail",
+        "hat": "trexsinge",
+        "hat_color": "vert",
+        "hair": "bun",
+        "skin": 0,
+        "hair_color": 0,
+        "face": "love"
+      },
+      "episode": 2
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "name": "pixel_game_720",
+  "description": "Variante 720x1280 du style jeu de ville (reference: video 'Caragua Pixel', 35 s). Sous-titres 2 mots, HUD 3 lignes, carton de fin 1,8 s.",
+  "target": {
+    "width": 720,
+    "height": 1280,
+    "fps": 30
+  },
+  "audio": {
+    "lufs": -14.0,
+    "true_peak": -1.5,
+    "lra": 11.0,
+    "music_gain": 0.14
+  },
+  "cut_silences": false,
+  "silence": {
+    "noise_db": -35,
+    "min_silence": 0.35,
+    "keep_pad": 0.08,
+    "min_keep": 0.25
+  },
+  "pacing": {
+    "max_shot": 99,
+    "zoom_cycle": [
+      1.0
+    ]
+  },
+  "captions": {
+    "font": "Press Start 2P",
+    "fonts_dir": "../../packs/fonts",
+    "size": 38,
+    "max_words": 2,
+    "uppercase": true,
+    "primary": "FFFFFF",
+    "highlight": "FFD400",
+    "outline_color": "000000",
+    "outline": 5,
+    "margin_v": 320
+  },
+  "hook": {
+    "seconds": 0,
+    "size": 40,
+    "margin_v": 330,
+    "text_color": "111111",
+    "box_color": "FFFFFF"
+  },
+  "hud": {
+    "enabled": true,
+    "title": "JOUR 1 · LA VILLE VIDE",
+    "default_sub": "0 HABITANTS · 0 EMPLOIS",
+    "counter_label": "HABITANTS",
+    "counter_max": 100,
+    "bar_height": 112,
+    "top_offset": 0,
+    "title_size": 20,
+    "counter_size": 24
+  },
+  "badge": {
+    "size": 28,
+    "y": 340,
+    "seconds": 1.1,
+    "colors": {
+      "yellow": "FFD400",
+      "green": "3DDC6E",
+      "red": "E5484D"
+    }
+  },
+  "outro": {
+    "seconds": 1.8,
+    "title": "CARAGUÁ PIXEL",
+    "subtitle": "LA VILLE DES ABONNÉS|JOUR 1 · LA VILLE VIDE|0 / 100 HABITANTS",
+    "title_size": 40,
+    "subtitle_size": 22
+  },
+  "sfx": {
+    "enabled": true,
+    "gain": 0.5,
+    "map": {
+      "badge:yellow": "ding",
+      "badge:green": "coin",
+      "badge:red": "error_buzz",
+      "counter": "tick",
+      "cut": "click",
+      "outro": "stamp",
+      "milestone": [
+        "level_up",
+        "boom"
+      ],
+      "pop": "pop_double",
+      "impact": "boom",
+      "riser": "riser"
+    }
+  }
+}
