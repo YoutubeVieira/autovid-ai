@@ -1,0 +1,28 @@
+1
+00:00:00,150 --> 00:00:02,976
+Épisode 2 : Les premiers habitants.
+
+2
+00:00:03,196 --> 00:00:05,847
+2 nouveaux habitants arrivent.
+
+3
+00:00:06,067 --> 00:00:08,352
+Mamie, cuisinière fait maison.
+
+4
+00:00:08,572 --> 00:00:10,392
+Robin, T-rex singe.
+
+5
+00:00:10,612 --> 00:00:13,444
+Le monde compte maintenant 2 habitants.
+
+6
+00:00:13,664 --> 00:00:17,920
+Il en manque 13 pour les 15 premiers conseillers.
+
+7
+00:00:18,140 --> 00:00:22,207
+Commente ton prénom et ton métier : le prochain, c'est toi.
+

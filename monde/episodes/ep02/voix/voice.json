@@ -1,0 +1,45 @@
+{
+  "voice": "siwis",
+  "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
+  "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
+  "duration": 22.51,
+  "cues": [
+    {
+      "start": 0.15,
+      "end": 2.976,
+      "text": "Épisode 2 : Les premiers habitants."
+    },
+    {
+      "start": 3.196,
+      "end": 5.847,
+      "text": "2 nouveaux habitants arrivent."
+    },
+    {
+      "start": 6.067,
+      "end": 8.352,
+      "text": "Mamie, cuisinière fait maison."
+    },
+    {
+      "start": 8.572,
+      "end": 10.392,
+      "text": "Robin, T-rex singe."
+    },
+    {
+      "start": 10.612,
+      "end": 13.444,
+      "text": "Le monde compte maintenant 2 habitants."
+    },
+    {
+      "start": 13.664,
+      "end": 17.92,
+      "text": "Il en manque 13 pour les 15 premiers conseillers."
+    },
+    {
+      "start": 18.14,
+      "end": 22.207,
+      "text": "Commente ton prénom et ton métier : le prochain, c'est toi."
+    }
+  ],
+  "warnings": [],
+  "verification": []
+}
