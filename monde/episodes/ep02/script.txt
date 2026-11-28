@@ -1,9 +1,9 @@
 # Épisode 2 - Les premiers habitants (≈ 27 s). <début | +pause> | texte
 0.15 | Dans cette ville, tes commentaires deviennent des habitants.
-+0.22 | Partage avec un ami ou une amie.
-+0.22 | 2 nouveaux habitants arrivent.
++0.22 | Partage avec un ami ou une amie. || Partage avec un ami ou une amie. // Partage avec un ami, ou une amie. // Partage à un ami ou à une amie.
++0.22 | 2 nouveaux habitants arrivent. || 2 nouveaux habitants arrivent. // Deux nouveaux habitants arrivent.
 +0.22 | Mamie, cuisinière fait maison.
-+0.22 | Robin, T-rex singe.
++0.22 | Robin, T-rex singe. || Robin, T-rex singe. // Robin, Tirex singe. // Robin, Té-rex singe.
 +0.22 | Le monde compte maintenant 2 habitants.
 +0.22 | Il en manque 13 pour les 15 premiers conseillers.
-+0.22 | Commente ton prénom et ton métier : le prochain, c'est toi.
++0.22 | Commente ton prénom et ton métier : le prochain, c'est toi. || Commente ton prénom et ton métier : le prochain, c'est toi. // Commente ton prénom, et ton métier : le prochain, c'est toi. // Écris ton prénom et ton métier : le prochain, c'est toi.

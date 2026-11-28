@@ -63,7 +63,7 @@
  },
  {
   "debut": 6.95,
-  "fin": 9.6,
+  "fin": 9.76,
   "replique": 2,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -84,8 +84,8 @@
   }
  },
  {
-  "debut": 9.82,
-  "fin": 12.1,
+  "debut": 9.98,
+  "fin": 12.27,
   "replique": 3,
   "plan": "gros_plan",
   "camera": "orbite_legere",
@@ -106,8 +106,8 @@
   }
  },
  {
-  "debut": 12.32,
-  "fin": 14.14,
+  "debut": 12.49,
+  "fin": 14.31,
   "replique": 4,
   "plan": "insert",
   "camera": "punch_in",
@@ -128,8 +128,8 @@
   }
  },
  {
-  "debut": 14.36,
-  "fin": 17.19,
+  "debut": 14.53,
+  "fin": 17.45,
   "replique": 5,
   "plan": "contre_plongee",
   "camera": "tilt_up",
@@ -151,8 +151,8 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 17.41,
-  "fin": 19.54,
+  "debut": 17.67,
+  "fin": 21.4,
   "replique": 6,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -173,28 +173,10 @@
   }
  },
  {
-  "debut": 19.54,
-  "fin": 21.67,
-  "replique": 6,
-  "plan": "gros_plan",
-  "camera": "push_in_lent",
-  "zoom": [
-   1.0,
-   1.08
-  ],
-  "sujet": "decor",
-  "parle": false,
-  "visage": "smile",
-  "effet": null,
-  "son": null,
-  "texte_ecran": null,
-  "punch_in": null
- },
- {
-  "debut": 21.89,
-  "fin": 23.92,
+  "debut": 21.62,
+  "fin": 23.58,
   "replique": 7,
-  "plan": "insert",
+  "plan": "gros_plan",
   "camera": "hold_doux",
   "zoom": [
    1.0,
@@ -213,14 +195,14 @@
   }
  },
  {
-  "debut": 23.92,
-  "fin": 25.96,
+  "debut": 23.58,
+  "fin": 25.53,
   "replique": 7,
-  "plan": "contre_plongee",
+  "plan": "insert",
   "camera": "push_in_lent",
   "zoom": [
    1.0,
-   1.04
+   1.08
   ],
   "sujet": "decor",
   "parle": false,

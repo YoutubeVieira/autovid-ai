@@ -2,7 +2,7 @@
   "voice": "siwis",
   "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
   "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
-  "duration": 26.26,
+  "duration": 25.83,
   "cues": [
     {
       "start": 0.15,
@@ -16,35 +16,92 @@
     },
     {
       "start": 6.945,
-      "end": 9.596,
+      "end": 9.761,
       "text": "2 nouveaux habitants arrivent."
     },
     {
-      "start": 9.816,
-      "end": 12.101,
+      "start": 9.981,
+      "end": 12.266,
       "text": "Mamie, cuisinière fait maison."
     },
     {
-      "start": 12.321,
-      "end": 14.141,
+      "start": 12.486,
+      "end": 14.307,
       "text": "Robin, T-rex singe."
     },
     {
-      "start": 14.361,
-      "end": 17.193,
+      "start": 14.527,
+      "end": 17.452,
       "text": "Le monde compte maintenant 2 habitants."
     },
     {
-      "start": 17.413,
-      "end": 21.669,
+      "start": 17.672,
+      "end": 21.403,
       "text": "Il en manque 13 pour les 15 premiers conseillers."
     },
     {
-      "start": 21.889,
-      "end": 25.956,
+      "start": 21.623,
+      "end": 25.527,
       "text": "Commente ton prénom et ton métier : le prochain, c'est toi."
     }
   ],
   "warnings": [],
-  "verification": []
+  "verification": [
+    {
+      "phrase": "Dans cette ville, tes commentaires deviennent des habitants.",
+      "variante": "brut",
+      "texte_envoye": "Dans cette ville, tes commentaires deviennent des abitan.",
+      "entendu": "Dans cette ville, tes commentaires deviennent des habitants.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Partage avec un ami ou une amie.",
+      "variante": "brut",
+      "texte_envoye": "Partage avec un ami ou une amie.",
+      "entendu": "Partage avec un ami ou une amie.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "2 nouveaux habitants arrivent.",
+      "variante": "variante1",
+      "texte_envoye": "Deux nouveaux habitants arrivent.",
+      "entendu": "Deux nouveaux habitants arrivent.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Mamie, cuisinière fait maison.",
+      "variante": "brut",
+      "texte_envoye": "Mamie, cuisinière fait maison.",
+      "entendu": "Mamy, cuisinière, fait maison.",
+      "erreur_mots": 0.25
+    },
+    {
+      "phrase": "Robin, T-rex singe.",
+      "variante": "brut",
+      "texte_envoye": "Robin, T-rex singe.",
+      "entendu": "Robin T. Rex Singe",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Le monde compte maintenant 2 habitants.",
+      "variante": "brut",
+      "texte_envoye": "Le monde compte maintenant deux abitan.",
+      "entendu": "Le monde compte maintenant deux habitants.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Il en manque 13 pour les 15 premiers conseillers.",
+      "variante": "brut",
+      "texte_envoye": "Il en manque treize pour les quinze premiers conseillé.",
+      "entendu": "Il en manque 13 pour les 15 premiers conseillers.",
+      "erreur_mots": 0.0
+    },
+    {
+      "phrase": "Commente ton prénom et ton métier : le prochain, c'est toi.",
+      "variante": "complet",
+      "texte_envoye": "Commante ton prénom et ton métié : le prochin, c'est toi.",
+      "entendu": "Comment ton prénom et ton métier le prochain, c'est toi.",
+      "erreur_mots": 0.091
+    }
+  ]
 }

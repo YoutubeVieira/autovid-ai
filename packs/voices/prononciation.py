@@ -88,8 +88,39 @@ def _light(word):
     return respell(word) if re.search(r"(ants?|ents?)$", low) else word
 
 
+_U = "zéro un deux trois quatre cinq six sept huit neuf dix onze douze treize quatorze quinze seize".split()
+_D = {20: "vingt", 30: "trente", 40: "quarante", 50: "cinquante", 60: "soixante"}
+
+
+def num_fr(n):
+    """Nombre entier (0-999999) -> lettres, français de France (soixante-dix, quatre-vingts, quatre-vingt-dix)."""
+    if n < 17:
+        return _U[n]
+    if n < 20:
+        return "dix-" + _U[n - 10]
+    if n < 70:
+        d, u = n // 10 * 10, n % 10
+        return _D[d] + ("" if u == 0 else " et un" if u == 1 else "-" + _U[u])
+    if n < 80:
+        return "soixante" + (" et onze" if n == 71 else "-" + num_fr(n - 60))
+    if n < 100:
+        return "quatre-vingts" if n == 80 else "quatre-vingt-" + num_fr(n - 80)
+    if n < 1000:
+        c, r = divmod(n, 100)
+        return ("cent" if c == 1 else _U[c] + " cent") + ("s" if (c > 1 and r == 0) else "") + ("" if r == 0 else " " + num_fr(r))
+    m, r = divmod(n, 1000)
+    return ("mille" if m == 1 else num_fr(m) + " mille") + ("" if r == 0 else " " + num_fr(r))
+
+
+def nombres(text):
+    """Les chiffres sont dits en toutes lettres (la voix lit mal « 13 », « 10 000 »)."""
+    text = re.sub(r"(?<=\d)[ \u202f\u00a0](?=\d{3}\b)", "", text)
+    return re.sub(r"\d+", lambda m: num_fr(int(m.group(0))), text)
+
+
 def fix(text, level="full"):
     """level='full': toutes les lettres muettes de fin; 'light': -ant(s)/-ent(s) + dictionnaire; 'overrides': dictionnaire seul."""
+    text = nombres(text)
     fn = {"full": respell, "light": _light, "overrides": lambda w: OVERRIDES.get(w.lower(), w)}[level]
 
     def sub(m):

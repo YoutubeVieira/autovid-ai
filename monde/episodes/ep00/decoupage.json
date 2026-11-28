@@ -23,7 +23,7 @@
  },
  {
   "debut": 2.96,
-  "fin": 5.37,
+  "fin": 5.44,
   "replique": 1,
   "plan": "gros_plan",
   "camera": "hold_doux",
@@ -44,8 +44,8 @@
   }
  },
  {
-  "debut": 5.62,
-  "fin": 8.89,
+  "debut": 5.69,
+  "fin": 8.83,
   "replique": 2,
   "plan": "moyen",
   "camera": "orbite_legere",
@@ -66,8 +66,8 @@
   }
  },
  {
-  "debut": 9.2,
-  "fin": 10.98,
+  "debut": 9.13,
+  "fin": 11.08,
   "replique": 3,
   "plan": "large",
   "camera": "pull_out_lent",
@@ -80,7 +80,7 @@
   "visage": "sad",
   "effet": "desature",
   "son": null,
-  "texte_ecran": "Mais elle est vide.",
+  "texte_ecran": "Mais la ville est vide.",
   "punch_in": {
    "mot": "vide",
    "zoom": 1.2,
@@ -88,8 +88,8 @@
   }
  },
  {
-  "debut": 11.23,
-  "fin": 13.44,
+  "debut": 11.33,
+  "fin": 13.54,
   "replique": 4,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -110,8 +110,8 @@
   }
  },
  {
-  "debut": 13.69,
-  "fin": 15.68,
+  "debut": 13.79,
+  "fin": 15.96,
   "replique": 5,
   "plan": "gros_plan",
   "camera": "punch_in",
@@ -124,7 +124,7 @@
   "visage": "surprise",
   "effet": "flash",
   "son": "oh_surprise",
-  "texte_ecran": "Chacune tague dix amis.",
+  "texte_ecran": "Chaque personne invite dix amis.",
   "punch_in": {
    "mot": "dix amis",
    "zoom": 1.2,
@@ -132,8 +132,8 @@
   }
  },
  {
-  "debut": 15.98,
-  "fin": 18.77,
+  "debut": 16.25,
+  "fin": 19.09,
   "replique": 6,
   "plan": "contre_plongee",
   "camera": "tilt_up",
@@ -155,8 +155,8 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 19.02,
-  "fin": 21.42,
+  "debut": 19.34,
+  "fin": 21.74,
   "replique": 7,
   "plan": "moyen",
   "camera": "orbite_legere",
@@ -169,7 +169,7 @@
   "visage": "happy",
   "effet": null,
   "son": "pop",
-  "texte_ecran": "Commente ton prénom et ton métier.",
+  "texte_ecran": "Écris ton prénom et ton métier.",
   "punch_in": {
    "mot": "prénom",
    "zoom": 1.2,
@@ -177,8 +177,8 @@
   }
  },
  {
-  "debut": 21.62,
-  "fin": 24.71,
+  "debut": 21.94,
+  "fin": 24.97,
   "replique": 8,
   "plan": "gros_plan",
   "camera": "hold_doux",
@@ -191,7 +191,7 @@
   "visage": "love",
   "effet": null,
   "son": "pop",
-  "texte_ecran": "Tague-les : ils déménagent au paradis.",
+  "texte_ecran": "Invite-les : ils déménagent au paradis.",
   "punch_in": {
    "mot": "paradis",
    "zoom": 1.2,
