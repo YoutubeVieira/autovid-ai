@@ -39,7 +39,7 @@ def main():
         if not os.path.exists(src):
             refuses.append((r["fichier"], "fichier absent"))
             continue
-        espece = re.sub(r"[^a-z0-9]+", "_", r["espece"].lower()).strip("_")
+        espece = re.sub(r"[^a-z0-9]+", "_", (r.get("espece") or r.get("nom") or "son").lower()).strip("_")
         n = sum(1 for m in man if m["espece"] == espece) + 1
         dst = os.path.join(a.out, "sons", f"{espece}_{n:02d}.wav")
         af = ("silenceremove=start_periods=1:start_threshold=-45dB:start_silence=0.05,areverse,"

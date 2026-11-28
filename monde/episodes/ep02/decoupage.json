@@ -152,7 +152,7 @@
  },
  {
   "debut": 17.67,
-  "fin": 21.4,
+  "fin": 19.54,
   "replique": 6,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -173,10 +173,28 @@
   }
  },
  {
+  "debut": 19.54,
+  "fin": 21.4,
+  "replique": 6,
+  "plan": "gros_plan",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ },
+ {
   "debut": 21.62,
   "fin": 23.58,
   "replique": 7,
-  "plan": "gros_plan",
+  "plan": "insert",
   "camera": "hold_doux",
   "zoom": [
    1.0,
@@ -198,11 +216,11 @@
   "debut": 23.58,
   "fin": 25.53,
   "replique": 7,
-  "plan": "insert",
+  "plan": "contre_plongee",
   "camera": "push_in_lent",
   "zoom": [
    1.0,
-   1.08
+   1.04
   ],
   "sujet": "decor",
   "parle": false,

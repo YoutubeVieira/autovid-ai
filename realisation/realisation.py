@@ -42,7 +42,7 @@ def decouper(beats, cues):
         t0, t1 = c["start"], c["end"]
         dur = t1 - t0
         parle = b.get("qui", "narrateur")
-        n = max(1, round(dur / MAX_SHOT))                  # coupes pour garder un changement visuel regulier
+        n = max(1, -(-int(dur * 100) // 320))                  # coupes pour garder un changement visuel regulier
         for i in range(n):
             a = t0 + dur * i / n
             z = t0 + dur * (i + 1) / n
