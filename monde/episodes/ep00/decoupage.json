@@ -1,0 +1,197 @@
+[
+ {
+  "debut": 0.15,
+  "fin": 3.07,
+  "replique": 0,
+  "plan": "large",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.12
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": null,
+  "son": "whoosh_fast",
+  "texte_ecran": "Il existe une ville où tout est possible.",
+  "punch_in": {
+   "mot": "tout est possible",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 3.32,
+  "fin": 6.6,
+  "replique": 1,
+  "plan": "moyen",
+  "camera": "orbite_legere",
+  "zoom": [
+   1.0,
+   1.06
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": null,
+  "son": "giggle",
+  "texte_ecran": "Boulanger, astronaute, maire : tu choisis.",
+  "punch_in": {
+   "mot": "tu choisis",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 6.9,
+  "fin": 8.68,
+  "replique": 2,
+  "plan": "large",
+  "camera": "pull_out_lent",
+  "zoom": [
+   1.12,
+   1.0
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "sad",
+  "effet": "desature",
+  "son": null,
+  "texte_ecran": "Mais elle est vide.",
+  "punch_in": {
+   "mot": "vide",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 8.93,
+  "fin": 11.14,
+  "replique": 3,
+  "plan": "moyen",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.1
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "smile",
+  "effet": null,
+  "son": "riser",
+  "texte_ecran": "Il nous faut mille personnes.",
+  "punch_in": {
+   "mot": "mille",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 11.39,
+  "fin": 13.38,
+  "replique": 4,
+  "plan": "gros_plan",
+  "camera": "punch_in",
+  "zoom": [
+   1.0,
+   1.18
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": "flash",
+  "son": "oh_surprise",
+  "texte_ecran": "Chacune tague dix amis.",
+  "punch_in": {
+   "mot": "dix amis",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 13.68,
+  "fin": 16.47,
+  "replique": 5,
+  "plan": "contre_plongee",
+  "camera": "tilt_up",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": "sparkle",
+  "son": "boom",
+  "texte_ecran": "Dix mille habitants. Dix mille amis.",
+  "punch_in": {
+   "mot": "dix mille",
+   "zoom": 1.2,
+   "duree": 0.18
+  },
+  "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
+ },
+ {
+  "debut": 16.72,
+  "fin": 19.12,
+  "replique": 6,
+  "plan": "moyen",
+  "camera": "orbite_legere",
+  "zoom": [
+   1.0,
+   1.06
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": null,
+  "son": "pop",
+  "texte_ecran": "Commente ton prénom et ton métier.",
+  "punch_in": {
+   "mot": "prénom",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 19.32,
+  "fin": 21.36,
+  "replique": 7,
+  "plan": "gros_plan",
+  "camera": "hold_doux",
+  "zoom": [
+   1.0,
+   1.05
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": "pop",
+  "texte_ecran": "Partage, tague tes amis : ils déménagent au paradis.",
+  "punch_in": {
+   "mot": "paradis",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 21.36,
+  "fin": 23.41,
+  "replique": 7,
+  "plan": "insert",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.08
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ }
+]

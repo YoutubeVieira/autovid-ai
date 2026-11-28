@@ -1,0 +1,10 @@
+[
+ {"role":"hook","emotion":"curiosite","mot_fort":"tout est possible"},
+ {"role":"contexte","emotion":"joie","mot_fort":"tu choisis"},
+ {"role":"montee","emotion":"tristesse","mot_fort":"vide"},
+ {"role":"montee","emotion":"suspense","mot_fort":"mille"},
+ {"role":"montee","emotion":"surprise","mot_fort":"dix amis"},
+ {"role":"climax","emotion":"fierte","mot_fort":"dix mille"},
+ {"role":"cta","emotion":"joie","mot_fort":"prénom"},
+ {"role":"cta","emotion":"amour","mot_fort":"paradis"}
+]
