@@ -22,6 +22,8 @@ FACES = ["smile", "happy", "laugh", "love", "tongue", "wink", "surprise"]
 SPEECH_WPS = 1.85                      # mots par seconde mesurés sur la voix (vitesse 1,05; prénoms et métiers = débit plus lent)
 TARGET = (25.0, 30.0)
 OUTRO = 2.2
+MOOD_CYCLE = ["aventure", "joyeux", "calme", "melancolique"]      # le fond change a chaque episode (jamais deux fois de suite le meme)
+AMBIANCE_CYCLE = ["oiseaux", "foule", "vent", "riviere", "grillons", "pluie"]
 MILESTONES = [(15, "les 15 premiers conseillers"), (100, "l'élection du maire")]
 
 
@@ -155,6 +157,13 @@ def ajouter(args):
     before = len(st["habitants"])
     lines, featured = plan_script(args.titre, args.episode, new, before, before + len(new))
     dur = estimate(lines)
+    sys.path.insert(0, os.path.join(HERE, "..", "packs", "sfx"))
+    import music_pick
+    rec = not args.simuler
+    musique = [dict(music_pick.pick(MOOD_CYCLE[args.episode % len(MOOD_CYCLE)], args.episode, record=rec), gain=0.3, role="fond"),
+               dict(music_pick.pick(AMBIANCE_CYCLE[args.episode % len(AMBIANCE_CYCLE)], args.episode, kind="ambiance", record=rec), gain=0.22, role="ambiance")]
+    if any(before < mm <= before + len(new) for mm, _ in MILESTONES):
+        musique.append(dict(music_pick.pick("victoire", args.episode, record=rec), gain=0.35, role="palier"))
     out = os.path.join(HERE, "episodes", f"ep{args.episode:02d}")
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "script.txt"), "w", encoding="utf-8") as f:
@@ -162,7 +171,7 @@ def ajouter(args):
         for i, l in enumerate(lines):
             f.write(("0.15" if i == 0 else "+0.22") + f" | {l}\n")
     spec = {"episode": args.episode, "titre": args.titre, "nouveaux": new, "mis_en_avant": [c["id"] for c in featured],
-            "anciens": st["habitants"], "total_avant": before, "total_apres": before + len(new), "duree_estimee_s": round(dur, 1),
+            "anciens": st["habitants"], "musique": musique, "total_avant": before, "total_apres": before + len(new), "duree_estimee_s": round(dur, 1),
             "ecartes": rejected}
     json.dump(spec, open(os.path.join(out, "episode.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
     if not args.simuler:

@@ -155,6 +155,22 @@
     5
   ],
   "anciens": [],
+  "musique": [
+    {
+      "episode": 2,
+      "mood": "calme",
+      "file": "music_gen/calme_2.mp3",
+      "gain": 0.3,
+      "role": "fond"
+    },
+    {
+      "episode": 2,
+      "ambiance": "vent",
+      "file": "music_gen/vent_1.mp3",
+      "gain": 0.22,
+      "role": "ambiance"
+    }
+  ],
   "total_avant": 0,
   "total_apres": 8,
   "duree_estimee_s": 27.0,

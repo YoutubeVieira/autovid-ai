@@ -141,6 +141,9 @@ events.append({"t": round(cues[ci]["start"], 2), "type": "sfx", "name": "ding"})
 if any(total >= m > spec["total_avant"] for m in (15, 100)):
     events += [{"t": round(cues[ci]["start"], 2), "type": "milestone"}, {"t": round(cues[ci]["start"], 2), "type": "sfx", "name": "level_up"}]
 prefs.keyframe_new_interpolation_type = 'BEZIER'
+for mu in spec.get("musique", []):                      # fond sonore different a chaque episode (choisi par monde.py)
+    t_mu = cues[ci]["start"] if mu.get("role") == "palier" else 0.0
+    events.append({"t": round(t_mu, 2), "type": "sfx", "name": mu["role"], "file": mu["file"], "gain": mu.get("gain", 0.3), "dur": round(END - t_mu, 2)})
 
 cams = []
 for n, (t0, t1, l0, l1, g0, g1, lens) in enumerate(shots, 1):
