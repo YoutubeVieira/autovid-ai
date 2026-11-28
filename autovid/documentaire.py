@@ -210,6 +210,8 @@ def documentaire(sujet, out_dir, workdir, plan=None, images=None, tts="auto", vo
         s["fr"] = s["texte"]
     engine = nar.voice_segments(voiced, voice_id or nar.default_voice(), tts, langue)
     print(f"   moteur : {engine or 'aucun (durées estimées, vidéo sans voix)'}")
+    if nar.RAPPORT:
+        (out / "controle_voix.json").write_text(json.dumps(nar.RAPPORT, ensure_ascii=False, indent=1), encoding="utf-8")
     for s in voiced:
         s["dur"] = max(s["dur"] + 0.7, 3.0)
 

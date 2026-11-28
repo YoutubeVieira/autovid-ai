@@ -9,3 +9,4 @@ anthropic
 kokoro-onnx
 soundfile
 sherpa-onnx>=2.0
+num2words  # installer avec --no-deps (docopt ne compile pas)

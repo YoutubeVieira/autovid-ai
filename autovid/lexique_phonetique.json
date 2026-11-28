@@ -1,0 +1,83 @@
+{
+ "fr": {
+  "_note": "Règles trouvées en testant Supertonic 3 + Whisper. 'regles' = [motif regex, remplacement] appliqués dans l'ordre ; 'mots' = mot → graphie (ajoutés aussi par le contrôle audio). Toujours un mot pour un mot. Testé : « dix »/« six » avant consonne doivent rester tels quels (« si témoins » est entendu « cité-moi »).",
+  "regles": [
+   [
+    "\\bdix-neuf\\b",
+    "dize-neuf"
+   ],
+   [
+    "\\bdix-huit\\b",
+    "dize-huit"
+   ],
+   [
+    "\\bdix-sept\\b",
+    "disse-sept"
+   ],
+   [
+    "\\bdix(?=\\s+et\\b)",
+    "disse"
+   ],
+   [
+    "\\bsix(?=\\s+et\\b)",
+    "sisse"
+   ],
+   [
+    "\\bdix(?=\\s*(?:[.!?;:,»)]|$))",
+    "disse"
+   ],
+   [
+    "\\bsix(?=\\s*(?:[.!?;:,»)]|$))",
+    "sisse"
+   ],
+   [
+    "\\bdix\\s+(?=(?!et\\b)[aeiouyhéèêàâîôû])",
+    "diz "
+   ],
+   [
+    "\\bsix\\s+(?=(?!et\\b)[aeiouyhéèêàâîôû])",
+    "siz "
+   ]
+  ],
+  "mots": {},
+  "etrangers": {
+   "aú": "pt",
+   "ginga": "pt",
+   "roda": "pt",
+   "axé": "pt",
+   "rasteira": "pt",
+   "esquiva": "pt",
+   "meia-lua": "pt",
+   "armada": "pt",
+   "queixada": "pt",
+   "martelo": "pt",
+   "bênção": "pt",
+   "negativa": "pt",
+   "berimbau": "pt",
+   "mestre": "pt",
+   "jacobina": "pt"
+  }
+ },
+ "pt": {
+  "regles": [],
+  "mots": {},
+  "etrangers": {
+   "Versailles": "fr",
+   "Gambais": "fr",
+   "Landru": "fr",
+   "Notre-Dame": "fr",
+   "Champs-Élysées": "fr"
+  }
+ },
+ "en": {
+  "regles": [],
+  "mots": {},
+  "etrangers": {
+   "Versailles": "fr",
+   "Landru": "fr",
+   "capoeira": "pt",
+   "ginga": "pt",
+   "São Paulo": "pt"
+  }
+ }
+}

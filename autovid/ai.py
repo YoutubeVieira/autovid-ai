@@ -324,3 +324,49 @@ def image_pertinente(requete, path):
         return r["pertinente"] and not r["choquante"]
     except Exception:
         return True
+
+
+PHON_SCHEMA = {
+    "type": "object",
+    "properties": {"mots": {"type": "array", "items": {"type": "object", "properties": {
+        "mot": {"type": "string", "description": "le mot tel qu'il est écrit dans le texte"},
+        "langue": {"type": "string", "enum": ["fr", "pt", "en"], "description": "pays dont il faut prendre l'accent"},
+        "graphie": {"type": "string", "description": "orthographe phonétique pour la voix dans CETTE langue, un seul "
+                                                    "mot, ou chaîne vide si la langue suffit"}},
+        "required": ["mot", "langue", "graphie"], "additionalProperties": False}}},
+    "required": ["mots"], "additionalProperties": False,
+}
+
+
+def relecture_phonetique(textes, langue="fr"):
+    """Agent de relecture : repère les mots d'un autre pays (noms, lieux, termes de capoeira, sigles) et les mots que
+    la synthèse vocale lit mal, et donne la langue et la graphie à utiliser. Ajoute le résultat au lexique."""
+    import anthropic
+
+    from . import phonetique as ph
+    try:
+        client = anthropic.Anthropic()
+        resp = client.messages.create(
+            model=MODEL, max_tokens=8000,
+            output_config={"effort": "medium", "format": {"type": "json_schema", "schema": PHON_SCHEMA}},
+            messages=[{"role": "user", "content":
+                       f"Texte de voix off en {dict(fr='français', pt='portugais du Brésil', en='anglais')[langue]}, lu par "
+                       "une synthèse vocale. Liste les mots qui viennent d'un autre pays (noms de personnes, villes, "
+                       "lieux, termes de capoeira, marques) avec la langue de leur prononciation d'origine, et les mots "
+                       "que la synthèse risque de mal lire (sigles, chiffres romains, mots rares), avec une graphie "
+                       "phonétique d'un seul mot. Ne liste rien d'autre.\n\n" + "\n".join(textes)}])
+        text = next((b.text for b in resp.content if b.type == "text"), None)
+        if resp.stop_reason == "refusal" or not text:
+            return 0
+        data = json.loads(text)
+    except (anthropic.APIError, anthropic.AnthropicError, TypeError, ValueError):
+        return 0
+    lex = ph.lexique()
+    zone = lex.setdefault(langue, {})
+    for m in data["mots"]:
+        if m["langue"] != langue:
+            zone.setdefault("etrangers", {})[m["mot"]] = m["langue"]
+        elif m["graphie"] and len(m["graphie"].split()) == 1:
+            zone.setdefault("mots", {})[m["mot"].lower()] = m["graphie"]
+    ph.LEXIQUE.write_text(json.dumps(lex, ensure_ascii=False, indent=1), encoding="utf-8")
+    return len(data["mots"])

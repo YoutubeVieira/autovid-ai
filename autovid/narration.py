@@ -67,7 +67,7 @@ def build_script(impacts, discipline="combat", short=False):
 
 
 def plain(text):
-    return re.sub(r"\[/?pt\]", "", text)
+    return re.sub(r"\[/?(?:pt|fr|en)\]", "", text)
 
 
 # --------------------------------------------------------------------------- ElevenLabs
@@ -131,9 +131,8 @@ def tts_piece(text, voice_id, lang):
 def synth(text, voice_id, lang=None):
     """Texte balisé → audio + mots horodatés ; les morceaux [pt] sont dits en portugais.
     lang (« pt », « fr »…) : tout le texte dans cette langue (documentaire pour un public brésilien, par exemple)."""
-    pieces = [(p, "pt" if i % 2 else "fr") for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
-    if lang:
-        pieces = [(plain(text), lang)]
+    from .phonetique import morceaux
+    pieces = morceaux(text, lang or "fr")
     audio, words, t = [], [], 0.0
     gap = np.zeros((int(0.04 * sfx.SR), 2))
     for piece, lang in pieces:
@@ -256,11 +255,8 @@ def synth_supertonic(text, voice=None, lang="fr", speed=1.0):
     import sherpa_onnx as so
     tts = _supertonic()
     voice = ST_VOICE if voice is None else voice
-    if lang == "fr":
-        pieces = [(p.strip(), "pt" if i % 2 else "fr")
-                  for i, p in enumerate(re.split(r"\[pt\](.*?)\[/pt\]", text)) if p.strip()]
-    else:
-        pieces = [(plain(text).strip(), lang)]
+    from .phonetique import morceaux
+    pieces = morceaux(text, lang)              # [pt]…[/pt], [fr]…[/fr], [en]…[/en] : chaque mot avec l'accent de son pays
     audio, words, t = [], [], 0.0
     gap = np.zeros((int(0.06 * sfx.SR), 2))
     for piece, lg in pieces:
@@ -288,7 +284,7 @@ def synth_supertonic(text, voice=None, lang="fr", speed=1.0):
     return (np.concatenate(audio) if audio else np.zeros((0, 2))), words, t
 
 
-def voice_segments(segs, voice_id=None, engine="auto", lang=None):
+def voice_segments(segs, voice_id=None, engine="auto", lang=None, controle=None):
     """Ajoute à chaque segment : audio (ou None), mots horodatés relatifs, durée.
 
     engine : "elevenlabs" (ta voix clonée), "supertonic" (Supertonic 3, hors ligne, commercial OK, voix n° 9 par
@@ -301,10 +297,15 @@ def voice_segments(segs, voice_id=None, engine="auto", lang=None):
             "supertonic" if supertonic_available() else ("kokoro" if kokoro_available() else None))
     elif engine == "supertonic" and not supertonic_available():
         engine = None
+    if controle is None:                       # correcteur + contrôle audio dès que Whisper est installable
+        from .phonetique import whisper_disponible
+        controle = whisper_disponible() and os.environ.get("AUTOVID_SANS_CONTROLE") != "1"
     elif engine == "elevenlabs" and not (voice_id and _key()):
         engine = None
     elif engine == "kokoro" and not kokoro_available():
         engine = None
+    if engine and controle:
+        return _voice_checked(segs, voice_id, engine, lang or "fr")
     for s in segs:
         if engine == "elevenlabs":
             s["audio"], s["words"], s["dur"] = synth(s["fr"], voice_id, lang if lang and lang != "fr" else None)
@@ -374,3 +375,77 @@ def cues_from_text(text, t0, t1, max_chars=32):
 def write_srt(cues, path):
     Path(path).write_text("".join(f"{i}\n{_srt_time(a)} --> {_srt_time(b)}\n{txt}\n\n"
                                   for i, (a, b, txt) in enumerate(cues, 1)), encoding="utf-8")
+
+
+# --------------------------------------------------------------------------- agents : correcteur de texte + contrôle audio
+
+RAPPORT = []                                   # dernier contrôle, écrit à côté de la vidéo par l'appelant
+
+
+def _synth_any(engine, spoken, voice_id, lang, speed=1.0):
+    if engine == "elevenlabs":
+        return synth(spoken, voice_id, lang if lang != "fr" else None)
+    if engine == "supertonic":
+        return synth_supertonic(spoken, lang=lang, speed=speed)
+    if lang == "pt":
+        return synth_kokoro(spoken, voice="pm_alex", speed=speed, lang="pt-br")
+    return synth_kokoro(spoken, speed=1.05 * speed)
+
+
+def _voice_checked(segs, voice_id, engine, lang):
+    """Pour chaque réplique : 1) texte écrit en toutes lettres (sous-titres), 2) graphie phonétique + balises de
+    langue pour les mots étrangers (voix), 3) Whisper réécoute ; si des mots sont mal dits, on relance (débit plus
+    lent, puis mot lu avec l'accent d'une autre langue) et on garde la meilleure prise. Les corrections qui marchent
+    vont dans le lexique."""
+    from . import phonetique as ph
+    RAPPORT.clear()
+    from .ai import has_credentials, relecture_phonetique
+    if has_credentials():                      # agent de relecture : mots de chaque pays, avant la synthèse
+        n = relecture_phonetique([s["fr"] for s in segs], lang)
+        print(f"   relecture phonétique par Claude : {n} mot(s) ajouté(s) au lexique")
+    langs = {"fr", "pt", "en"} - {lang}
+    for s in segs:
+        shown = ph.ecrire(s["fr"], lang)
+        tagged = ph.marquer(shown, lang)
+        ignorer = [m for m, lg in ph.morceaux(tagged, lang) if lg != lang]     # mots étrangers : jugés à part
+        tries = [({}, 1.0)]
+        best = None
+        for k in range(4):
+            if k >= len(tries):
+                break
+            variantes, speed = tries[k]
+            spoken = ph.dire(tagged, lang, variantes)
+            for mot, lg in variantes.get("__tags__", {}).items():
+                spoken = re.sub(rf"(?<![\w\]-]){re.escape(mot)}(?![\w-])", f"[{lg}]{mot}[/{lg}]", spoken, count=1)
+            audio, words, dur = _synth_any(engine, spoken, voice_id, lang, speed)
+            heard = ph.transcrire(audio, sfx.SR, lang)
+            errs = ph.comparer(shown, heard, lang, ignorer)
+            cand = (ph.score(errs), k, audio, words, dur, spoken, heard, errs)
+            if best is None or cand[0] < best[0]:
+                best = cand
+            if not errs:
+                break
+            if k == 0:                         # 2e prise : un peu plus lent
+                tries.append(({}, 0.92))
+                # 3e et 4e prises : un nom propre ou un mot long mal dit, lu avec l'accent d'un autre pays
+                names = [w for w in re.findall(r"[^\W\d_][\w'-]*", plain(shown))
+                         if (w[0].isupper() or len(w) >= 6) and any(ph.normaliser(w, lang) and
+                                                                     ph.normaliser(w, lang)[0] in a.split() for a, _ in errs)]
+                for lg in sorted(langs) if names else []:
+                    tries.append(({"__tags__": {w: lg for w in names[:2]}}, 1.0))
+        sc, k, audio, words, dur, spoken, heard, errs = best
+        if k >= 2 and sc == 0:                 # une balise de langue a réglé le problème : on la retient
+            for mot, lg in tries[k][0]["__tags__"].items():
+                lex = ph.lexique()
+                lex.setdefault(lang, {}).setdefault("etrangers", {})[mot] = lg
+                ph.LEXIQUE.write_text(json.dumps(lex, ensure_ascii=False, indent=1), encoding="utf-8")
+        shown_words = plain(shown).split()
+        if len(shown_words) == len(words):     # sous-titres : les mots écrits, pas la graphie phonétique
+            for w, t in zip(words, shown_words):
+                w["text"] = t
+        s.update(audio=audio, words=words, dur=dur, fr=shown, dit=spoken)
+        RAPPORT.append({"id": str(s["id"]), "ecrit": shown, "dit": spoken, "entendu": heard, "prises": k + 1,
+                        "erreurs": [{"attendu": a, "entendu": e} for a, e in errs]})
+        etat = "OK" if not errs else "À ÉCOUTER : " + " ; ".join(f"« {a} » entendu « {e} »" for a, e in errs)
+        print(f"   voix [{s['id']}] {etat}" + (f" (prise {k + 1})" if k else ""))
+    return engine

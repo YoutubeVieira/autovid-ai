@@ -18,6 +18,10 @@ Monteur vidéo automatique en Python + ffmpeg (paquet `autovid/`). Commandes : `
 - Après chaque montage : le mettre dans la plateforme Studio Jacobina (skill `plateforme`) pour que l'utilisateur corrige.
 - Voix off : `--tts auto` = ElevenLabs (voix clonée, si clé) sinon **Supertonic 3** (hors ligne, commercial OK,
   `--voix 0-9`, 9 = homme grave par défaut ; FR, PT, EN…) sinon Kokoro (test).
+- Voix : chaque réplique passe par les agents de voix (`phonetique.py`) : nombres en lettres, graphie phonétique
+  (`lexique_phonetique.json`), mots de chaque pays avec leur accent ([pt]/[fr]/[en]), puis Whisper réécoute et relance
+  si un mot est mal dit → rapport `controle_voix.json`. Agents Claude Code : `relecteur-phonetique` (avant la voix,
+  cherche TOUJOURS la prononciation des mots de chaque pays) et `correcteur-audio` (après).
 - Toujours **regarder** le rendu (planche contact via ffmpeg + Read) avant de dire qu'il est bon.
 - Tests : `python3 -m unittest discover tests` (rapides, rushs synthétiques).
 - Ne jamais committer de vidéos (`*.mp4` est ignoré) ni de clés API.
