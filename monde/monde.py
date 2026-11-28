@@ -187,6 +187,25 @@ def ajouter(args):
     return spec
 
 
+def hook(args):
+    """Place un hook (phrase dite en premier, texte ecran identique) au debut du script d'un episode et decale les repliques suivantes."""
+    out = os.path.join(HERE, "episodes", f"ep{args.episode:02d}")
+    sp = os.path.join(out, "script.txt")
+    spec = json.load(open(os.path.join(out, "episode.json"), encoding="utf-8"))
+    rows = open(sp, encoding="utf-8").read().splitlines()
+    if spec.get("hook"):
+        print("hook déjà présent:", spec["hook"])
+        return
+    head, body = rows[0], [r for r in rows[1:] if r.strip()]
+    first = body[0].split("|", 1)
+    body[0] = "+0.22 |" + first[1]
+    new = [head, f"0.15 | {args.texte}"] + body
+    open(sp, "w", encoding="utf-8").write("\n".join(new) + "\n")
+    spec["hook"], spec["decalage_cues"] = args.texte, 1
+    json.dump(spec, open(os.path.join(out, "episode.json"), "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+    print("hook ajouté:", args.texte)
+
+
 def beats(args):
     """Annote le script d'un episode (emotions, roles, sujet cadre) -> beats.json pour realisation/realisation.py."""
     out = os.path.join(HERE, "episodes", f"ep{args.episode:02d}")
@@ -198,7 +217,9 @@ def beats(args):
     for i, l in enumerate(lines):
         pren = l.split(",")[0]
         if i == 0:
-            b.append({"role": "hook", "emotion": "curiosite", "mot_fort": spec["titre"].split()[-1]})
+            b.append({"role": "hook", "emotion": "curiosite", "mot_fort": "habitants"})
+        elif l.startswith("Épisode"):
+            b.append({"role": "contexte", "emotion": "joie", "mot_fort": spec["titre"].split()[-1]})
         elif re.match(r"(Un nouvel|\d+ nouveaux)", l):
             b.append({"role": "contexte", "emotion": "suspense", "mot_fort": "nouveau" if "nouvel" in l else "nouveaux"})
         elif pren in names:
@@ -239,6 +260,10 @@ if __name__ == "__main__":
     pa.add_argument("--max", type=int, default=30, help="habitants max par épisode")
     pa.add_argument("--simuler", action="store_true", help="ne pas enregistrer dans etat.json")
     pa.set_defaults(fn=ajouter)
+    ph = sub.add_parser("hook", help="ajoute un hook en première réplique")
+    ph.add_argument("--episode", type=int, required=True)
+    ph.add_argument("--texte", required=True)
+    ph.set_defaults(fn=hook)
     pb = sub.add_parser("beats", help="annote le script (émotions, rôles) pour le moteur de réalisation")
     pb.add_argument("--episode", type=int, required=True)
     pb.set_defaults(fn=beats)

@@ -76,6 +76,7 @@ def name_tag(arm, h):
     return tg
 
 
+OFF = spec.get("decalage_cues", 0)
 old = spec["anciens"]
 new = spec["nouveaux"]
 feat_ids = spec["mis_en_avant"]
@@ -97,9 +98,9 @@ others = [h for h in new if h["id"] not in feat_ids]
 total = spec["total_avant"]
 shots = []                                              # (t0, t1, cam0, cam1, tgt0, tgt1, lens)
 spots = {}
-shots.append((0, cues[1]["start"], (0, -3, 2.0), (0, 4, 2.2), (0, 14, 1.5), (0, 14, 1.6), 28))
+shots.append((0, cues[1 + OFF]["start"], (0, -3, 2.0), (0, 4, 2.2), (0, 14, 1.5), (0, 14, 1.6), 28))
 for k, h in enumerate(feat):
-    cue = cues[2 + k]
+    cue = cues[2 + OFF + k]
     t0, t1 = cue["start"], cue["end"]
     a = spawn(h)
     chars[h["id"]] = a
@@ -121,7 +122,7 @@ for k, h in enumerate(feat):
                {"t": round(t0, 2), "type": "sfx", "name": "pop"}]
     shots.append((t0, t1 + 0.1, (spot[0] - side * 0.4, 6.2, 1.1), (spot[0] - side * 0.2, 7.2, 1.2), (spot[0], 9.0, 0.95), (spot[0], 9.0, 1.0), 50))
 # foule des autres arrivants pendant "Et N autres encore"
-ci = 2 + len(feat)
+ci = 2 + OFF + len(feat)
 tc0 = cues[ci]["start"] if others else cues[ci]["start"]
 for j, h in enumerate(others):
     a = spawn(h)

@@ -1,5 +1,5 @@
 # Épisode 0 - Bienvenue au paradis (≈ 27 s). <début_s | +pause> | texte dit
-0.15 | Il existe une ville où tout est possible.
+0.15 | Dans cette ville, tout est possible.
 +0.25 | Boulanger, astronaute, maire : tu choisis.
 +0.30 | Mais elle est vide.
 +0.25 | Il nous faut mille personnes.

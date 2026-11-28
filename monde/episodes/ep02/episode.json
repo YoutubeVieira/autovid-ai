@@ -63,5 +63,7 @@
   "total_avant": 0,
   "total_apres": 2,
   "duree_estimee_s": 27.4,
-  "ecartes": []
+  "ecartes": [],
+  "hook": "Dans cette ville, tes commentaires deviennent des habitants.",
+  "decalage_cues": 1
 }

@@ -1,7 +1,7 @@
 [
  {
   "debut": 0.15,
-  "fin": 3.07,
+  "fin": 2.74,
   "replique": 0,
   "plan": "large",
   "camera": "push_in_lent",
@@ -14,7 +14,7 @@
   "visage": "surprise",
   "effet": null,
   "son": "whoosh_fast",
-  "texte_ecran": "Il existe une ville où tout est possible.",
+  "texte_ecran": "Dans cette ville, tout est possible.",
   "punch_in": {
    "mot": "tout est possible",
    "zoom": 1.2,
@@ -22,8 +22,8 @@
   }
  },
  {
-  "debut": 3.32,
-  "fin": 6.6,
+  "debut": 2.99,
+  "fin": 6.26,
   "replique": 1,
   "plan": "moyen",
   "camera": "orbite_legere",
@@ -44,8 +44,8 @@
   }
  },
  {
-  "debut": 6.9,
-  "fin": 8.68,
+  "debut": 6.57,
+  "fin": 8.35,
   "replique": 2,
   "plan": "large",
   "camera": "pull_out_lent",
@@ -66,8 +66,8 @@
   }
  },
  {
-  "debut": 8.93,
-  "fin": 11.14,
+  "debut": 8.6,
+  "fin": 10.81,
   "replique": 3,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -88,8 +88,8 @@
   }
  },
  {
-  "debut": 11.39,
-  "fin": 13.38,
+  "debut": 11.06,
+  "fin": 13.05,
   "replique": 4,
   "plan": "gros_plan",
   "camera": "punch_in",
@@ -110,8 +110,8 @@
   }
  },
  {
-  "debut": 13.68,
-  "fin": 16.47,
+  "debut": 13.35,
+  "fin": 16.14,
   "replique": 5,
   "plan": "contre_plongee",
   "camera": "tilt_up",
@@ -133,8 +133,8 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 16.72,
-  "fin": 19.12,
+  "debut": 16.39,
+  "fin": 18.79,
   "replique": 6,
   "plan": "moyen",
   "camera": "orbite_legere",
@@ -155,8 +155,8 @@
   }
  },
  {
-  "debut": 19.32,
-  "fin": 21.36,
+  "debut": 18.99,
+  "fin": 21.03,
   "replique": 7,
   "plan": "gros_plan",
   "camera": "hold_doux",
@@ -177,8 +177,8 @@
   }
  },
  {
-  "debut": 21.36,
-  "fin": 23.41,
+  "debut": 21.03,
+  "fin": 23.07,
   "replique": 7,
   "plan": "insert",
   "camera": "push_in_lent",

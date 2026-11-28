@@ -1,7 +1,7 @@
 [
  {
   "debut": 0.15,
-  "fin": 2.98,
+  "fin": 2.12,
   "replique": 0,
   "plan": "large",
   "camera": "push_in_lent",
@@ -14,6 +14,46 @@
   "visage": "surprise",
   "effet": null,
   "son": "whoosh_fast",
+  "texte_ecran": "Dans cette ville, tes commentaires deviennent des habitants.",
+  "punch_in": {
+   "mot": "habitants",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 2.12,
+  "fin": 4.09,
+  "replique": 0,
+  "plan": "contre_plongee",
+  "camera": "push_in_lent",
+  "zoom": [
+   1.0,
+   1.04
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "surprise",
+  "effet": null,
+  "son": null,
+  "texte_ecran": null,
+  "punch_in": null
+ },
+ {
+  "debut": 4.31,
+  "fin": 7.14,
+  "replique": 1,
+  "plan": "moyen",
+  "camera": "orbite_legere",
+  "zoom": [
+   1.0,
+   1.06
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "happy",
+  "effet": null,
+  "son": "giggle",
   "texte_ecran": "Épisode 2 : Les premiers habitants.",
   "punch_in": {
    "mot": "habitants",
@@ -22,10 +62,10 @@
   }
  },
  {
-  "debut": 3.2,
-  "fin": 5.85,
-  "replique": 1,
-  "plan": "moyen",
+  "debut": 7.36,
+  "fin": 10.01,
+  "replique": 2,
+  "plan": "gros_plan",
   "camera": "push_in_lent",
   "zoom": [
    1.0,
@@ -44,10 +84,10 @@
   }
  },
  {
-  "debut": 6.07,
-  "fin": 8.35,
-  "replique": 2,
-  "plan": "gros_plan",
+  "debut": 10.23,
+  "fin": 12.52,
+  "replique": 3,
+  "plan": "moyen",
   "camera": "orbite_legere",
   "zoom": [
    1.0,
@@ -66,10 +106,10 @@
   }
  },
  {
-  "debut": 8.57,
-  "fin": 10.39,
-  "replique": 3,
-  "plan": "insert",
+  "debut": 12.74,
+  "fin": 14.56,
+  "replique": 4,
+  "plan": "gros_plan",
   "camera": "punch_in",
   "zoom": [
    1.0,
@@ -88,9 +128,9 @@
   }
  },
  {
-  "debut": 10.61,
-  "fin": 13.44,
-  "replique": 4,
+  "debut": 14.78,
+  "fin": 17.61,
+  "replique": 5,
   "plan": "contre_plongee",
   "camera": "tilt_up",
   "zoom": [
@@ -111,9 +151,9 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 13.66,
-  "fin": 15.79,
-  "replique": 5,
+  "debut": 17.83,
+  "fin": 19.96,
+  "replique": 6,
   "plan": "moyen",
   "camera": "push_in_lent",
   "zoom": [
@@ -133,9 +173,9 @@
   }
  },
  {
-  "debut": 15.79,
-  "fin": 17.92,
-  "replique": 5,
+  "debut": 19.96,
+  "fin": 22.08,
+  "replique": 6,
   "plan": "gros_plan",
   "camera": "push_in_lent",
   "zoom": [
@@ -151,9 +191,9 @@
   "punch_in": null
  },
  {
-  "debut": 18.14,
-  "fin": 20.17,
-  "replique": 6,
+  "debut": 22.3,
+  "fin": 24.34,
+  "replique": 7,
   "plan": "insert",
   "camera": "hold_doux",
   "zoom": [
@@ -173,9 +213,9 @@
   }
  },
  {
-  "debut": 20.17,
-  "fin": 22.21,
-  "replique": 6,
+  "debut": 24.34,
+  "fin": 26.37,
+  "replique": 7,
   "plan": "contre_plongee",
   "camera": "push_in_lent",
   "zoom": [

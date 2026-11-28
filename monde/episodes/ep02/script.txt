@@ -1,5 +1,6 @@
 # Épisode 2 - Les premiers habitants (≈ 27 s). <début | +pause> | texte
-0.15 | Épisode 2 : Les premiers habitants.
+0.15 | Dans cette ville, tes commentaires deviennent des habitants.
++0.22 | Épisode 2 : Les premiers habitants.
 +0.22 | 2 nouveaux habitants arrivent.
 +0.22 | Mamie, cuisinière fait maison.
 +0.22 | Robin, T-rex singe.
