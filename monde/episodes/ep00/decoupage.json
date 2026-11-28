@@ -22,9 +22,31 @@
   }
  },
  {
-  "debut": 2.99,
-  "fin": 6.26,
+  "debut": 2.96,
+  "fin": 5.37,
   "replique": 1,
+  "plan": "gros_plan",
+  "camera": "hold_doux",
+  "zoom": [
+   1.0,
+   1.05
+  ],
+  "sujet": "decor",
+  "parle": false,
+  "visage": "love",
+  "effet": null,
+  "son": "sparkle",
+  "texte_ecran": "Partage avec un ami ou une amie.",
+  "punch_in": {
+   "mot": "ami",
+   "zoom": 1.2,
+   "duree": 0.18
+  }
+ },
+ {
+  "debut": 5.62,
+  "fin": 8.89,
+  "replique": 2,
   "plan": "moyen",
   "camera": "orbite_legere",
   "zoom": [
@@ -44,9 +66,9 @@
   }
  },
  {
-  "debut": 6.57,
-  "fin": 8.35,
-  "replique": 2,
+  "debut": 9.2,
+  "fin": 10.98,
+  "replique": 3,
   "plan": "large",
   "camera": "pull_out_lent",
   "zoom": [
@@ -66,9 +88,9 @@
   }
  },
  {
-  "debut": 8.6,
-  "fin": 10.81,
-  "replique": 3,
+  "debut": 11.23,
+  "fin": 13.44,
+  "replique": 4,
   "plan": "moyen",
   "camera": "push_in_lent",
   "zoom": [
@@ -88,9 +110,9 @@
   }
  },
  {
-  "debut": 11.06,
-  "fin": 13.05,
-  "replique": 4,
+  "debut": 13.69,
+  "fin": 15.68,
+  "replique": 5,
   "plan": "gros_plan",
   "camera": "punch_in",
   "zoom": [
@@ -110,9 +132,9 @@
   }
  },
  {
-  "debut": 13.35,
-  "fin": 16.14,
-  "replique": 5,
+  "debut": 15.98,
+  "fin": 18.77,
+  "replique": 6,
   "plan": "contre_plongee",
   "camera": "tilt_up",
   "zoom": [
@@ -133,9 +155,9 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 16.39,
-  "fin": 18.79,
-  "replique": 6,
+  "debut": 19.02,
+  "fin": 21.42,
+  "replique": 7,
   "plan": "moyen",
   "camera": "orbite_legere",
   "zoom": [
@@ -155,9 +177,9 @@
   }
  },
  {
-  "debut": 18.99,
-  "fin": 21.03,
-  "replique": 7,
+  "debut": 21.62,
+  "fin": 24.71,
+  "replique": 8,
   "plan": "gros_plan",
   "camera": "hold_doux",
   "zoom": [
@@ -169,29 +191,11 @@
   "visage": "love",
   "effet": null,
   "son": "pop",
-  "texte_ecran": "Partage, tague tes amis : ils déménagent au paradis.",
+  "texte_ecran": "Tague-les : ils déménagent au paradis.",
   "punch_in": {
    "mot": "paradis",
    "zoom": 1.2,
    "duree": 0.18
   }
- },
- {
-  "debut": 21.03,
-  "fin": 23.07,
-  "replique": 7,
-  "plan": "insert",
-  "camera": "push_in_lent",
-  "zoom": [
-   1.0,
-   1.08
-  ],
-  "sujet": "decor",
-  "parle": false,
-  "visage": "love",
-  "effet": null,
-  "son": null,
-  "texte_ecran": null,
-  "punch_in": null
  }
 ]

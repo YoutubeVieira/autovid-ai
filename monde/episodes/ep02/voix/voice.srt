@@ -3,30 +3,30 @@
 Dans cette ville, tes commentaires deviennent des habitants.
 
 2
-00:00:04,314 --> 00:00:07,140
-Épisode 2 : Les premiers habitants.
+00:00:04,314 --> 00:00:06,725
+Partage avec un ami ou une amie.
 
 3
-00:00:07,360 --> 00:00:10,011
+00:00:06,945 --> 00:00:09,596
 2 nouveaux habitants arrivent.
 
 4
-00:00:10,231 --> 00:00:12,516
+00:00:09,816 --> 00:00:12,101
 Mamie, cuisinière fait maison.
 
 5
-00:00:12,736 --> 00:00:14,556
+00:00:12,321 --> 00:00:14,141
 Robin, T-rex singe.
 
 6
-00:00:14,776 --> 00:00:17,608
+00:00:14,361 --> 00:00:17,193
 Le monde compte maintenant 2 habitants.
 
 7
-00:00:17,828 --> 00:00:22,084
+00:00:17,413 --> 00:00:21,669
 Il en manque 13 pour les 15 premiers conseillers.
 
 8
-00:00:22,304 --> 00:00:26,371
+00:00:21,889 --> 00:00:25,956
 Commente ton prénom et ton métier : le prochain, c'est toi.
 

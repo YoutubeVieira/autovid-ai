@@ -2,7 +2,7 @@
   "voice": "siwis",
   "credit": "Voix: Supertonic 3 (Supertone), voix n°9",
   "license": "code MIT (LICENSE du modele); modele OpenRAIL-M d'apres les notes de l'utilisateur: usage commercial permis, a reverifier sur la fiche du modele",
-  "duration": 23.37,
+  "duration": 25.01,
   "cues": [
     {
       "start": 0.15,
@@ -10,39 +10,44 @@
       "text": "Dans cette ville, tout est possible."
     },
     {
-      "start": 2.986,
-      "end": 6.265,
+      "start": 2.956,
+      "end": 5.367,
+      "text": "Partage avec un ami ou une amie."
+    },
+    {
+      "start": 5.617,
+      "end": 8.895,
       "text": "Boulanger, astronaute, maire : tu choisis."
     },
     {
-      "start": 6.565,
-      "end": 8.347,
+      "start": 9.195,
+      "end": 10.978,
       "text": "Mais elle est vide."
     },
     {
-      "start": 8.597,
-      "end": 10.809,
+      "start": 11.228,
+      "end": 13.439,
       "text": "Il nous faut mille personnes."
     },
     {
-      "start": 11.059,
-      "end": 13.048,
+      "start": 13.689,
+      "end": 15.679,
       "text": "Chacune tague dix amis."
     },
     {
-      "start": 13.348,
-      "end": 16.141,
+      "start": 15.979,
+      "end": 18.772,
       "text": "Dix mille habitants. Dix mille amis."
     },
     {
-      "start": 16.391,
-      "end": 18.789,
+      "start": 19.022,
+      "end": 21.42,
       "text": "Commente ton prénom et ton métier."
     },
     {
-      "start": 18.989,
-      "end": 23.073,
-      "text": "Partage, tague tes amis : ils déménagent au paradis."
+      "start": 21.62,
+      "end": 24.714,
+      "text": "Tague-les : ils déménagent au paradis."
     }
   ],
   "warnings": [],

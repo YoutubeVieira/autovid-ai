@@ -74,7 +74,7 @@ def name_tag(arm, h):
     return tg
 
 
-OFF = 0
+OFF = spec.get("decalage_cues", 0)
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "monde"))
 import monde as M
 chars = {}
@@ -105,29 +105,29 @@ def pop(a, t, x, y, rot=0.0):
 heroes = []
 for i, k in enumerate(("boulanger", "astronaute", "maire")):
     a = anon(k)
-    t = cues[1]["start"] + 0.35 * i
+    t = cues[1 + OFF]["start"] + 0.35 * i
     x = (-1.3, 0.0, 1.3)[i]
     pop(a, t, x, 12.0 + 0.6 * (i == 1), rot=(-8, 0, 8)[i])
-    bk.wave(a, fr(t) + 6, fr(cues[2]["start"]) + 10, side="R")
+    bk.wave(a, fr(t) + 6, fr(cues[2 + OFF]["start"]) + 10, side="R")
     events.append({"t": round(t, 2), "type": "sfx", "name": "pop"})
     heroes.append((a, x))
 for a, x in heroes:                                   # la ville se vide
-    t_out = cues[2]["start"] + 0.3
+    t_out = cues[2 + OFF]["start"] + 0.3
     bk.walk(a, fr(t_out), fr(t_out + 1.0), (x, 12.0, Z0), (x * 6, 12.0, Z0))
     bk.key_obj(a, fr(t_out + 1.1), loc=(x * 6, 12.0, Z0), scale=0.0001)
 # cue 3-5: la foule arrive par vagues (20 -> 45 figurines), cue 5-7: tout le monde fete
 grid = [(-4.4 + (j % 9) * 1.1 + rz.uniform(-0.15, 0.15), 11.5 + (j // 9) * 1.5) for j in range(45)]
 for j, (x, y) in enumerate(grid):
-    cue = cues[3] if j < 20 else cues[4] if j < 35 else cues[5]
+    cue = cues[3 + OFF] if j < 20 else cues[4 + OFF] if j < 35 else cues[5 + OFF]
     t = cue["start"] + 0.12 * (j - (0 if j < 20 else 20 if j < 35 else 35))
     a = anon()
     pop(a, t, x, y, rot=rz.uniform(-20, 20))
     bk.cheer(a, fr(t) + 2, fr(END), base_z=Z0)
     if j in (0, 20, 35):
         events.append({"t": round(t, 2), "type": "sfx", "name": "pop_double"})
-events += [{"t": round(cues[5]["start"], 2), "type": "badge", "text": "OBJECTIF · 10 000 AMIS", "color": "yellow"},
-           {"t": round(cues[5]["start"], 2), "type": "sfx", "name": "crowd_cheer", "gain": 0.7}]
-ci = 5
+events += [{"t": round(cues[5 + OFF]["start"], 2), "type": "badge", "text": "OBJECTIF · 10 000 AMIS", "color": "yellow"},
+           {"t": round(cues[5 + OFF]["start"], 2), "type": "sfx", "name": "crowd_cheer", "gain": 0.7}]
+ci = 5 + OFF
 total = 0
 
 if args.decoupage:                                      # --- plans de camera, expressions, sons et effets pilotes par le decoupage

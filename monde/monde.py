@@ -218,6 +218,8 @@ def beats(args):
         pren = l.split(",")[0]
         if i == 0:
             b.append({"role": "hook", "emotion": "curiosite", "mot_fort": "habitants"})
+        elif l.startswith("Partage"):
+            b.append({"role": "contexte", "emotion": "amour", "mot_fort": "ami"})
         elif l.startswith("Épisode"):
             b.append({"role": "contexte", "emotion": "joie", "mot_fort": spec["titre"].split()[-1]})
         elif re.match(r"(Un nouvel|\d+ nouveaux)", l):

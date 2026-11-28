@@ -3,30 +3,34 @@
 Dans cette ville, tout est possible.
 
 2
-00:00:02,986 --> 00:00:06,265
-Boulanger, astronaute, maire : tu choisis.
+00:00:02,956 --> 00:00:05,367
+Partage avec un ami ou une amie.
 
 3
-00:00:06,565 --> 00:00:08,347
-Mais elle est vide.
+00:00:05,617 --> 00:00:08,895
+Boulanger, astronaute, maire : tu choisis.
 
 4
-00:00:08,597 --> 00:00:10,809
-Il nous faut mille personnes.
+00:00:09,195 --> 00:00:10,978
+Mais elle est vide.
 
 5
-00:00:11,059 --> 00:00:13,048
-Chacune tague dix amis.
+00:00:11,228 --> 00:00:13,439
+Il nous faut mille personnes.
 
 6
-00:00:13,348 --> 00:00:16,140
-Dix mille habitants. Dix mille amis.
+00:00:13,689 --> 00:00:15,679
+Chacune tague dix amis.
 
 7
-00:00:16,391 --> 00:00:18,789
-Commente ton prénom et ton métier.
+00:00:15,979 --> 00:00:18,772
+Dix mille habitants. Dix mille amis.
 
 8
-00:00:18,989 --> 00:00:23,073
-Partage, tague tes amis : ils déménagent au paradis.
+00:00:19,022 --> 00:00:21,420
+Commente ton prénom et ton métier.
+
+9
+00:00:21,620 --> 00:00:24,714
+Tague-les : ils déménagent au paradis.
 

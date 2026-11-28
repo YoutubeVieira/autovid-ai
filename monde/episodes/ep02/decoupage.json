@@ -41,31 +41,31 @@
  },
  {
   "debut": 4.31,
-  "fin": 7.14,
+  "fin": 6.72,
   "replique": 1,
-  "plan": "moyen",
-  "camera": "orbite_legere",
+  "plan": "gros_plan",
+  "camera": "hold_doux",
   "zoom": [
    1.0,
-   1.06
+   1.05
   ],
   "sujet": "decor",
   "parle": false,
-  "visage": "happy",
+  "visage": "love",
   "effet": null,
-  "son": "giggle",
-  "texte_ecran": "Épisode 2 : Les premiers habitants.",
+  "son": "sparkle",
+  "texte_ecran": "Partage avec un ami ou une amie.",
   "punch_in": {
-   "mot": "habitants",
+   "mot": "ami",
    "zoom": 1.2,
    "duree": 0.18
   }
  },
  {
-  "debut": 7.36,
-  "fin": 10.01,
+  "debut": 6.95,
+  "fin": 9.6,
   "replique": 2,
-  "plan": "gros_plan",
+  "plan": "moyen",
   "camera": "push_in_lent",
   "zoom": [
    1.0,
@@ -84,10 +84,10 @@
   }
  },
  {
-  "debut": 10.23,
-  "fin": 12.52,
+  "debut": 9.82,
+  "fin": 12.1,
   "replique": 3,
-  "plan": "moyen",
+  "plan": "gros_plan",
   "camera": "orbite_legere",
   "zoom": [
    1.0,
@@ -106,10 +106,10 @@
   }
  },
  {
-  "debut": 12.74,
-  "fin": 14.56,
+  "debut": 12.32,
+  "fin": 14.14,
   "replique": 4,
-  "plan": "gros_plan",
+  "plan": "insert",
   "camera": "punch_in",
   "zoom": [
    1.0,
@@ -128,8 +128,8 @@
   }
  },
  {
-  "debut": 14.78,
-  "fin": 17.61,
+  "debut": 14.36,
+  "fin": 17.19,
   "replique": 5,
   "plan": "contre_plongee",
   "camera": "tilt_up",
@@ -151,8 +151,8 @@
   "note": "silence 0,3 s de la voix avant la replique + riser; musique baisse (ducking)"
  },
  {
-  "debut": 17.83,
-  "fin": 19.96,
+  "debut": 17.41,
+  "fin": 19.54,
   "replique": 6,
   "plan": "moyen",
   "camera": "push_in_lent",
@@ -173,8 +173,8 @@
   }
  },
  {
-  "debut": 19.96,
-  "fin": 22.08,
+  "debut": 19.54,
+  "fin": 21.67,
   "replique": 6,
   "plan": "gros_plan",
   "camera": "push_in_lent",
@@ -191,8 +191,8 @@
   "punch_in": null
  },
  {
-  "debut": 22.3,
-  "fin": 24.34,
+  "debut": 21.89,
+  "fin": 23.92,
   "replique": 7,
   "plan": "insert",
   "camera": "hold_doux",
@@ -213,8 +213,8 @@
   }
  },
  {
-  "debut": 24.34,
-  "fin": 26.37,
+  "debut": 23.92,
+  "fin": 25.96,
   "replique": 7,
   "plan": "contre_plongee",
   "camera": "push_in_lent",
